@@ -8,12 +8,17 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"testing"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/rooms"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
 
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/core"
 )
+
+const testSecret = "test-secret"
 
 func newTestServer(t *testing.T) (*httptest.Server, *store.Store) {
 	t.Helper()
@@ -26,7 +31,7 @@ func newTestServer(t *testing.T) (*httptest.Server, *store.Store) {
 	srv := &Server{
 		Store:  st,
 		Rooms:  rooms.NewManager(st),
-		Secret: []byte("test-secret"),
+		Secret: []byte(testSecret),
 	}
 	ts := httptest.NewServer(srv.Router())
 	t.Cleanup(ts.Close)
@@ -59,6 +64,76 @@ func doJSON(t *testing.T, method, url, token string, body any) (*http.Response, 
 	}
 	resp.Body.Close()
 	return resp, out
+}
+
+// TestMarvelDBDecklistParse pins the marvelcdb API payload shape: the hero is
+// exposed as "hero_code", not ringsdb's "investigator_code".
+func TestMarvelDBDecklistParse(t *testing.T) {
+	payload := []byte(`{
+		"id": 63988,
+		"name": "The defense rests, your honor",
+		"hero_code": "60001a",
+		"hero_name": "Daredevil",
+		"slots": {"60048": 3, "60050": 3, "01008": 2},
+		"ignoreDeckLimitSlots": null,
+		"version": "1.0",
+		"meta": "{\"aspect\":\"protection\"}"
+	}`)
+	var dl marvelDBDecklist
+	if err := json.Unmarshal(payload, &dl); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	code := dl.HeroCode
+	if code == "" {
+		code = dl.InvestigatorCode
+	}
+	if code != "60001a" {
+		t.Fatalf("hero code: got %q, want 60001a", code)
+	}
+	if dl.Name != "The defense rests, your honor" || dl.Slots["60048"] != 3 {
+		t.Fatalf("parsed decklist incomplete: %+v", dl)
+	}
+}
+
+// TestAuthTokenFailures pins the distinct 401 reasons the frontend relies on
+// (missing vs invalid vs expired) and the happy path.
+func TestAuthTokenFailures(t *testing.T) {
+	ts, _ := newTestServer(t)
+	base := ts.URL
+
+	_, b := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: "tokuser", Password: "secret123"})
+	good, _ := b["token"].(string)
+	if good == "" {
+		t.Fatalf("register returned no token: %v", b)
+	}
+
+	resp, body := doJSON(t, "GET", base+"/api/v1/whoami", good, nil)
+	if resp.StatusCode != http.StatusOK || body["username"] != "tokuser" {
+		t.Fatalf("whoami with good token: %d %v", resp.StatusCode, body)
+	}
+
+	resp, body = doJSON(t, "GET", base+"/api/v1/whoami", "", nil)
+	if resp.StatusCode != http.StatusUnauthorized || body["error"] != "missing token" {
+		t.Fatalf("missing token: %d %v", resp.StatusCode, body)
+	}
+
+	resp, body = doJSON(t, "GET", base+"/api/v1/whoami", good+"x", nil)
+	if resp.StatusCode != http.StatusUnauthorized || body["error"] != "invalid token" {
+		t.Fatalf("tampered token: %d %v", resp.StatusCode, body)
+	}
+
+	expired, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Subject:   "1",
+		IssuedAt:  jwt.NewNumericDate(time.Now().Add(-25 * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+	}).SignedString([]byte(testSecret))
+	if err != nil {
+		t.Fatalf("sign expired token: %v", err)
+	}
+	resp, body = doJSON(t, "GET", base+"/api/v1/whoami", expired, nil)
+	if resp.StatusCode != http.StatusUnauthorized || body["error"] != "token expired" {
+		t.Fatalf("expired token: %d %v", resp.StatusCode, body)
+	}
 }
 
 func TestFullGameFlow(t *testing.T) {

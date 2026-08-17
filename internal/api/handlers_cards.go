@@ -103,10 +103,12 @@ type importDeckRequest struct {
 
 var deckURLRE = regexp.MustCompile(`/(deck(list)?)(/view)?/([^/]+)`)
 
-// marvelDBDecklist mirrors the marvelcdb decklist API JSON.
+// marvelDBDecklist mirrors the marvelcdb decklist API JSON. marvelcdb exposes
+// the hero as "hero_code" (unlike the ringsdb "investigator_code" some forks use).
 type marvelDBDecklist struct {
 	Name             string         `json:"name"`
 	InvestigatorCode string         `json:"investigator_code"`
+	HeroCode         string         `json:"hero_code"`
 	Slots            map[string]int `json:"slots"`
 }
 
@@ -136,12 +138,15 @@ func (s *Server) handleImportDeck(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var dl marvelDBDecklist
-		if err := json.Unmarshal(body, &dl); err != nil || dl.InvestigatorCode == "" {
+		if err := json.Unmarshal(body, &dl); err != nil || (dl.InvestigatorCode == "" && dl.HeroCode == "") {
 			writeErr(w, http.StatusBadGateway, "invalid marvelcdb decklist")
 			return
 		}
 		req.Name = dl.Name
-		req.InvestigatorCode = dl.InvestigatorCode
+		req.InvestigatorCode = dl.HeroCode
+		if req.InvestigatorCode == "" {
+			req.InvestigatorCode = dl.InvestigatorCode
+		}
 		req.Slots = dl.Slots
 	}
 	if req.InvestigatorCode == "" || len(req.Slots) == 0 {
