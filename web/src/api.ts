@@ -37,6 +37,13 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     } catch {
       /* ignore */
     }
+    // A stored token the server rejects (expired or signed with a rotated
+    // secret) is unrecoverable: drop it and return to the login screen.
+    // Login/register calls carry no token, so they are unaffected.
+    if (resp.status === 401 && token) {
+      setToken(null)
+      window.location.assign('/login')
+    }
     throw new ApiError(resp.status, msg)
   }
   if (resp.status === 204) return undefined as T

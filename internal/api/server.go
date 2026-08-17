@@ -4,6 +4,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -78,15 +79,15 @@ func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 			writeErr(w, http.StatusUnauthorized, "missing token")
 			return
 		}
-		claims := jwt.RegisteredClaims{}
-		token, err := jwt.ParseWithClaims(tokenStr, &claims, func(t *jwt.Token) (any, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method")
+		claims, err := s.parseToken(tokenStr)
+		if err != nil {
+			// Distinguish expiry from bad signatures so clients can react
+			// (and logs make sense) without guessing.
+			if errors.Is(err, jwt.ErrTokenExpired) {
+				writeErr(w, http.StatusUnauthorized, "token expired")
+			} else {
+				writeErr(w, http.StatusUnauthorized, "invalid token")
 			}
-			return s.Secret, nil
-		})
-		if err != nil || !token.Valid {
-			writeErr(w, http.StatusUnauthorized, "invalid token")
 			return
 		}
 		uid, err := claims.GetSubject()
@@ -133,16 +134,28 @@ func (s *Server) issueToken(userID int64) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.Secret)
 }
 
-// parseSubject validates a token and returns its subject (user id).
-func (s *Server) parseSubject(tokenStr string) (string, bool) {
-	claims := jwt.RegisteredClaims{}
-	token, err := jwt.ParseWithClaims(tokenStr, &claims, func(t *jwt.Token) (any, error) {
+// parseToken validates a signed token and returns its claims.
+func (s *Server) parseToken(tokenStr string) (*jwt.RegisteredClaims, error) {
+	claims := &jwt.RegisteredClaims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
 		return s.Secret, nil
 	})
 	if err != nil || !token.Valid {
+		if err == nil {
+			err = jwt.ErrTokenInvalidClaims
+		}
+		return nil, err
+	}
+	return claims, nil
+}
+
+// parseSubject validates a token and returns its subject (user id).
+func (s *Server) parseSubject(tokenStr string) (string, bool) {
+	claims, err := s.parseToken(tokenStr)
+	if err != nil {
 		return "", false
 	}
 	sub, err := claims.GetSubject()

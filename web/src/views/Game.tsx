@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { get, post, GameView } from '../api'
+import { get, post, getToken, GameView } from '../api'
 import { CardImage } from '../cards'
 import QuestionPanel from '../components/QuestionPanel'
 
@@ -12,7 +12,7 @@ export default function Game() {
   const wsRef = useRef<WebSocket | null>(null)
 
   const connect = useCallback(() => {
-    const token = localStorage.getItem('token') ?? ''
+    const token = getToken() ?? ''
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
     const ws = new WebSocket(`${proto}://${location.host}/api/v1/marvel/games/${gameId}/stream?token=${encodeURIComponent(token)}`)
     ws.onmessage = (ev) => {
