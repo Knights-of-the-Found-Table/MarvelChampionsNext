@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      MC_JWT_SECRET: ${MC_JWT_SECRET:-}
+    volumes:
+      - marvel-data:/data
+    restart: unless-stopped
+
+volumes:
+  marvel-data:

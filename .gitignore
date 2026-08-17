@@ -1,0 +1,29 @@
+# Binaries
+*.exe
+/bin/
+
+# Go
+*.test
+*.out
+
+# Node
+web/node_modules/
+web/dist/
+
+# Card images are downloaded at build/dev time, never committed
+web/public/img/cards/*
+!web/public/img/cards/README.txt
+
+# Local env
+.env
+*.local
+
+# Editors / OS
+.DS_Store
+*~
+
+# Legacy reference code (previous Haskell implementation), kept local only
+legacy/
+
+# runtime cache (on-demand fetched card images etc.)
+cache/
