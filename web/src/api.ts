@@ -190,6 +190,29 @@ export interface Deck {
   slots: Record<string, number>
 }
 
+export interface CardInfo {
+  code: string
+  name: string
+  subname?: string
+  packCode: string
+  packName?: string
+  type: string
+  category: string
+  aspect?: string
+  cost?: number | null
+  unique: boolean
+  traits?: string[]
+  resources?: string[]
+}
+
+let cardsPromise: Promise<CardInfo[]> | null = null
+
+// Full card catalog, fetched once per session and shared by consumers.
+export function allCards(): Promise<CardInfo[]> {
+  if (!cardsPromise) cardsPromise = get<CardInfo[]>('/marvel/cards')
+  return cardsPromise
+}
+
 export interface ScenarioInfo {
   id: string
   name: string

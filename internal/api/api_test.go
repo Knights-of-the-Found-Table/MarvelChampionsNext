@@ -136,6 +136,48 @@ func TestAuthTokenFailures(t *testing.T) {
 	}
 }
 
+// TestImportDeckFromTextAndFetchDetail covers the marvelcdb plain-text
+// import path and the per-deck detail endpoint.
+func TestImportDeckFromTextAndFetchDetail(t *testing.T) {
+	ts, _ := newTestServer(t)
+	base := ts.URL
+
+	_, b := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: "txtuser", Password: "secret123"})
+	token := b["token"].(string)
+
+	text := "Text Deck\r\n\r\nSpider-Man\r\nPacks: Core Set\r\n\r\nEvents\r\n2x Uppercut (Core Set)\r\n\r\nResources\r\n3x Energy (Core Set)\r\n"
+	resp, body := doJSON(t, "POST", base+"/api/v1/marvel/decks", token, importDeckRequest{Text: text})
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("import text deck: %d %v", resp.StatusCode, body)
+	}
+	deckID := int64(body["id"].(float64))
+
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/decks/%d", base, deckID), token, nil)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("get deck: %d %v", resp.StatusCode, body)
+	}
+	if body["investigatorCode"] != "01001a" {
+		t.Fatalf("investigator: %v", body["investigatorCode"])
+	}
+	slots, _ := body["slots"].(map[string]any)
+	if len(slots) != 2 || slots["01054"].(float64) != 2 || slots["01088"].(float64) != 3 {
+		t.Fatalf("slots: %v", slots)
+	}
+
+	// another user must not see the deck
+	_, b2 := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: "txtuser2", Password: "secret123"})
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/decks/%d", base, deckID), b2["token"].(string), nil)
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("foreign deck should 404: %d %v", resp.StatusCode, body)
+	}
+
+	// bad text is a 400 with a useful message
+	resp, body = doJSON(t, "POST", base+"/api/v1/marvel/decks", token, importDeckRequest{Text: "nonsense\n\nSpider-Man\n"})
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("bad text: %d %v", resp.StatusCode, body)
+	}
+}
+
 func TestFullGameFlow(t *testing.T) {
 	ts, _ := newTestServer(t)
 	base := ts.URL

@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/api.ts","./src/cards.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/questionpanel.tsx","./src/views/decks.tsx","./src/views/game.tsx","./src/views/games.tsx","./src/views/login.tsx","./src/views/newgame.tsx"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/api.ts","./src/cards.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/questionpanel.tsx","./src/views/deckdetail.tsx","./src/views/decks.tsx","./src/views/game.tsx","./src/views/games.tsx","./src/views/login.tsx","./src/views/newgame.tsx"],"version":"5.9.3"}

@@ -18,6 +18,7 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 		Name       string `json:"name"`
 		Subname    string `json:"subname,omitempty"`
 		PackCode   string `json:"packCode"`
+		PackName   string `json:"packName,omitempty"`
 		Type       string `json:"type"`
 		Category   string `json:"category"`
 		Aspect     string `json:"aspect,omitempty"`
@@ -33,7 +34,7 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 	for _, def := range all {
 		out = append(out, cardOut{
 			Code: def.Code, Name: def.Name, Subname: def.Subname,
-			PackCode: def.PackCode, Type: def.Type, Category: def.Category,
+			PackCode: def.PackCode, PackName: def.PackName, Type: def.Type, Category: def.Category,
 			Aspect: def.Aspect, CardSet: def.CardSet, Cost: def.Cost,
 			Unique: def.Unique, Traits: def.Traits, Resources: def.Resources,
 			Quantity: def.Quantity,
@@ -95,6 +96,8 @@ func (s *Server) handleScenarios(w http.ResponseWriter, r *http.Request) {
 type importDeckRequest struct {
 	// URL of a marvelcdb decklist to import.
 	URL string `json:"url"`
+	// Or the contents of a marvelcdb plain-text decklist export.
+	Text string `json:"text"`
 	// Or direct contents.
 	Name             string         `json:"name"`
 	InvestigatorCode string         `json:"investigatorCode"`
@@ -148,6 +151,15 @@ func (s *Server) handleImportDeck(w http.ResponseWriter, r *http.Request) {
 			req.InvestigatorCode = dl.InvestigatorCode
 		}
 		req.Slots = dl.Slots
+	} else if req.Text != "" {
+		parsed, err := parseDecklistText(req.Text)
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		req.Name = parsed.Name
+		req.InvestigatorCode = parsed.InvestigatorCode
+		req.Slots = parsed.Slots
 	}
 	if req.InvestigatorCode == "" || len(req.Slots) == 0 {
 		writeErr(w, http.StatusBadRequest, "decklist requires investigatorCode and slots")
@@ -178,6 +190,25 @@ func (s *Server) handleImportDeck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]any{"id": deckID, "name": req.Name})
+}
+
+func (s *Server) handleGetDeck(w http.ResponseWriter, r *http.Request) {
+	var uid int64
+	if _, err := fmt.Sscanf(userID(r), "%d", &uid); err != nil {
+		writeErr(w, http.StatusUnauthorized, "invalid user")
+		return
+	}
+	deckID, err := pathID(r)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid deck id")
+		return
+	}
+	deck, err := s.Store.DeckByID(deckID)
+	if err != nil || deck.UserID != uid {
+		writeErr(w, http.StatusNotFound, "deck not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, deck)
 }
 
 func (s *Server) handleListDecks(w http.ResponseWriter, r *http.Request) {

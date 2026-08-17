@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import App from './App'
 import Login from './views/Login'
 import Decks from './views/Decks'
+import DeckDetail from './views/DeckDetail'
 import NewGame from './views/NewGame'
 import Games from './views/Games'
 import Game from './views/Game'
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { index: true, element: <RequireAuth><Games /></RequireAuth> },
       { path: 'login', element: <Login /> },
       { path: 'decks', element: <RequireAuth><Decks /></RequireAuth> },
+      { path: 'decks/:id', element: <RequireAuth><DeckDetail /></RequireAuth> },
       { path: 'new', element: <RequireAuth><NewGame /></RequireAuth> },
       { path: 'games/:id', element: <RequireAuth><Game /></RequireAuth> },
     ],

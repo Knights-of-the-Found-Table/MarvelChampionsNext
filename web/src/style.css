@@ -199,6 +199,54 @@ a.button {
   margin-top: 1rem;
 }
 
+/* ---- deck detail ---- */
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  border-color: var(--accent-2);
+}
+
+.deck-hero {
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.deck-row {
+  align-items: center;
+}
+
+.stat-row {
+  gap: 1rem;
+}
+
+.cost-curve {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 72px;
+  max-width: 240px;
+}
+
+.cost-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+}
+
+.cost-bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent-2);
+}
+
 .games-table {
   width: 100%;
   border-collapse: collapse;
