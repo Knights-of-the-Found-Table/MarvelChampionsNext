@@ -351,6 +351,31 @@ a.button {
   border-color: var(--ok);
 }
 
+/* ---- card hover zoom (after arkhamhorror.app's CardOverlay) ---- */
+
+.card-zoom {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  animation: cardZoomFadeIn 0.15s ease-out;
+}
+
+.card-zoom img {
+  display: block;
+  width: 300px;
+  border-radius: 12px;
+  filter: drop-shadow(2px 4px 12px rgba(0, 0, 0, 0.75));
+}
+
+@keyframes cardZoomFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .log summary {
   cursor: pointer;
   color: var(--muted);

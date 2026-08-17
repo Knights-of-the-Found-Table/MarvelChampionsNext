@@ -1,6 +1,9 @@
 // Card image resolution with content-hash cache busting. The manifest is
 // generated at image-fetch time (docker build or local dev script).
 
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+
 interface Manifest {
   [code: string]: string
 }
@@ -27,6 +30,90 @@ export async function preloadManifest(): Promise<void> {
   await loadManifest()
 }
 
+// ---- hover zoom preview -----------------------------------------------------
+// Modeled on arkhamhorror.app's CardOverlay: hovering a card shows a large,
+// pointer-transparent copy fixed beside it. Placed right of the card, flipped
+// to the left when it would overflow the viewport, and clamped vertically.
+const ZOOM_W = 300
+const ZOOM_H = 420 // 5:7 card aspect
+const ZOOM_GAP = 10
+const ZOOM_PAD = 10
+const ZOOM_DELAY_MS = 100
+const coarsePointer =
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(hover: none) and (pointer: coarse)').matches
+
+function useCardZoom(code: string, imgRef: React.RefObject<HTMLImageElement | null>) {
+  const [visible, setVisible] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const timer = useRef<number | null>(null)
+
+  function position() {
+    const rect = imgRef.current!.getBoundingClientRect()
+    let left = rect.right + ZOOM_GAP
+    if (left + ZOOM_W > window.innerWidth - ZOOM_PAD) left = rect.left - ZOOM_W - ZOOM_GAP
+    left = Math.max(ZOOM_PAD, Math.min(left, window.innerWidth - ZOOM_W - ZOOM_PAD))
+    const top = Math.max(ZOOM_PAD, Math.min(rect.top - 40, window.innerHeight - ZOOM_H - ZOOM_PAD))
+    return { top, left }
+  }
+
+  function clearTimer() {
+    if (timer.current !== null) {
+      clearTimeout(timer.current)
+      timer.current = null
+    }
+  }
+
+  function onEnter() {
+    if (coarsePointer) return
+    clearTimer()
+    timer.current = window.setTimeout(() => {
+      setPos(position())
+      setVisible(true)
+    }, ZOOM_DELAY_MS)
+  }
+
+  function hide() {
+    clearTimer()
+    setVisible(false)
+  }
+
+  // Keep the preview glued to the card while the page scrolls or resizes.
+  useEffect(() => {
+    if (!visible) return
+    const track = () => setPos(position())
+    window.addEventListener('scroll', track, true)
+    window.addEventListener('resize', track)
+    return () => {
+      window.removeEventListener('scroll', track, true)
+      window.removeEventListener('resize', track)
+    }
+  }, [visible])
+
+  useEffect(() => clearTimer, [])
+
+  const overlay = visible
+    ? createPortal(
+        <div className="card-zoom" style={pos}>
+          <img
+            src={cardUrl(code)}
+            alt=""
+            onError={(e) => {
+              const img = e.currentTarget
+              if (!img.dataset.fallback) {
+                img.dataset.fallback = '1'
+                img.src = fallbackDataUrl(code)
+              }
+            }}
+          />
+        </div>,
+        document.body
+      )
+    : null
+
+  return { onEnter, hide, overlay }
+}
+
 export function CardImage({
   code,
   size = 'md',
@@ -37,21 +124,29 @@ export function CardImage({
   className?: string
 }) {
   const widths: Record<string, number> = { xs: 60, sm: 100, md: 160, lg: 220 }
+  const imgRef = useRef<HTMLImageElement | null>(null)
+  const zoom = useCardZoom(code, imgRef)
   return (
-    <img
-      className={className}
-      src={cardUrl(code)}
-      alt={code}
-      width={widths[size]}
-      loading="lazy"
-      onError={(e) => {
-        const img = e.currentTarget
-        if (!img.dataset.fallback) {
-          img.dataset.fallback = '1'
-          img.src = fallbackDataUrl(code)
-        }
-      }}
-    />
+    <>
+      <img
+        ref={imgRef}
+        className={className}
+        src={cardUrl(code)}
+        alt={code}
+        width={widths[size]}
+        loading="lazy"
+        onMouseEnter={zoom.onEnter}
+        onMouseLeave={zoom.hide}
+        onError={(e) => {
+          const img = e.currentTarget
+          if (!img.dataset.fallback) {
+            img.dataset.fallback = '1'
+            img.src = fallbackDataUrl(code)
+          }
+        }}
+      />
+      {zoom.overlay}
+    </>
   )
 }
 
