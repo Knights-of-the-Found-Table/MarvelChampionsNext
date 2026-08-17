@@ -12,7 +12,8 @@ A full-stack web implementation of [Marvel Champions: The Card Game](https://fan
 One-click dev server (backend on :3000, frontend on :8080):
 
 ```bash
-./dev.sh
+./dev.sh   # Linux / macOS / Git Bash
+dev.cmd    # Windows
 ```
 
 Open http://localhost:8080, register, import a deck from a marvelcdb URL on the Decks page, and start a game.
