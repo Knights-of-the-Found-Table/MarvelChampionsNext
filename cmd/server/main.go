@@ -60,8 +60,8 @@ func main() {
 	})
 
 	// Card images are fetched from marvelcdb on demand and cached on
-	// disk; hash-versioned URLs (?v=...) are immutable, the manifest is
-	// always revalidated.
+	// disk; content-addressed URLs (/img/cards/{code}.{hash}.png) are
+	// immutable, the manifest is always revalidated.
 	mux.Handle("GET /img/cards/manifest.json", server.ManifestHandler())
 	mux.Handle("/img/cards/", server.ImageHandler())
 	// Static frontend with SPA fallback.

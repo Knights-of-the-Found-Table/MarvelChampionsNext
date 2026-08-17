@@ -20,7 +20,7 @@ async function loadManifest(): Promise<Manifest | null> {
 
 export function cardUrl(code: string, hash?: string): string {
   const h = hash ?? manifest?.[code]
-  return `/img/cards/${code}.png${h ? `?v=${h}` : ''}`
+  return h ? `/img/cards/${code}.${h}.png` : `/img/cards/${code}.png`
 }
 
 export async function preloadManifest(): Promise<void> {

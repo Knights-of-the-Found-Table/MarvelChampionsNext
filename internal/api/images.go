@@ -19,8 +19,8 @@ import (
 // imageCache serves card images with on-demand fetching: the first request
 // for a card downloads it from marvelcdb into the cache directory, records
 // its content hash in manifest.json, and every later request is served
-// locally. Hash-versioned URLs (?v=<hash>) get immutable caching, exactly
-// like the previous build-time pipeline.
+// locally. Content-addressed URLs (/img/cards/{code}.{hash}.png) get
+// immutable caching, exactly like the previous build-time pipeline.
 type imageCache struct {
 	dir      string
 	imageURL string // marvelcdb site root
@@ -151,8 +151,14 @@ func detectImage(body []byte) string {
 	return "image/png"
 }
 
-// ImageHandler serves card images on demand with immutable caching for
-// hash-versioned URLs.
+// ImageHandler serves card images on demand. Two URL shapes:
+//
+//	/img/cards/{code}.png              unversioned, no-cache
+//	/img/cards/{code}.{hash}.png       content-addressed, immutable
+//
+// The hash is the sha256 recorded in manifest.json; a request whose hash
+// does not match the current content returns 404 so the client refetches
+// the manifest.
 func (s *Server) ImageHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := filepath.Base(r.URL.Path)
@@ -160,9 +166,15 @@ func (s *Server) ImageHandler() http.Handler {
 			writeErr(w, http.StatusBadRequest, "missing image name")
 			return
 		}
-		code := strings.TrimSuffix(name, filepath.Ext(name))
-		if !validCardCode(code) {
-			writeErr(w, http.StatusBadRequest, "invalid card code")
+		stem := strings.TrimSuffix(name, filepath.Ext(name))
+		code := stem
+		wantHash := ""
+		if i := strings.LastIndexByte(stem, '.'); i > 0 {
+			code = stem[:i]
+			wantHash = stem[i+1:]
+		}
+		if !validCardCode(code) || (wantHash != "" && !validHash(wantHash)) {
+			writeErr(w, http.StatusBadRequest, "invalid image name")
 			return
 		}
 		img, err := s.Images.get(code)
@@ -170,9 +182,13 @@ func (s *Server) ImageHandler() http.Handler {
 			writeErr(w, http.StatusBadGateway, "card image unavailable: "+err.Error())
 			return
 		}
+		if wantHash != "" && wantHash != img.hash {
+			writeErr(w, http.StatusNotFound, "stale content hash")
+			return
+		}
 		w.Header().Set("Content-Type", img.mimeType)
 		w.Header().Set("ETag", `"`+img.hash+`"`)
-		if r.URL.Query().Get("v") != "" {
+		if wantHash != "" {
 			// Content-addressed URL: cache forever.
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		} else {
@@ -184,7 +200,7 @@ func (s *Server) ImageHandler() http.Handler {
 }
 
 // ManifestHandler exposes the current {code: hash} manifest so clients can
-// build immutable URLs.
+// build content-addressed URLs.
 func (s *Server) ManifestHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -199,6 +215,19 @@ func validCardCode(code string) bool {
 	}
 	for _, r := range code {
 		if (r >= '0' && r <= '9') || (r >= 'a' && r <= 'c') {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func validHash(h string) bool {
+	if len(h) != 16 {
+		return false
+	}
+	for _, r := range h {
+		if (r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') {
 			continue
 		}
 		return false
