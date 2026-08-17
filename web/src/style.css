@@ -218,6 +218,19 @@ a.button {
   align-items: center;
 }
 
+.deck-count {
+  min-width: 2.2rem;
+  flex-shrink: 0;
+  text-align: right;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.deck-thumb {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
 .stat-row {
   gap: 1rem;
 }

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { get, allCards, CardInfo, Deck } from '../api'
-import { CardImage } from '../cards'
+import { CardImage, useCardZoom } from '../cards'
 
 const TYPE_ORDER = ['ally', 'event', 'support', 'upgrade', 'resource', 'player_side_scheme']
 const TYPE_LABEL: Record<string, string> = {
@@ -22,6 +22,28 @@ const RESOURCE_LABEL: Record<string, string> = {
 interface DeckEntry {
   info: CardInfo
   count: number
+}
+
+function DeckCardRow({ info, count }: DeckEntry) {
+  const thumbRef = useRef<HTMLSpanElement | null>(null)
+  const zoom = useCardZoom(info.code, thumbRef)
+  return (
+    <div className="card row deck-row" onMouseEnter={zoom.onEnter} onMouseLeave={zoom.hide}>
+      <span className="deck-count">{count}x</span>
+      <span className="deck-thumb" ref={thumbRef}>
+        <CardImage code={info.code} size="xs" zoom={false} />
+      </span>
+      <div style={{ flex: 1 }}>
+        <strong>
+          {info.name}
+          {info.subname ? ` (${info.subname})` : ''}
+        </strong>
+        <div className="muted">{info.packName ?? info.packCode}</div>
+      </div>
+      {info.cost != null && <span className="badge">{info.cost}</span>}
+      {zoom.overlay}
+    </div>
+  )
 }
 
 export default function DeckDetail() {
@@ -141,18 +163,8 @@ export default function DeckDetail() {
             <span className="muted">({stats.byType.get(t)})</span>
           </h3>
           <div className="deck-list">
-            {grouped.get(t)!.map(({ info, count }) => (
-              <div key={info.code} className="card row deck-row">
-                <CardImage code={info.code} size="sm" />
-                <div style={{ flex: 1 }}>
-                  <strong>
-                    {count}x {info.name}
-                    {info.subname ? ` (${info.subname})` : ''}
-                  </strong>
-                  <div className="muted">{info.packName ?? info.packCode}</div>
-                </div>
-                {info.cost != null && <span className="badge">{info.cost}</span>}
-              </div>
+            {grouped.get(t)!.map((e) => (
+              <DeckCardRow key={e.info.code} info={e.info} count={e.count} />
             ))}
           </div>
         </div>

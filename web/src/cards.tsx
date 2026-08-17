@@ -43,13 +43,13 @@ const coarsePointer =
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(hover: none) and (pointer: coarse)').matches
 
-function useCardZoom(code: string, imgRef: React.RefObject<HTMLImageElement | null>) {
+export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement | null>) {
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const timer = useRef<number | null>(null)
 
   function position() {
-    const rect = imgRef.current!.getBoundingClientRect()
+    const rect = anchorRef.current!.getBoundingClientRect()
     let left = rect.right + ZOOM_GAP
     if (left + ZOOM_W > window.innerWidth - ZOOM_PAD) left = rect.left - ZOOM_W - ZOOM_GAP
     left = Math.max(ZOOM_PAD, Math.min(left, window.innerWidth - ZOOM_W - ZOOM_PAD))
@@ -114,14 +114,19 @@ function useCardZoom(code: string, imgRef: React.RefObject<HTMLImageElement | nu
   return { onEnter, hide, overlay }
 }
 
+// `zoom={false}` lets a parent row own the preview: it calls useCardZoom
+// itself with a wrapper element as the anchor, so hovering anywhere in the
+// row (not just the image) shows the overlay beside the thumbnail.
 export function CardImage({
   code,
   size = 'md',
   className,
+  zoom: zoomEnabled = true,
 }: {
   code: string
   size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
+  zoom?: boolean
 }) {
   const widths: Record<string, number> = { xs: 60, sm: 100, md: 160, lg: 220 }
   const imgRef = useRef<HTMLImageElement | null>(null)
@@ -135,8 +140,8 @@ export function CardImage({
         alt={code}
         width={widths[size]}
         loading="lazy"
-        onMouseEnter={zoom.onEnter}
-        onMouseLeave={zoom.hide}
+        onMouseEnter={zoomEnabled ? zoom.onEnter : undefined}
+        onMouseLeave={zoomEnabled ? zoom.hide : undefined}
         onError={(e) => {
           const img = e.currentTarget
           if (!img.dataset.fallback) {
@@ -145,7 +150,7 @@ export function CardImage({
           }
         }}
       />
-      {zoom.overlay}
+      {zoomEnabled ? zoom.overlay : null}
     </>
   )
 }
