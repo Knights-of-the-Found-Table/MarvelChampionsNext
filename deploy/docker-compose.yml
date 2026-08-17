@@ -6,7 +6,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      MC_JWT_SECRET: ${MC_JWT_SECRET:-}
+      # Required: without a stable secret every container restart invalidates
+      # all login tokens. Copy .env.example to .env (same directory) to set it.
+      MC_JWT_SECRET: ${MC_JWT_SECRET:?MC_JWT_SECRET is required — copy deploy/.env.example to deploy/.env or export it}
     volumes:
       - marvel-data:/data
     restart: unless-stopped

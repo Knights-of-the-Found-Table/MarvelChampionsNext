@@ -20,6 +20,8 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 echo "==> starting backend on :3000"
+# Fixed dev secret so backend restarts don't invalidate login tokens.
+if [ -z "$MC_JWT_SECRET" ]; then export MC_JWT_SECRET=mcdev-insecure-jwt-secret; fi
 go run ./cmd/server &
 BACKEND=$!
 

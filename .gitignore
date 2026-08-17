@@ -27,3 +27,8 @@ legacy/
 
 # runtime cache (on-demand fetched card images etc.)
 cache/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal

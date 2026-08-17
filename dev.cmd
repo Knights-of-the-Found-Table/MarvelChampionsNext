@@ -13,6 +13,8 @@ if not exist web\node_modules (
 )
 
 echo ==^> starting backend on :3000
+rem Fixed dev secret so backend restarts don't invalidate login tokens.
+if not defined MC_JWT_SECRET set "MC_JWT_SECRET=mcdev-insecure-jwt-secret"
 start "mcg-backend" cmd /k go run ./cmd/server
 
 echo ==^> starting frontend on :8080
