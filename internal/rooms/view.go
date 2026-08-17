@@ -56,6 +56,7 @@ type SchemeView struct {
 	Stage     int    `json:"stage,omitempty"`
 	Crisis    bool   `json:"crisis,omitempty"`
 	Hazard    int    `json:"hazard,omitempty"`
+	PlayerSide bool  `json:"playerSide,omitempty"`
 	Acceleration int `json:"acceleration,omitempty"`
 }
 
@@ -111,6 +112,7 @@ type PlayerView struct {
 	Hand  []CardRef `json:"hand,omitempty"`
 	HandSize int    `json:"handSize"`
 	DeckCount  int  `json:"deckCount"`
+	SenseDeckCount int `json:"senseDeckCount,omitempty"`
 	DiscardTop *CardRef `json:"discardTop,omitempty"`
 
 	Allies   []AllyView    `json:"allies"`
@@ -124,6 +126,7 @@ type EntityLite struct {
 	Code      string `json:"code"`
 	Name      string `json:"name"`
 	Exhausted bool   `json:"exhausted"`
+	Counters  int    `json:"counters,omitempty"`
 }
 
 // BuildView projects the engine state for a viewer. viewerUserID empty =
@@ -165,7 +168,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 		v.SideSchemes = append(v.SideSchemes, SchemeView{
 			ID: string(s.ID), Code: s.Code, Name: s.EDef().Name,
 			Threat: s.Threat, MaxThreat: s.MaxThreat,
-			Crisis: s.Crisis, Hazard: s.Hazard,
+			Crisis: s.Crisis, Hazard: s.Hazard, PlayerSide: s.PlayerSide,
 		})
 	}
 	for _, m := range sortedByNum(g.Minions) {
@@ -186,6 +189,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough,
 			FirstPlayer: p.FirstPlayer, KOed: p.KOed, FormChanged: p.FormChanged,
 			HandSize: len(p.Hand), DeckCount: len(p.Deck), EncounterDown: len(p.EncounterDown),
+			SenseDeckCount: len(p.SenseDeck),
 			UserID: owners[string(p.ID)],
 		}
 		if viewerUserID != "" && pv.UserID == viewerUserID {
@@ -209,12 +213,12 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 		}
 		for _, id := range p.Supports {
 			if s := g.Supports[id]; s != nil {
-				pv.Supports = append(pv.Supports, EntityLite{ID: string(s.ID), Code: s.Code, Name: s.EDef().Name, Exhausted: s.Exhausted})
+				pv.Supports = append(pv.Supports, EntityLite{ID: string(s.ID), Code: s.Code, Name: s.EDef().Name, Exhausted: s.Exhausted, Counters: s.Counters})
 			}
 		}
 		for _, id := range p.Upgrades {
 			if u := g.Upgrades[id]; u != nil {
-				pv.Upgrades = append(pv.Upgrades, EntityLite{ID: string(u.ID), Code: u.Code, Name: u.EDef().Name, Exhausted: u.Exhausted})
+				pv.Upgrades = append(pv.Upgrades, EntityLite{ID: string(u.ID), Code: u.Code, Name: u.EDef().Name, Exhausted: u.Exhausted, Counters: u.Counters})
 			}
 		}
 		v.Players = append(v.Players, pv)
