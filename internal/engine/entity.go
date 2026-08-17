@@ -56,6 +56,80 @@ type Behavior struct {
 	// Damage modifiers, e.g. Retaliate-like auras or extra consequential
 	// damage. Return added effects keyed by event.
 	Modifiers func(g *Game, e Entity, target EntityID) []Modifier
+	// Obligation resolution when revealed from the encounter deck; the
+	// hook moves the card via ObligationResolve messages.
+	ResolveObligation func(g *Game, p *Player, card Card) []Message
+	// Minion: while engaged with a player, that player cannot thwart
+	// (Baron Zemo). Applies to basic thwarts (approximation).
+	EngagedBlocksThwart bool
+	// Identity: passive cost reduction for a card being paid for (e.g.
+	// Living Legend: first ally each round costs 1 less).
+	CardCost func(g *Game, p *Player, def *data.CardDef) int
+	// Event: resolves a defense event played from the defense prompt.
+	// Returns the (possibly modified) Defends message plus extra messages
+	// (e.g. draw a card); ok=false when it cannot be played right now.
+	DefenseEvent func(g *Game, p *Player, e *EventCard, against EntityID) (Defends, []Message, bool)
+	// Support/Upgrade: declares a resource-generating ability that is
+	// offered automatically in payment prompts (Super-Soldier Serum,
+	// Enhanced Awareness...).
+	Resource *ResourceAbility
+	// Upgrade: saves the identity from being defeated (Captain America's
+	// Helmet); the hook performs the save (set HP, discard the card) and
+	// reports whether the defeat was prevented.
+	DefeatSave func(g *Game, p *Player, u *Upgrade) bool
+	// Upgrade: persistent identity stat bonuses while in play (Captain
+	// America's Shield: +1 DEF, retaliate 1).
+	IdentityStats func(p *Player) StatBonus
+	// Ally: attacking requires discarding a card from hand as an
+	// additional cost (Wonder Man).
+	AllyAttackDiscardCost bool
+	// Upgrade attached to an ally: extra consequential damage after that
+	// ally attacks (Enraged).
+	ConsequentialBonus int
+	// Ally: opens the defeat interrupt window (Red Dagger); destroy runs
+	// the standard destruction when the save is declined or impossible.
+	AllyDefeatInterrupt func(g *Game, a *Ally, destroy func()) []Message
+	// Minion: gates damage dynamically (Thomas Edison while another
+	// minion is engaged, Edison's Giant Robot); may inspect state and
+	// returns whether the damage still applies.
+	MinionDamageable func(g *Game, m *Minion, damage int) bool
+	// Event in hand: offered when a treachery is about to resolve against
+	// the player (Get Behind Me!); returns the replacement effect, nil =
+	// currently unplayable.
+	TreacheryInterrupt func(g *Game, p *Player, card Card) []Message
+	// Upgrade: automatic damage prevention while in play (Energy
+	// Barrier); consumes counters and returns damage prevented plus
+	// reflection damage (0 = none).
+	DamagePrevention func(g *Game, u *Upgrade, p *Player, n int) (prevented, reflect int)
+	// Identity: damage prevention from identity counters (Groot's
+	// growth counters); returns the amount prevented.
+	IdentityDamagePrevention func(g *Game, p *Player, n int) int
+	// Upgrade: offered in the defense prompt as a substitute defense
+	// (Bamf! — defend without exhausting); returns the Defends payload
+	// (Via is filled in by the engine) plus extra messages.
+	DefenseSubstitute func(g *Game, p *Player, u *Upgrade, against EntityID) (Defends, []Message, bool)
+	// Ally: may be played from the owner's discard pile (Lockjaw).
+	PlayableFromDiscard bool
+	// Upgrade attached to an enemy: flat attack reduction while that
+	// enemy attacks the owner (Heightened Hearing); auto-consumed.
+	AttachedEnemyAttackMod int
+	// Ally: consequential damage hits the owner instead (Elektra).
+	ConsequentialToOwner bool
+}
+
+// ResourceAbility describes an exhaust-to-generate-resources ability.
+type ResourceAbility struct {
+	Icon    string // generated icon: energy | physical | mental | wild
+	HeroOnly    bool // "Hero Resource": hero form required
+	EventOnly   bool // only usable when paying for an event
+	UsesCounters bool // consumes one counter from the source per use
+}
+
+// StatBonus is a persistent stat adjustment applied to an identity.
+type StatBonus struct {
+	ATK, THW, DEF int
+	REC           int
+	Retaliate     int
 }
 
 // Modifier is a persistent stat adjustment an entity applies to a target.

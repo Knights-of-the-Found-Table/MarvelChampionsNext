@@ -35,6 +35,17 @@ func init() {
 		WindowAfterEnemyAttacked{}, WindowAfterThwarted{}, RunAbility{},
 		ApplyVillainScheme{}, ResourcePayStub{}, RevealNemesisSet{}, SpawnDrone{},
 		TakeDeckCard{}, FlipVillainPersona{}, MillPlayerDeck{}, DealEncounterToPlayer{}, BoostEnemyAttack{},
+		ObligationResolve{}, DiscardControlled{}, AddAccelerationToken{}, RevealNextEncounter{},
+		PlayDefenseEvent{}, AddEntityCounter{}, ReturnControlled{},
+		AllyEntersPlayFree{}, MinionEntersPlay{}, AttachUpgrade{},
+		EventPlayed{}, SetEventBonus{}, ReturnDiscardCard{}, DiscardToBottom{},
+		AllyDefeated{}, AllyDestroyed{}, SupportStoreCard{}, SupportRetrieveCards{},
+		TreacheryWindow{}, TreacheryResolve{}, ConsumeHandCard{}, PlayDiscardAlly{},
+		ApplyStatBonus{}, WindowDefended{}, SenseEnterPlay{},
+		ShuffleIntoDeck{}, GrantTrait{}, InvokeSpecial{}, AllyAttackWindow{},
+		SideDeckDiscardTop{}, UpgradeEnterPlay{}, SideDeckToHand{}, RecycleFromDiscard{},
+		SwapHandWithDeckTop{},
+		ResourcePayStub{}, AbilityPayStub{},
 	}
 	for _, p := range prototypes {
 		messageRegistry[reflect.TypeOf(p).String()] = reflect.TypeOf(p)

@@ -1,7 +1,9 @@
 package core
 
 import (
+
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
 
 // registerAspectCards installs behaviors for frequently-played Core Set
@@ -9,7 +11,7 @@ import (
 func registerAspectCards() {
 	// For Justice!: remove 3 threat (4 if paid with a mental resource).
 	engine.RegisterBehavior("01060", &engine.Behavior{
-		OnPlay: chooseSchemeEffect("01060", "For Justice!", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme("For Justice!", func(g *engine.Game, e engine.Entity) int {
 			if ec, ok := e.(*engine.EventCard); ok && ec.Paid.PaidIcon("mental") {
 				return 4
 			}
@@ -19,21 +21,20 @@ func registerAspectCards() {
 
 	// Uppercut: deal 5 damage to an enemy.
 	engine.RegisterBehavior("01054", &engine.Behavior{
-		OnPlay: chooseEnemyEffect("Uppercut — deal 5 damage", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy("Uppercut — deal 5 damage", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			n := 5
-			var extra []engine.Message
 			if ec, ok := e.(*engine.EventCard); ok && ec.Paid.PaidIcon("physical") {
 				// physical rider: +2 damage (approximation of the
 				// printed "+2 if physical" line)
 				n = 7
 			}
-			return n, extra
+			return n, nil
 		}),
 	})
 
 	// Relentless Assault: deal 5 damage to a minion.
 	engine.RegisterBehavior("01053", &engine.Behavior{
-		OnPlay: chooseMinionEffect("Relentless Assault — deal 5 damage", 5),
+		OnPlay: cardutil.ChooseMinion("Relentless Assault — deal 5 damage", 5),
 	})
 
 	// First Aid: heal 2 damage from any character (approximation: heal
@@ -95,10 +96,10 @@ func registerAspectCards() {
 			}
 			if len(g.Enemies()) > 0 {
 				var dmgChoices []engine.Choice
-				for _, id := range sortedEnemyIDs(g) {
+				for _, id := range cardutil.SortedEnemyIDs(g) {
 					enemy := g.Entity(id)
 					dmgChoices = append(dmgChoices, engine.Choice{
-						Label: enemy.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
+						Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
 					}.Msgs(engine.DamageEntity{Target: id, Damage: 4, Source: pid}))
 				}
 				choices = append(choices, engine.Choice{
@@ -111,75 +112,4 @@ func registerAspectCards() {
 			}}
 		},
 	})
-}
-
-// chooseSchemeEffect builds a "remove N threat from a scheme" OnPlay hook.
-func chooseSchemeEffect(code, name string, amount func(g *engine.Game, e engine.Entity) int) func(g *engine.Game, e engine.Entity) []engine.Message {
-	return func(g *engine.Game, e engine.Entity) []engine.Message {
-		pid := e.EOwner()
-		p := g.Player(pid)
-		if p == nil {
-			return nil
-		}
-		schemes := g.Schemes()
-		if len(schemes) == 0 {
-			return nil
-		}
-		var choices []engine.Choice
-		for _, id := range schemes {
-			s := g.Entity(id)
-			choices = append(choices, engine.Choice{
-				Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
-			}.Msgs(engine.ThwartScheme{Scheme: id, N: amount(g, e), Source: pid}))
-		}
-		return []engine.Message{engine.AskQuestion{
-			Player:   pid,
-			Question: engine.Ask(name + " — choose a scheme", choices...),
-		}}
-	}
-}
-
-// chooseEnemyEffect builds a "deal damage to an enemy" OnPlay hook; the
-// callback returns the damage plus optional extra messages.
-func chooseEnemyEffect(prompt string, f func(g *engine.Game, e engine.Entity) (int, []engine.Message)) func(g *engine.Game, e engine.Entity) []engine.Message {
-	return func(g *engine.Game, e engine.Entity) []engine.Message {
-		pid := e.EOwner()
-		if len(g.Enemies()) == 0 {
-			return nil
-		}
-		n, extra := f(g, e)
-		_ = extra
-		var choices []engine.Choice
-		for _, id := range sortedEnemyIDs(g) {
-			enemy := g.Entity(id)
-			choices = append(choices, engine.Choice{
-				Label: enemy.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
-			}.Msgs(engine.DamageEntity{Target: id, Damage: n, Source: pid}))
-		}
-		return []engine.Message{engine.AskQuestion{
-			Player:   pid,
-			Question: engine.Ask(prompt, choices...),
-		}}
-	}
-}
-
-// chooseMinionEffect builds a "deal damage to a minion" OnPlay hook.
-func chooseMinionEffect(prompt string, dmg int) func(g *engine.Game, e engine.Entity) []engine.Message {
-	return func(g *engine.Game, e engine.Entity) []engine.Message {
-		pid := e.EOwner()
-		var choices []engine.Choice
-		for _, id := range sortedIDsOf(g.Minions) {
-			mn := g.Minions[id]
-			choices = append(choices, engine.Choice{
-				Label: mn.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code,
-			}.Msgs(engine.DamageEntity{Target: id, Damage: dmg, Source: pid}))
-		}
-		if len(choices) == 0 {
-			return nil
-		}
-		return []engine.Message{engine.AskQuestion{
-			Player:   pid,
-			Question: engine.Ask(prompt, choices...),
-		}}
-	}
 }

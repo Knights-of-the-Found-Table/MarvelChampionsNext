@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
 
 // registerHeroes installs identity behaviors for the remaining Core Set
@@ -71,7 +72,7 @@ func registerSheHulk() {
 				return nil
 			}
 			var choices []engine.Choice
-			for _, id := range sortedEnemyIDs(g) {
+			for _, id := range cardutil.SortedEnemyIDs(g) {
 				enemy := g.Entity(id)
 				choices = append(choices, engine.Choice{
 					Label: enemy.EDef().Name, Kind: engine.ChoiceTarget,

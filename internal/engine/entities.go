@@ -79,6 +79,9 @@ type Minion struct {
 	Source  *Card    `json:"source,omitempty"` // the facedown card, if any
 	// EngagedWith records which player the minion is engaged with.
 	EngagedWith PlayerID `json:"engagedWith,omitempty"`
+	// BlankText marks the text box as blank until the end of the phase
+	// (Edison's Giant Robot).
+	BlankText bool `json:"blankText,omitempty"`
 
 	Attachments []EntityID `json:"attachments"`
 }
@@ -107,6 +110,15 @@ type Ally struct {
 	Damage    int      `json:"damage"`
 	AttackVal int      `json:"attack"`
 	ThwartVal int      `json:"thwart"`
+	// BonusATK/BonusTHW are until-end-of-phase modifiers (Avengers
+	// Assemble); PermATK is a persistent attachment bonus (Enraged).
+	BonusATK int `json:"bonusAtk,omitempty"`
+	BonusTHW int `json:"bonusThw,omitempty"`
+	PermATK  int `json:"permAtk,omitempty"`
+	// ExtraTraits are dynamically granted traits (Honorary Avenger).
+	ExtraTraits []string `json:"extraTraits,omitempty"`
+	// Counters tracks counters on the ally (Hawkeye's arrows).
+	Counters int `json:"counters,omitempty"`
 
 	Exhausted bool `json:"exhausted"`
 	Stunned   bool `json:"stunned"`
@@ -135,6 +147,11 @@ type Support struct {
 	Code      string   `json:"code"`
 	Owner     PlayerID `json:"owner"`
 	Exhausted bool     `json:"exhausted"`
+	// Counters tracks "Uses (N ...)" or similar counters (Quinjet time).
+	Counters int `json:"counters,omitempty"`
+	// AttachedCards stores facedown cards tucked under the support
+	// (Bruno Carrelli).
+	AttachedCards CardList `json:"attachedCards,omitempty"`
 }
 
 func (s *Support) EID() EntityID       { return s.ID }
@@ -157,6 +174,11 @@ type Upgrade struct {
 	Code      string   `json:"code"`
 	Owner     PlayerID `json:"owner"`
 	Exhausted bool     `json:"exhausted"`
+	// AttachTo marks an attached friendly character / scheme (Honorary
+	// Avenger, Enraged, Followed).
+	AttachTo EntityID `json:"attachTo,omitempty"`
+	// Counters tracks "Uses (N ...)" counters (Enhanced Awareness...).
+	Counters int `json:"counters,omitempty"`
 }
 
 func (u *Upgrade) EID() EntityID       { return u.ID }
@@ -253,6 +275,12 @@ type SideScheme struct {
 	MaxThreat int      `json:"maxThreat"`
 	Crisis    bool     `json:"crisis,omitempty"`
 	Hazard    int      `json:"hazard,omitempty"`
+	// PlayerSide marks a player-owned scheme (Focus the Senses).
+	PlayerSide bool      `json:"playerSide,omitempty"`
+	Owner      PlayerID `json:"owner,omitempty"`
+	// StoredCards holds cards tucked under the scheme (Open the Dark
+	// Dimension).
+	StoredCards CardList `json:"storedCards,omitempty"`
 }
 
 func (s *SideScheme) EID() EntityID       { return s.ID }

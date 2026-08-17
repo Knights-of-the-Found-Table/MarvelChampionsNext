@@ -11,9 +11,11 @@ func init() {
 	registerKlaw()
 	registerUltron()
 	registerSpiderMan()
+	registerCoreCards()
 	registerHeroes()
 	registerTreacheries()
 	registerAspectCards()
+	registerCoreObligations()
 }
 
 // registerRhino registers "The Break-In" (Rhino scenario).

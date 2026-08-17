@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -16,13 +17,33 @@ func (g *Game) handle(msg Message) {
 	case BeginRound:
 		g.Round++
 		g.UsedThisRound = map[string]bool{}
+		for _, p := range g.Players {
+			p.AllyPlayedThisRound = false
+		}
 		g.logf("── Round %d ──", g.Round)
 		g.Push(BeginPhase{Phase: PhaseResource})
 
 	case BeginPhase:
+		g.Phase = m.Phase
 		g.handleBeginPhase(m.Phase)
 
 	case EndPhase:
+		for _, p := range g.Players {
+			p.CostDiscounts = nil
+			// Until-end-of-phase stat modifiers expire.
+			p.BonusTHW, p.BonusATK, p.BonusDEF = 0, 0, 0
+			for _, id := range p.Allies {
+				if a := g.Allies[id]; a != nil {
+					a.BonusTHW, a.BonusATK = 0, 0
+				}
+			}
+		}
+		g.EventDamageBonus = map[PlayerID]int{}
+		g.EventThreatBonus = map[PlayerID]int{}
+		// Blank-text effects expire.
+		for _, mn := range g.Minions {
+			mn.BlankText = false
+		}
 		switch m.Phase {
 		case PhaseResource:
 			g.Push(BeginPhase{Phase: PhasePlayer})
@@ -160,6 +181,10 @@ func (g *Game) handle(msg Message) {
 			g.logf("%s is confused and cannot thwart", p.Name)
 			return
 		}
+		if g.thwartBlocked(p) {
+			g.logf("%s cannot thwart while engaged with %s", p.Name, g.thwartBlockerName(p))
+			return
+		}
 		p.Exhausted = true
 		g.Push(ThwartScheme{Scheme: m.Target, N: m.N, Source: p.ID})
 		g.Push(WindowAfterThwarted{Player: p.ID, Scheme: m.Target})
@@ -178,7 +203,7 @@ func (g *Game) handle(msg Message) {
 		g.Push(DamageEntity{Target: m.Target, Damage: m.N, Source: p.ID})
 		// Retaliate
 		if e := g.Entity(m.Target); e != nil {
-			if v := retaliateOf(e); v > 0 {
+			if v := retaliateOf(g, e); v > 0 {
 				g.Push(DamageEntity{Target: p.ID, Damage: v, Source: m.Target})
 			}
 		}
@@ -189,7 +214,7 @@ func (g *Game) handle(msg Message) {
 			return
 		}
 		p.Exhausted = true
-		g.Push(HealEntity{Target: p.ID, N: p.RecoverStat()})
+		g.Push(HealEntity{Target: p.ID, N: p.RecoverStat(g)})
 
 	case VillainActivates:
 		g.handleVillainActivates(m)
@@ -390,6 +415,290 @@ func (g *Game) handle(msg Message) {
 	case SpawnDrone:
 		g.handleSpawnDrone(m.Player)
 
+	case ObligationResolve:
+		if p := g.Player(m.Player); p != nil {
+			if m.Remove {
+				p.ObligationRemoved = append(p.ObligationRemoved, m.Card)
+				g.logf("%s is removed from the game", m.Card.Def().Name)
+			} else {
+				p.ObligationDiscard = append(p.ObligationDiscard, m.Card)
+				g.logf("%s is discarded", m.Card.Def().Name)
+			}
+		}
+
+	case DiscardControlled:
+		g.discardControlled(m.Player, m.ID)
+
+	case AddAccelerationToken:
+		if g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
+			g.MainScheme.AccelerationTokens++
+			g.logf("%s gains an acceleration token", g.MainScheme.EDef().Name)
+		}
+
+	case RevealNextEncounter:
+		if c, ok := g.drawEncounter(); ok {
+			g.revealEncounterCard(m.Player, c)
+		}
+
+	case PlayDefenseEvent:
+		g.handlePlayDefenseEvent(m)
+
+	case AddEntityCounter:
+		switch t := g.Entity(m.ID).(type) {
+		case *Support:
+			t.Counters += m.N
+			g.logf("%s counters: %d", t.EDef().Name, t.Counters)
+		case *Upgrade:
+			t.Counters += m.N
+			g.logf("%s counters: %d", t.EDef().Name, t.Counters)
+		case *Ally:
+			t.Counters += m.N
+			g.logf("%s counters: %d", t.EDef().Name, t.Counters)
+		}
+
+	case ReturnControlled:
+		if p := g.Player(m.Player); p != nil {
+			if e := g.Entity(m.ID); e != nil {
+				code := e.ECode()
+				g.Delete(m.ID)
+				p.Hand = append(p.Hand, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
+				g.logf("%s returns %s to their hand", p.Name, e.EDef().Name)
+			}
+		}
+
+	case AllyEntersPlayFree:
+		g.handleAllyEntersPlayFree(m)
+
+	case AttachUpgrade:
+		if u := g.Upgrades[m.ID]; u != nil {
+			u.AttachTo = m.Target
+			switch t := g.Entity(m.Target).(type) {
+			case *Player:
+				if m.MaxHP > 0 {
+					t.MaxHP += m.MaxHP
+				}
+				if m.GrantTrait != "" {
+					t.ExtraTraits = append(t.ExtraTraits, m.GrantTrait)
+				}
+			case *Ally:
+				if m.MaxHP > 0 {
+					t.MaxHP += m.MaxHP
+				}
+				if m.ATK > 0 {
+					t.PermATK += m.ATK
+				}
+				if m.GrantTrait != "" {
+					t.ExtraTraits = append(t.ExtraTraits, m.GrantTrait)
+				}
+			}
+			if tgt := g.Entity(m.Target); tgt != nil {
+				g.logf("%s attaches to %s", u.EDef().Name, tgt.EDef().Name)
+			}
+		}
+
+	case SenseEnterPlay:
+		g.handleSenseEnterPlay(m)
+
+	case ShuffleIntoDeck:
+		if p := g.Player(m.Player); p != nil {
+			if c, ok := p.Discard.Remove(m.CardID); ok {
+				p.Deck = append(p.Deck, c)
+				g.shuffle(&p.Deck)
+				g.logf("%s shuffles %s into their deck", p.Name, c.Def().Name)
+			}
+		}
+
+	case GrantTrait:
+		switch t := g.Entity(m.Target).(type) {
+		case *Player:
+			t.ExtraTraits = append(t.ExtraTraits, m.Trait)
+			g.logf("%s gains the %s trait", t.Name, m.Trait)
+		case *Ally:
+			t.ExtraTraits = append(t.ExtraTraits, m.Trait)
+			g.logf("%s gains the %s trait", t.EDef().Name, m.Trait)
+		}
+
+	case InvokeSpecial:
+		if p := g.Player(m.Player); p != nil {
+			card, ok := p.SenseDeck.Remove(m.Card.ID)
+			if !ok {
+				return
+			}
+			def := card.Def()
+			if m.ReturnToTop {
+				p.SenseDeck = append(CardList{card}, p.SenseDeck...)
+				g.logf("%s resolves %s (back on top)", p.Name, def.Name)
+			} else {
+				p.SideDiscard = append(p.SideDiscard, card)
+				g.logf("%s resolves %s", p.Name, def.Name)
+			}
+			if b := behavior(def.Code); b.OnPlay != nil {
+				ec := &EventCard{Code: def.Code, Owner: p.ID}
+				g.Push(b.OnPlay(g, ec)...)
+			}
+		}
+
+	case SideDeckDiscardTop:
+		if p := g.Player(m.Player); p != nil && len(p.SenseDeck) > 0 {
+			card := p.SenseDeck[0]
+			p.SenseDeck = p.SenseDeck[1:]
+			p.SideDiscard = append(p.SideDiscard, card)
+			g.logf("%s discards %s from the side deck", p.Name, card.Def().Name)
+		}
+
+	case UpgradeEnterPlay:
+		if p := g.Player(m.Player); p != nil {
+			card, ok := p.Hand.Find(m.Card.ID)
+			if !ok {
+				card, ok = p.Deck.Find(m.Card.ID)
+			}
+			if !ok {
+				card, ok = p.Discard.Find(m.Card.ID)
+			}
+			if !ok {
+				g.logf("cannot find %s to put into play", m.Card.Code)
+				return
+			}
+			p.Hand.Remove(card.ID)
+			p.Deck.Remove(card.ID)
+			p.Discard.Remove(card.ID)
+			def := card.Def()
+			u := &Upgrade{ID: g.nextEntityID(KindUpgrade), Code: def.Code, Owner: p.ID}
+			g.Upgrades[u.ID] = u
+			p.Upgrades = append(p.Upgrades, u.ID)
+			g.logf("%s puts %s into play", p.Name, def.Name)
+			if b := behavior(def.Code); b.OnPlay != nil {
+				g.Push(b.OnPlay(g, u)...)
+			}
+		}
+
+	case SideDeckToHand:
+		if p := g.Player(m.Player); p != nil {
+			for i, c := range p.SenseDeck {
+				if c.ID == m.CardID {
+					p.SenseDeck = append(p.SenseDeck[:i], p.SenseDeck[i+1:]...)
+					p.Hand = append(p.Hand, c)
+					g.logf("%s takes %s from under Echo", p.Name, c.Def().Name)
+					return
+				}
+			}
+		}
+
+	case RecycleFromDiscard:
+		if p := g.Player(m.Player); p != nil {
+			if src := g.Player(m.From); src != nil {
+				if c, ok := src.Discard.Remove(m.CardID); ok {
+					p.Hand = append(p.Hand, c)
+					g.logf("%s takes %s from %s's discard pile", p.Name, c.Def().Name, src.Name)
+				}
+			}
+		}
+
+	case SwapHandWithDeckTop:
+		if p := g.Player(m.Player); p != nil && len(p.Deck) > 0 {
+			if c, ok := p.Hand.Remove(m.CardID); ok {
+				top := p.Deck[0]
+				p.Deck[0] = c
+				p.Hand = append(p.Hand, top)
+				g.logf("%s swaps %s with the top of their deck", p.Name, c.Def().Name)
+			}
+		}
+
+	case EventPlayed:
+		// announcement only; reactions drive the effects
+
+	case SetEventBonus:
+		if g.EventDamageBonus == nil {
+			g.EventDamageBonus = map[PlayerID]int{}
+		}
+		if g.EventThreatBonus == nil {
+			g.EventThreatBonus = map[PlayerID]int{}
+		}
+		if m.Damage != 0 {
+			g.EventDamageBonus[m.Player] += m.Damage
+		}
+		if m.Threat != 0 {
+			g.EventThreatBonus[m.Player] += m.Threat
+		}
+
+	case ReturnDiscardCard:
+		if p := g.Player(m.Player); p != nil {
+			if c, ok := p.Discard.Remove(m.CardID); ok {
+				p.Hand = append(p.Hand, c)
+				g.logf("%s takes %s back to hand", p.Name, c.Def().Name)
+			}
+		}
+
+	case DiscardToBottom:
+		if p := g.Player(m.Player); p != nil {
+			if c, ok := p.Discard.Remove(m.CardID); ok {
+				p.Deck = append(p.Deck, c)
+				g.logf("%s puts %s on the bottom of their deck", p.Name, c.Def().Name)
+			}
+		}
+
+	case AllyDefeated:
+		if a := g.Allies[m.AllyID]; a != nil {
+			destroy := func() { g.Push(AllyDestroyed{AllyID: a.ID}) }
+			if hook := behavior(a.Code).AllyDefeatInterrupt; hook != nil {
+				if msgs := hook(g, a, destroy); msgs != nil {
+					g.Push(msgs...)
+					return
+				}
+			}
+			destroy()
+		}
+
+	case AllyDestroyed:
+		g.destroyAlly(m.AllyID)
+
+	case SupportStoreCard:
+		if s := g.Supports[m.ID]; s != nil {
+			if p := g.Player(s.Owner); p != nil {
+				if c, ok := p.Hand.Remove(m.Card.ID); ok {
+					s.AttachedCards = append(s.AttachedCards, c)
+					s.Counters = len(s.AttachedCards)
+					g.logf("%s tucks a card under %s (%d stored)", p.Name, s.EDef().Name, s.Counters)
+				}
+			}
+		}
+
+	case SupportRetrieveCards:
+		if s := g.Supports[m.ID]; s != nil {
+			if p := g.Player(s.Owner); p != nil {
+				take := min(len(m.Cards), 3, len(s.AttachedCards))
+				taken := append(CardList{}, s.AttachedCards[:take]...)
+				s.AttachedCards = s.AttachedCards[take:]
+				s.Counters = len(s.AttachedCards)
+				p.Hand = append(p.Hand, taken...)
+				g.logf("%s takes %d stored cards from %s", p.Name, take, s.EDef().Name)
+			}
+		}
+
+	case TreacheryWindow:
+		g.handleTreacheryWindow(m)
+
+	case TreacheryResolve:
+		g.handleTreacheryResolve(m)
+
+	case ConsumeHandCard:
+		if p := g.Player(m.Player); p != nil {
+			if c, ok := p.Hand.Remove(m.CardID); ok {
+				p.Discard = append(p.Discard, c)
+			}
+		}
+
+	case PlayDiscardAlly:
+		g.handlePlayDiscardAlly(m)
+
+	case ApplyStatBonus:
+		if p := g.Player(m.Target); p != nil {
+			p.BonusATK += m.ATK
+			p.BonusTHW += m.THW
+			p.BonusDEF += m.DEF
+			g.logf("%s gets +%d THW / +%d ATK / +%d DEF until the end of the phase", p.Name, m.THW, m.ATK, m.DEF)
+		}
+
 	case TakeDeckCard:
 		p := g.Player(m.Player)
 		if p == nil {
@@ -437,6 +746,13 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 			}
 			g.Minions[mn.ID] = mn
 			g.logf("%s enters play engaged with %s", def.Name, p.Name)
+			g.Push(MinionEntersPlay{MinionID: mn.ID, Player: p.ID})
+			if def.HasKeyword("Quickstrike") && p.IsHero() {
+				g.Push(DamageEntity{Target: p.ID, Damage: mn.AttackVal, Source: mn.ID})
+			}
+			if b := behavior(def.Code); b.OnPlay != nil {
+				g.Push(b.OnPlay(g, mn)...)
+			}
 		case "side_scheme":
 			s := &SideScheme{
 				ID:        g.nextEntityID(KindSideScheme),
@@ -448,6 +764,9 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 			}
 			g.SideSchemes[s.ID] = s
 			g.logf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
+			if b := behavior(def.Code); b.OnPlay != nil {
+				g.Push(b.OnPlay(g, s)...)
+			}
 		default:
 			p.NemesisDiscard = append(p.NemesisDiscard, c)
 		}
@@ -491,14 +810,64 @@ func (g *Game) handleSpawnDrone(pid PlayerID) {
 	g.logf("A Drone enters play engaged with %s", p.Name)
 }
 
+func (g *Game) discardControlled(pid PlayerID, id EntityID) {
+	p := g.Player(pid)
+	e := g.Entity(id)
+	if p == nil || e == nil {
+		return
+	}
+	g.Delete(id)
+	var code string
+	switch t := e.(type) {
+	case *Ally:
+		code = t.Code
+	case *Support:
+		code = t.Code
+	case *Upgrade:
+		code = t.Code
+	default:
+		return
+	}
+	// Sense upgrades cycle back to the bottom of the Sense deck (Matt
+	// Murdock's forced interrupt).
+	if def, ok := DB.Lookup(code); ok && def.HasTrait("sense") {
+		p.SenseDeck = append(p.SenseDeck, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
+		g.logf("%s returns to the bottom of the Sense deck", def.Name)
+		return
+	}
+	p.Discard = append(p.Discard, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
+	g.logf("%s is discarded", e.EDef().Name)
+}
+
+// thwartBlocked reports whether a minion engaged with the player blocks
+// thwarting (e.g. Baron Zemo). Approximation: gates basic hero thwarts
+// only, not event-driven threat removal.
+func (g *Game) thwartBlocked(p *Player) bool {
+	return g.thwartBlockerName(p) != ""
+}
+
+func (g *Game) thwartBlockerName(p *Player) string {
+	for _, id := range sortedIDs(g.Minions) {
+		mn := g.Minions[id]
+		if mn.EngagedWith == p.ID && behavior(mn.Code).EngagedBlocksThwart {
+			return mn.EDef().Name
+		}
+	}
+	return ""
+}
+
 func (g *Game) handleStartGame() {
 	for _, p := range g.Players {
 		p.Deck = g.assignCardIDs(p.Deck, p.ID)
-		p.ObligationDeck = g.assignCardIDs(p.ObligationDeck, p.ID)
 		g.shuffle(&p.Deck)
-		g.shuffle(&p.ObligationDeck)
 		p.Hand = append(p.Hand, p.Deck[:min(len(p.Deck), p.HandSize(g))]...)
 		p.Deck = p.Deck[len(p.Hand):]
+	}
+	// Obligations join the encounter deck (official rules); they carry
+	// their owner and resolve for them when revealed.
+	for _, p := range g.Players {
+		g.EncounterDeck = append(g.EncounterDeck, p.ObligationDeck...)
+		p.ObligationDeck = nil
 	}
 	g.EncounterDeck = g.assignCardIDs(g.EncounterDeck, "")
 	g.shuffle(&g.EncounterDeck)
@@ -663,24 +1032,53 @@ func (g *Game) handleDefends(m Defends) {
 		return
 	}
 
+	// Sense upgrades and similar attachments weaken the attacker's strike
+	// (Heightened Hearing; approximation: auto-consumed when beneficial).
+	if defender := g.Player(m.Defender); defender != nil {
+		for _, id := range defender.Upgrades {
+			u := g.Upgrades[id]
+			if u == nil || u.AttachTo != m.Against {
+				continue
+			}
+			if mod := behavior(u.Code).AttachedEnemyAttackMod; mod < 0 {
+				attack += mod
+				g.Logf("%s weakens the attack by %d", u.EDef().Name, -mod)
+				g.Push(DiscardControlled{Player: u.Owner, ID: u.ID})
+			}
+		}
+	}
+
 	switch def := g.Entity(m.Defender).(type) {
 	case *Player:
 		damage := attack
 		if !m.Undefended && def.IsHero() && !def.Exhausted {
-			def.Exhausted = true
-			damage -= def.DefenseStat()
-			g.logf("%s defends (%d damage prevented)", def.Name, def.DefenseStat())
+			if !m.NoExhaust {
+				def.Exhausted = true
+			}
+			prevented := def.DefenseStat(g) + m.DefBonus
+			damage -= prevented
+			g.logf("%s defends (%d damage prevented)", def.Name, prevented)
+		}
+		if m.ExtraPrevent > 0 {
+			damage -= m.ExtraPrevent
+			g.logf("%s prevents %d additional damage", def.Name, m.ExtraPrevent)
+		}
+		if m.PreventAll {
+			g.logf("%s prevents all damage", def.Name)
+			damage = 0
 		}
 		g.Push(DamageEntity{Target: def.ID, Damage: max(0, damage), Source: m.Against})
+		g.Push(WindowDefended{Defender: def.ID, Against: m.Against, DamageTaken: max(0, damage), Via: m.Via})
 		// Retaliate on the defending identity.
-		if rv := retaliateOf(def); rv > 0 {
+		if rv := retaliateOf(g, def); rv > 0 {
 			g.Push(DamageEntity{Target: m.Against, Damage: rv, Source: def.ID})
 		}
 	case *Ally:
 		def.Exhausted = true
 		damage := max(0, attack-def.Defense())
 		g.Push(DamageEntity{Target: def.ID, Damage: damage, Source: m.Against})
-		if rv := retaliateOf(def); rv > 0 {
+		g.Push(WindowDefended{Defender: def.ID, Against: m.Against, DamageTaken: damage})
+		if rv := retaliateOf(g, def); rv > 0 {
 			g.Push(DamageEntity{Target: m.Against, Damage: rv, Source: def.ID})
 		}
 		// Overkill-like spill is not implemented for minions.
@@ -703,6 +1101,14 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		return
 	}
 	def := card.Def()
+	g.consumeDiscount(p, def)
+	if def.Type == "ally" {
+		p.AllyPlayedThisRound = true
+	}
+	// A fresh play resets pending event bonuses (Embiggen!/Shrink are
+	// per-event).
+	delete(g.EventDamageBonus, p.ID)
+	delete(g.EventThreatBonus, p.ID)
 	// Pay resources: discard chosen cards.
 	for _, id := range m.Paid.CardIDs {
 		if rc, ok := p.Hand.Remove(id); ok {
@@ -747,14 +1153,252 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, u)...)
 		}
+	case "player_side_scheme":
+		// Player-owned side schemes (Focus the Senses, Establish
+		// Perimeter): they enter play with their printed threat and can
+		// be thwarted like any other scheme.
+		s := &SideScheme{
+			ID:          g.nextEntityID(KindSideScheme),
+			Code:        def.Code,
+			Owner:       p.ID,
+			PlayerSide:  true,
+			Threat:      deref(def.BaseThreat, 2),
+			MaxThreat:   deref(def.BaseThreat, 2),
+			Crisis:      strings.Contains(def.Text, "Crisis") || strings.Contains(def.Text, "crisis"),
+			Hazard:      def.Hazards,
+		}
+		g.SideSchemes[s.ID] = s
+		g.logf("%s plays %s (threat %d)", p.Name, def.Name, s.Threat)
+		if b := behavior(def.Code); b.OnPlay != nil {
+			g.Push(b.OnPlay(g, s)...)
+		}
 	default:
 		// Events and anything else: resolve then discard.
 		g.logf("%s plays %s", p.Name, def.Name)
 		ec := &EventCard{Code: def.Code, Owner: p.ID, Paid: m.Paid}
+		if def.Type == "event" {
+			// Announce the play before the effect resolves so that
+			// interrupts (Embiggen!) and responses (Morphogenetics)
+			// can hook in.
+			g.Push(EventPlayed{Player: p.ID, Card: card})
+		}
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, ec)...)
 		}
 		p.Discard = append(p.Discard, card)
+	}
+}
+
+// handlePlayDefenseEvent resolves a defense event chosen from the defense
+// prompt: pay, discard, then let the behavior build the Defends result.
+func (g *Game) handlePlayDefenseEvent(m PlayDefenseEvent) {
+	p := g.Player(m.Player)
+	if p == nil {
+		return
+	}
+	card, ok := p.Hand.Find(m.Card.ID)
+	if !ok {
+		g.logf("cannot play missing defense event %s", m.Card.Code)
+		return
+	}
+	def := card.Def()
+	for _, id := range m.Paid.CardIDs {
+		if rc, ok := p.Hand.Remove(id); ok {
+			p.Discard = append(p.Discard, rc)
+		}
+	}
+	p.Hand.Remove(card.ID)
+	p.Discard = append(p.Discard, card)
+	g.logf("%s plays %s", p.Name, def.Name)
+	b := behavior(def.Code)
+	if b.DefenseEvent == nil {
+		return
+	}
+	ec := &EventCard{Code: def.Code, Owner: p.ID, Paid: m.Paid}
+	d, extra, ok := b.DefenseEvent(g, p, ec, m.Against)
+	if !ok {
+		return
+	}
+	if d.Defender != "" {
+		g.Push(d)
+	}
+	g.Push(extra...)
+}
+
+// handleAllyEntersPlayFree puts an ally into play without paying its cost
+// (Quinjet, Make the Call, Lockjaw), running its enters-play response.
+func (g *Game) handleAllyEntersPlayFree(m AllyEntersPlayFree) {
+	p := g.Player(m.Player)
+	if p == nil {
+		return
+	}
+	var card Card
+	var found bool
+	if m.FromOwner == "" {
+		card, found = p.Hand.Find(m.Card.ID)
+		if found {
+			p.Hand.Remove(card.ID)
+		}
+	} else if src := g.Player(m.FromOwner); src != nil {
+		card, found = src.Discard.Find(m.Card.ID)
+		if found {
+			src.Discard.Remove(card.ID)
+		}
+	}
+	if !found {
+		g.logf("cannot put missing ally %s into play", m.Card.Code)
+		return
+	}
+	def := card.Def()
+	a := &Ally{
+		ID:        g.nextEntityID(KindAlly),
+		Code:      def.Code,
+		Owner:     p.ID,
+		MaxHP:     deref(def.HP, 1),
+		AttackVal: deref(def.Attack, 0),
+		ThwartVal: deref(def.Thwart, 0),
+		Tough:     def.HasKeyword("Toughness"),
+	}
+	g.Allies[a.ID] = a
+	p.Allies = append(p.Allies, a.ID)
+	p.AllyPlayedThisRound = true
+	g.logf("%s puts %s into play", p.Name, def.Name)
+	if b := behavior(def.Code); b.OnPlay != nil {
+		g.Push(b.OnPlay(g, a)...)
+	}
+}
+
+// handleTreacheryWindow offers hand-card treachery interrupts (Get Behind
+// Me!) before the treachery resolves.
+func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
+	p := g.Player(m.Player)
+	if p == nil {
+		g.Push(TreacheryResolve{Player: m.Player, Card: m.Card})
+		return
+	}
+	var interrupts []Choice
+	for _, hc := range p.Hand {
+		hb := behavior(hc.Def().Code)
+		if hb.TreacheryInterrupt == nil {
+			continue
+		}
+		repl := hb.TreacheryInterrupt(g, p, hc)
+		if repl == nil {
+			continue
+		}
+		final := append([]Message{ConsumeHandCard{Player: p.ID, CardID: hc.ID}}, repl...)
+		cost := deref(hc.Def().Cost, 0)
+		choice := Choice{
+			ID: "interrupt-" + hc.ID, Label: "Play " + hc.Def().Name,
+			Kind: ChoicePlay, CardCode: hc.Code,
+		}
+		if cost > 0 && len(p.Hand) > cost {
+			var pays []Choice
+			for _, rc := range p.Hand {
+				if rc.ID == hc.ID {
+					continue
+				}
+				pays = append(pays, Choice{
+					Label: "Discard " + rc.Def().Name, Kind: ChoiceCard, CardCode: rc.Code,
+				}.Msgs(append([]Message{DiscardCards{Player: p.ID, Cards: CardList{rc}}}, final...)...))
+			}
+			interrupts = append(interrupts, choice.WithThen(
+				Ask(fmt.Sprintf("Discard %d card(s) to pay for %s", cost, hc.Def().Name), pays...)))
+		} else if cost > 0 {
+			continue // cannot pay
+		} else {
+			interrupts = append(interrupts, choice.Msgs(final...))
+		}
+	}
+	if len(interrupts) == 0 {
+		g.Push(TreacheryResolve{Player: m.Player, Card: m.Card})
+		return
+	}
+	interrupts = append(interrupts, Choice{
+		ID: "continue", Label: "Let " + m.Card.Def().Name + " resolve", Kind: ChoicePass,
+	}.Msgs(TreacheryResolve{Player: m.Player, Card: m.Card}))
+	g.Push(AskQuestion{Player: p.ID, Question: Ask(m.Card.Def().Name+" — interrupts?", interrupts...)})
+}
+
+// handleTreacheryResolve performs the treachery resolution, or the
+// cancellation replacement.
+func (g *Game) handleTreacheryResolve(m TreacheryResolve) {
+	p := g.Player(m.Player)
+	if p == nil {
+		return
+	}
+	def := m.Card.Def()
+	if m.Cancelled {
+		g.logf("%s cancels the effects of %s", p.Name, def.Name)
+		return
+	}
+	t := &Treachery{ID: g.nextEntityID(KindTreachery), Code: def.Code}
+	g.Treacheries[t.ID] = t
+	if b := behavior(def.Code); b.ResolveTreachery != nil {
+		g.Push(b.ResolveTreachery(g, t, p)...)
+	} else {
+		g.logf("(no effect implemented for %s)", def.Name)
+		g.Delete(t.ID)
+	}
+}
+
+// handleSenseEnterPlay plays a Sense upgrade from the player's Sense deck
+// into play, running its OnPlay (attach target choice).
+func (g *Game) handleSenseEnterPlay(m SenseEnterPlay) {
+	p := g.Player(m.Player)
+	if p == nil {
+		return
+	}
+	card, ok := p.SenseDeck.Remove(m.Card.ID)
+	if !ok {
+		g.logf("cannot play missing Sense card %s", m.Card.Code)
+		return
+	}
+	def := card.Def()
+	u := &Upgrade{ID: g.nextEntityID(KindUpgrade), Code: def.Code, Owner: p.ID}
+	g.Upgrades[u.ID] = u
+	p.Upgrades = append(p.Upgrades, u.ID)
+	g.logf("%s plays %s from the Sense deck", p.Name, def.Name)
+	if b := behavior(def.Code); b.OnPlay != nil {
+		g.Push(b.OnPlay(g, u)...)
+	}
+}
+
+// handlePlayDiscardAlly plays an ally from the player's discard pile
+// (Lockjaw).
+func (g *Game) handlePlayDiscardAlly(m PlayDiscardAlly) {
+	p := g.Player(m.Player)
+	if p == nil {
+		return
+	}
+	card, ok := p.Discard.Find(m.Card.ID)
+	if !ok {
+		g.logf("cannot play missing discard ally %s", m.Card.Code)
+		return
+	}
+	for _, id := range m.Paid.CardIDs {
+		if rc, ok := p.Hand.Remove(id); ok {
+			p.Discard = append(p.Discard, rc)
+		}
+	}
+	p.Discard.Remove(card.ID)
+	def := card.Def()
+	a := &Ally{
+		ID:        g.nextEntityID(KindAlly),
+		Code:      def.Code,
+		Owner:     p.ID,
+		MaxHP:     deref(def.HP, 1),
+		AttackVal: deref(def.Attack, 0),
+		ThwartVal: deref(def.Thwart, 0),
+		Tough:     def.HasKeyword("Toughness"),
+	}
+	g.Allies[a.ID] = a
+	p.Allies = append(p.Allies, a.ID)
+	p.AllyPlayedThisRound = true
+	g.consumeDiscount(p, def)
+	g.logf("%s plays %s from their discard pile", p.Name, def.Name)
+	if b := behavior(def.Code); b.OnPlay != nil {
+		g.Push(b.OnPlay(g, a)...)
 	}
 }
 
@@ -778,6 +1422,23 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 	p := g.Player(pid)
 	def := card.Def()
 	g.logf("%s reveals %s", p.Name, def.Name)
+
+	// Obligations resolve for their owner, not the revealer, and do not
+	// enter the encounter discard.
+	if def.Type == "obligation" {
+		owner := g.Player(card.Owner)
+		if owner == nil {
+			owner = p
+		}
+		if b := behavior(def.Code); b.ResolveObligation != nil {
+			g.Push(b.ResolveObligation(g, owner, card)...)
+		} else {
+			owner.ObligationDiscard = append(owner.ObligationDiscard, card)
+			g.logf("(no effect implemented for %s)", def.Name)
+		}
+		return
+	}
+
 	g.EncounterDiscard = append(g.EncounterDiscard, card)
 
 	switch def.Type {
@@ -793,6 +1454,7 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 			EngagedWith: pid,
 		}
 		g.Minions[mn.ID] = mn
+		g.Push(MinionEntersPlay{MinionID: mn.ID, Player: pid})
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, mn)...)
 		}
@@ -810,20 +1472,17 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 		}
 		g.SideSchemes[s.ID] = s
 		g.logf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
+		if b := behavior(def.Code); b.OnPlay != nil {
+			g.Push(b.OnPlay(g, s)...)
+		}
 		for i := 0; i < s.Hazard; i++ {
 			if c, ok := g.drawEncounter(); ok {
 				g.Push(RevealEncounterCard{Player: pid, Card: c})
 			}
 		}
 	case "treachery":
-		t := &Treachery{ID: g.nextEntityID(KindTreachery), Code: def.Code}
-		g.Treacheries[t.ID] = t
-		if b := behavior(def.Code); b.ResolveTreachery != nil {
-			g.Push(b.ResolveTreachery(g, t, p)...)
-		} else {
-			g.logf("(no effect implemented for %s)", def.Name)
-			g.Delete(t.ID)
-		}
+		// The interrupt window (Get Behind Me!) runs before resolution.
+		g.Push(TreacheryWindow{Player: pid, Card: card})
 	case "attachment":
 		t := &Attachment{ID: g.nextEntityID(KindAttachment), Code: def.Code}
 		g.Attachments[t.ID] = t

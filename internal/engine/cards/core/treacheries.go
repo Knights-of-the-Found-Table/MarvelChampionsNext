@@ -3,6 +3,7 @@ package core
 import (
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
 
 // registerTreacheries installs Standard-set and Bomb Scare treacheries plus
@@ -61,10 +62,10 @@ func registerTreacheries() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			g.Delete(t.ID)
 			var msgs []engine.Message
-			for _, id := range sortedIDsOf(g.Villains) {
+			for _, id := range cardutil.SortedIDs(g.Villains) {
 				msgs = append(msgs, engine.VillainActivates{VillainID: id, Player: p.ID})
 			}
-			for _, id := range sortedIDsOf(g.Minions) {
+			for _, id := range cardutil.SortedIDs(g.Minions) {
 				msgs = append(msgs, engine.MinionActivates{MinionID: id, Player: p.ID})
 			}
 			return msgs
@@ -203,17 +204,4 @@ func registerTreacheries() {
 			return nil
 		},
 	})
-}
-
-func sortedIDsOf[T any](m map[engine.EntityID]T) []engine.EntityID {
-	ids := make([]engine.EntityID, 0, len(m))
-	for id := range m {
-		ids = append(ids, id)
-	}
-	for i := 1; i < len(ids); i++ {
-		for j := i; j > 0 && ids[j].Num() < ids[j-1].Num(); j-- {
-			ids[j], ids[j-1] = ids[j-1], ids[j]
-		}
-	}
-	return ids
 }

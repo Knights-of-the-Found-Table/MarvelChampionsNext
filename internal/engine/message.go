@@ -120,6 +120,15 @@ type (
 		Against  EntityID // attacking enemy
 		// Undefended marks "take the attack" (no defense bonus).
 		Undefended bool
+		// NoExhaust: apply the DEF bonus without exhausting the identity
+		// (Bamf!).
+		NoExhaust bool
+		// Defense-event modifiers:
+		PreventAll   bool // Shield Block: prevent all damage
+		ExtraPrevent int  // Wiggle Room: flat prevention
+		DefBonus     int  // Expert Defense: extra DEF while defending
+		// Via names a substitute-defense card (Bamf!).
+		Via string `json:"via,omitempty"`
 	}
 
 	// Boost cards
@@ -216,6 +225,238 @@ type (
 		Enemy EntityID
 		N     int
 	}
+
+	// ObligationResolve moves a resolving obligation to its owner's
+	// discard pile or removes it from the game.
+	ObligationResolve struct {
+		Player PlayerID
+		Card   Card
+		Remove bool
+	}
+
+	// DiscardControlled removes a player's ally/support/upgrade from play
+	// and puts the card into their discard pile.
+	DiscardControlled struct {
+		Player PlayerID
+		ID     EntityID
+	}
+
+	// AddAccelerationToken adds an acceleration token to a scheme.
+	AddAccelerationToken struct{ Scheme EntityID }
+
+	// RevealNextEncounter reveals the top card of the encounter deck to a
+	// player (surge and similar effects).
+	RevealNextEncounter struct{ Player PlayerID }
+
+	// PlayDefenseEvent plays an event chosen from the defense prompt; the
+	// behavior's DefenseEvent hook builds the resulting Defends message.
+	PlayDefenseEvent struct {
+		Player  PlayerID
+		Card    Card
+		Paid    CostPaid
+		Against EntityID
+	}
+
+	// AddEntityCounter adjusts the counters on an entity (Hawkeye's
+	// arrows, Quinjet time counters, "Uses (N X)" upgrades...).
+	AddEntityCounter struct {
+		ID EntityID
+		N  int
+	}
+
+	// ReturnControlled moves a player's in-play card back to their hand
+	// (Shield Toss returning the shield).
+	ReturnControlled struct {
+		Player PlayerID
+		ID     EntityID
+	}
+
+	// AllyEntersPlayFree puts an ally into play under a player's control
+	// without paying its cost (Quinjet, Make the Call). FromOwner ""
+	// takes the card from the player's hand, otherwise from that
+	// player's discard pile.
+	AllyEntersPlayFree struct {
+		Player    PlayerID
+		Card      Card
+		FromOwner PlayerID `json:"fromOwner,omitempty"`
+	}
+
+	// MinionEntersPlay announces a minion entering play (Hawkeye's
+	// response window).
+	MinionEntersPlay struct {
+		MinionID EntityID
+		Player   PlayerID
+	}
+
+	// AttachUpgrade attaches an in-play upgrade to a friendly character
+	// or scheme and applies its bonuses (Honorary Avenger, Enraged,
+	// Followed).
+	AttachUpgrade struct {
+		ID         EntityID
+		Target     EntityID
+		MaxHP      int    // target max HP bonus
+		ATK        int    // target attack bonus (allies)
+		GrantTrait string // trait granted to the target
+	}
+
+	// EventPlayed announces that a player played an event card
+	// (Morphogenetics, Embiggen!, Shrink).
+	EventPlayed struct {
+		Player PlayerID
+		Card   Card
+	}
+
+	// SetEventBonus records a pending bonus for the event currently being
+	// resolved (Embiggen! +2 damage, Shrink +2 threat removal); consumed
+	// by the first damage/threat removal from that player.
+	SetEventBonus struct {
+		Player PlayerID
+		Damage int
+		Threat int
+	}
+
+	// ReturnDiscardCard moves a card from a player's discard pile back to
+	// their hand (Morphogenetics).
+	ReturnDiscardCard struct {
+		Player PlayerID
+		CardID string
+	}
+
+	// DiscardToBottom moves a discard-pile card to the bottom of the
+	// player's deck (Aamir Khan).
+	DiscardToBottom struct {
+		Player PlayerID
+		CardID string
+	}
+
+	// AllyDefeated opens the interrupt window before an ally is
+	// destroyed; AllyDestroyed performs the destruction.
+	AllyDefeated struct{ AllyID EntityID }
+	AllyDestroyed struct{ AllyID EntityID }
+
+	// SupportStoreCard attaches a facedown hand card to a support
+	// (Bruno Carrelli); SupportRetrieveCards takes stored cards back.
+	SupportStoreCard struct {
+		ID   EntityID
+		Card Card
+	}
+	SupportRetrieveCards struct {
+		ID    EntityID
+		Cards CardList
+	}
+
+	// TreacheryWindow opens the interrupt window before a revealed
+	// treachery resolves (Get Behind Me!); TreacheryResolve performs the
+	// (possibly cancelled) resolution.
+	TreacheryWindow struct {
+		Player PlayerID
+		Card   Card
+	}
+	TreacheryResolve struct {
+		Player   PlayerID
+		Card     Card
+		Cancelled bool
+	}
+
+	// ConsumeHandCard moves a hand card to its owner's discard pile (the
+	// event card of a played interrupt).
+	ConsumeHandCard struct {
+		Player PlayerID
+		CardID string
+	}
+
+	// PlayDiscardAlly plays an ally from the player's discard pile paying
+	// its cost (Lockjaw).
+	PlayDiscardAlly struct {
+		Player PlayerID
+		Card   Card
+		Paid   CostPaid
+	}
+
+	// ApplyStatBonus grants an identity until-end-of-phase stat bonuses
+	// (Morale Boost).
+	ApplyStatBonus struct {
+		Target PlayerID
+		ATK, THW, DEF int
+	}
+
+	// WindowDefended announces a resolved defense with the damage actually
+	// taken (Unflappable, Under Control). Via names a substitute-defense
+	// card (Bamf!).
+	WindowDefended struct {
+		Defender    EntityID
+		Against     EntityID
+		DamageTaken int
+		Via         string `json:"via,omitempty"`
+	}
+
+	// SenseEnterPlay plays a Sense upgrade from a player's Sense deck into
+	// play (Daredevil), optionally paying its cost first.
+	SenseEnterPlay struct {
+		Player PlayerID
+		Card   Card
+	}
+
+	// ShuffleIntoDeck moves a discard-pile card into the player's deck and
+	// shuffles (Karen Page).
+	ShuffleIntoDeck struct {
+		Player PlayerID
+		CardID string
+	}
+
+	// GrantTrait grants an entity a dynamic trait (Billy Club's Aerial).
+	GrantTrait struct {
+		Target EntityID
+		Trait  string
+	}
+
+	// InvokeSpecial resolves the top card of a side deck (Doctor
+	// Strange's Invocations); ReturnToTop keeps the card on top of the
+	// side deck instead of the side discard (Master of the Mystic Arts).
+	InvokeSpecial struct {
+		Player      PlayerID
+		Card        Card
+		ReturnToTop bool
+	}
+
+	// AllyAttackWindow announces an ally attacking (Iron Fist's rider).
+	AllyAttackWindow struct {
+		Ally   EntityID
+		Target EntityID
+	}
+
+	// SideDeckDiscardTop discards the top card of a player's side deck
+	// (Wong, Natural Talent).
+	SideDeckDiscardTop struct{ Player PlayerID }
+
+	// UpgradeEnterPlay puts an upgrade card into play from the player's
+	// hand, deck or discard pile without paying (Daytripper's Bamf!).
+	UpgradeEnterPlay struct {
+		Player PlayerID
+		Card   Card
+	}
+
+	// SideDeckToHand moves a card from the player's side deck to hand
+	// (Echo's tucked events).
+	SideDeckToHand struct {
+		Player PlayerID
+		CardID string
+	}
+
+	// RecycleFromDiscard moves a card from another player's discard pile
+	// to a player's hand (Study the Tape).
+	RecycleFromDiscard struct {
+		Player PlayerID
+		From   PlayerID
+		CardID string
+	}
+
+	// SwapHandWithDeckTop exchanges a hand card with the deck's top card
+	// (Domino).
+	SwapHandWithDeckTop struct {
+		Player PlayerID
+		CardID string
+	}
 )
 
 func (StartGame) msg()             {}
@@ -271,3 +512,37 @@ func (FlipVillainPersona) msg()    {}
 func (MillPlayerDeck) msg()        {}
 func (DealEncounterToPlayer) msg() {}
 func (BoostEnemyAttack) msg()      {}
+func (ObligationResolve) msg()     {}
+func (DiscardControlled) msg()     {}
+func (AddAccelerationToken) msg()  {}
+func (RevealNextEncounter) msg()   {}
+func (PlayDefenseEvent) msg()      {}
+func (AddEntityCounter) msg()      {}
+func (ReturnControlled) msg()      {}
+func (AllyEntersPlayFree) msg()    {}
+func (MinionEntersPlay) msg()      {}
+func (AttachUpgrade) msg()         {}
+func (EventPlayed) msg()           {}
+func (SetEventBonus) msg()         {}
+func (ReturnDiscardCard) msg()     {}
+func (DiscardToBottom) msg()       {}
+func (AllyDefeated) msg()          {}
+func (AllyDestroyed) msg()         {}
+func (SupportStoreCard) msg()      {}
+func (SupportRetrieveCards) msg()  {}
+func (TreacheryWindow) msg()       {}
+func (TreacheryResolve) msg()      {}
+func (ConsumeHandCard) msg()       {}
+func (PlayDiscardAlly) msg()       {}
+func (ApplyStatBonus) msg()        {}
+func (WindowDefended) msg()        {}
+func (SenseEnterPlay) msg()        {}
+func (ShuffleIntoDeck) msg()       {}
+func (GrantTrait) msg()            {}
+func (InvokeSpecial) msg()         {}
+func (AllyAttackWindow) msg()      {}
+func (SideDeckDiscardTop) msg()    {}
+func (UpgradeEnterPlay) msg()      {}
+func (SideDeckToHand) msg()        {}
+func (RecycleFromDiscard) msg()    {}
+func (SwapHandWithDeckTop) msg()   {}

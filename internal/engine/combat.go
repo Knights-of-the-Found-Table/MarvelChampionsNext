@@ -85,6 +85,9 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	if n <= 0 {
 		return
 	}
+	if adj, ok := g.eventBonusFor(n, source, "threat"); ok {
+		n = adj
+	}
 	if s := g.SideSchemes[schemeID]; s != nil {
 		s.Threat -= n
 		if s.Threat < 0 {
@@ -112,6 +115,49 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 
 // ---------------------------------------------------------------- damage
 
+// destroyAlly removes a defeated ally from play and discards its card.
+func (g *Game) destroyAlly(id EntityID) {
+	a := g.Allies[id]
+	if a == nil {
+		return
+	}
+	owner := g.Player(a.Owner)
+	code := a.Code
+	g.Delete(id)
+	if owner != nil {
+		owner.Discard = append(owner.Discard, Card{ID: g.nextCardID(), Code: code, Owner: owner.ID})
+	}
+	g.logf("%s is destroyed", a.EDef().Name)
+}
+
+// eventBonusFor applies a pending Embiggen!/Shrink bonus to a value
+// originating from source (a player). ok=false when no bonus applies.
+func (g *Game) eventBonusFor(n int, source EntityID, kind string) (int, bool) {
+	if source == "" || !source.Is(KindPlayer) {
+		return n, false
+	}
+	var bonus int
+	switch kind {
+	case "damage":
+		bonus = g.EventDamageBonus[source]
+	case "threat":
+		bonus = g.EventThreatBonus[source]
+	default:
+		return n, false
+	}
+	if bonus == 0 {
+		return n, false
+	}
+	switch kind {
+	case "damage":
+		delete(g.EventDamageBonus, source)
+	case "threat":
+		delete(g.EventThreatBonus, source)
+	}
+	g.logf("event bonus +%d %s", bonus, kind)
+	return n + bonus, true
+}
+
 func (g *Game) damage(id EntityID, n int, source EntityID) {
 	if n <= 0 {
 		return
@@ -131,16 +177,25 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			g.logf("%s's tough status card prevents the damage", e.EDef().Name)
 			return
 		}
+		if adj, ok := g.eventBonusFor(n, source, "damage"); ok {
+			n = adj
+		}
 		e.Damage += n
 		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(VillainDefeated{VillainID: e.ID})
 		}
 	case *Minion:
+		if b := behavior(e.Code); b.MinionDamageable != nil && !b.MinionDamageable(g, e, n) {
+			return
+		}
 		if e.Tough {
 			e.Tough = false
 			g.logf("%s's tough status card prevents the damage", e.EDef().Name)
 			return
+		}
+		if adj, ok := g.eventBonusFor(n, source, "damage"); ok {
+			n = adj
 		}
 		e.Damage += n
 		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
@@ -152,17 +207,64 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			e.Tough = false
 			return
 		}
+		if src, ok := g.eventBonusFor(n, source, "damage"); ok {
+			n = src
+		}
 		e.Damage += n
 		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
-			owner := g.Player(e.Owner)
-			g.Delete(e.ID)
-			if owner != nil {
-				owner.Discard = append(owner.Discard, Card{ID: g.nextCardID(), Code: e.Code, Owner: owner.ID})
-			}
-			g.logf("%s is destroyed", e.EDef().Name)
+			g.Push(AllyDefeated{AllyID: e.ID})
 		}
 	case *Player:
+		// Identity-level prevention (Groot's growth counters).
+		if hook := behavior(e.HeroCode).IdentityDamagePrevention; hook != nil {
+			if pv := hook(g, e, n); pv > 0 {
+				n -= pv
+				if n <= 0 {
+					return
+				}
+			}
+		}
+		// Automatic damage prevention from upgrades (Energy Barrier;
+		// approximation: auto-used, reflection hits the first enemy).
+		prevented := 0
+		for _, id := range e.Upgrades {
+			u := g.Upgrades[id]
+			if u == nil {
+				continue
+			}
+			hook := behavior(u.Code).DamagePrevention
+			if hook == nil {
+				continue
+			}
+			pv, refl := hook(g, u, e, n-prevented)
+			prevented += pv
+			if refl > 0 {
+				// Prefer reflecting at the damage source, else the
+				// first enemy.
+				target := source
+				if !(source.Is(KindVillain) || source.Is(KindMinion)) {
+					if enemies := sortedIDs(g.Minions); len(enemies) > 0 {
+						target = enemies[0]
+					} else if vids := sortedIDs(g.Villains); len(vids) > 0 {
+						target = vids[0]
+					}
+				}
+				if target != "" {
+					g.Push(DamageEntity{Target: target, Damage: refl, Source: e.ID})
+				}
+			}
+			if prevented >= n {
+				break
+			}
+		}
+		if prevented > 0 {
+			n -= prevented
+			g.logf("%s prevents %d damage", e.Name, prevented)
+			if n <= 0 {
+				return
+			}
+		}
 		if e.Tough {
 			e.Tough = false
 			g.logf("%s's tough status card prevents the damage", e.Name)
@@ -171,11 +273,31 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		e.Damage += n
 		g.logf("%s takes %d damage (HP %d/%d)", e.Name, n, e.HP(), e.MaxHP)
 		if e.HP() <= 0 && !e.KOed {
+			if g.applyDefeatSave(e) {
+				return
+			}
 			e.KOed = true
 			g.logf("%s is KO'd!", e.Name)
 			g.Push(GameOver{Won: false, Reason: fmt.Sprintf("%s was defeated", e.Name)})
 		}
 	}
+}
+
+// applyDefeatSave lets an upgrade save the identity from defeat (Captain
+// America's Helmet); reports whether the defeat was prevented.
+func (g *Game) applyDefeatSave(p *Player) bool {
+	for _, id := range p.Upgrades {
+		u := g.Upgrades[id]
+		if u == nil {
+			continue
+		}
+		if hook := behavior(u.Code).DefeatSave; hook != nil {
+			if hook(g, p, u) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (g *Game) heal(id EntityID, n int) {
@@ -263,9 +385,17 @@ func (g *Game) setExhausted(id EntityID, exhausted bool) {
 	}
 }
 
-// retaliateOf returns the printed Retaliate value of an enemy.
-func retaliateOf(e Entity) int {
-	def := e.EDef()
+// retaliateOf returns the Retaliate value of an enemy or defending
+// identity (including upgrade bonuses such as Captain America's Shield).
+func retaliateOf(g *Game, e Entity) int {
+	if p, ok := e.(*Player); ok {
+		return printedRetaliate(p.EDef()) + p.upgradeStats(g).Retaliate
+	}
+	return printedRetaliate(e.EDef())
+}
+
+// printedRetaliate reads the printed Retaliate keyword value.
+func printedRetaliate(def *data.CardDef) int {
 	for _, k := range def.Keywords {
 		if k.Name == "Retaliate" {
 			return k.Value

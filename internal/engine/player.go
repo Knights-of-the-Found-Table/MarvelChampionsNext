@@ -10,6 +10,13 @@ const (
 	SideAlterEgo = "alterego"
 )
 
+// CostDiscount is a pending reduction applied to the next matching payment.
+type CostDiscount struct {
+	Type   string `json:"type,omitempty"`  // card type filter, "" = any
+	Trait  string `json:"trait,omitempty"` // trait filter, "" = any
+	Amount int    `json:"amount"`
+}
+
 // Player is one identity (hero + alter-ego) controlled by a user.
 type Player struct {
 	ID            PlayerID `json:"id"`
@@ -32,9 +39,27 @@ type Player struct {
 	Hand     CardList `json:"hand"`
 	Discard  CardList `json:"discard"`
 
-	// Obligation deck for hero-specific obligations.
+	// Obligation deck for hero-specific obligations; the cards are merged
+	// into the encounter deck at game start and resolve for their owner
+	// when revealed.
 	ObligationDeck    CardList `json:"obligationDeck"`
 	ObligationDiscard CardList `json:"obligationDiscard"`
+	ObligationRemoved CardList `json:"obligationRemoved,omitempty"`
+
+	// SenseDeck is the hero's side deck of Sense upgrades (Daredevil);
+	// Sense cards cycle back here when they leave play. It doubles as the
+	// Invocation deck for Doctor Strange.
+	SenseDeck CardList `json:"senseDeck,omitempty"`
+	// SideDiscard is the side deck's discard pile (resolved Invocations).
+	SideDiscard CardList `json:"sideDiscard,omitempty"`
+
+	// CostDiscounts are pending one-shot cost reductions (Nakia Bahadir,
+	// Avengers Tower); the next matching payment consumes one, and they
+	// are cleared at each phase change.
+	CostDiscounts []CostDiscount `json:"costDiscounts,omitempty"`
+	// AllyPlayedThisRound marks whether an ally has been played this round
+	// (Living Legend discount).
+	AllyPlayedThisRound bool `json:"allyPlayedThisRound,omitempty"`
 
 	// Controlled entities.
 	Allies    []EntityID `json:"allies"`
@@ -53,6 +78,16 @@ type Player struct {
 	EndedTurn    bool `json:"endedTurn"`
 	FirstPlayer  bool `json:"firstPlayer"`
 	KOed         bool `json:"koed"`
+
+	// Until-end-of-phase stat modifiers (Fearless Determination,
+	// Avengers Assemble...); cleared at each phase change.
+	BonusTHW int `json:"bonusThw,omitempty"`
+	BonusATK int `json:"bonusAtk,omitempty"`
+	BonusDEF int `json:"bonusDef,omitempty"`
+	// ExtraTraits are dynamically granted traits (Honorary Avenger).
+	ExtraTraits []string `json:"extraTraits,omitempty"`
+	// GrowthCounters are identity-level prevention counters (Groot).
+	GrowthCounters int `json:"growthCounters,omitempty"`
 
 	// UsedAbilityRounds tracks once-per-round ability usage for abilities
 	// owned by this identity.
@@ -94,30 +129,51 @@ func (p *Player) HandSize(g *Game) int {
 }
 
 // Attack/Thwart/Defense/Recover values for the current side; -1 when the
-// side doesn't have the stat.
-func (p *Player) AttackStat() int {
+// side doesn't have the stat. Includes until-end-of-phase bonuses and
+// persistent bonuses from upgrades in play.
+func (p *Player) AttackStat(g *Game) int {
 	if !p.IsHero() {
 		return -1
 	}
-	return deref(p.HeroDef().Attack, 0)
+	return deref(p.HeroDef().Attack, 0) + p.BonusATK + p.upgradeStats(g).ATK
 }
-func (p *Player) ThwartStat() int {
+func (p *Player) ThwartStat(g *Game) int {
 	if !p.IsHero() {
 		return -1
 	}
-	return deref(p.HeroDef().Thwart, 0)
+	return deref(p.HeroDef().Thwart, 0) + p.BonusTHW + p.upgradeStats(g).THW
 }
-func (p *Player) DefenseStat() int {
+func (p *Player) DefenseStat(g *Game) int {
 	if !p.IsHero() {
 		return -1
 	}
-	return deref(p.HeroDef().Defense, 0)
+	return deref(p.HeroDef().Defense, 0) + p.BonusDEF + p.upgradeStats(g).DEF
 }
-func (p *Player) RecoverStat() int {
+func (p *Player) RecoverStat(g *Game) int {
 	if p.IsHero() {
 		return -1
 	}
-	return deref(p.AlterEgoDef().Recover, 0)
+	return deref(p.AlterEgoDef().Recover, 0) + p.upgradeStats(g).REC
+}
+
+// upgradeStats sums the IdentityStats bonuses of the upgrades in play.
+func (p *Player) upgradeStats(g *Game) (b StatBonus) {
+	if g == nil {
+		return b
+	}
+	for _, id := range p.Upgrades {
+		if u := g.Upgrades[id]; u != nil {
+			if hook := behavior(u.Code).IdentityStats; hook != nil {
+				s := hook(p)
+				b.ATK += s.ATK
+				b.THW += s.THW
+				b.DEF += s.DEF
+				b.REC += s.REC
+				b.Retaliate += s.Retaliate
+			}
+		}
+	}
+	return b
 }
 
 // React implements identity reactions via the hero behavior hook.

@@ -23,6 +23,9 @@ type Game struct {
 	ScenarioID string `json:"scenarioId"`
 	Difficulty string `json:"difficulty"` // standard | expert
 	Round     int    `json:"round"`
+	// Phase is the current round phase (phase-dependent reactions such as
+	// Change of Fortune).
+	Phase Phase `json:"phase,omitempty"`
 
 	Players []*Player `json:"players"`
 
@@ -53,6 +56,12 @@ type Game struct {
 
 	UsedThisRound map[string]bool `json:"usedThisRound"`
 	UsedThisTurn  map[string]bool `json:"usedThisTurn"`
+
+	// EventDamageBonus / EventThreatBonus hold pending per-player bonuses
+	// for the event currently resolving (Embiggen!, Shrink); consumed by
+	// the first matching application.
+	EventDamageBonus map[PlayerID]int `json:"eventDamageBonus,omitempty"`
+	EventThreatBonus map[PlayerID]int `json:"eventThreatBonus,omitempty"`
 
 	nextID int
 	Over   bool   `json:"over"`
@@ -390,43 +399,164 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 	case strings.HasPrefix(q.Validate, "payment:"):
 		var cost int
 		fmt.Sscanf(q.Validate, "payment:%d", &cost)
+		playerID := PlayerID(fmt.Sprint(q.Context["player"]))
+		p := g.Player(playerID)
+		if p == nil {
+			return nil, fmt.Errorf("unknown player in payment context")
+		}
+		// The card being paid for (absent for ability payments).
+		var targetDef *data.CardDef
+		var targetCard Card
+		if cardID, ok := q.Context["cardId"].(string); ok {
+			card, found := p.Hand.Find(cardID)
+			if !found {
+				return nil, fmt.Errorf("card no longer in hand")
+			}
+			targetDef = card.Def()
+			targetCard = card
+		}
 		total := 0
+		var paidIDs []string
+		var icons []string
+		seenAbility := map[EntityID]bool{}
+		var exhausts []Message
 		for _, c := range choices {
 			for _, msg := range c.msgs {
-				if stub, ok := msg.(ResourcePayStub); ok {
-					total += iconCount(stub.Card.Def())
+				switch st := msg.(type) {
+				case ResourcePayStub:
+					total += iconCount(st.Card.Def()) + powerOfBonus(st.Card.Def(), targetDef)
+					paidIDs = append(paidIDs, st.Card.ID)
+					icons = append(icons, st.Card.Def().Resources...)
+				case AbilityPayStub:
+					if seenAbility[st.Source] {
+						continue
+					}
+					seenAbility[st.Source] = true
+					total++
+					icons = append(icons, st.Icon)
+					exhausts = append(exhausts, ExhaustEntity{ID: st.Source})
+					src := g.Entity(st.Source)
+					if src != nil && behavior(src.ECode()).Resource.UsesCounters {
+						exhausts = append(exhausts, AddEntityCounter{ID: st.Source, N: -1})
+					}
 				}
 			}
 		}
 		if total < cost {
 			return nil, fmt.Errorf("need %d resource icons, selected %d", cost, total)
 		}
-		// Collect paid card ids and their resource icons.
-		var paidIDs []string
-		var icons []string
-		for _, c := range choices {
-			for _, msg := range c.msgs {
-				if stub, ok := msg.(ResourcePayStub); ok {
-					paidIDs = append(paidIDs, stub.Card.ID)
-					icons = append(icons, stub.Card.Def().Resources...)
+		paid := CostPaid{CardIDs: paidIDs, Icons: icons}
+		if invID, ok := q.Context["invocationCard"].(string); ok {
+			card, found := p.SenseDeck.Find(invID)
+			if !found {
+				return nil, fmt.Errorf("invocation card no longer on top")
+			}
+			var paidCards []Card
+			for _, id := range paidIDs {
+				if c, ok := p.Hand.Find(id); ok {
+					paidCards = append(paidCards, c)
 				}
 			}
-		}
-		playerID := PlayerID(fmt.Sprint(q.Context["player"]))
-		p := g.Player(playerID)
-		if p == nil {
-			return nil, fmt.Errorf("unknown player in payment context")
-		}
-		if cardID, ok := q.Context["cardId"].(string); ok {
-			card, found := p.Hand.Find(cardID)
-			if !found {
-				return nil, fmt.Errorf("card no longer in hand")
+			out := exhausts
+			if len(paidCards) > 0 {
+				out = append(out, ResourcePay{Player: playerID, Cards: paidCards})
 			}
-			return []Message{PlayCard{
-				Player: playerID,
-				Card:   card,
-				Paid:   CostPaid{CardIDs: paidIDs, Icons: icons},
-			}}, nil
+			out = append(out, InvokeSpecial{
+				Player:      playerID,
+				Card:        card,
+				ReturnToTop: q.Context["returnToTop"] == true,
+			})
+			return out, nil
+		}
+		if senseID, ok := q.Context["senseCard"].(string); ok {
+			card, found := p.SenseDeck.Find(senseID)
+			if !found {
+				return nil, fmt.Errorf("sense card no longer in the sense deck")
+			}
+			var paidCards []Card
+			for _, id := range paidIDs {
+				if c, ok := p.Hand.Find(id); ok {
+					paidCards = append(paidCards, c)
+				}
+			}
+			out := exhausts
+			if len(paidCards) > 0 {
+				out = append(out, ResourcePay{Player: playerID, Cards: paidCards})
+			}
+			out = append(out, SenseEnterPlay{Player: playerID, Card: card})
+			return out, nil
+		}
+		if discardID, ok := q.Context["playDiscard"].(string); ok {
+			card, found := p.Discard.Find(discardID)
+			if !found {
+				return nil, fmt.Errorf("card no longer in discard pile")
+			}
+			out := append(exhausts, PlayDiscardAlly{Player: playerID, Card: card, Paid: paid})
+			return out, nil
+		}
+		if saveID, ok := q.Context["saveAlly"].(string); ok {
+			// Generic "pay to save an ally" flow (Red Dagger): pay,
+			// return the ally to hand, optionally hit an enemy.
+			var paidCards []Card
+			for _, id := range paidIDs {
+				if c, ok := p.Hand.Find(id); ok {
+					paidCards = append(paidCards, c)
+				}
+			}
+			out := exhausts
+			if len(paidCards) > 0 {
+				out = append(out, ResourcePay{Player: playerID, Cards: paidCards})
+			}
+			out = append(out, ReturnControlled{Player: playerID, ID: EntityID(saveID)})
+			dmg := ctxInt(q.Context["saveDamage"])
+			if dmg > 0 && len(g.Enemies()) > 0 {
+				var picks []Choice
+				for _, eid := range sortedIDs(g.Villains) {
+					v := g.Villains[eid]
+					picks = append(picks, Choice{
+						Label: fmt.Sprintf("%s — %d/%d HP", v.EDef().Name, v.HP(), v.MaxHP),
+						Kind:  ChoiceTarget, SourceID: eid, CardCode: v.Code,
+					}.Msgs(DamageEntity{Target: eid, Damage: dmg, Source: playerID}))
+				}
+				for _, eid := range sortedIDs(g.Minions) {
+					mn := g.Minions[eid]
+					picks = append(picks, Choice{
+						Label: fmt.Sprintf("%s — %d/%d HP", mn.EDef().Name, mn.HP(), mn.MaxHP),
+						Kind:  ChoiceTarget, SourceID: eid, CardCode: mn.Code,
+					}.Msgs(DamageEntity{Target: eid, Damage: dmg, Source: playerID}))
+				}
+				out = append(out, AskQuestion{Player: playerID, Question: Ask("Choose an enemy", picks...)})
+			}
+			return out, nil
+		}
+		if fromID, ok := q.Context["makeCallFrom"].(string); ok {
+			cardID, _ := q.Context["makeCallCard"].(string)
+			var paidCards []Card
+			for _, id := range paidIDs {
+				if c, ok := p.Hand.Find(id); ok {
+					paidCards = append(paidCards, c)
+				}
+			}
+			out := exhausts
+			if len(paidCards) > 0 {
+				out = append(out, ResourcePay{Player: playerID, Cards: paidCards})
+			}
+			out = append(out, AllyEntersPlayFree{
+				Player:    playerID,
+				Card:      Card{ID: cardID},
+				FromOwner: PlayerID(fromID),
+			})
+			return out, nil
+		}
+		if against, ok := q.Context["defenseAgainst"].(string); ok && targetDef != nil {
+			out := append(exhausts, PlayDefenseEvent{
+				Player: playerID, Card: targetCard, Paid: paid, Against: EntityID(against),
+			})
+			return out, nil
+		}
+		if targetDef != nil {
+			out := append(exhausts, PlayCard{Player: playerID, Card: targetCard, Paid: paid})
+			return out, nil
 		}
 		if srcID, ok := q.Context["abilitySource"].(string); ok {
 			src := g.Entity(EntityID(srcID))
@@ -447,6 +577,7 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 			}
 			ab := abilities[idx]
 			var msgs []Message
+			msgs = append(msgs, exhausts...)
 			if ab.Exhaust {
 				msgs = append(msgs, ExhaustEntity{ID: src.EID()})
 			}
@@ -468,6 +599,64 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 // discarded for payment.
 func iconCount(def *data.CardDef) int {
 	return len(def.Resources)
+}
+
+// powerOfBonus returns the extra icon a "The Power of <Aspect>" resource
+// card contributes when paying for a card of that aspect (data-driven:
+// parsed from the card name).
+func powerOfBonus(paying, target *data.CardDef) int {
+	if target == nil || !strings.HasPrefix(paying.Name, "The Power of ") {
+		return 0
+	}
+	aspect := strings.ToLower(strings.TrimPrefix(paying.Name, "The Power of "))
+	if target.Aspect == aspect {
+		return 1
+	}
+	return 0
+}
+
+// costFor returns the payable cost for a card after the identity's passive
+// discounts and one pending CostDiscount.
+func (g *Game) costFor(p *Player, def *data.CardDef) int {
+	cost := deref(def.Cost, 0)
+	if cost <= 0 {
+		return 0
+	}
+	if b := behavior(p.HeroCode); b.CardCost != nil {
+		cost -= b.CardCost(g, p, def)
+	}
+	for _, d := range p.CostDiscounts {
+		if discountMatches(d, def) && d.Amount > 0 {
+			cost -= d.Amount
+			break
+		}
+	}
+	return max(0, cost)
+}
+
+// consumeDiscount removes the pending discount that applied to a card
+// being played.
+func (g *Game) consumeDiscount(p *Player, def *data.CardDef) {
+	if deref(def.Cost, 0) <= 0 {
+		return
+	}
+	for i, d := range p.CostDiscounts {
+		if discountMatches(d, def) && d.Amount > 0 {
+			g.logf("%s costs %d less (%s)", def.Name, d.Amount, p.Name)
+			p.CostDiscounts = append(p.CostDiscounts[:i], p.CostDiscounts[i+1:]...)
+			return
+		}
+	}
+}
+
+func discountMatches(d CostDiscount, def *data.CardDef) bool {
+	if d.Type != "" && d.Type != def.Type {
+		return false
+	}
+	if d.Trait != "" && !def.HasTrait(d.Trait) {
+		return false
+	}
+	return true
 }
 
 // ctxInt coerces a JSON context value (float64) or in-memory int.
@@ -572,6 +761,8 @@ func NewGame(opts NewGameOptions) (*Game, error) {
 		Environments:  map[EntityID]*Environment{},
 		UsedThisRound: map[string]bool{},
 		UsedThisTurn:  map[string]bool{},
+		EventDamageBonus: map[PlayerID]int{},
+		EventThreatBonus: map[PlayerID]int{},
 		scenario:      scen,
 	}
 	if g.Difficulty == "" {
