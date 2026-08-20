@@ -1,0 +1,253 @@
+[
+ {
+  "code": "43001a",
+  "name": "X-23",
+  "text": "<i>Living Weapon</i> — <b>Response</b>: After X-23 takes any amount of damage, ready X-23. (Limit once per phase.)",
+  "traits": "X-Force.",
+  "flavor": "\"The Facility created me to kill, but I choose to fight to protect life.\""
+ },
+ {
+  "code": "43002",
+  "name": "X-23's Claws",
+  "text": "Permanent.\n<b>Hero Action</b>: Exhaust X-23's Claws and take 2 damage → X-23 gets +2 ATK until the end of the round.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "43003",
+  "name": "Honey Badger",
+  "subname": "Gabby Kinney",
+  "text": "<b>Hero Response</b>: After Honey Badger takes any amount of damage, ready X-23.",
+  "traits": "X-Men.",
+  "flavor": "\"You don't scare me. And I won't let you mess with my friends anymore!\""
+ },
+ {
+  "code": "43004",
+  "name": "Animal Instinct",
+  "text": "<b>Hero Interrupt</b>: When X-23 makes a basic thwart, she gets +X THW for this thwart, where X is equal to her ATK.",
+  "traits": "Skill.",
+  "flavor": "X-23 inherited Wolverine's superhuman senses...as well as his charming personality."
+ },
+ {
+  "code": "43005",
+  "name": "Claw Mastery",
+  "text": "Max 1 per round.\n<b>Hero Action</b>: Until the end of the round, X-23 gets +2 ATK (and her attacks gain overkill while Honey Badger is in play).",
+  "traits": "Skill."
+ },
+ {
+  "code": "43006",
+  "name": "Regenerative Longevity",
+  "text": "<b>Action</b>: Heal a total of 4 damage from your identity and Honey Badger.",
+  "traits": "Superpower.",
+  "flavor": "\"If what doesn't kill you makes you stronger, I should have Colossus-level strength by now.\" —X-23"
+ },
+ {
+  "code": "43007",
+  "name": "Sisterly Bond",
+  "text": "<b>Hero Interrupt</b>: When Honey Badger thwarts or attacks, add X-23's matching power to Honey Badger's power for this use.",
+  "traits": "Condition.",
+  "flavor": "\"High five!\" —Honey Badger"
+ },
+ {
+  "code": "43008",
+  "name": "Sisterhood",
+  "text": "<b>Action</b>: Exhaust Sisterhood and discard an X-23 card from your hand → search your deck and discard pile for Honey Badger and add her to your hand. <i>(Shuffle.)</i>",
+  "traits": "Condition.",
+  "flavor": "Laura and Gabby's bond is stronger than genetics."
+ },
+ {
+  "code": "43009",
+  "name": "Adamantium Lacing",
+  "text": "You get +2 hit points.\nX-23 gains retaliate 1 and her basic attacks gain piercing.",
+  "flavor": "X-23's claws are coated with the metal adamantium, making them incredibly sharp and nearly indestructible."
+ },
+ {
+  "code": "43010",
+  "name": "Grim Resolve",
+  "text": "<b>Resource</b>: Exhaust this card and take 1 damage → generate a [wild] resource.",
+  "traits": "Condition.",
+  "flavor": "\"Is that all you got?\" —X-23"
+ },
+ {
+  "code": "43011",
+  "name": "Pain Tolerance",
+  "text": "<b>Response</b>: After you play an X-23 card <i>(including this one)</i>, heal 1 damage from your identity.",
+  "traits": "Superpower.",
+  "flavor": "\"Barely felt a thing.\" —X-23"
+ },
+ {
+  "code": "43012",
+  "name": "Puncture Wound",
+  "text": "Attach to an enemy that X-23 or Honey Badger attacked this turn.\nAttached enemy gets -1 ATK.\n<b>Forced Response</b>: After the player phase begins, discard this card and deal 3 damage to attached enemy.",
+  "traits": "Condition."
+ },
+ {
+  "code": "43013",
+  "name": "Boom Boom",
+  "subname": "Tabitha Smith",
+  "text": "<b>Action</b>: Exhaust Boom Boom → add 1 boom counter to her. Then, you may discard Boom Boom to deal 1 damage to each enemy for each boom counter on her.",
+  "traits": "X-Force.",
+  "flavor": "\"Tick...tick...tick...\""
+ },
+ {
+  "code": "43014",
+  "name": "Rictor",
+  "subname": "Julio Richter",
+  "text": "[star] <b>Response</b>: After Rictor attacks, discard the top card of your deck. Deal 1 damage to each minion engaged with you for each resource on the discarded card.",
+  "traits": "X-Force."
+ },
+ {
+  "code": "43015",
+  "name": "Shatterstar",
+  "subname": "Gaveedra Seven",
+  "text": "[star] <b>Interrupt</b>: When Shatterstar attacks a minion, engage that minion. If you are already engaged with that minion, Shatterstar gets +1 ATK for this attack.",
+  "traits": "X-Force.",
+  "flavor": "A skilled swordfighter, Shatterstar can even cut openings in space to teleport vast distances."
+ },
+ {
+  "code": "43016",
+  "name": "Critical Hit",
+  "text": "Play only if there is a side scheme in the victory display.\n<b>Hero Response</b>: After you attack an enemy, stun it."
+ },
+ {
+  "code": "43017",
+  "name": "Moment of Triumph",
+  "text": "<b>Hero Response:</b> After you attack and defeat an enemy, heal 1 damage from your hero for each point of excess damage dealt to that enemy by that attack.",
+  "_dup_of": "12030"
+ },
+ {
+  "code": "43018",
+  "name": "Keep Them Busy",
+  "text": "Victory 0.\nAssault. <i>(Basic thwarts against this scheme use ATK instead of THW.)</i>\n<b>When Defeated</b>: The player who defeated this scheme removes 5[per_hero] threat from the main scheme."
+ },
+ {
+  "code": "43019",
+  "name": "\"Now I'm Mad\"",
+  "text": "Play under any player's control. Max 1 per player.\nWhile your hero's remaining hit points are less than half your hero's starting hit points, your hero gets +1 ATK and -1 THW.",
+  "traits": "Condition."
+ },
+ {
+  "code": "43020",
+  "name": "The Direct Approach",
+  "text": "Attach to a non-permanent side scheme. Limit 1 per side scheme.\nAttached scheme gains assault. <i>(Basic thwarts against this scheme use ATK instead of THW.)</i>",
+  "traits": "Tactic."
+ },
+ {
+  "code": "43021",
+  "name": "Specialized Training",
+  "text": "Victory 0.\n<b>When Defeated</b>: Each player who does not control a [[SPECIALIZATION]] upgrade chooses 1 set-aside [[SPECIALIZATION]] upgrade and puts it into play under their control."
+ },
+ {
+  "code": "43022",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "43023",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "43024",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "43025",
+  "name": "IPAC",
+  "text": "Play only if your identity has the [[X-FORCE]] trait.\n<b>Hero Action</b>: Exhaust IPAC and deal 1 facedown encounter card to a player → that player draws 2 cards.",
+  "traits": "Vehicle. X-Force.",
+  "_dup_of": "41022"
+ },
+ {
+  "code": "43026",
+  "name": "X-Bunker",
+  "text": "<b>Action</b>: Exhaust X-Bunker and choose a player whose identity has the [[MUTANT]] trait → that player searches the top X cards of their deck for any card, where X is the number of side schemes in the victory display, and adds that card to their hand. <i>(Shuffle.)</i>",
+  "traits": "Location. X-Force.",
+  "_dup_of": "41023"
+ },
+ {
+  "code": "43027",
+  "name": "Endurance",
+  "text": "Play under any player's control. Max 1 per player.\nYou get +3 hit points.",
+  "traits": "Condition.",
+  "_dup_of": "36026"
+ },
+ {
+  "code": "43028",
+  "name": "Self-Isolation",
+  "text": "<b><i>Give to the Laura Kinney player.</i></b>\nSearch your hand, deck, discard pile, and play area for Honey Badger and place her facedown under this obligation. If you cannot, discard this card and deal yourself 1 facedown encounter card.\n<b>Response</b>: After you make a basic recovery, discard this obligation and Honey Badger."
+ },
+ {
+  "code": "43029",
+  "name": "Lady Deathstrike",
+  "text": "<b>When Defeated</b>: The player who defeated this minion discards the top card of the encounter deck and takes 1 indirect damage for each boost icon ([boost]) on that card.",
+  "traits": "Elite. Reaver."
+ },
+ {
+  "code": "43030",
+  "name": "In the Name of Vengeance",
+  "text": "Each enemy gains retaliate 1.",
+  "flavor": "\"Cute kid. Be a shame if something was to happen to her.\" —Lady Deathstrike"
+ },
+ {
+  "code": "43031",
+  "name": "Cybermods",
+  "text": "Attach to Lady Deathstrike. If you cannot, discard cards from the top of the encounter deck until a minion is discarded. Put that minion into play engaged with you and attach this card to it.\n<b>Forced Interrupt</b>: When attached minion would be discarded, shuffle it into the encounter deck instead.",
+  "traits": "Tech."
+ },
+ {
+  "code": "43032",
+  "name": "Critical Wound",
+  "text": "Attach to your identity.\n<b>Forced Interrupt</b>: When your turn ends, discard this card and take 4 damage.",
+  "traits": "Condition."
+ },
+ {
+  "code": "43033",
+  "name": "Hack 'n' Slash",
+  "text": "<b>When Revealed</b>: Discard 1 random card from your hand and take damage equal to the number of printed resources on it.\n<hr />\n[star] <b>Boost</b>: Discard 1 random card from your hand and take damage equal to the number of printed resources on it."
+ },
+ {
+  "code": "43034",
+  "name": "Combat Specialist",
+  "text": "Linked (Specialized Training).\nYour hero gets +1 ATK.\n<b>Hero Response</b>: After your hero performs a basic attack, exhaust this card → draw 1 card.",
+  "traits": "Specialization."
+ },
+ {
+  "code": "43035",
+  "name": "Defense Specialist",
+  "text": "Linked (Specialized Training).\nYour hero gets +1 DEF.\n<b>Hero Response</b>: After your hero performs a basic defense, exhaust this card → draw 1 card.",
+  "traits": "Specialization."
+ },
+ {
+  "code": "43036",
+  "name": "Front Line Specialist",
+  "text": "Linked (Specialized Training).\nYour identity gets +4 hit points.\n<b>Response</b>: After your identity takes damage from an enemy attack, exhaust this card → draw 1 card.",
+  "traits": "Specialization."
+ },
+ {
+  "code": "43037",
+  "name": "Surveillance Specialist",
+  "text": "Linked (Specialized Training).\nYour hero gets +1 THW.\n<b>Hero Response</b>: After your hero performs a basic thwart, exhaust this card → draw 1 card.",
+  "traits": "Specialization."
+ },
+ {
+  "code": "43038",
+  "name": "Predictable Ploy",
+  "text": "Play only if there is a side scheme in the victory display.\n<b>Hero Interrupt</b>: When a treachery card is revealed from the encounter deck, cancel its \"<b>When Revealed</b>\" effects."
+ },
+ {
+  "code": "43039",
+  "name": "Rally the Troops",
+  "text": "Victory 0.\n<b>When Defeated</b>: Heal 2 damage from each ally.",
+  "flavor": "\"Press on, team! Victory is in sight!\" —Cyclops"
+ },
+ {
+  "code": "43040",
+  "name": "Anticipated Attack",
+  "text": "Play only if there is a side scheme in the victory display.\n<b>Hero Interrupt</b> <i>(defense)</i>: When an enemy initiates an attack, give your hero a tough status card.",
+  "traits": "Defense."
+ }
+]

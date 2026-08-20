@@ -1,0 +1,431 @@
+[
+ {
+  "code": "60001a",
+  "name": "Daredevil",
+  "text": "<i>Superhuman Senses</i> — <b>Action</b>: Play the top card of the [[Sense]] deck as if it were in your hand <i>(paying its cost)</i>.",
+  "traits": "Defender. Martial Artist."
+ },
+ {
+  "code": "60002",
+  "name": "Acute Tactility",
+  "text": "Attach to an enemy or scheme.\n<b>Interrupt</b>: When you defeat attached enemy or remove the last threat from attached scheme, discard this card → ready your identity.",
+  "traits": "Sense. Superpower."
+ },
+ {
+  "code": "60003",
+  "name": "Enhanced Olfaction",
+  "text": "Attach to an enemy or scheme.\n<b>Interrupt</b>: When you defeat attached enemy or remove the last threat from attached scheme, discard this card → reduce the cost of the next card you play this phase by 2.",
+  "traits": "Sense. Superpower."
+ },
+ {
+  "code": "60004",
+  "name": "Heightened Hearing",
+  "text": "Attach to an enemy.\n<b>Hero Interrupt</b> <i>(defense)</i>: When attached enemy attacks, discard this card → that enemy gets -3 ATK for that attack. <i>(You become the target of that attack.)</i>",
+  "traits": "Sense. Superpower."
+ },
+ {
+  "code": "60005",
+  "name": "Radar Sense",
+  "text": "Attach to an enemy.\n<b>Response</b> <i>(attack)</i>: After you attack attached enemy, discard this card → deal 3 damage to that enemy.",
+  "traits": "Sense. Superpower.",
+  "flavor": "The accident that cost Matt his eyesight gave him a new, radar-like sense."
+ },
+ {
+  "code": "60006",
+  "name": "Superior Taste",
+  "text": "Attach to a scheme.\n<b>Response</b> <i>(thwart)</i>: After you thwart attached scheme, discard this card → remove 2 threat from that scheme.",
+  "traits": "Sense. Superpower."
+ },
+ {
+  "code": "60007",
+  "name": "Elektra",
+  "subname": "Elektra Natchios",
+  "text": "[star] <b>Forced Interrupt (Hero)</b>: When Elektra would take consequential damage, Daredevil takes that damage instead.",
+  "traits": "Defender. Martial Artist.",
+  "flavor": "\"I don't need your protection, Matt.\""
+ },
+ {
+  "code": "60008",
+  "name": "Cross-Examination",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 3 damage to an enemy. For each upgrade attached to that enemy, you may deal 1 additional damage to it.",
+  "traits": "Attack.",
+  "flavor": "\"No further questions, punk.\" —Daredevil"
+ },
+ {
+  "code": "60009",
+  "name": "Deposition",
+  "text": "<b>Alter-Ego Action</b> <i>(thwart)</i>: You may choose any upgrade from the [[Sense]] deck and play it, ignoring its resource cost. <i>(Do not shuffle.)</i> Remove 2 threat from a scheme.",
+  "traits": "Thwart.",
+  "flavor": "\"Tell us everything.\" —Matt Murdock"
+ },
+ {
+  "code": "60010",
+  "name": "Living Lie Detector",
+  "text": "<b>Action</b> <i>(thwart)</i>: Remove 2 threat from a scheme. For each upgrade attached to that scheme, you may remove 1 additional threat from it.",
+  "traits": "Thwart.",
+  "flavor": "Thump-Thump     Thump-Thump    Thump-Thump   Thump-Thump  Thump-Thump Thump-Thump"
+ },
+ {
+  "code": "60011",
+  "name": "Raising Hell",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to each enemy for each upgrade attached to that enemy (3 damage instead if Daredevil has the [[Aerial]] trait).",
+  "traits": "Attack.",
+  "flavor": "\"I cannot see the light. So I will be the light. I am Daredevil, and I am not afraid.\" —Daredevil"
+ },
+ {
+  "code": "60012",
+  "name": "Focus the Senses",
+  "text": "Threat cannot be removed from this scheme except by Daredevil or Matt Murdock.\n<b>When Defeated</b>: You may move any number of [[Sense]] upgrades in play to other cards they can attach to. Choose any number of upgrades from the [[Sense]] deck and put them into play. <i>(Do not shuffle.)</i>"
+ },
+ {
+  "code": "60013",
+  "name": "Foggy Nelson",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Foggy Nelson → remove 2 threat from a scheme.",
+  "traits": "Attorney. Persona.",
+  "flavor": "\"Everything's okay now, Matt! Ol' Fog is on it!\""
+ },
+ {
+  "code": "60014",
+  "name": "Karen Page",
+  "text": "<b>Action</b>: Exhaust Karen Page → shuffle 1 Daredevil card from your discard pile into your deck. If you are in alter-ego form, draw 1 card.",
+  "traits": "Persona.",
+  "flavor": "\"What would you boys do without me?\""
+ },
+ {
+  "code": "60015",
+  "name": "Nelson and Murdock",
+  "text": "<b>Response</b>: After an [[Attorney]] character or support defeats a side scheme, confuse an enemy.",
+  "traits": "Location.",
+  "flavor": "\"Let's see them pull off their heist with their vehicle impounded.\" —Matt Murdock"
+ },
+ {
+  "code": "60016",
+  "name": "Sister Maggie",
+  "text": "Matt Murdock gets +3 REC.\n<b>Response</b>: After you recover, discard a status card from your identity.",
+  "traits": "Persona.",
+  "flavor": "As both a Catholic nun and Matt's mother, Sister Maggie often nurses her son back to health."
+ },
+ {
+  "code": "60017",
+  "name": "Daredevil's Billy Club",
+  "text": "Restricted. Daredevil gets +1 ATK.\n<b>Hero Action</b>: Return this card to your hand <i>(from play)</i> → choose:\n• Deal 1 damage to an enemy.\n• Daredevil gains the [[Aerial]] trait until the end of the round.",
+  "traits": "Item. Weapon."
+ },
+ {
+  "code": "60018",
+  "name": "The Man Without Fear",
+  "text": "<b>Hero Action</b>: Exhaust this card and deal 1 damage to Daredeveil → choose:\n• Choose any upgrade from the [[Sense]] deck and play it, ignoring its resource cost. <i>(Do not shuffle.)</i>\n• Ready Daredevil.",
+  "traits": "Title."
+ },
+ {
+  "code": "60019",
+  "name": "Blindspot",
+  "subname": "Sam Chung",
+  "text": "[star] <b>Response</b>: After Blindspot thwarts, confuse an enemy with an upgrade attached.",
+  "traits": "Genius. Martial Artist.",
+  "flavor": "\"I'm invisible, but I'm still here. Chinatown is where I live and I'm going to protect it.\""
+ },
+ {
+  "code": "60020",
+  "name": "Cloak",
+  "subname": "Tyrone Johnson",
+  "text": "<b>Action</b>: Exhaust Cloak and spend [energy] [energy] resources → find Dagger and put her into play.",
+  "traits": "Defender."
+ },
+ {
+  "code": "60021",
+  "name": "Dagger",
+  "subname": "Tandy Bowen",
+  "text": "Cloak loses each [acceleration] icon.\n[star] If Cloak is in play, Dagger takes -1 consequential damage after she uses a basic power.",
+  "traits": "Defender.",
+  "flavor": "\"I'll be the light in your dark, Ty.\""
+ },
+ {
+  "code": "60022",
+  "name": "Ghost Rider",
+  "subname": "Johnny Blaze",
+  "text": "[star] <b>Interrupt</b>: When Ghost Rider attacks an enemy, spend a [energy] resource ([energy] [energy] resources instead if that enemy is the villain) → confuse that enemy.",
+  "traits": "Midnight Sun.",
+  "flavor": "\"My penance stare reveals all of your past sins!\""
+ },
+ {
+  "code": "60023",
+  "name": "Know Your Enemy",
+  "text": "[star] Discount 1 ([[Martial Artist]]).\n<b>Hero Action</b> <i>(thwart)</i>: Remove 1 threat from a scheme. Remove 1 threat from a scheme.",
+  "traits": "Thwart.",
+  "flavor": "\"I don't need to see you to know your next move.\" —Iron Fist"
+ },
+ {
+  "code": "60024",
+  "name": "De-escalation",
+  "text": "Victory 0.\n<b>When Defeated</b>: Remove an acceleration token from play.",
+  "flavor": "\"I can see my house from here!\" —Civilian"
+ },
+ {
+  "code": "60025",
+  "name": "Chance Encounter",
+  "text": "Attach to a side scheme. Max 1 per scheme.\n<b>Interrupt:</b> When attached side scheme is defeated, search your deck and discard pile for an ally and add it to your hand. Shuffle your deck.",
+  "traits": "Condition.",
+  "_dup_of": "26034"
+ },
+ {
+  "code": "60026",
+  "name": "Legal Trouble",
+  "text": "[star] Discount 1 ([[Attorney]] or [[Police]]).\nAttach to a minion. Max 1 per minion.\nAttached minion gets -2 SCH.",
+  "traits": "Condition.",
+  "flavor": "\"You got a permit for that?\" —Police officer"
+ },
+ {
+  "code": "60027",
+  "name": "Move in Shadow",
+  "text": "[star] Discount 1 ([[Martial Artist]] or [[Spy]]).\nTemporary. Max 1 per player.\n<b>Response</b> <i>(thwart)</i>: After you play a card <i>(including this one)</i>, remove 1 threat from a scheme.",
+  "traits": "Skill."
+ },
+ {
+  "code": "60028",
+  "name": "Stealth Training",
+  "text": "Play under any player's control. Max 1 per player.\n<b>Response</b>: After you thwart and exactly defeat a side scheme, exhaust Stealth Training → stun an enemy.",
+  "traits": "Skill."
+ },
+ {
+  "code": "60029",
+  "name": "Stick",
+  "text": "<b>Interrupt</b>: When a friendly [[Martial Artist]] character uses a basic power, choose:\n• Exhaust Stick → that character gets +1 to that basic power for this use.\n• That character gets -1 to that basic power for this use. Ready Stick.",
+  "traits": "Martial Artist. Persona."
+ },
+ {
+  "code": "60030",
+  "name": "Contingency Planning",
+  "text": "Max 1 per player.\nYou may play the upgrade tucked here as if it were in your hand.\n<b>Action</b>: Choose 1 upgrade in your hand that can attach to a minion or side scheme. Tuck that upgrade under here (to a maximum of 1).",
+  "traits": "Skill."
+ },
+ {
+  "code": "60031",
+  "name": "Dance with the Devil",
+  "text": "Team-Up (Daredevil and Elektra). Max 1 per deck.\nAttach to an enemy.\n<b>Hero Action</b> <i>(attack)</i>: Discard this card → deal 3 damage to attached enemy.",
+  "traits": "Dance."
+ },
+ {
+  "code": "60032",
+  "name": "Sensory Overload",
+  "text": "<b><i>Give to the Matt Murdock player.</i></b>\n<b>Forced Response</b>: After a [[Sense]] upgrade enters play, take 1 damage.\n<b>Alter-Ego Response</b>: After you recover, discard this card.",
+  "flavor": "Daredevil's heightened senses make him vulnerable to intense stimuli."
+ },
+ {
+  "code": "60033",
+  "name": "Bullseye",
+  "text": "<b>When Revealed</b>: Choose:\n• Discard a [[Persona]] support you control.\n• Bullseye attacks you <i>(even in alter-ego form)</i>.",
+  "traits": "Assassin.",
+  "flavor": "\"In my hands, anything is a deadly weapon!\""
+ },
+ {
+  "code": "60034",
+  "name": "Deadliest Man Alive",
+  "text": "<b>Forced Interrupt</b>: When Bullseye attacks, give him a facedown boost card.",
+  "flavor": "\"C'mon, Hornhead, let's give the people a show!\" —Bullseye"
+ },
+ {
+  "code": "60035",
+  "name": "Stolen Sai",
+  "text": "Attach to the enemy with the highest ATK.\n[star] Attached character's attacks gain piercing.\n<b>Hero Action</b>: Spend [physical] [physical] resources → choose to either attach this card to Elektra or discard it.\n<hr />\n[star] <b>Boost</b>: If this activation is an attack, it gains piercing.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "60036",
+  "name": "Eye on the Target",
+  "text": "<b>When Revealed</b>: Choose:\n• Remove an ally or [[Persona]] support you control from the game.\n• Bullseye attacks you <i>(even in alter-ego form)</i>. If he is not in play, find him and reveal him.",
+  "flavor": "\"Catch!\" —Bullseye"
+ },
+ {
+  "code": "60037a",
+  "name": "Echo",
+  "text": "<i>Watch and Learn</i> — <b>Response</b>: After a player plays an aspect or basic event, tuck that event under here from that player's discard pile. Then, if there are more than 3 tucked cards here, discard all but 3 of those cards.",
+  "traits": "Defender. Martial Artist."
+ },
+ {
+  "code": "60038",
+  "name": "Innate Reflexes",
+  "text": "Starting. <i>(You may add this card to your hand before drawing your starting hand.)</i>\nYour hero gets +1 DEF.",
+  "traits": "Condition.",
+  "flavor": "KTINK!"
+ },
+ {
+  "code": "60039",
+  "name": "Daredevil",
+  "subname": "Matt Murdock",
+  "text": "[star] <b>Response</b>: After Daredevil uses a basic power, reduce the cost of the next event you play this round by 1.",
+  "traits": "Defender. Martial Artist.",
+  "flavor": "\"Follow my lead.\""
+ },
+ {
+  "code": "60040a",
+  "name": "Photographic Reflexes",
+  "text": "[star] If you are in hero form, you can discard Photographic Reflexes from your hand to play an event tucked under Echo as if it were in your hand. Reduce the cost to play that event by 2. You cannot trigger Echo's <i>\"Watch and Learn\"</i> ability for that event."
+ },
+ {
+  "code": "60040b",
+  "name": "Photographic Reflexes",
+  "text": "[star] If you are in hero form, you can discard Photographic Reflexes from your hand to play an event tucked under Echo as if it were in your hand. Reduce the cost to play that event by 2. You cannot trigger Echo's <i>\"Watch and Learn\"</i> ability for that event."
+ },
+ {
+  "code": "60040c",
+  "name": "Photographic Reflexes",
+  "text": "[star] If you are in hero form, you can discard Photographic Reflexes from your hand to play an event tucked under Echo as if it were in your hand. Reduce the cost to play that event by 2. You cannot trigger Echo's <i>\"Watch and Learn\"</i> ability for that event."
+ },
+ {
+  "code": "60041",
+  "name": "Study the Tape",
+  "text": "<b>Action</b>: Search any player's discard pile for 1 aspect event, 1 basic event, or 1 copy of Photographic Reflexes and add that card to your hand.",
+  "traits": "Tactic.",
+  "flavor": "\"I watch tape after tape to train for a fight.\" —Echo"
+ },
+ {
+  "code": "60042",
+  "name": "The Rez",
+  "text": "<b>Alter-Ego Action</b>: Exhaust The Rez → heal X damage from Maya Lopez, where X is the highest cost among cards tucked under her.",
+  "traits": "Location.",
+  "flavor": "The Rez is not a real reservation or Native nation, but a place for all tribes."
+ },
+ {
+  "code": "60043",
+  "name": "American Sign Language",
+  "text": "<b>Hero Resource</b>: Exhaust this card → generate a [wild] resource for an event being played by any player.",
+  "traits": "Skill.",
+  "flavor": "<Need help?>* —Echo\n*Translated from ASL."
+ },
+ {
+  "code": "60044",
+  "name": "Choreography",
+  "text": "<b>Action</b>: Exhaust this card → shuffle 1 aspect or basic event from your discard pile into your deck. If you are in alter-ego form, draw 1 card.",
+  "traits": "Skill.",
+  "flavor": "Maya uses her physical gifts to express herself in dance."
+ },
+ {
+  "code": "60045",
+  "name": "Echo's Katana",
+  "text": "Restricted.\n<b>Hero Response</b> <i>(attack)</i>: After you play an event, exhaust Echo's Katana → deal damage to an enemy equal to that event's printed cost. This attack gains piercing.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "60046",
+  "name": "Improvisation",
+  "text": "<b>Hero Response</b>: After you play an event, if it has the following traits:\n• [[Attack]] — heal 1 damage from Echo.\n• [[Defense]] — remove 1 threat from a scheme.\n• [[Thwart]] — deal 1 damage to an enemy.",
+  "traits": "Skill."
+ },
+ {
+  "code": "60047",
+  "name": "Muscle Memory",
+  "text": "<b>Hero Action</b>: Exhaust this card → add an event tucked under Echo to your hand.",
+  "traits": "Skill.",
+  "flavor": "\"I absorb an arsenal of actions, so when I need to, I can perform them with the same precision.\" —Echo"
+ },
+ {
+  "code": "60048",
+  "name": "Army of One",
+  "text": "[star] Increase the cost to play this card by 1 for each ally you control.\n<b>Hero Action</b>: Ready your hero.",
+  "flavor": "\"Two versus one is not a fair fight...for you.\" —Daredevil"
+ },
+ {
+  "code": "60049",
+  "name": "Get Their Attention",
+  "text": "<b>Hero Interrupt</b> <i>(defense/thwart)</i>: When an enemy initiates an attack, remove 3 threat from a scheme.",
+  "traits": "Defense. Thwart.",
+  "flavor": "\"I think we made 'em mad.\"\n\"What do you mean 'we'?\"\n—Rocket Raccoon and Gamora"
+ },
+ {
+  "code": "60050",
+  "name": "In Harm's Way",
+  "text": "[star] Increase the cost to play this card by 1 for each ally you control.\n<b>Hero Action</b> <i>(attack/thwart)</i>: Deal X damage to an enemy and remove X threat from a scheme, where X is your DEF.",
+  "traits": "Attack. Thwart."
+ },
+ {
+  "code": "60051",
+  "name": "Powerful Punch",
+  "text": "<b>Hero Interrupt</b> <i>(attack/defense)</i>: When an enemy initiates an attack, deal 4 damage to that enemy.",
+  "traits": "Attack. Defense.",
+  "flavor": "\"That was my favorite shirt!\" —Luke Cage",
+  "_dup_of": "32014"
+ },
+ {
+  "code": "60052",
+  "name": "The Best Offense...",
+  "text": "Temporary.\nYour hero gets +1 DEF.\nUse your DEF in place of your THW and ATK. <i>(Ignore any modifiers to your THW and ATK.)</i>",
+  "traits": "Condition."
+ },
+ {
+  "code": "60053",
+  "name": "Ronin",
+  "text": "While you do not control any allies, your hero gets +1 DEF and gains retaliate 1.",
+  "traits": "Title.",
+  "flavor": "\"I am Ronin, the samurai with no master.\" —Ronin"
+ },
+ {
+  "code": "60054",
+  "name": "Stand Alone",
+  "text": "Max 1 per player.\n<b>Hero Interrupt</b>: When an enemy attacks you <i>(before any defender is declared)</i>, if you do not control any allies, exhaust Stand Alone → ready your hero.",
+  "traits": "Condition."
+ },
+ {
+  "code": "60055",
+  "name": "See No Evil, Hear No Evil",
+  "text": "Team-Up (Daredevil and Echo). Max 1 per deck.\n<b>Hero Action</b> <i>(attack/thwart)</i>: Choose 2 of the following (you may choose the same option twice):\n• Deal 3 damage to an enemy.\n• Remove 3 threat from a scheme.",
+  "traits": "Attack. Thwart."
+ },
+ {
+  "code": "60056",
+  "name": "Superpower Training",
+  "text": "Victory 0.\n<b>When Defeated</b>: Each player may search their deck and discard pile for an identity-specific upgrade and put it into play. <i>(Shuffle.)</i>",
+  "flavor": "\"Eat light daggers, you purple punk!\" —Dagger",
+  "_dup_of": "40059"
+ },
+ {
+  "code": "60057",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "60058",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "60059",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "60060",
+  "name": "Raised by the Kingpin",
+  "text": "<b><i>Give to the Maya Lopez player.</i></b>\nYou cannot deal damage to Kingpin.\n<b>When Revealed</b>: Find Kingpin and put him into play engaged with you.\n<b>Response</b>: After you thwart, place that threat here. If there is 4 or more threat here, remove this card from the game.",
+  "flavor": "Allie Preswick"
+ },
+ {
+  "code": "60061",
+  "name": "Kingpin",
+  "text": "[star] <b>Forced Interrupt</b>: When Kingpin would attack the Maya Lopez player, he schemes instead.\n<i>(Echo's nemesis minion.)</i>",
+  "traits": "Criminal.",
+  "flavor": "\"In my own way, I grew to care for you, Maya. I loved you like a daughter. I still do.\""
+ },
+ {
+  "code": "60062",
+  "name": "Master Manipulator",
+  "text": "Kingpin cannot take damage.\n<b>When Revealed</b>: Find Kingpin and put him into play engaged with you.\n<hr />\n[star] <b>Boost</b>: If Kingpin is in play, reveal this scheme.",
+  "flavor": "\"If you lay a hand on me, you will regret it.\" —Kingpin"
+ },
+ {
+  "code": "60063",
+  "name": "Kingpin's Henchman",
+  "text": "Guard.\nKingpin cannot take damage.",
+  "traits": "Criminal.",
+  "flavor": "\"Mr. Fisk would like a word wit' yous.\""
+ },
+ {
+  "code": "60064",
+  "name": "Pawn of the Kingpin",
+  "text": "<b>When Revealed (Alter-Ego)</b>: If Kingpin is in play, he schemes. Otherwise, this card gains surge.\n<b>When Revealed (Hero)</b>: Deal damage to a hero equal to your hero's ATK.",
+  "flavor": "Kingpin convinced Echo that it was Daredevil, not Kingpin, who killed her father."
+ }
+]

@@ -1,0 +1,1104 @@
+[
+ {
+  "code": "16001a",
+  "name": "Groot",
+  "text": "<i>Flora Colossus</i> — <b>Forced Interrupt</b>: When Groot would take any amount of damage, remove that many growth counters from him. For each growth counter removed this way, prevent 1 of that damage.",
+  "traits": "Guardian."
+ },
+ {
+  "code": "16002",
+  "name": "Fruition",
+  "text": "<b>Action</b>: Place 2 growth counters on Groot (to a maximum of 10).",
+  "traits": "Superpower.",
+  "flavor": "\"I am Groot...\" —Groot"
+ },
+ {
+  "code": "16003",
+  "name": "\"I am Groot\"",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove threat from a scheme equal to the number of growth counters on Groot.",
+  "traits": "Superpower. Thwart.",
+  "flavor": "\"I am Groot!!!\" —Groot"
+ },
+ {
+  "code": "16004",
+  "name": "\"I. AM. GROOT!\"",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal damage to an enemy equal to the number of growth counters on Groot.",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"I. AM. GROOT!\" —Groot"
+ },
+ {
+  "code": "16005",
+  "name": "Root Stomp",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy. If this attack defeats that enemy, place 1 growth counter on Groot (to a maximum of 10).",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"I. Am. Groot.\" —Groot"
+ },
+ {
+  "code": "16006",
+  "name": "\"We Are Groot\"",
+  "text": "<b>Hero Action</b>: Remove up to 4 growth counters from Groot → choose that many friendly characters. Give each of those characters a tough status card.",
+  "traits": "Superpower.",
+  "flavor": "\"We Are Groot.\" —Groot"
+ },
+ {
+  "code": "16007",
+  "name": "Fertile Ground",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Fertile Ground → place 1 growth counter on Groot (to a maximum of 10) and draw 1 card.",
+  "traits": "Location.",
+  "flavor": "\"I...am... Groot.\" —Groot"
+ },
+ {
+  "code": "16008",
+  "name": "Entangling Vines",
+  "text": "<b>Hero Interrupt</b>: When Groot makes a basic thwart, remove 1 growth counter from him and exhaust Entangling Vines → Groot gets +2 THW for that thwart.",
+  "traits": "Superpower.",
+  "flavor": "\"I am. GROOT!\" —Groot"
+ },
+ {
+  "code": "16009",
+  "name": "Lashing Vines",
+  "text": "<b>Hero Response</b>: After Groot uses a basic power, remove 2 growth counters from him and exhaust Lashing Vines → ready Groot.",
+  "traits": "Superpower.",
+  "flavor": "\"I AM. Groot.\" —Groot"
+ },
+ {
+  "code": "16010",
+  "name": "Vine Shield",
+  "text": "<b>Hero Interrupt</b>: When Groot defends against an attack, remove 1 growth counter from him and exhaust Vine Shield → Groot gets +3 DEF for that attack.",
+  "traits": "Superpower.",
+  "flavor": "\"I am Groot?\" —Groot"
+ },
+ {
+  "code": "16011",
+  "name": "Vine Spikes",
+  "text": "<b>Hero Interrupt</b>: When Groot makes a basic attack, remove 1 growth counter from him and exhaust Vine Spikes → Groot gets +2 ATK for that attack.",
+  "traits": "Superpower.",
+  "flavor": "\"We get it, you're Groot.\" —Rocket Raccoon"
+ },
+ {
+  "code": "16012",
+  "name": "Starhawk",
+  "subname": "Stakar Ogord",
+  "text": "<b>Interrupt</b>: When Starhawk takes damage exactly equal to his remaining hit points, return him to your hand.",
+  "traits": "Aerial. Guardian.",
+  "flavor": "\"I am one who knows.\""
+ },
+ {
+  "code": "16013",
+  "name": "Desperate Defense",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When your hero defends against an attack, it gets +2 DEF for that attack. If you take no damage from that attack, ready your hero.",
+  "traits": "Defense.",
+  "_dup_of": "09015"
+ },
+ {
+  "code": "16014",
+  "name": "Fighting Fit",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to the villain (5 damage instead if your hero's remaining hit points are equal to or greater than your hero's starting hit points).",
+  "traits": "Attack.",
+  "flavor": "\"Prepare yourself, simpleton\" —Drax"
+ },
+ {
+  "code": "16015",
+  "name": "The Power of Protection",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Protection <i>(green)</i> card.",
+  "_dup_of": "01079"
+ },
+ {
+  "code": "16016",
+  "name": "Dauntless",
+  "text": "Play under any player's control.\nMax 1 per player.\nWhile your hero's remaining hit points are equal to or greater than your hero's starting hit points, your hero gains retaliate 1.",
+  "traits": "Condition."
+ },
+ {
+  "code": "16017",
+  "name": "Hard to Ignore",
+  "text": "<b>Hero Response</b>: After your hero defends against an attack and takes no damage, exhaust Hard to Ignore → remove 1 threat from the main scheme.",
+  "traits": "Skill.",
+  "flavor": "\"I will die before I yield!\" —Drax"
+ },
+ {
+  "code": "16018",
+  "name": "Indomitable",
+  "text": "<b>Response</b>: After your hero defends, discard indomitable → ready your hero.",
+  "traits": "Condition.",
+  "flavor": "\"We have no choice. So we fight — and we win. There are no other options.\" —Captain America",
+  "_dup_of": "01082"
+ },
+ {
+  "code": "16019",
+  "name": "Rocket Raccoon",
+  "text": "Play only if your identity has the [[guardian]] trait.\n<b>Interrupt</b>: When Rocket Raccoon attacks a minion, he gets +3 ATK for that attack. That attack gains overkill.",
+  "traits": "Guardian."
+ },
+ {
+  "code": "16020",
+  "name": "Flora and Fauna",
+  "text": "Team-Up (Groot and Rocket Raccoon).\nMax 1 per deck\n<b>Hero Action</b>: Place 2 growth counters on Groot (to a maximum of 10) and ready him, or place 2 charge counters on a Rocket Raccoon upgrade and ready that upgrade."
+ },
+ {
+  "code": "16021",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "16022",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "16023",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "16024",
+  "name": "Deft Focus",
+  "text": "Max 1 per player.\n<b>Hero Action</b>: Exhaust Deft Focus → reduce the resource cost of the next [[superpower]] card you play this turn by 1.",
+  "traits": "Skill."
+ },
+ {
+  "code": "16025",
+  "name": "Wilt",
+  "text": "<b><i>Give to the Groot player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust your alter-ego → remove Wilt from the game.\n• Remove 3 growth counters from Groot. If no growth counters were removed this way, this card gains surge. Discard this obligation."
+ },
+ {
+  "code": "16026",
+  "name": "Blazing Inferno",
+  "text": "<b>Forced Response</b>: After the villain phase begins, deal 2 indirect damage to each player.",
+  "flavor": "Furnax rampage across Groot's homeworld, Planet X, bringing death and destruction to everything it touches."
+ },
+ {
+  "code": "16027",
+  "name": "Furnax",
+  "text": "[star] <b>Forced Response</b>: After Furnax activates, deal 2 indirect damage to each player.\n<i>(Groot's nemesis minion.)</i>",
+  "traits": "Leviatron."
+ },
+ {
+  "code": "16028",
+  "name": "Fan the Flames",
+  "text": "<b>When Revealed</b>: Take 2 indirect damage. If Blazing Inferno is in play, take 1 additional indirect damage. If Furnax is in play, take 1 additional indirect damage."
+ },
+ {
+  "code": "16029a",
+  "name": "Rocket Raccoon",
+  "text": "<i>\"Murdered You!\"</i> — <b>Response</b>: After you deal excess damage to an enemy, draw 1 card.",
+  "traits": "Guardian.",
+  "flavor": "\"That's it! You can attack me, you can call me names, but NO ONE touches my blaster!\""
+ },
+ {
+  "code": "16030",
+  "name": "I've Got a Plan",
+  "text": "<b>Hero Response</b>: After you make a basic thwart (using your THW), ready Rocket Raccoon. Rocket Raccoon gets +1 THW while in hero form until the end of the phase.",
+  "traits": "Tactic.",
+  "flavor": "\"No, I thought it'd be funny! Was it funny?\" —Rocket Raccoon"
+ },
+ {
+  "code": "16031",
+  "name": "Reload",
+  "text": "<b>Hero Action</b>: Ready each [[tech]] upgrade you control.",
+  "traits": "Skill.",
+  "flavor": "\"Me? I don't really care about people. I spend most of my time shooting at them.\" —Rocket Raccoon"
+ },
+ {
+  "code": "16032",
+  "name": "Schadenfreude",
+  "text": "<b>Hero Action</b>: Until the end of the turn, heal 2 damage from Rocket Raccoon each time you deal any amount of damage to an enemy.",
+  "flavor": "\"I live for the simple things... like how much this is gonna hurt.\" —Rocket Raccoon"
+ },
+ {
+  "code": "16033",
+  "name": "Salvage",
+  "text": "<b>Response</b>: After you spend this card, put a [[tech]] upgrade from your discard pile on top of your deck."
+ },
+ {
+  "code": "16034",
+  "name": "Battery Pack",
+  "text": "Enters play with 2 charge counters on it.\n<b>Action</b>: Exhaust Battery Pack → move a charge counter from this card to another [[tech]] upgrade you control.",
+  "traits": "Item. Tech."
+ },
+ {
+  "code": "16035",
+  "name": "Cybernetic Skeleton",
+  "text": "You get +3 hit points.\nWhile in hero form, Rocket Raccoon gets +1 ATK.",
+  "traits": "Tech.",
+  "flavor": "\"Yeah, yeah, look at the freak while you can.\" —Rocket Raccoon"
+ },
+ {
+  "code": "16036",
+  "name": "Particle Cannon",
+  "text": "Restricted. Enters play with 2 charge counters on it.\n<b>Hero Action</b> <i>(attack)</i>: Exhaust Particle Cannon and remove 1 charge counter from it → deal 4 damage to an enemy. This attack gains overkill and ranged.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "16037",
+  "name": "Rocket Launcher",
+  "text": "Restricted. Enters play with 2 charge counters on it.\n<b>Hero Action</b>: Exhaust Rocket Launcher and remove 1 charge counter from it → choose a player. Deal 2 damage to the villain and each minion engaged with that player.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "16038",
+  "name": "Rocket's Pistol",
+  "text": "Restricted. Enters play with 3 charge counters on it.\n<b>Hero Action</b> <i>(attack)</i>: Exhaust Rocket's Pistol and remove 1 charge counter from it → deal 2 damage to an enemy.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "16039",
+  "name": "Thruster Boots",
+  "text": "While in hero form, Rocket Raccoon gets +1 THW and gains the [[aerial]] trait.",
+  "traits": "Armor. Tech.",
+  "flavor": "\"Even from up here, I can tell that you're the ugliest human I've ever seen. And I hang out with Peter Quill.\" —Rocket Raccoon"
+ },
+ {
+  "code": "16040",
+  "name": "Bug",
+  "text": "<b>Hero Response</b>: After your hero makes a basic attack, heal 1 damage from Bug.",
+  "traits": "Guardian.",
+  "flavor": "\"Whoopee! We're a *tik* team again! There ain't no way they can *tik* stop us now!\""
+ },
+ {
+  "code": "16041",
+  "name": "Chase Them Down",
+  "text": "<b>Response</b> <i>(thwart)</i>: After your hero attacks and defeats an enemy, remove 2 threat from a scheme.",
+  "traits": "Thwart.",
+  "flavor": "\"Kamala, we don't have a theme song. Please stop humming one...\" —Captain Marvel",
+  "_dup_of": "01052"
+ },
+ {
+  "code": "16042",
+  "name": "Into the Fray",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 6 damage to a minion. For each point of excess damage dealt by this attack, remove 1 threat from the main scheme.",
+  "traits": "Attack.",
+  "_dup_of": "13013"
+ },
+ {
+  "code": "16043",
+  "name": "Looking for Trouble",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Discard cards from the top of the encounter deck until you discard a minion. Put that minion into play engaged with you → remove 3 threat from the main scheme.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "16044",
+  "name": "Relentless Assault",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to a minion. If you paid for this card using a [physical] resource, this attack gains overkill. <i>(Excess damage from this attack is dealt to the villain.)</i>",
+  "traits": "Attack.",
+  "_dup_of": "01053"
+ },
+ {
+  "code": "16045",
+  "name": "Follow Through",
+  "text": "<b>Hero Interrupt</b>: When your hero's attack deals any amount of excess damage, increase that amount by 1.",
+  "traits": "Skill.",
+  "flavor": "\"That's a little excessive...\""
+ },
+ {
+  "code": "16046",
+  "name": "Hand Cannon",
+  "text": "Restricted. Uses (3 charge counters).\n<b>Hero Interrupt</b>: When your hero makes a basic attack, exhaust Hand Cannon and remove 1 charge counter from it → your hero gets +2 ATK for that attack. That attack gains overkill.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "16047",
+  "name": "Groot",
+  "text": "Play only if your identity has the [[guardian]] trait.\n<b>Response</b>: After Groot defends against an attack, heal 2 damage from him.",
+  "traits": "Guardian.",
+  "flavor": "\"I am Groot!\""
+ },
+ {
+  "code": "16048",
+  "name": "Flora and Fauna",
+  "text": "Team-Up (Groot and Rocket Raccoon).\nMax 1 per deck\n<b>Hero Action</b>: Place 2 growth counters on Groot (to a maximum of 10) and ready him, or place 2 charge counters on a Rocket Raccoon upgrade and ready that upgrade.",
+  "_dup_of": "16020"
+ },
+ {
+  "code": "16049",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "16050",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "16051",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "16052",
+  "name": "Booster Boots",
+  "text": "Play only if your identity has the [[guardian]] trait. Max 1 per player.\n<b>Hero Interrupt</b>: When you would take any amount of damage from an attack, exhaust Booster Boots and discard the top card of your deck → prevent 1 of that damage.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "16053",
+  "name": "Crisis on Halfworld",
+  "text": "<b><i>Give to the Rocket Raccoon player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust your alter-ego → remove Crisis on Halfworld from the game.\n• Discard the highest cost upgrade you control. If no upgrade was discarded this way, this card gains surge. Discard this obligation"
+ },
+ {
+  "code": "16054",
+  "name": "Vendetta",
+  "flavor": "\"I know you hate that word. But hey, if it looks like a duck, quacks like a duck, and walks like a duck... it's a raccoon!\" —Blackjack O'Hare"
+ },
+ {
+  "code": "16055",
+  "name": "Blackjack O'Hare",
+  "text": "Quickstrike.\nVillainous. (When this minion activates, give it a boost card.)\n<i>(Rocket Raccoon's nemesis minion.)</i>",
+  "traits": "Criminal.",
+  "flavor": "Hahahahahahahahahahahahahaha!"
+ },
+ {
+  "code": "16056",
+  "name": "Blackjack's Bazooka",
+  "text": "Attach to Blackjack O'Hare, if able. If you cannot, attach to the villain.\n<b>Hero Action</b>: Spend [mental][mental][mental] resources → Discard this card.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "16057",
+  "name": "Planetary Invasion",
+  "text": "<b>When Revealed</b>: Discard cards from the top of the encounter deck until you discard a minion. Reveal that minion, then give it a tough status card.",
+  "flavor": "\"What're you gonna do about it?!\" —Blackjack O'Hare"
+ },
+ {
+  "code": "16058",
+  "name": "Drang",
+  "text": "[star] <b>Forced Response</b>: After Drang schemes, resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.",
+  "traits": "Badoon.",
+  "flavor": "<b><i>\"Surrender to the might of the badoon!\"</i></b>"
+ },
+ {
+  "code": "16059",
+  "name": "Drang",
+  "text": "<b>When Revealed</b>: If Drang's Spear is in play, give Drang 1 facedown boost card; otherwise, search the encounter deck and discard pile for Drang's Spear, reveal it, and shuffle the encounter deck.\n[star] <b>Forced Response</b>: After Drang schemes, resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16060",
+  "name": "Drang",
+  "text": "<b>When Revealed</b>: Discard the top 4[per_hero] cards of the encounter deck. Each time a minion is discarded this way, put it into play engaged with the player who is engaged with the fewest minions.\n[star] <b>Forced Response</b>: After Drang activates, resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16061a",
+  "name": "Terrestrial Invasion",
+  "text": "<b>Contents</b>: Drang (I) and Drang (II). (Drang (II) and Drang(III) instead for expert mode.) Brotherhood of Badoon, Ship Command, and Standard encounter sets. One modular encounter set (Band of Badoon).\n<b>Setup</b>: Put the Badoon Ship environment and the Milano support into play.",
+  "flavor": "<i>Drang's overwhelming forces have mounted a surprise attack against Earth!</i>"
+ },
+ {
+  "code": "16062a",
+  "name": "Protect the Planet",
+  "text": "<b>When Revealed</b>: Resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.",
+  "flavor": "<i>The Badoon have punctured through Earth's defenses! Beat them back before it's too late.</i>"
+ },
+ {
+  "code": "16063",
+  "name": "Badoon Ship",
+  "text": "<i>Charge Up</i> — <b>Special</b>: Place 1 barrage counter here. Then, if there are 4 or more barrage counters here, deal 2 indirect damage to each player and remove all barrage counters from here.",
+  "traits": "Aerial. Vehicle.",
+  "flavor": "<b><i>The Brotherhood of Badoon's ship is charging its cannons for a devastating attack against the heroes on the ground below.</i></b>"
+ },
+ {
+  "code": "16064",
+  "name": "Drang's Spear",
+  "text": "Attach to Drang.\nDrang gains stalwart. (He cannot be stunned or confused.)\n<b>Hero Action</b>: Spend [mental][physical][physical] resources → discard this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "16065",
+  "name": "Badoon Engineer",
+  "text": "[star] <b>Forced Response</b>: After Badoon Engineer engages you or activates against you, resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.\n<hr />\n[star] <b>Boost</b>: Resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16066",
+  "name": "Blockade",
+  "text": "Hinder 2[per_hero]. <i>(When revealed, place 2[per_hero] threat here.)</i>\n<b>First Player Action</b>: Exhaust the Milano → remove 3 threat from this scheme."
+ },
+ {
+  "code": "16067",
+  "name": "Bombardment",
+  "text": "<b>Forced Response</b>: After resolving step one of the villain phase, resolve the Badoon Ship's <i>\"Charge Up\"</i> ability.\n<b>First Player Action</b>: Exhaust the Milano → remove 3 threat from this scheme."
+ },
+ {
+  "code": "16068",
+  "name": "Oppressive Armada",
+  "text": "Hinder 3[per_hero]. <i>When revealed, place 3[per_hero] threat here.)</i>\n<b>First Player Action</b>: Exhaust the Milano → remove 3 threat from this scheme."
+ },
+ {
+  "code": "16069",
+  "name": "Spatial Positioning",
+  "text": "<b>First Player Action</b>: Exhaust the Milano → remove 3 threat from this scheme."
+ },
+ {
+  "code": "16070",
+  "name": "Collector",
+  "text": "<b>Forced Interrupt</b>: When a card <i>(player or encounter)</i> would be placed into a discard pile from play, put it faceup into The Collection instead.",
+  "traits": "Elder.",
+  "flavor": "<b><i>\"I have a display case ready and waiting for our newest acquisitions!\"</i></b>"
+ },
+ {
+  "code": "16071",
+  "name": "Collector",
+  "text": "<b>When Revealed</b>: In player order, each player must choose to either put the top card of their deck faceup into The Collection or take 3 damage.\n<b>Forced Interrupt</b>: When a card <i>(player or encounter)</i> would be placed into a discard pile from play, put it faceup into The Collection instead.",
+  "traits": "Elder."
+ },
+ {
+  "code": "16072",
+  "name": "Collector",
+  "text": "<b>When Revealed</b>: Put the top card of each player's deck faceup into The Collection. Place 1 threat on the main scheme for each card in The Collection.\n<b>Forced Interrupt</b>: When a card would be placed into a discard pile from play, put it faceup into The Collection instead, then place 1 threat on the main scheme.",
+  "traits": "Elder."
+ },
+ {
+  "code": "16073a",
+  "name": "The Grand Collection",
+  "text": "<b>Contents</b>: Collector (I) and Collector (II). <i>(Collector (II) and Collector (III) instead for expert mode.)</i> Infiltrate the Museum, Galactic Artifacts, and Standard encounter sets. One modular encounter set <i>(Menagerie Medley).</i>\n<b>Setup</b>: Create \"The Collection\" game area <i>(see insert for details).</i> Put the top card of each player's deck faceup into The Collection."
+ },
+ {
+  "code": "16074",
+  "name": "Biogram Image",
+  "text": "Attach to Collector.\n<b>Forced Interrupt</b>: When Collector would take any amount of damage, put this card faceup into The Collection → prevent all of that damage, then place threat on the main scheme equal to the amount prevented this way.\n<hr />\n[star] <b>Boost</b>: After this activation ends, reveal this card.",
+  "traits": "Illusion."
+ },
+ {
+  "code": "16075",
+  "name": "Monarch Starstalker",
+  "text": "Villainous. <i>(When this minion activates, give it a boost card.)</i>",
+  "traits": "Bounty Hunter.",
+  "flavor": "<b>\"No one can hide from me.\"</b>"
+ },
+ {
+  "code": "16076",
+  "name": "Inconspicuous Box",
+  "text": "<b>When Revealed</b>: Put the lowest cost card you control faceup into The Collection. If you cannot, this card gains surge.\n<hr />\n[star] <b>Boost</b>: If there are 3[per_hero] or fewer cards in The Collection, put the top card of your deck faceup into The Collection."
+ },
+ {
+  "code": "16077",
+  "name": "View the Cosmos",
+  "text": "<b>When Revealed</b>: Choose one:\n- Put the highest cost card from your hand faceup into The Collection.\n- Discard the highest cost card from your hand, then place threat on the main scheme equal to its printed cost."
+ },
+ {
+  "code": "16078",
+  "name": "Stay Awhile",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Choose to either spend [physical][physical] resources or put the top card of your deck faceup into The Collection.\n<b>When Revealed (Hero)</b>: Collector attacks you with +1 ATK. If you take any amount of damage from that attack, put the top card of your deck faceup into The Collection."
+ },
+ {
+  "code": "16079",
+  "name": "Caught Off Guard",
+  "text": "<b>When Revealed</b>: Discard an upgrade or support you control. If no cards were discarded this way, this card gains surge."
+ },
+ {
+  "code": "16080a",
+  "name": "Collector",
+  "text": "[star] Collector gets +X SCH and +X ATK, where X is equal to the main scheme's current stage number.\n<b>Forced Interrupt</b>: When Collector would be defeated, remove 3[per_hero] threat from the main scheme and flip this card instead.",
+  "traits": "Elder."
+ },
+ {
+  "code": "16081a",
+  "name": "Collector",
+  "text": "[star] Collector gets +X SCH and +X ATK, where X is equal to the main scheme's current stage number.\n<b>Forced Interrupt</b>: When Collector would be defeated, remove 3[per_hero] threat from the main scheme and flip this card instead.",
+  "traits": "Elder."
+ },
+ {
+  "code": "16082a",
+  "name": "The Missing Milano",
+  "text": "<b>Contents</b>: Collector (A1) <i>(Collector (B1) instead for expert mode.)</i> Escape the Museum, Galactic Artifacts, Ship Command, and Standard encounter sets. One modular encounter set <i>(Menagerie Medley).</i>\n<b>Setup</b>: Put the Library Labyrinth environment into play. Set aside the Ship Command modular encounter set."
+ },
+ {
+  "code": "16083a",
+  "name": "Lost in the Museum",
+  "text": "<b>When Revealed</b>: Put the set-aside Milano support from the Ship Command encounter set into play under the first player's control.",
+  "flavor": "<b><i>The Milano is being held in a massive container. You try to pry open the side, but ultimately resolve to smashing the glass as hard as you can.</i></b>"
+ },
+ {
+  "code": "16084a",
+  "name": "The Great Escape",
+  "text": "<b>When Revealed</b>: Flip Library Labyrinth. Place 1 acceleration token on the main scheme. Shuffle the remaining cards from the set-aside Ship Command encounter set into the encounter deck.",
+  "flavor": "<b><i>You've found the exit! As the Milano bursts into space and readies its thrusters, you see the Museum Ship's cannons beginning to charge.</i></b>"
+ },
+ {
+  "code": "16085a",
+  "name": "Library Labyrinth",
+  "text": "\"<i>This way?</i>\" — <b>Hero Action</b>: Deal yourself 1 facedown encounter card → remove 5 threat from the main scheme. (Limit once per round per player.)",
+  "traits": "Location.",
+  "flavor": "The Collector's museum is a maze of miscellaneous trinkets from every culture and hapless creatures from every star system."
+ },
+ {
+  "code": "16086",
+  "name": "\"I Have You Now!\"",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Exhaust your identity. Collector schemes.\n<b>When Revealed (Hero)</b>: You are stunned. Collector attacks you.\n<hr />\n[star] <b>Boost</b>: Give Collector a tough status card."
+ },
+ {
+  "code": "16087",
+  "name": "Impossible Geometry",
+  "text": "Incite 1. <i>(When revealed, place 1 threat on the main scheme.)</i>\n<b>When Revealed</b>: You are confused. If you are already confused, choose and discard 1 card you control.",
+  "flavor": "\"I… am… Groot???\" —Groot"
+ },
+ {
+  "code": "16088",
+  "name": "Nebula",
+  "text": "The first [[Technique]] attachment revealed each round gains surge.\n[star] <b>Forced Interrupt</b>: When Nebula initiates an activation against you, resolve the \"<b>Special</b>\" ability on each [[Technique]] attachment in play, then discard each of those attachments.",
+  "traits": "Criminal."
+ },
+ {
+  "code": "16089",
+  "name": "Nebula",
+  "text": "The first [[Technique]] attachment revealed each round gains surge.\n[star] <b>Forced Interrupt</b>: When Nebula initiates an activation against you, resolve the \"<b>Special</b>\" ability on each [[Technique]] attachment in play, then choose and discard 1 of those attachments.",
+  "traits": "Criminal."
+ },
+ {
+  "code": "16090",
+  "name": "Nebula",
+  "text": "The first [[Technique]] attachment revealed each round gains surge.\n[star] <b>Forced Interrupt</b>: When Nebula initiates an activation against you, resolve the \"<b>Special</b>\" ability on each [[Technique]] attachment in play. You may then remove the top card of your deck from the game to choose and discard 1 of those attachments.",
+  "traits": "Criminal."
+ },
+ {
+  "code": "16091a",
+  "name": "The Art of Evasion",
+  "text": "<b>Contents</b>: Nebula (I) and Nebula (II). <i>(Nebula (II) and Nebula (III) instead for expert mode.)</i> Nebula, Power Stone, Ship Command, and Standard encounter sets. One modular encounter set <i>(Space Pirates).</i>\n<b>Setup</b>: Put the Nebula's Ship environment and the Milano support into play. Attach the Power Stone to Nebula. Discard the top 2[per_hero] cards of the encounter deck, then attach each [[Technique]] attachment discarded this way to Nebula."
+ },
+ {
+  "code": "16092a",
+  "name": "Warp Drive Initiated",
+  "text": "<b>When Revealed</b>: Place 2 evasion counters on Nebula's Ship. For each evasion counter on Nebula's Ship, discard the top 2 cards of each player deck and the encounter deck.",
+  "flavor": "<b><i>With expert precision, Nebula's Ship pitches and yaws, outmaneuvering the Milano and putting Nebula just far enough away that she might have a chance to escape.</i></b>"
+ },
+ {
+  "code": "16093",
+  "name": "Nebula's Ship",
+  "text": "<b>Forced Interrupt</b>: When the villain phase begins, place 1 evasion counter here.\n<i>Shoot the Thrusters!</i> - <b>First Player Action</b>: Exhaust the Milano and spend up to 2 resources of any type → remove 1 evasion counter from here for each resource spent this way.",
+  "traits": "Aerial. Vehicle."
+ },
+ {
+  "code": "16094",
+  "name": "Cutthroat Ambition",
+  "text": "Attach to Nebula.\nNebula cannot take more than 5 damage from a single attack.\n<b>Special</b>: Place 1 threat on the main scheme.\n<hr />\n[star] <b>Boost</b>: After this activation ends, attach this card to Nebula and resolve its <b>\"Special\"</b> ability.",
+  "traits": "Technique."
+ },
+ {
+  "code": "16095",
+  "name": "Evasive Maneuvering",
+  "text": "Attach to Nebula.\nNebula gains stalwart.\n<b>Special</b>: You are stunned. If you are already stunned, give Nebula 1 facedown boost card.\n<hr />\n[star] <b>Boost</b>: After this activation ends, attach this card to Nebula and resolve its <b>\"Special\"</b> ability.",
+  "traits": "Technique."
+ },
+ {
+  "code": "16096",
+  "name": "Unyielding Persistence",
+  "text": "Attach to Nebula.\nNebula gains stalwart.\n<b>Special</b>: Give Nebula a tough status card. If Nebula already has a tough status card, give Nebula 1 facedown boost card.\n<hr />\n[star] <b>Boost</b>: After this activation ends, attach this card to Nebula and resolve its <b>\"Special\"</b> ability.",
+  "traits": "Technique."
+ },
+ {
+  "code": "16097",
+  "name": "Weapon Mastery",
+  "text": "Attach to Nebula.\nNebula gains retaliate 1.\n<b>Special</b>: Take 1 damage.\n<hr />\n[star] <b>Boost</b>: After this activation ends, attach this card to Nebula and resolve its <b>\"Special\"</b> ability.",
+  "traits": "Technique."
+ },
+ {
+  "code": "16098",
+  "name": "Wide Stance",
+  "text": "Attach to Nebula.\nReduce the amount of damage Nebula takes from each attack by 1.\n<b>Special</b>: Discard 1 card at random from your hand.\n<hr />\n[star] <b>Boost</b>: After this activation ends, attach this card to Nebula and resolve its <b>\"Special\"</b> ability.",
+  "traits": "Technique."
+ },
+ {
+  "code": "16099",
+  "name": "Lethal Intent",
+  "text": "<b>When Revealed</b>: Discard cards from the top of the encounter deck until a [[Technique]] attachment is discarded. Reveal that card."
+ },
+ {
+  "code": "16100",
+  "name": "Barrel Roll",
+  "text": "Incite 1. Surge.\n<b>When Revealed</b>: Place 1 evasion counter on Nebula's Ship.\n<hr />\n[star] <b>Boost</b>: Place 1 evasion counter on Nebula's Ship."
+ },
+ {
+  "code": "16101",
+  "name": "Combat Ready",
+  "text": "<b>When Revealed</b>: Discard cards from the top of the encounter deck until a [[Technique]] attachment is discarded. Reveal that card, then resolve its <b>\"Special\"</b> ability.",
+  "flavor": "\"I'll never be finished until I've gotten what I want.\" —Nebula"
+ },
+ {
+  "code": "16102",
+  "name": "Ruthless",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Nebula schemes. If threat is placed by this activation, place 1 evasion counter on Nebula's Ship.\n<b>When Revealed (Hero)</b>: Nebula attacks you. If damage is dealt by this activation, place 1 evasion counter on Nebula's Ship."
+ },
+ {
+  "code": "16103",
+  "name": "Ronan the Accuser",
+  "text": "Toughness.\n[star] <b>Forced Interrupt</b>: When Ronan the Accuser activates against you, give him 1 additional boost card if you control the Power Stone.",
+  "traits": "Accuser Corps. Kree.",
+  "flavor": "<b><i>\"There is no discussion, no debate. You are guilty.\"</i></b>"
+ },
+ {
+  "code": "16104",
+  "name": "Ronan the Accuser",
+  "text": "Toughness.\n<b>When Revealed</b>: Search the encounter deck and discard pile for the Cut the Power side scheme and reveal it. <i>(Shuffle.)</i>\n[star] <b>Forced Interrupt</b>: When Ronan the Accuser activates against you, give him 1 additional boost card if you control the Power Stone.",
+  "traits": "Accuser Corps. Kree."
+ },
+ {
+  "code": "16105",
+  "name": "Ronan the Accuser",
+  "text": "Retaliate 1. Toughness.\n<b>When Revealed</b>: Search the encounter deck and discard pile for the Superior Tactics side scheme and reveal it. <i>(Shuffle.)</i>\n[star] <b>Forced Interrupt</b>: When Ronan the Accuser activates against you, give him 1 additional boost card if you control the Power Stone.",
+  "traits": "Accuser Corps. Kree."
+ },
+ {
+  "code": "16106a",
+  "name": "Interception Imminent",
+  "text": "<b>Contents</b>: Ronan the Accuser (I) and Ronan the Accuser (II). <i>(Ronan the Accuser (II) and Ronan the Accuser (III) instead for expert mode.)</i> Ronan the Accuser, Power Stone, Ship Command, and Standard encounter sets. One modular encounter set <i>(Kree Militants).</i>\n<b>Setup</b>: Put the Kree Command Ship environment and the Milano support into play. Attach the Universal Weapon to Ronan the Accuser. Attach the Power Stone to the first player."
+ },
+ {
+  "code": "16107a",
+  "name": "\"Take What Is Mine\"",
+  "text": "<b>When Revealed</b>: Attach the Power Stone to Ronan the Accuser. If it is already attached to him, give him 1 facedown boost card.",
+  "flavor": "<b><i>Ronan the Accuser's ship has docked with yours. Boarding the Milano, he makes one strike of his Universal Weapon to knock you off your feet. Before you're able to recover, he grabs the Power Stone.</i></b>"
+ },
+ {
+  "code": "16108",
+  "name": "Kree Command Ship",
+  "text": "<b>First Player Interrupt</b>: When a treachery card is revealed from the encounter deck, exhaust the Milano and spend 1 resource of any type → cancel that card's <b>\"When Revealed\" effects.",
+  "traits": "Aerial. Vehicle."
+ },
+ {
+  "code": "16109",
+  "name": "Universal Weapon",
+  "text": "Attach to Ronan the Accuser.\nRonan the Accuser gains stalwart.\n<b>Hero Action</b>: Take 2 damage and deal yourself 1 facedown encounter card → shuffle Universal Weapon into the encounter deck.\n<hr />\n[star] <b>Boost</b>: Attach Universal Weapon to Ronan the Accuser.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "16110",
+  "name": "Fanaticism",
+  "text": "Surge.\nAttach to Ronan the Accuser. Uses (1 fury counter, plus 1[per_hero] additional fury counters).\n[star] <b>Forced Interrupt</b>: When Ronan the Accuser attacks you, that attack gains overkill and piercing. At the end of that attack, remove 1 fury counter from here.",
+  "traits": "Condition."
+ },
+ {
+  "code": "16111",
+  "name": "Cut the Power",
+  "text": "[star] <b>Boost</b>: Choose to either exhaust the Milano or place 2 threat on the main scheme."
+ },
+ {
+  "code": "16112",
+  "name": "Pincer Maneuver",
+  "text": "Hinder 2[per_hero] <i>(When revealed, place 2[per_hero] threat here.)</i>.\n<b>First Player Action</b>: Exhaust the Milano → remove 3 threat from this scheme."
+ },
+ {
+  "code": "16113",
+  "name": "Superior Tactics",
+  "text": "The Power Stone cannot be unattached from Ronan the Accuser.\n<b>When Revealed</b>: Attach the Power Stone to Ronan the Accuser. If it is already attached to him, place 1[per_hero] threat here.",
+  "flavor": "<b><i>Ronan the Accuser's advanced Kree training and fanatical determination make him an opponent like no other.</i></b>"
+ },
+ {
+  "code": "16114",
+  "name": "Single-Minded Fury",
+  "text": "<b>When Revealed</b>: Ronan the Accuser attacks the player who controls the Power Stone <i>(even if that player is in alter-ego form).</i> If no attack was made this way, this card gains surge.\n<hr />\n[star] <b>Boost</b>: Attach the Power Stone to Ronan the Accuser."
+ },
+ {
+  "code": "16115",
+  "name": "Kree Physiology",
+  "text": "Surge.\n<b>When Revealed</b>: Give Ronan the Accuser a tough status card. If he already has a tough status card, take 1 damage.",
+  "flavor": "\"Kneel before me!\" —Ronan the Accuser"
+ },
+ {
+  "code": "16116",
+  "name": "\"You Stand Accused!\"",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Ronan the Accuser schemes with +1 SCH.\n<b>When Revealed (Hero)</b>: Ronan the Accuser attacks you with +1 ATK.\n<hr />\n[star] <b>Boost</b>: Give the villain 1 additional boost card for this activation."
+ },
+ {
+  "code": "16117",
+  "name": "Badoon Assassin",
+  "text": "<b>Forced Response</b>: After Badoon Assassin engages your hero, it attacks you with +2 ATK.\n<hr />\n[star] <b>Boost</b>: If this activation is an attack, this attack gains overkill, piercing, and ranged.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16118",
+  "name": "Badoon Grunt",
+  "text": "<b>Forced Response</b>: After Badoon Grunt engages you, if there are no other minions engaged with you, deal yourself 1 facedown encounter card.\n<hr />\n[star] <b>Boost</b>: Put Badoon Grunt into play engaged with you.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16119",
+  "name": "Badoon Lieutenant",
+  "text": "Patrol. <i>(While this minion is engaged with you, you cannot thwart the main scheme.)</i>\n<hr />\n[star] <b>Boost</b>: If this activation is a scheme, this card gets +2 boost icons ([boost][boost]) for this activation.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16120",
+  "name": "Badoon Sentry",
+  "text": "Retaliate 1.\n<hr />\n[star] <b>Boost</b>: Give the villain a tough status card. If the villain already has a tough status card, this card gets +2 boost icons ([boost][boost]) for this activation.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16121",
+  "name": "Badoon Warlord",
+  "text": "[star] Badoon Warlord's attacks gain overkill.\n<hr />\n[star] <b>Boost</b>: If this activation is an attack, this card gets +2 boost icons ([boost][boost]) for this activation.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16122",
+  "name": "Cloak of Hercules",
+  "text": "Attach to the enemy with the lowest ATK.\n<b>Hero Action</b>: Spend [physical][physical][physical] resources → discard this card.",
+  "traits": "Artifact.",
+  "flavor": "<b><i>The cloak of the fabled hero Hercules. Those fortunate enough to don this mantle are granted unimaginable strength.</i></b>"
+ },
+ {
+  "code": "16123",
+  "name": "Obedience Potion",
+  "text": "Attach to your identity.\nAttached character gets -1 THW, -1 ATK, and -1 DEF.\n<b>Hero Action</b>: Take 1 damage and spend [mental][mental] resources → discard this card. Any player can do this.",
+  "traits": "Artifact."
+ },
+ {
+  "code": "16124",
+  "name": "The Beyonder's Blazer",
+  "text": "Attach to the enemy with the highest SCH.\n<b>Hero Action</b>: Place 2 threat on the main scheme and spend 2 resources → discard this card.",
+  "traits": "Artifact."
+ },
+ {
+  "code": "16125",
+  "name": "The Poison",
+  "text": "Attach to your identity.\n<b>Forced Interrupt</b>: When your turn begins, place 1 poison counter here, the take 1 damage for each poison counter here.\n<b>Hero Action</b>: Spend 3 resources of different types → discard this card. Any player can do this.",
+  "traits": "Artifact.",
+  "flavor": "<b><i>The deadliest toxin in the galaxy.</i></b>"
+ },
+ {
+  "code": "16126",
+  "name": "Vandarian Power Stone",
+  "text": "Attach to the enemy with the lowest SCH.\n<b>Hero Action</b>: Spend [energy][energy][energy] resources → discard this card.",
+  "traits": "Artifact."
+ },
+ {
+  "code": "16127",
+  "name": "Hujahdarian Monarch Egg",
+  "text": "Hinder 2[per_hero]. Victory 0.\n<b>When Defeated</b>: The player who defeated this scheme may ready their identity."
+ },
+ {
+  "code": "16128",
+  "name": "Magical Teapot",
+  "text": "Hinder 2[per_hero]. Victory 0.\n<b>When Defeated</b>: The player who defeated this scheme may heal 4 damage from their identity."
+ },
+ {
+  "code": "16129",
+  "name": "Philosopher's Stone",
+  "text": "Hinder 2[per_hero]. Victory 0.\n<b>When Defeated</b>: The player who defeated this scheme may draw 2 cards."
+ },
+ {
+  "code": "16130",
+  "name": "Crystal Ball",
+  "text": "Hinder 2[per_hero]. Victory 0.\n<b>When Defeated</b>: The player who defeated this scheme may play a card from their hand, reducing its resources cost by 3."
+ },
+ {
+  "code": "16131",
+  "name": "Kree Combat Armor",
+  "text": "Attach to the enemy with the highest ATK.\nReduce the amount of damage attached character takes from each attack by 1.\n<b>Hero Action</b>: Spend 3 resources of the same type → discard this card.",
+  "traits": "Armor."
+ },
+ {
+  "code": "16132",
+  "name": "Kree Commando",
+  "text": "Patrol. <i>(While this minion is engaged with you, you cannot thwart the main scheme.)</i>\n<hr />\n[star] <b>Boost</b>: If this is an attack, this attack gains piercing.",
+  "traits": "Kree. Soldier."
+ },
+ {
+  "code": "16133",
+  "name": "Kree Lieutenant",
+  "text": "Guard. Stalwart. <i>(This character cannot be stunned or confused.)</i>\n<hr />\n[star] <b>Boost</b>: If this activation is an attack, this card gets +3 boost icons ([boost][boost][boost]) for this activation.",
+  "traits": "Kree. Soldier."
+ },
+ {
+  "code": "16134",
+  "name": "Kree Private",
+  "text": "Quickstrike. <i>(After this minion engages your hero, it attacks you.)</i>\n<hr />\n[star] <b>Boost</b>: If this activation is an attack, this attack gains overkill.",
+  "traits": "Kree. Soldier."
+ },
+ {
+  "code": "16135",
+  "name": "Psionic Ghost",
+  "text": "<b>When Revealed</b>: You are confused. If you are already confused, take 1 damage.\n<hr />\n[star] <b>Boost</b>: Put Psionic Ghost into play engaged with you.",
+  "traits": "Ghost."
+ },
+ {
+  "code": "16136",
+  "name": "Servant Bot",
+  "text": "Guard. <i>(While this minion is engaged with you, you cannot attack the villain.)</i>\nPatrol. <i>(While this minion is engaged with you, you cannot thwart the main scheme.)</i>",
+  "traits": "Robot.",
+  "flavor": "<b><i>\"FIND. THE. INTRUDERS.\"</i></b>"
+ },
+ {
+  "code": "16137",
+  "name": "Starshark",
+  "text": "Quickstrike.\n[star] Starshark's attacks deal indirect damage.\n<hr />\n[star] <b>Boost</b>: Deal 1 damage to each character you control.",
+  "traits": "Creature. Elite."
+ },
+ {
+  "code": "16138",
+  "name": "Pirate Commander",
+  "text": "Quickstrike.\n[star] <b>Forced Response</b>: After this minion attacks and damages you, remove 1 card at random in your hand from the game.\n<hr />\n[star] <b>Boost</b>: Give the villain 1 additional boost card for this activation.",
+  "traits": "Criminal."
+ },
+ {
+  "code": "16139",
+  "name": "Pirate Lackey",
+  "text": "Quickstrike.\n[star] <b>Forced Response</b>: After this minion attacks and damages you, remove the top card of your deck from the game.\n<hr />\n[star] <b>Boost</b>: Give the villain 1 additional boost card for this activation.",
+  "traits": "Criminal."
+ },
+ {
+  "code": "16140",
+  "name": "Sound the Alarms",
+  "text": "Each enemy gets +1 ATK.\n<hr />\n[star] <b>Boost</b>: Reveal this card."
+ },
+ {
+  "code": "16141",
+  "name": "Honor Among Thieves",
+  "text": "<b>When Revealed</b>: Discard cards from the top of the encounter deck until a [[Criminal]] minion is discarded. Reveal that minion, then give that minion a tough status card and the villain 1 facedown boost card.",
+  "flavor": "<b><i>A family that steals together stays together.</i></b>"
+ },
+ {
+  "code": "16142",
+  "name": "Milano",
+  "text": "Permanent. Setup.\nThe first player controls the Milano.\n<i>Piloting</i> - <b>Resource</b>: Exhaust the Milano → generate a [wild] resource for any player.",
+  "traits": "Aerial. Vehicle."
+ },
+ {
+  "code": "16143",
+  "name": "Rogue Vessel",
+  "text": "Surge.\n<b>Forced Interrupt</b>: When the villain phase ends, deal 1 damage to each player.\n<b>First Player Action</b>: Exhaust the Milano and spend 2 resources of any type → discard this card.",
+  "traits": "Aerial. Vehicle."
+ },
+ {
+  "code": "16144",
+  "name": "Cannonade",
+  "text": "Hinder 3[per_hero] <i>(When revealed, place 3[per_hero] threat here.)</i>.\n<b>First Player Action</b>: Exhaust the Milano → remove 3 threat from this scheme."
+ },
+ {
+  "code": "16145",
+  "name": "Blind Side",
+  "text": "Peril. <i>(While you are resolving this card, other players cannot help you.)</i>\n<b>When Revealed</b>: Choose one:\n-Exhaust the Milano.\n-Spend [physical][physical] resources.\n- Stun the first player."
+ },
+ {
+  "code": "16146",
+  "name": "Hull Breach",
+  "text": "Peril. <i>(While you are resolving this card, other players cannot help you.)</i>\n<b>When Revealed</b>: Choose one:\n-Exhaust the Milano.\n-Spend [mental][mental] resources.\n- Deal 3 damage to the first player."
+ },
+ {
+  "code": "16147",
+  "name": "Power Siphon",
+  "text": "Peril. <i>(While you are resolving this card, other players cannot help you.)</i>\n<b>When Revealed</b>: Choose one:\n-Exhaust the Milano.\n-Spend [energy][energy] resources.\n- Discard 1 card at random from the first player's hand."
+ },
+ {
+  "code": "16148",
+  "name": "Special Delivery",
+  "text": "<b>When Revealed (Alter-Ego)</b>: You may exhaust the Milano. If you do not, the villain schemes with +1 SCH.\n<b>When Revealed (Hero)</b>: You may exhaust the Milano. If you do not, the villain attacks you with +1 ATK."
+ },
+ {
+  "code": "16149",
+  "name": "Power Stone",
+  "text": "Setup. Attach to the villain.\nPermanent.\n<b>Forced Response</b>: After a hero or villain deals 3 or more damage to attached character with a single attack, attach Power Stone to the attacking hero or villain.",
+  "traits": "Infinity Stone."
+ },
+ {
+  "code": "16150",
+  "name": "Brainstorm",
+  "text": "Unit Cost 1.\n<b>Hero Action</b> <i>(thwart)</i>: Name a card type, then look at the top card of your deck. If that card is of named type, remove 3 threat from the main scheme. Place that card on the top or bottom of your deck, then draw 1 card.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "16151",
+  "name": "By Any Means",
+  "text": "Unit Cost 1.\n<b>Hero Action</b> <i>(attack)</i>: Place 2 threat on the main scheme. Deal 3 damage to the villain. Draw 1 card.",
+  "traits": "Attack."
+ },
+ {
+  "code": "16152",
+  "name": "Contingency Plan",
+  "text": "Unit Cost 1.\n<b>Hero Action</b> <i>(attack)</i>: Discard the top 4 cards of your deck. For each different resource type discarded this way, deal 1 damage to an enemy. Draw 1 card.",
+  "traits": "Attack."
+ },
+ {
+  "code": "16153",
+  "name": "In Defiance",
+  "text": "Unit Cost 1.\n<b>Hero Interrupt</b>: When an identity would take any amount of damage from an attack, prevent 2 of that damage. Draw 1 card."
+ },
+ {
+  "code": "16154",
+  "name": "Calculate the Odds",
+  "text": "Unit Cost 2.\n<b>Hero Action</b>: Draw 1 card and choose a player. That player may draw 1 card, then choose and discard 1 card from their hand."
+ },
+ {
+  "code": "16155",
+  "name": "Creative Solution",
+  "text": "Unit Cost 2.\n<b>Hero Action</b>: Draw 1 card and remove a status card from any character. If the status card type removed this way was:\n- Tough - Deal 3 damage to an enemy.\n- Stun - Remove 3 threat from a scheme.\n- Confuse - Heal 3 damage from an identity."
+ },
+ {
+  "code": "16156",
+  "name": "Grapple",
+  "text": "Unit Cost 2.\n<b>Hero Action</b>: Deal 1 damage to an enemy and stun it. Stun your hero. Draw 1 card."
+ },
+ {
+  "code": "16157",
+  "name": "Wing It",
+  "text": "Unit Cost 2.\n<b>Hero Action</b>: Deal 1 damage to an enemy and confuse it. Confuse your hero. Draw 1 card."
+ },
+ {
+  "code": "16158",
+  "name": "Close Call",
+  "text": "Unit Cost 3.\n<b>Hero Interrupt</b>: When a boost card is turned faceup, cancel that card's <b>\"Boost\"</b> ability and all of its boost icons <i>(</i>[boost]<i>)</i>, then discard it. Draw 1 card."
+ },
+ {
+  "code": "16159",
+  "name": "Defy Danger",
+  "text": "Unit Cost 3.\n<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy and discard the top card of the encounter deck? Take 1 damage for each boost icon <i>(</i>[boost]<i>)</i> discarded this way.",
+  "traits": "Attack."
+ },
+ {
+  "code": "16160",
+  "name": "In Harm's Way",
+  "text": "Unit Cost 3.\n<b>Hero Action</b> <i>(thwart)</i>: Take 2 damage. Remove 5 threat from a scheme.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "16161",
+  "name": "Take the Fight to Them",
+  "text": "Unit Cost 3.\n<b>Hero Action</b>: Look at the top 2[per_hero] cards of the encounter deck. Discard any number of those, then place the rest on the top and/or bottom of the encounter deck in any order. Draw 1 card."
+ },
+ {
+  "code": "16162",
+  "name": "Armor Plating",
+  "text": "Unit Cost 4.\n<b>Hero Interrupt</b>: When an identity would take any amount of damage, exhaust Armor Plating → prevent 1 of that damage (2 of that damage instead if you control the Milano).",
+  "traits": "Armor. Milano Mod."
+ },
+ {
+  "code": "16163",
+  "name": "Heavy Cannon",
+  "text": "Unit Cost 4.\n<b>Hero Action</b>: Exhaust Heavy Cannon → deal 1 damage to each enemy. If you control the Milano, deal 1 additional damage to the villain.",
+  "traits": "Milano Mod. Weapon."
+ },
+ {
+  "code": "16164",
+  "name": "Hyper Thrusters",
+  "text": "Unit Cost 4.\n<b>Hero Action</b>: Exhaust Hyper Thrusters → remove 1 threat from each scheme. If you control the Milano, remove 1 additional threat from the main scheme.",
+  "traits": "Milano Mod. Tech."
+ },
+ {
+  "code": "16165",
+  "name": "Reactor Core",
+  "text": "Unit Cost 4.\n<b>Hero Action</b>: Exhaust Reactor Core and discard the top 2 cards of your deck (the top card instead if you control the Milano) → reduce the resource cost of the next event you play this turn by 1.",
+  "traits": "Milano Mod. Tech."
+ },
+ {
+  "code": "16166",
+  "name": "Ardent Resolve",
+  "text": "Unit Cost 5.\n<b>Hero Action</b>: Ready a friendly character. Draw 1 card."
+ },
+ {
+  "code": "16167",
+  "name": "Onrush",
+  "text": "Unit Cost 5.\n<b>Hero Interrupt</b>: When a card is revealed from the encounter deck, cancel the effects of that card and discard it."
+ },
+ {
+  "code": "16168",
+  "name": "Safeguard",
+  "text": "Unit Cost 5.\n<b>Hero Action</b>: Give up to 2 friendly characters each a tough status card. Draw 1 card."
+ },
+ {
+  "code": "16169",
+  "name": "Sure Gamble",
+  "text": "Unit Cost 5.\n<b>Hero Action</b>: Reduce the resource cost of the next card played this phase by 3."
+ },
+ {
+  "code": "16170",
+  "name": "Cargo Hold",
+  "text": "Unit Cost 6.\n<b>Hero Action</b>: Exhaust Cargo Hold → heal 1 damage from a friendly character. If you control the Milano, heal 1 damage from your identity.",
+  "traits": "Location. Milano Mod."
+ },
+ {
+  "code": "16171",
+  "name": "Mounted Laser",
+  "text": "Unit Cost 6.\n<b>Hero Action</b>: Exhaust Mounted Laser → deal 2 damage to an enemy (3 damage instead if you control the Milano).",
+  "traits": "Milano Mod. Weapon."
+ },
+ {
+  "code": "16172",
+  "name": "Navigation Column",
+  "text": "Unit Cost 6.\n<b>Hero Action</b>: Exhaust Navigation Column, choose and discard 1 card from your hand (discard the top card of your deck instead if you control the Milano) → draw 1 card.",
+  "traits": "Milano Mod. Tech."
+ },
+ {
+  "code": "16173",
+  "name": "Targeting Screen",
+  "text": "Unit Cost 6.\n<b>Hero Action</b>: Exhaust Targeting Screen → remove 2 threat from a scheme (3 threat instead if you control the Milano).",
+  "traits": "Milano Mod. Tech."
+ },
+ {
+  "code": "16174",
+  "name": "Grand Strategy",
+  "text": "Unit Cost 7.\n<b>Hero Action</b>: Draw up to your maximum hand size. Remove this card from the game."
+ },
+ {
+  "code": "16175",
+  "name": "Power Unleashed",
+  "text": "Unit Cost 7.\n<b>Hero Action</b>: Deal 5 damage to the villain and remove 5 threat from the main scheme. Remove this card from the game."
+ },
+ {
+  "code": "16176",
+  "name": "Tried and True",
+  "text": "Unit Cost 7.\n<b>Hero Action</b>: Choose a player. That player may add up to 3 cards from their discard pile to their hand. Remove this card from the game."
+ },
+ {
+  "code": "16177",
+  "name": "Triple Threat",
+  "text": "Unit Cost 7.\n<b>Hero Action</b>: Ready up to 3 characters. Remove this card from the game."
+ },
+ {
+  "code": "16178a",
+  "name": "Badoon Blitz",
+  "text": "<b>Standard Mode Only.</b>\nHinder 3[per_hero]. <i>(When revealed, place 3[per_hero] threat here.)</i>\nVictory 1. <i>(When defeated, add this card to the victory display.)</i>\n<b>When Defeated</b>: Each player may draw 1 card."
+ },
+ {
+  "code": "16179a",
+  "name": "Gallery of Splendor",
+  "text": "<b>Standard Mode Only.</b>\nHinder 3[per_hero]. Victory 1.\n<b>When Defeated</b>: Place the top card of each player's deck faceup into the Collection."
+ },
+ {
+  "code": "16180a",
+  "name": "\"There is No Escape\"",
+  "text": "<b>Standard Mode Only.</b>\nHinder 3[per_hero]. Victory 1.\n<b>When Defeated</b>: Deal 1 damage to each player."
+ },
+ {
+  "code": "16181a",
+  "name": "Guerrilla Tactics",
+  "text": "<b>Standard Mode Only.</b>\nHinder 3[per_hero]. Victory 1.\n<b>When Defeated</b>: Place 2 evasion counters on Nebula's Ship."
+ },
+ {
+  "code": "16182a",
+  "name": "Kree Supremacy",
+  "text": "<b>Standard Mode Only.</b>\nHinder 3[per_hero]. Victory 1."
+ },
+ {
+  "code": "16183",
+  "name": "Badoon Headhunter",
+  "text": "Victory 2. <i>(When defeated, add this card to the victory display.)</i>\nVillainous. <i>(When this minion activates, give it a boost card.)</i>\n<hr />\n[star] <b>Boost</b>: Put Badoon Headhunter into play engaged with you.",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16184",
+  "name": "On the Hunt",
+  "text": "Surge.\n<b>When Revealed</b>: Choose to either take 2 damage or discard 1 card at random from your hand.\n<hr />\n[star] <b>Boost</b>: Give the villain 1 additional boost card for this activation."
+ },
+ {
+  "code": "16185",
+  "name": "Dead to Rights",
+  "text": "Surge.\n<b>When Revealed</b>: Exhaust your identity. If you cannot, place 2 threat on the main scheme.\n<hr />\n[star] <b>Boost</b>: Give the villain 1 additional boost card for this activation."
+ },
+ {
+  "code": "16186",
+  "name": "Headhunter's Henchman",
+  "text": "Surge. Patrol. <i>(While this minion is engaged with you, you cannot thwart the main scheme.)</i>",
+  "traits": "Badoon."
+ },
+ {
+  "code": "16187",
+  "name": "Fugitive Recovery",
+  "text": "Surge.\nHinder 3[per_hero]. <i>(When revealed, place 3[per_hero] threat here.)</i>"
+ }
+]

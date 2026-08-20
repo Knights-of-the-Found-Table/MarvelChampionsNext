@@ -1,0 +1,489 @@
+[
+ {
+  "code": "57001",
+  "name": "She-Hulk",
+  "text": "<b>Setup</b>: The enemy team finds a copy of Superhuman Strength and attaches it to She-Hulk.\n<b>Forced Response</b>: After an alter-ego changes to hero form, deal 1 damage to that hero.",
+  "traits": "Avenger. Gamma."
+ },
+ {
+  "code": "57002",
+  "name": "She-Hulk",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. She-Hulk cannot take damage this phase.\n<b>Forced Response</b>: After an alter-ego changes to hero form, deal 1 damage to that hero.",
+  "traits": "Avenger. Gamma."
+ },
+ {
+  "code": "57003",
+  "name": "She-Hulk",
+  "text": "<b>Setup</b>: The enemy team finds a copy of Superhuman Strength and attaches it to She-Hulk.\n<b>Forced Response</b>: After an alter-ego changes to hero form, deal 1 damage to that hero.",
+  "traits": "Avenger. Gamma."
+ },
+ {
+  "code": "57004",
+  "name": "She-Hulk",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. She-Hulk cannot take damage this phase.\n<b>Forced Response</b>: After an alter-ego changes to hero form, deal 1 damage to that hero.",
+  "traits": "Avenger. Gamma."
+ },
+ {
+  "code": "57005a",
+  "name": "Superhero Registration Act",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "57006a",
+  "name": "Pro-Registration Tactics",
+  "flavor": "Iron Man and his Avengers are ordered to apprehend any superpowered individuals who refuse to register with S.H.I.E.L.D. That includes former teammates such as Captain America and Spider-Woman."
+ },
+ {
+  "code": "57007",
+  "name": "Superhuman Strength",
+  "text": "Attach to She-Hulk.\n[star] <b>Forced Interrupt</b>: When She-Hulk attacks, this attack gains overkill. Discard this card after this attack.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "57008",
+  "name": "Focused Rage",
+  "text": "Attach to She-Hulk.\nShe-Hulk gains stalwart.\n[star] <b>Forced Response</b>: After She-Hulk schemes, discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "57009",
+  "name": "One-Two Punch",
+  "text": "<b>When Revealed (Alter-Ego)</b>: She-Hulk schemes. Give her a tough status card.\n<b>When Revealed (Hero)</b>: She-Hulk attacks you. Give her a tough status card.",
+  "flavor": "\"Don't make this harder than it already is!\" —She-Hulk"
+ },
+ {
+  "code": "57010",
+  "name": "Ground Stomp",
+  "text": "<b>When Revealed</b>: Exhaust each character you control. If no character was exhausted this way, this card gains surge.\n<hr />\n[star] <b>Boost</b>: Exhaust a character you control."
+ },
+ {
+  "code": "57011",
+  "name": "Gamma Slam",
+  "text": "<b>When Revealed</b>: Discard the highest-cost ally or support you control. Place threat on the main scheme equal to that card's cost. If no threat is placed on the main scheme this way, this card gains surge.",
+  "flavor": "\"You messed with the wrong woman!\" —She-Hulk"
+ },
+ {
+  "code": "57012",
+  "name": "Legal Practice",
+  "text": "Threat cannot be removed from this scheme by heroes or allies.\n<b>Alter-Ego Response</b>: After you change form, exhaust your identity → remove 3 threat from this scheme."
+ },
+ {
+  "code": "57013",
+  "name": "S.H.I.E.L.D. Operator",
+  "text": "Patrol.\n<b>When Revealed</b>: Place 2 threat on the main scheme.",
+  "traits": "S.H.I.E.L.D.",
+  "flavor": "\"Unregistered super located at 43rd and Madison. Dispatch unit twelve to intercept.\""
+ },
+ {
+  "code": "57014",
+  "name": "Strategic Overwatch",
+  "text": "<b>When Revealed</b>: Give the enemy leader and each minion a tough status card.\n<hr />\n[star] <b>Boost</b>: Give the activating enemy a tough status card.",
+  "flavor": "\"I knew we couldn't trust that guy.\" —Maria Hill"
+ },
+ {
+  "code": "57015",
+  "name": "Rapid Response",
+  "text": "<b>When Revealed</b>: Discard cards from the encounter deck until a minion is discarded. If you are in:\n• Alter-ego form, place threat on the main scheme equal to that minion's SCH.\n• Hero form, deal damage to your hero equal to that minion's ATK."
+ },
+ {
+  "code": "57016",
+  "name": "Homeland Security",
+  "text": "Hinder 1[per_hero].\nThe first minion revealed each round gains surge.",
+  "flavor": "\"Illegal superpowered activity has been detected in this area. Please return to your homes and take shelter!\" —S.H.I.E.L.D. officer"
+ },
+ {
+  "code": "57017",
+  "name": "Atlas",
+  "text": "<b>When Revealed</b>: Stun your leader. Otherwise, you are stunned.\n<hr />\n[star] <b>Boost</b>: Stun your leader. Otherwise, you are stunned.",
+  "traits": "Giant. Thunderbolt.",
+  "flavor": "\"I'm gonna put the hurt on you, little man.\""
+ },
+ {
+  "code": "57018",
+  "name": "Songbird",
+  "text": "<b>When Revealed</b>: Confuse your leader. Otherwise, you are confused.\n<hr />\n[star] <b>Boost</b>: Confuse your leader. Otherwise, you are confused.",
+  "traits": "Aerial. Thunderbolt.",
+  "flavor": "\"That worked better than I expected.\""
+ },
+ {
+  "code": "57019",
+  "name": "Penance",
+  "text": "<b>When Revealed</b>: Deal 2 damage to your leader. Otherwise, deal 2 damage to a character you control.\n<hr />\n[star] <b>Boost</b>: Deal 2 damage to your leader. Otherwise, deal 1 damage to a character you control.",
+  "traits": "Thunderbolt."
+ },
+ {
+  "code": "57020",
+  "name": "Justice Like Lightning",
+  "text": "<b>When Revealed</b>: Each minion activates against the player it is engaged with. Otherwise, the enemy leader activates against you. Do not give it a boost card for this activation.",
+  "flavor": "\"We're all guilty. This is justice!\" —Penance"
+ },
+ {
+  "code": "57021",
+  "name": "The Thunderbolts",
+  "text": "Hinder 1[per_hero].\nThreat cannot be removed from this scheme while a [[Thunderbolt]] minion is in play.",
+  "flavor": "The government gave supercriminals two options: rot in prison or join the Thunderbolts."
+ },
+ {
+  "code": "57022",
+  "name": "Taskmaster",
+  "text": "Retaliate 1. Toughness. Villainous.\n<b>When Revealed</b>: Taskmaster activates against you.",
+  "traits": "Elite. Thunderbolt.",
+  "flavor": "\"I'm going to charge S.H.I.E.L.D. extra for this!\""
+ },
+ {
+  "code": "57023",
+  "name": "Taskmaster's Sword",
+  "text": "Attach to Taskmaster. Otherwise, attach to the enemy leader.\n[star] Attached character's attacks gain piercing.\n<b>Hero Action</b>: Spend [mental] [physical] resources → discard this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "57024",
+  "name": "Taskmaster's Shield",
+  "text": "Attach to Taskmaster. Otherwise, attach to the enemy leader.\n<b>Forced Interrupt</b>: When attached character would take any amount of damage, reduce that amount by 1.\n<b>Hero Action</b>: Spend [mental] [physical] resources → discard this card.",
+  "traits": "Armor."
+ },
+ {
+  "code": "57025",
+  "name": "Mimicked Move",
+  "text": "<b>When Revealed</b>: If Taskmaster is in play, he attacks your leader. Otherwise, give the enemy leader a tough status card and a facedown boost card.\n<hr />\n[star] <b>Boost</b>: Give the activating enemy an additional boost card."
+ },
+ {
+  "code": "57026",
+  "name": "Taskmaster's Academy",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: Give the enemy leader a tough status card and a facedown boost card.",
+  "flavor": "\"You think I'm mean? Just wait 'til you're fighting Steve Rogers!\" —Taskmaster"
+ },
+ {
+  "code": "57027",
+  "name": "Jester",
+  "text": "<b>When Revealed</b>: Discard the top 3 cards of your deck. Take 1 indirect damage for each different card type discarded this way.",
+  "traits": "Thunderbolt.",
+  "flavor": "\"Ha ha! This is too great! We're being ordered to attack heroes!\""
+ },
+ {
+  "code": "57028",
+  "name": "Jack O'Lantern",
+  "text": "<b>When Revealed</b>: Discard the top 3 cards of your deck. Place 1 threat on the main scheme for each different card type discarded this way.",
+  "traits": "Thunderbolt.",
+  "flavor": "\"I can't believe we're getting paid for this!\""
+ },
+ {
+  "code": "57029",
+  "name": "Mad Jack's Platform",
+  "text": "Attach to a minion of the enemy team's choice. Otherwise, this card gains surge.\nAttached minion gets +4 hit points and gains stalwart.\n<hr />\n[star] <b>Boost</b>: Attach this card to a minion engaged with you.",
+  "traits": "Tech."
+ },
+ {
+  "code": "57030",
+  "name": "Jester's Yo-Yo",
+  "text": "<b>When Revealed</b>: Discard the highest-cost card you control. Otherwise, this card gains surge.\n<hr />\n[star] <b>Boost</b>: Discard an upgrade you control."
+ },
+ {
+  "code": "57031",
+  "name": "Deadly Duo",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: Each player discards the top 8 cards of their deck.",
+  "flavor": "Ordered by S.H.I.E.L.D. to hunt down renegade heroes, Jester and Jack O'Lantern are only too happy to do their part."
+ },
+ {
+  "code": "57032",
+  "name": "You're Out of Order!",
+  "text": "<b>Interrupt</b>: When any amount of threat would be placed on the main scheme, say \"I object!\" and prevent 3 of that threat."
+ },
+ {
+  "code": "57033",
+  "name": "She-Hulk Smash",
+  "text": "<b>Action</b>: Your She-Hulk leader attacks the enemy leader. If you spent a [physical] resource to pay for this event, stun the enemy leader.",
+  "flavor": "\"That does it! Now I'm mad!\" —She-Hulk"
+ },
+ {
+  "code": "57034",
+  "name": "Make Me Angry",
+  "text": "Attach to your She-Hulk leader.\n<b>Forced Response</b>: After a hero or leader attacks attached She-Hulk, she attacks that character. Then, discard this card."
+ },
+ {
+  "code": "57035",
+  "name": "Legal Counsel",
+  "text": "<b>Hero Response</b>: After you spend this resource, move 1 threat from the main scheme to your leader's main scheme."
+ },
+ {
+  "code": "57036",
+  "name": "Righteous Cause",
+  "text": "<b>When Revealed</b>: The enemy leader schemes. If there is more than 1 player on your team, give the enemy leader an additional boost card for this activation.",
+  "flavor": "\"I was a double agent for years. There's not much I won't do for a just cause.\" —Spider-Woman",
+  "_dup_of": "56125"
+ },
+ {
+  "code": "57037",
+  "name": "Whatever It Takes",
+  "text": "<b>When Revealed (Alter-Ego)</b>: The enemy leader attacks your leader.\n<b>When Revealed (Hero)</b>: The enemy leader attacks you.",
+  "flavor": "\"I'm on target. Commence attack.\" —Captain Marvel",
+  "_dup_of": "56126"
+ },
+ {
+  "code": "57038",
+  "name": "Targeted Strike",
+  "text": "<b>When Revealed</b>: The enemy team searches the top 5 cards of the encounter deck for a card and deals it to you as a facedown encounter card.\n<hr />\n[star] <b>Boost</b>: The card gains [boost] for each player on your team.",
+  "_dup_of": "56127"
+ },
+ {
+  "code": "57039a",
+  "name": "Choosing Sides",
+  "text": "Permanent.\nThe enemy leader cannot take more than 2 damage from each attack.\n<b>Forced Response</b>: After the last threat is removed from here, the enemy team searches the top 5 cards of the encounter deck for 1[per_hero] encounter cards and deals one to each player as a facedown encounter card. Flip this card.",
+  "_dup_of": "56128a"
+ },
+ {
+  "code": "57040",
+  "name": "Vision",
+  "text": "<b>Setup</b>: The enemy team finds Vision's mass form attachment and attaches it to Vision, Dense side faceup.\n<b>Forced Response</b>: After resolving step 1 of the villain phase, flip Vision's mass form attachment.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "57041",
+  "name": "Vision",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Vision cannot take damage this phase.\n<b>Forced Response</b>: After resolving step 1 of the villain phase, flip Vision's mass form attachment.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "57042",
+  "name": "Vision",
+  "text": "<b>Setup</b>: The enemy team finds Vision's mass form attachment and attaches it to Vision, Dense side faceup.\n<b>Forced Response</b>: After resolving step 1 of the villain phase, flip Vision's mass form attachment.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "57043",
+  "name": "Vision",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Vision cannot take damage this phase.\n<b>Forced Response</b>: After resolving step 1 of the villain phase, flip Vision's mass form attachment.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "57044a",
+  "name": "Superhero Resistance",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "57045a",
+  "name": "Resistance Tactics",
+  "flavor": "Captain America and his Avengers are forced to go underground or face arrest for refusing to register with S.H.I.E.L.D. When Iron Man and Captain Marvel start rounding up their superpowered friends, the resistance decides to fight back."
+ },
+ {
+  "code": "57046a",
+  "name": "Dense",
+  "text": "Permanent. Mass form.",
+  "traits": "Superpower.",
+  "flavor": "Vision controls the molecules of his body to make himself intangible, or so dense that weapons shatter against him."
+ },
+ {
+  "code": "57047",
+  "name": "Solar Gem",
+  "text": "Attach to Vision.\nVision gains stalwart.\n<b>Hero Response</b>: After you make a basic attack against Vision, spend [energy] [physical] resources → discard this card and flip Vision's mass form attachment.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Item."
+ },
+ {
+  "code": "57048",
+  "name": "Vision's Cape",
+  "text": "Attach to Vision.\nVision gains retaliate 1.\n<b>Hero Response</b>: After you make a basic attack against Vision, spend [energy] [mental] resources → discard this card and flip Vision's mass form attachment.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Item."
+ },
+ {
+  "code": "57049",
+  "name": "Mass Increase",
+  "text": "Attach to Vision.\n<b>Forced Interrupt</b>: When a character attacks Vision while the Dense attachment is in play, prevent all damage from that attack and stun the attacking character. Discard this card.",
+  "traits": "Superpower.",
+  "flavor": "\"Halt!\" —Vision"
+ },
+ {
+  "code": "57050",
+  "name": "Density Control",
+  "text": "Surge. Attach to Vision.\n<b>Forced Interrupt</b>: When Vision activates, if this activation is:\n• A scheme, flip Vision's mass form attachment to Intangible.\n• An attack, flip Vision's mass form attachment to Dense.\nThen, if Vision's mass form attachment flipped, discard this card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "57051",
+  "name": "Solar Beam",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Vision schemes. If the Intangible attachment is in play, Vision gets +1 SCH for this scheme.\n<b>When Revealed (Hero)</b>: Vision attacks you. If the Dense attachment is in play, Vision gets +1 ATK for this attack."
+ },
+ {
+  "code": "57052",
+  "name": "Superdense Strike",
+  "text": "<b>When Revealed</b>: Exhaust a character you control. If the Dense attachment is in play, deal 2 damage to that character. If the Intangible attachment is in play, flip that attachment.",
+  "flavor": "\"Please do not resist or I will be required to apply even greater force.\" —Vision"
+ },
+ {
+  "code": "57053",
+  "name": "Phase Disruption",
+  "text": "<b>When Revealed</b>: The enemy team exhausts an upgrade you control. If the Intangible attachment is in play, discard that upgrade instead. If the Dense attachment is in play, flip that attachment.",
+  "flavor": "\"Target neutralized.\" —Vision"
+ },
+ {
+  "code": "57054",
+  "name": "Just Passing Through",
+  "text": "<b>When Defeated</b>: The player who defeated this scheme confuses their identity. Otherwise, they stun their identity.",
+  "flavor": "Vision's phasing power makes him a difficult and unpredictable foe."
+ },
+ {
+  "code": "57055",
+  "name": "Patriot",
+  "text": "Toughness.\n<b>When Revealed</b>: Give the enemy leader a tough status card.",
+  "traits": "Young Avenger.",
+  "flavor": "\"Don't they know that WE'RE the good guys?\""
+ },
+ {
+  "code": "57056",
+  "name": "Hawkeye",
+  "text": "[star] Hawkeye's attacks gain piercing and ranged.\n<b>When Revealed</b>: Discard an upgrade you control.",
+  "traits": "Young Avenger.",
+  "flavor": "\"Eat your heart out, Clint!\""
+ },
+ {
+  "code": "57057",
+  "name": "Stature",
+  "text": "Guard.\n<b>When Revealed</b>: Discard a support you control.",
+  "traits": "Giant. Young Avenger.",
+  "flavor": "\"You shouldn't talk down to a girl who can grow two stories tall!\""
+ },
+ {
+  "code": "57058",
+  "name": "Teenage Superheroes",
+  "text": "<b>When Revealed</b>: Resolve the \"<b>When Revealed</b>\" ability of each minion in play. If no \"<b>When Revealed</b>\" abilities were resolved this way, this card gains surge.",
+  "flavor": "\"Young Avengers, assemble!\" —Kate Bishop"
+ },
+ {
+  "code": "57059",
+  "name": "Young Avengers",
+  "text": "Hinder 1[per_hero].\nThe first minion revealed each round gains surge.",
+  "flavor": "The next generation of superheroes hopes to carry on the legacy of their seniors."
+ },
+ {
+  "code": "57060",
+  "name": "Speed",
+  "text": "Quickstrike.\n<b>When Revealed</b>: You are stunned. Otherwise, deal 2 damage to your identity.",
+  "traits": "Young Avenger.",
+  "flavor": "\"Hey! Geriatrics! Let's get a move on.\""
+ },
+ {
+  "code": "57061",
+  "name": "Wiccan",
+  "text": "Incite 1.\n<b>When Revealed</b>: You are confused. Otherwise, place 2 threat on the main scheme.",
+  "traits": "Young Avenger.",
+  "flavor": "\"You picked the wrong kids to mess with.\""
+ },
+ {
+  "code": "57062",
+  "name": "Superspeed",
+  "text": "<b>When Revealed</b>: Discard 1 random card from your hand. Take indirect damage equal to its cost.\n<hr />\n[star] <b>Boost</b>: Discard 1 card from your hand.",
+  "flavor": "\"Didn't see that coming, did you?\" Speed"
+ },
+ {
+  "code": "57063",
+  "name": "Spellcasting",
+  "text": "<b>Forced Interrupt</b>: When you play a card, cancel its effects and discard it. Then, discard this card.",
+  "flavor": "\"BLINDINGFLASHBLINDINGFLASH.\" —Wiccan"
+ },
+ {
+  "code": "57064",
+  "name": "Superpowered Siblings",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: The player who defeated this scheme discards 1 card from their hand.",
+  "flavor": "Wiccan and Speed are following in the footsteps of their superhero parents: Vision and Scarlet Witch."
+ },
+ {
+  "code": "57065",
+  "name": "Moon Knight",
+  "text": "Retaliate 2. Toughness.\n<b>When Revealed</b>: Resolve the <b>\"When Revealed\"</b> ability of the topmost treachery in the encounter discard pile.",
+  "traits": "Defender. Elite.",
+  "flavor": "\"You're in a world of trouble now.\""
+ },
+ {
+  "code": "57066",
+  "name": "Crescent Dart",
+  "text": "Attach to Moon Knight. Otherwise, attach to the enemy leader.\n[star] <b>Forced Interrupt</b>: When attached character attacks, this attack gains piercing and ranged. Discard this card after this attack.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "57067",
+  "name": "Fist of Khonshu",
+  "text": "<b>When Revealed</b>: Exhaust your identity and deal 2 damage to it.\n<hr />\n[star] <b>Boost</b>: Exhaust your identity.",
+  "flavor": "\"I am the Fist of Khonshu! I am vengeance!\" —Moon Knight"
+ },
+ {
+  "code": "57068",
+  "name": "Khonshu's Avatar",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: Discard cards from the top of the encounter deck until a treachery is discarded. Resolve that card's \"<b>When Revealed</b>\" ability."
+ },
+ {
+  "code": "57069",
+  "name": "Janus",
+  "text": "<b>When Revealed</b>: If you have the [[Hunted]] trait, Janus activates against you. Otherwise, discard the top 2 cards of your deck.",
+  "traits": "Atlantis.",
+  "flavor": "\"No one escapes the Atlantean royal guard!\""
+ },
+ {
+  "code": "57070",
+  "name": "Amir",
+  "text": "<b>When Revealed</b>: If you have the [[Hunted]] trait, Amir activates against you. Otherwise, discard the top 2 cards of your deck.",
+  "traits": "Atlantis.",
+  "flavor": "\"My lord, Namor, has ordered you brought before him.\""
+ },
+ {
+  "code": "57071",
+  "name": "Atlanteans",
+  "text": "<b>When Revealed</b>: Discard the top 3 cards of your deck. If you are in:\n• Alter-ego form, place 1 threat on the main scheme for each different card type discarded this way.\n• Hero form, take 1 indirect damage for each different card type discarded this way."
+ },
+ {
+  "code": "57072",
+  "name": "Blood Debt",
+  "text": "You gain the [[Hunted]] trait.\n<b>Alter-Ego Action</b>: Discard the top 8 cards of your deck → discard this card."
+ },
+ {
+  "code": "57073",
+  "name": "The Royal Guard",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: The enemy team searches the encounter deck and discard pile for a copy of Blood Debt and deals it to the player who defeated this scheme as a facedown encounter card."
+ },
+ {
+  "code": "57074",
+  "name": "Calculated Risk",
+  "text": "<b>Action</b>: Search the top 5 cards of your leader's encounter deck for an encounter card and deal it to the first player on the enemy team as a facedown encounter card.",
+  "flavor": "\"There is no victory without risk.\" —Vision"
+ },
+ {
+  "code": "57075",
+  "name": "Synthezoid Strike",
+  "text": "<b>Action</b>: Your Vision leader attacks the enemy leader. If Vision's mass form attachment is:\n• Dense, Vision gets +1 ATK for this attack and this attack gains piercing.\n• Intangible, flip it to Dense before resolving this attack."
+ },
+ {
+  "code": "57076",
+  "name": "Phased Out",
+  "text": "<b>Action</b>: Choose an attachment on the enemy leader with the text <b>\"Hero Response\"</b> or <b>\"Hero Interrupt\"</b> and discard it.",
+  "flavor": "\"My ability to phase through electronics can disrupt Stark's technology.\" —Vision"
+ },
+ {
+  "code": "57077",
+  "name": "Android Assistance",
+  "text": "<b>Hero Interrupt</b>: When you spend this resource, flip your Vision leader's mass form attachment."
+ },
+ {
+  "code": "57078",
+  "name": "Righteous Cause",
+  "text": "<b>When Revealed</b>: The enemy leader schemes. If there is more than 1 player on your team, give the enemy leader an additional boost card for this activation.",
+  "flavor": "\"I was a double agent for years. There's not much I won't do for a just cause.\" —Spider-Woman",
+  "_dup_of": "56203"
+ },
+ {
+  "code": "57079",
+  "name": "Whatever It Takes",
+  "text": "<b>When Revealed (Alter-Ego)</b>: The enemy leader attacks your leader.\n<b>When Revealed (Hero)</b>: The enemy leader attacks you.",
+  "flavor": "\"I'm on target. Commence attack.\" —Captain Marvel",
+  "_dup_of": "56204"
+ },
+ {
+  "code": "57080",
+  "name": "Targeted Strike",
+  "text": "<b>When Revealed</b>: The enemy team searches the top 5 cards of the encounter deck for a card and deals it to you as a facedown encounter card.\n<hr />\n[star] <b>Boost</b>: The card gains [boost] for each player on your team.",
+  "_dup_of": "56205"
+ },
+ {
+  "code": "57081a",
+  "name": "Choosing Sides",
+  "text": "Permanent.\nThe enemy leader cannot take more than 2 damage from each attack.\n<b>Forced Response</b>: After the last threat is removed from here, the enemy team searches the top 5 cards of the encounter deck for 1[per_hero] encounter cards and deals one to each player as a facedown encounter card. Flip this card.",
+  "_dup_of": "56206a"
+ }
+]

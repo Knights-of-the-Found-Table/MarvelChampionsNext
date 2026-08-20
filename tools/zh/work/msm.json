@@ -1,0 +1,217 @@
+[
+ {
+  "code": "05001a",
+  "name": "Ms. Marvel",
+  "text": "\"Morphogenetics\" — <b>Response</b>: After you play an [[Attack]], [[Thwart]], or [[Defense]] event, exhaust Ms. Marvel → return that event to your hand.",
+  "traits": "Champion. Inhuman.",
+  "flavor": "\"You can call me Ms. Marvel. And if you cooperate, I won't throw you again.\""
+ },
+ {
+  "code": "05002",
+  "name": "Red Dagger",
+  "text": "<b>Interrupt</b>: When Red Dagger is defeated, spend 2 resources of different types → deal 2 damage to an enemy and return Red Dagger to your hand.",
+  "traits": "Champion.",
+  "flavor": "\"Karachi is my home. I patrol these neighborhoods.\""
+ },
+ {
+  "code": "05003",
+  "name": "Big Hands",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy.",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"This hand thing... is getting out of hand...\" —Ms. Marvel"
+ },
+ {
+  "code": "05004",
+  "name": "Sneak By",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme.",
+  "traits": "Skill. Thwart.",
+  "flavor": "\"This is my whole life in one garbage metaphor.\" —Kamala Khan"
+ },
+ {
+  "code": "05005",
+  "name": "Wiggle Room",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When you would take any amount of damage, prevent 3 of that damage. Draw 1 card.",
+  "traits": "Defense. Superpower.",
+  "flavor": "\"Since we're just getting to know each other, a little FYI: I don't like being taken by surprise!\" —Ms. Marvel"
+ },
+ {
+  "code": "05006",
+  "name": "Aamir Khan",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Aamir Khan → place 1 card from your discard pile on the bottom of your deck, then draw 1 card.",
+  "traits": "Persona.",
+  "flavor": "\"Are you okay? I mean, aside from being in the worst trouble of your life?\""
+ },
+ {
+  "code": "05007",
+  "name": "Bruno Carrelli",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Bruno Carrelli → attach 1 card from your hand facedown here.\n<b>Action</b>: Exhaust Bruno Carrelli → add up to 3 cards attached here to your hand.",
+  "traits": "Persona."
+ },
+ {
+  "code": "05008",
+  "name": "Nakia Bahadir",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Nakia Bahadir → reduce the cost of the next card you play this phase by 1.",
+  "traits": "Persona.",
+  "flavor": "\"You're too sweet, squishy muffin. You give people way too much credit.\" —Nakia Bahadir"
+ },
+ {
+  "code": "05009",
+  "name": "Biokinetic Polymer Suit",
+  "text": "<b>Hero Resource</b>: Exhaust Biokinetic Polymer Suit → generate a [wild] resource for an event.",
+  "traits": "Armor.",
+  "flavor": "\"What about that polymer you were working on for the scholarship? The super snot?\" —Kamala Khan"
+ },
+ {
+  "code": "05010",
+  "name": "Embiggen!",
+  "text": "<b>Hero Interrupt</b>: When you play an [[Attack]] event, exhaust Embiggen! → increase the amount of damage that event deals by 2.",
+  "traits": "Condition. Superpower.",
+  "flavor": "\"EMBIGGEN!\" —Ms. Marvel"
+ },
+ {
+  "code": "05011",
+  "name": "Shrink",
+  "text": "<b>Hero Interrupt</b>: When you play a [[Thwart]] event, exhaust Shrink → increase the amount of threat that event removes by 2.",
+  "traits": "Condition. Superpower.",
+  "flavor": "\"Shrink, shrink, shrink!\" —Ms. Marvel"
+ },
+ {
+  "code": "05012",
+  "name": "Nova",
+  "subname": "Sam Alexander",
+  "text": "<b>Interrupt</b>: When an enemy initiates an attack against you, spend a [energy] resource → deal 2 damage to that enemy.",
+  "traits": "Champion.",
+  "flavor": "\"I guess mom was wrong. All those years of playing video games did pay off!\""
+ },
+ {
+  "code": "05013",
+  "name": "Get Behind Me!",
+  "text": "<b>Hero Interrupt</b>: When a treachery card is revealed from the encounter deck, cancel its \"<b>When Revealed</b>\" effects. The villain attacks you instead.",
+  "flavor": "\"Ahem! Stand aside, citizens!\" —Ms. Marvel",
+  "_dup_of": "01078"
+ },
+ {
+  "code": "05014",
+  "name": "Preemptive Strike",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When a boost card is turned face up while the villain attacks, cancel all boost icons ([boost]) on that card. Then deal 1 damage to the villain for each boost icon cancelled this way.",
+  "traits": "Defense."
+ },
+ {
+  "code": "05015",
+  "name": "Tackle",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Stun an enemy. If you paid for this card using a [physical] resource, deal 3 damage to that enemy.",
+  "traits": "Attack.",
+  "flavor": "That's gonna hurt in the morning."
+ },
+ {
+  "code": "05016",
+  "name": "The Power of Protection",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Protection <i>(green)</i> card.",
+  "_dup_of": "01079"
+ },
+ {
+  "code": "05017",
+  "name": "Energy Barrier",
+  "text": "Uses (3 reflection counters). <b>Interrupt:</b> When you would take any amount of damage, remove 1 reflection counter from here → prevent 1 of that damage and deal 1 damage to an enemy.",
+  "traits": "Item. Tech."
+ },
+ {
+  "code": "05018",
+  "name": "Lockjaw",
+  "text": "You may play Lockjaw from your discard pile during your turn (paying his resource cost).",
+  "traits": "Inhuman.",
+  "flavor": "\"Uhhh... hold on, Bruno. I think my new dog just teleported into my room.\" —Kamala Khan"
+ },
+ {
+  "code": "05019",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "05020",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "05021",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "05022",
+  "name": "Avengers Mansion",
+  "text": "Max 1 per player.\n<b>Action</b>: Exhaust Avengers Mansion → choose a player. That player draws 1 card.",
+  "traits": "Avenger. Location.",
+  "flavor": "\"Did you remember to turn off the stove?\" —Janet Van Dyne",
+  "_dup_of": "01091"
+ },
+ {
+  "code": "05023",
+  "name": "Endurance",
+  "text": "Play under any player's control. Max 1 per player.\nYou get +3 hit points.",
+  "traits": "Condition."
+ },
+ {
+  "code": "05024",
+  "name": "Enhanced Reflexes",
+  "text": "Uses (3 energy counters). <b>Hero Resource:</b> Exhaust Enhanced Reflexes and remove 1 energy counter from it → generate a [energy] resource.",
+  "traits": "Condition."
+ },
+ {
+  "code": "05025",
+  "name": "Home by Dawn",
+  "text": "<b><i>Give to the Kamala Khan player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Kamala Khan → remove Home by Dawn from the game.\n• Discard 1 [[Persona]] support you control. If no support was discarded this way, this card gains surge. Discard this obligation."
+ },
+ {
+  "code": "05026",
+  "name": "Generation Why?",
+  "text": "<b>When Revealed</b>: Discard the top card of each player's deck for each ally and [[Persona]] support in play.",
+  "flavor": "The Inventor has convinced the youth of Jersey City that they should serve as human batteries for his experiments"
+ },
+ {
+  "code": "05027",
+  "name": "Thomas Edison",
+  "text": "Thomas Edison cannot take damage while you are engaged with another minion.\n<i>(Ms. Marvel's nemesis minion.)</i>",
+  "traits": "Bird. Genius.",
+  "flavor": "\"I AM NOT A BIRD!\""
+ },
+ {
+  "code": "05028",
+  "name": "Edison's Giant Robot",
+  "text": "Edison's Giant Robot cannot take damage.\n<b>Hero Action:</b> Spend a [mental] resource → until the end of the phase, treat this card's printed text box as if it were blank.",
+  "traits": "Robot."
+ },
+ {
+  "code": "05029",
+  "name": "Harvest",
+  "text": "<b>When Revealed</b>: Exhaust each [[Persona]] support in play. For each support exhaust this way, the villain heals 1 damage. If no [[Persona]] support was exhausted this way, this card gains surge."
+ },
+ {
+  "code": "05030",
+  "name": "Melee",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 3 damage to an enemy. Deal 3 damage to another enemy.",
+  "traits": "Attack."
+ },
+ {
+  "code": "05031",
+  "name": "Concussive Blow",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Confuse an enemy. If you paid for this card using a [physical] resource, deal 3 damage to that enemy.",
+  "traits": "Attack."
+ },
+ {
+  "code": "05032",
+  "name": "Morale Boost",
+  "text": "<b>Hero Action</b>: Choose a hero. Until the end of the round, that hero gets +1 THW, +1 ATK, and +1 DEF",
+  "flavor": "\"This is a stand I need to take. This time, no compromises.\" —Sam Wilson"
+ },
+ {
+  "code": "05033",
+  "name": "Down Time",
+  "text": "Play under any player's control. Max 1 per player.\nYour alter-ego gets +2 REC.",
+  "traits": "Condition.",
+  "flavor": "\"We should do this more often.\""
+ }
+]

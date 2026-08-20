@@ -1,0 +1,207 @@
+[
+ {
+  "code": "14001a",
+  "name": "Quicksilver",
+  "text": "<i>Super Speed</i> — <b>Response:</b> After you use one of Quicksilver's basic powers <em>(THW, ATK, or DEF),</em> ready him. (Limit once per phase.)",
+  "traits": "Avenger.",
+  "flavor": "\"Super speed. Look it up.\""
+ },
+ {
+  "code": "14002",
+  "name": "Scarlet Witch",
+  "subname": "Wanda Maximoff",
+  "text": "<b>Interrupt:</b> When you use one of Scarlet Witch's basic powers, discard the top card of the encounter deck. For each boost icon discarded this way, Scarlet Witch gets +1 to that power for this use.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "14003",
+  "name": "Always Be Running",
+  "text": "<b>Hero Action:</b> Ready Quicksilver.",
+  "traits": "Superpower.",
+  "flavor": "\"I'm the fastest man on Earth.\" —Quicksilver"
+ },
+ {
+  "code": "14004",
+  "name": "Double Time",
+  "text": "<b>Hero Action</b>: Choose two of the following (you may choose the same option twice):\n- Deal 2 damage to an enemy.\n- Remove 2 threat from a scheme.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "14005",
+  "name": "Maximum Velocity",
+  "text": "Max 1 per phase.\n<b>Hero Action:</b> You get +2 THW, +2 ATK, and +2 DEF until the end of the round.",
+  "traits": "Superpower.",
+  "flavor": "\"Ever been punched at supersonic speed?\" —Quicksilver"
+ },
+ {
+  "code": "14006",
+  "name": "Speed Cyclone",
+  "text": "<b>Hero Action:</b> Stun X Enemies.",
+  "traits": "Superpower.",
+  "flavor": "\"Eat my dust.\" —Quicksilver"
+ },
+ {
+  "code": "14007",
+  "name": "Serval Industries",
+  "text": "<b>Alter-Ego Action:</b> Exhaust Serval Industries → shuffle 2 Quicksilver cards from your discard pile into your deck.",
+  "traits": "Location. X-Factor.",
+  "flavor": "Corporate sponsors of the superhero team known as X-Factor."
+ },
+ {
+  "code": "14008",
+  "name": "Accelerated Reflex",
+  "text": "Quicksilver gets +1 DEF.",
+  "traits": "Condition. Superpower.",
+  "flavor": "\"Is that all you got?\" —Quicksilver"
+ },
+ {
+  "code": "14009",
+  "name": "Friction Resistance",
+  "text": "<b>Hero Response:</b> After you ready Quicksilver, ready this card.\n<b>Resource:</b> Exhaust Friction Resistance → generate a [physical] resource.",
+  "traits": "Condition. Superpower."
+ },
+ {
+  "code": "14010",
+  "name": "Hyper Perception",
+  "text": "Quicksilver gets +1 THW.",
+  "traits": "Condition. Superpower.",
+  "flavor": "\"Surely you can do better than that.\" —Quicksilver"
+ },
+ {
+  "code": "14011",
+  "name": "Reinforced Sinew",
+  "text": "Quicksilver gets +1 ATK.",
+  "traits": "Condition. Superpower.",
+  "flavor": "\"The future is written by the winners.\" —Quicksilver"
+ },
+ {
+  "code": "14012",
+  "name": "Multiple Man",
+  "text": "<b>Response</b>: After Multiple Man enters play, search your deck and hand for a copy of Multiple Man and put it into play. Shuffle your deck if it was searched this way.",
+  "traits": "X-Factor.",
+  "flavor": "\"Who wants a sandwich?!\""
+ },
+ {
+  "code": "14013",
+  "name": "Warlock",
+  "text": "<b>Action:</b> Spend a [mental] resource → heal up to 2 damage from Warlock.",
+  "traits": "X-Factor.",
+  "flavor": "\"Self thinks this is a mistake. But then, self is very young and knows very little.\""
+ },
+ {
+  "code": "14014",
+  "name": "Never Back Down",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When you defend against an attack, you get +2 DEF for this attack. If you take no damage from this attack, stun the attacking enemy.",
+  "traits": "Defense.",
+  "flavor": "\"Champions, charge!\" —Ms. Marvel"
+ },
+ {
+  "code": "14015",
+  "name": "Side Step",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When you would take any amount of damage, prevent 3 of that damage. If you paid for this card using [energy] resource, deal 1 damage to that enemy.",
+  "traits": "Defense.",
+  "flavor": "\"Missed me!\" —Wasp"
+ },
+ {
+  "code": "14016",
+  "name": "Armored Vest",
+  "text": "Play under any player's control. Max 1 per player.\nYour hero gets +1 DEF.",
+  "traits": "Armor.",
+  "flavor": "Life-saving and stylish.",
+  "_dup_of": "01081"
+ },
+ {
+  "code": "14017",
+  "name": "Nerves of Steel",
+  "text": "Play under any player's control.\nMax 1 per player.\n<b>Resource</b>: Exhaust Nerves of Steel → generate a [energy] resource for a [[Defense]] event.",
+  "traits": "Skill."
+ },
+ {
+  "code": "14018",
+  "name": "Order and Chaos",
+  "text": "Team-Up (Quicksilver and Scarlet Witch). Max 1 per deck.\n<b>Hero Interrupt</b>: When a treachery card is revealed from the encounter deck, cancel its \"<b>When Revealed</b>\" effects, then deal 2 damage to the villain."
+ },
+ {
+  "code": "14019",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "14020",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "14021",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "14022",
+  "name": "Adrenaline Rush",
+  "text": "<b>Hero Action</b>: Discard Adrenaline Rush → your hero gets +1 ATK until the end of the phase.",
+  "traits": "Condition.",
+  "flavor": "\"Wow, lady! And I thought Gamora was intense.\" —Rocket Raccoon"
+ },
+ {
+  "code": "14023",
+  "name": "Civic Duty",
+  "text": "<b>Hero Action:</b> Discard Civic Duty → your hero gets +1 THW until the end of the phase.",
+  "traits": "Tactic.",
+  "flavor": "\"Please stay calm! Everything will be okay!\" —Ms. Marvel"
+ },
+ {
+  "code": "14024",
+  "name": "Need for Speed",
+  "text": "<b><i>Give to the Pietro Maximoff player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Pietro Maximoff → remove Need for Speed from the game.\n• Exhaust your identity. You cannot ready your identity until your next turn ends. Discard this obligation."
+ },
+ {
+  "code": "14025",
+  "name": "Extortion of Seismic Proportion",
+  "text": "Incite 1. <i>(When revealed, place 1 threat on the main scheme.)</i>"
+ },
+ {
+  "code": "14026",
+  "name": "Avalanche",
+  "text": "Incite 2. <em>(When revealed, place 2 threat on the main scheme.)</em>\n<b>When Revealed:</b> Each player must choose to either take 2 indirect damage or exhaust their identity.\n<em>(Quicksilver's nemesis minion.)</em>",
+  "traits": "Brotherhood of Mutants."
+ },
+ {
+  "code": "14027",
+  "name": "Vibration Resistance",
+  "text": "Attach to Avalanche, if able. If you cannot, attach to the villain.\nReduce the damage attached enemy takes from each attack by 1.\n<b>Hero Action</b>: Exhaust your hero → discard this card.",
+  "traits": "Condition."
+ },
+ {
+  "code": "14028",
+  "name": "Earthquake",
+  "text": "Incite 1. <i>(When revealed, place 1 threat on the main scheme.)</i>\n<b>When Revealed</b>: Discard 2 cards from your hand and exhaust your identity.\n<hr />\n[star] <b>Boost</b>: Choose to either spend [physical] [physical] resources or exhaust your identity."
+ },
+ {
+  "code": "14029",
+  "name": "Brute Force",
+  "text": "Your hero gets +1 ATK. Your basic attacks gain piercing. <i>(Discard any tough status cards from the target before dealing damage.)</i>\n<b>Forced Response</b>: After you make a basic attack, discard Brute Force.",
+  "traits": "Skill."
+ },
+ {
+  "code": "14030",
+  "name": "Sense of Justice",
+  "text": "Play under any player's control.\nMax 1 per player.\n<b>Resource:</b> Exhaust Sense of Justice → generate a [mental] resource for a [[Thwart]] event.",
+  "traits": "Skill."
+ },
+ {
+  "code": "14031",
+  "name": "United We Stand",
+  "text": "Play only if your identity has the [[Avenger]] trait.\n<b>Hero Action:</b> Heal 1 damage from up to X friendly characters (to a maximum of 3 characters), where X is equal to the villain's stage number."
+ },
+ {
+  "code": "14032",
+  "name": "Beat 'Em Up",
+  "text": "<b>Hero Action</b>: Deal 1 damage to the villain and each minion engaged with you.",
+  "traits": "Tactic.",
+  "flavor": "\"too easy.\" —She-Hulk"
+ }
+]

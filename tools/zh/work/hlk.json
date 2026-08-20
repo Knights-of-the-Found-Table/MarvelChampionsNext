@@ -1,0 +1,210 @@
+[
+ {
+  "code": "10001a",
+  "name": "Hulk",
+  "text": "\"Enraged\" — <b>Forced Interrupt</b>: When your turn ends, discard your hand.",
+  "traits": "Avenger. Gamma.",
+  "flavor": "\"Hulk is not sorry. Hulk is Hulk.\""
+ },
+ {
+  "code": "10002",
+  "name": "Crushing Blow",
+  "text": "You can only spend [physical] resources to pay for this card.\n<b>Hero Action</b> <i>(attack)</i>: Deal damage to an enemy equal to your ATK.",
+  "traits": "Attack.",
+  "flavor": "\"Puny monster.\" —Hulk"
+ },
+ {
+  "code": "10003",
+  "name": "Hulk Smash",
+  "text": "<b>Hero Interrupt</b>: When you make a basic attack, you get +10 ATK for that attack. If you paid for this card using only [physical] resources, that attack gains overkill.",
+  "traits": "Superpower.",
+  "flavor": "\"When Hulk smash something, it stay smashed!\" —Hulk"
+ },
+ {
+  "code": "10004",
+  "name": "Sub-Orbital Leap",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme (5 threat instead if you paid for this card using only [physical] resources).",
+  "traits": "Superpower. Thwart.",
+  "flavor": "\"Leave Hulk alone!\" —Hulk"
+ },
+ {
+  "code": "10005",
+  "name": "Thunderclap",
+  "text": "<b>Hero Action</b>: Choose up to 3 different enemies. Deal 3 damage to each of them.",
+  "traits": "Superpower.",
+  "flavor": "\"Are you afraid of Hulk's little wind?\" —Hulk"
+ },
+ {
+  "code": "10006",
+  "name": "Unstoppable Force",
+  "text": "<b>Hero Action</b>: Ready Hulk. If you paid for this card using only [physical] resources, draw 1 card.",
+  "flavor": "\"Nobody stop Hulk!\" —Hulk"
+ },
+ {
+  "code": "10007",
+  "name": "Limitless Strength",
+  "text": "Spend this card only in hero form."
+ },
+ {
+  "code": "10008",
+  "name": "Banner's Laboratory",
+  "text": "Bruce Banner gets +2 REC.\n<b>Alter-Ego Resource</b>: Exhaust Banner's Laboratory → generate a [mental] resource.",
+  "traits": "Location.",
+  "flavor": "\"The best thing about my lab is that nobody ever bothers me here.\" —Bruce Banner"
+ },
+ {
+  "code": "10009",
+  "name": "Boundless Rage",
+  "text": "Hero form only. Hulk gets +1 ATK.\n<b>Forced Response</b>: After you change form, discard this card.",
+  "traits": "Condition. Gamma.",
+  "flavor": "\"The angrier I get, the stronger I get.\" —Bruce Banner"
+ },
+ {
+  "code": "10010",
+  "name": "Immovable Object",
+  "text": "You get +4 hit points.\nHulk gains retaliate 1.",
+  "traits": "Condition."
+ },
+ {
+  "code": "10011",
+  "name": "Brawn",
+  "text": "<b>Response</b>: After Brawn attacks, remove 1 threat from a scheme.",
+  "traits": "Champion. Gamma.",
+  "flavor": "\"I'm the strongest one there is. And the smartest. That's all the authority I need.\""
+ },
+ {
+  "code": "10012",
+  "name": "Sentry",
+  "subname": "Robert Reynolds",
+  "text": "<b>Forced Response</b>: After Sentry enters play under your control, deal yourself 1 encounter card.",
+  "traits": "Avenger.",
+  "flavor": "\"When I use my powers of a million exploding suns, I unleash the Void. He attacks the world every time I try to save it.\""
+ },
+ {
+  "code": "10013",
+  "name": "She-Hulk",
+  "subname": "Jennifer Walters",
+  "text": "[star] She-Hulk gets +1 ATK for each damage token here.",
+  "traits": "Avenger. Gamma.",
+  "flavor": "\"I'd ask your to surrender... but I'm really hoping you'll put up a fight.\""
+ },
+ {
+  "code": "10014",
+  "name": "Drop Kick",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy. If you paid for this card using only [physical] resources, stun that enemy and draw 1 card.",
+  "traits": "Attack.",
+  "flavor": "\"Smashing is what Hulk does best!\" —Hulk"
+ },
+ {
+  "code": "10015",
+  "name": "Toe to Toe",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Choose an enemy. That enemy attacks you. Deal 5 damage to that enemy.",
+  "traits": "Attack.",
+  "flavor": "\"How about a taste of your own medicine?\" —Captain Marvel"
+ },
+ {
+  "code": "10016",
+  "name": "\"You'll Pay for That!\"",
+  "text": "<b>Hero Response</b> <i>(thwart)</i>: After the villain attacks you, remove 1 threat from a scheme for each damage you took from the attack (to a maximum of 5).",
+  "traits": "Thwart."
+ },
+ {
+  "code": "10017",
+  "name": "The Power of Aggression",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Aggression <i>(red)</i> card.",
+  "_dup_of": "01055"
+ },
+ {
+  "code": "10018",
+  "name": "Martial Prowess",
+  "text": "Play under any player's control.\nMax 1 per player.\n<b>Resource</b>: Exhaust Martial Prowess → generate a [physical] resource for an [[Attack]] event.",
+  "traits": "Skill."
+ },
+ {
+  "code": "10019",
+  "name": "To the Rescue!",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 2 threat from a scheme.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "10020",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "10021",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "10022",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "10023",
+  "name": "Avengers Mansion",
+  "text": "Max 1 per player.\n<b>Action</b>: Exhaust Avengers Mansion → choose a player. That player draws 1 card.",
+  "traits": "Avenger. Location.",
+  "flavor": "\"Did you remember to turn off the stove?\" —Janet Van Dyne",
+  "_dup_of": "01091"
+ },
+ {
+  "code": "10024",
+  "name": "Helicarrier",
+  "text": "Max 1 per player.\n<b>Action</b>: Exhaust Helicarrier → choose a player. Reduce the resource cost of the next card that player plays this phase by 1.",
+  "traits": "Location. S.H.I.E.L.D.",
+  "flavor": "\"A flying aircraft carrier? You're kidding, right?\" —Jennifer Walters",
+  "_dup_of": "01092"
+ },
+ {
+  "code": "10025",
+  "name": "Inner Demons",
+  "text": "<b><i>Give to the Bruce Banner player.</i></b>\nChange form <i>(flip your identity)</i>.\n• If you are Bruce Banner, discard 2 cards from your hand. Discard this obligation.\n• If you are Hulk, exhaust your hero. Discard this obligation."
+ },
+ {
+  "code": "10026",
+  "name": "Abomination",
+  "text": "[star] <b>Forced Response</b>: After Abomination attacks you, discard the top card of your deck. If a [physical] resource was discarded this way, take 2 damage.",
+  "traits": "Elite. Gamma.",
+  "flavor": "\"Foolish rabble! Your pitiful display is nothing to my newfound power!\""
+ },
+ {
+  "code": "10027",
+  "name": "Total Destruction",
+  "text": "Threat cannot be removed from this scheme while Abomination is in play."
+ },
+ {
+  "code": "10028",
+  "name": "Clash Of The Titans",
+  "text": "<b>When Revealed</b>: The enemy with the highest ATK attacks the hero or ally with the highest ATK (first player decides ties.) If no attack was made this way, this card gains surge.",
+  "flavor": "\"You are all beneath me!\" —Abomination"
+ },
+ {
+  "code": "10029",
+  "name": "Beat Cop",
+  "text": "<b>Action</b>: Exhaust Beat Cop → move 1 threat from a scheme to here.\n<b>Action</b>: Exhaust and discard Beat Cop → deal 1 damage to a minion for each threat here.",
+  "traits": "Persona."
+ },
+ {
+  "code": "10030",
+  "name": "Inspiring Presence",
+  "text": "Play only if your identity has the [[Avenger]] trait.\n<b>Hero Action</b>: Heal 1 damage from an ally and ready it."
+ },
+ {
+  "code": "10031",
+  "name": "Electrostatic Armor",
+  "text": "Player under any player's control.\nMax 1 per player.\n<b>Response</b>: After you defend against an attack, deal 1 damage to the attacking character.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "10032",
+  "name": "Resourceful",
+  "text": "<b>Resource</b>: Discard Resourceful → generate a [wild] resource.",
+  "traits": "Skill.",
+  "flavor": "\"Innovation is the ultimate weapon.\" —Vision"
+ }
+]

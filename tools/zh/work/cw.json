@@ -1,0 +1,1282 @@
+[
+ {
+  "code": "56001a",
+  "name": "Tigra",
+  "text": "Each minion with a copy of Hunted attached loses guard.\n<i>On the Hunt</i> — <b>Response</b>: After the player phase begins, draw 1 card for each minion engaged with you (to a maximum of 3).",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56002",
+  "name": "Moon Knight",
+  "subname": "Marc Spector",
+  "text": "<b>Forced Response</b>: After Moon Knight enters play, search the encounter deck and discard pile for a minion and put it into play engaged with you. Stun and confuse that minion.",
+  "traits": "Avenger.",
+  "flavor": "\"Hey, Greer, look what I found!\""
+ },
+ {
+  "code": "56003",
+  "name": "Precinct HQ",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Precinct HQ → remove 1 threat from a scheme. Remove 1 additional threat for each minion engaged with you.",
+  "traits": "Location.",
+  "flavor": "\"Save your threats, mister. My friends are a lot scarier than yours.\" —Greer Nelson"
+ },
+ {
+  "code": "56004",
+  "name": "Cat's Head Amulet",
+  "text": "<b>Resource</b>: Exhaust Cat's Head Amulet → generate a [physical] resource for each minion engaged with you (to a maximum of [physical] [physical] [physical]).",
+  "traits": "Artifact. Item.",
+  "flavor": "Tigra's amulet allows her to change between her feline and human forms."
+ },
+ {
+  "code": "56005",
+  "name": "Sharp Claws",
+  "text": "<b>Interrupt</b>: When you make a basic attack, exhaust Sharp Claws → Tigra gets +1 ATK for this attack. Choose:\n• This attack gains overkill.\n• This attack gains piercing.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "56006",
+  "name": "Cat-Like Reflexes",
+  "text": "<b>Hero Interrupt</b>: When you would take any amount of damage, discard Cat-Like Reflexes → prevent 3 of that damage. You may confuse a minion engaged with you.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "56007",
+  "name": "Hunted",
+  "text": "[star] As an additional cost to play this upgrade, search the encounter deck and discard pile for a minion and put it into play engaged with you. Attach Hunted to that minion and stun it.\n<b>Interrupt</b>: When attached minion is defeated, ready Tigra.",
+  "traits": "Condition."
+ },
+ {
+  "code": "56008",
+  "name": "Tooth and Claw",
+  "text": "Reduce the cost to play this event by 1 for each minion engaged with you.\n<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy. Deal 4 damage to an enemy.",
+  "traits": "Attack. Superpower."
+ },
+ {
+  "code": "56009",
+  "name": "Feline Senses",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme. If this removes the last threat from that scheme, stun a minion.",
+  "traits": "Superpower. Thwart.",
+  "flavor": "\"It's just instinct. This cat's got to hunt.\" —Tigra"
+ },
+ {
+  "code": "56010",
+  "name": "Two-Gun Kid",
+  "subname": "Matthew Hawk",
+  "text": "[star] <b>Interrupt</b>: When Two-Gun Kid makes a basic attack, choose 2 enemies instead of 1 and resolve this attack against each of them.",
+  "traits": "Avenger.",
+  "flavor": "\"Alright fellas, say when.\""
+ },
+ {
+  "code": "56011",
+  "name": "Spider-Girl",
+  "subname": "Anya Corazon",
+  "text": "<b>Response</b>: After you play Spider-Girl from your hand, stun and confuse a minion.",
+  "traits": "Avenger.",
+  "flavor": "\"Alright you bunch of losers. Who wants a piece of me?.\"",
+  "_dup_of": "04040"
+ },
+ {
+  "code": "56012",
+  "name": "Air Cover",
+  "text": "Uses (2 fuel counters). Max 1 per player.\n<b>Response</b>: After a minion enters play, exhaust this card and remove 1 fuel counter from it → search your deck and discard pile for a [[Tactic]] upgrade that can be attached to that minion and add it to your hand.",
+  "traits": "Tech."
+ },
+ {
+  "code": "56013",
+  "name": "Aggressive Conditioning",
+  "text": "Play under any player's control. Max 1 per player.\nYou get +3 hit points and your hero gets +1 ATK.",
+  "traits": "Condition."
+ },
+ {
+  "code": "56014",
+  "name": "Suppressing Fire",
+  "text": "Attach to a minion. Max 1 per minion.\n<b>Hero Interrupt</b>: When you attack and defeat attached minion, heal 2 damage from your hero.",
+  "traits": "Tactic.",
+  "_dup_of": "46014"
+ },
+ {
+  "code": "56015",
+  "name": "\"Bring It!\"",
+  "text": "Max 1 per phase.\n<b>Hero Action</b>: Draw 1 card for each minion engaged with you.",
+  "flavor": "\"You picked the wrong day, pal!\" —Rocket Raccoon",
+  "_dup_of": "19030"
+ },
+ {
+  "code": "56016",
+  "name": "Coup de Grâce",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Defeat a non-[[Elite]] minion with an upgrade attached. Ignore any \"<b>When Defeated</b>\" abilities on that minion.",
+  "traits": "Attack.",
+  "flavor": "\"I'm putting an end to this – right now!\" —Black Knight"
+ },
+ {
+  "code": "56017",
+  "name": "Savage Strike",
+  "text": "<b>Hero Interrupt</b>: When you make a basic attack, you get +6 ATK for this attack. This attack gains piercing.",
+  "traits": "Skill.",
+  "flavor": "KRACK!"
+ },
+ {
+  "code": "56018",
+  "name": "Audacity",
+  "text": "Max 1 per deck.\n<b>Hero Response</b>: After you spend this card, deal 1 damage to the villain.",
+  "_dup_of": "21046"
+ },
+ {
+  "code": "56019",
+  "name": "Yellow Jacket",
+  "subname": "Hank Pym",
+  "text": "Play only if you have the [[Avenger]] trait.\n<b>Response</b>: After Yellow Jacket enters play, search the top 5 cards of your deck for an upgrade and add it to your hand.",
+  "traits": "Avenger.",
+  "flavor": "\"I know what I have to do.\""
+ },
+ {
+  "code": "56020",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "56021",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "56022",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "56023",
+  "name": "In Too Deep",
+  "text": "<b><i>Give to the Greer Nelson player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Greer Nelson → remove In Too Deep from the game.\n• Each minion engage3d with you activates against you. If no minions activate this way, In Too Deep gains surge. Discard this card."
+ },
+ {
+  "code": "56024",
+  "name": "The Hood",
+  "text": "Steady. Villainous.\n[star] <b>Forced Response</b>: After The Hood attacks, place 1 threat on the Criminal Underworld side scheme.\n<i>(Tigra's nemesis minion.)</i>",
+  "traits": "Criminal."
+ },
+ {
+  "code": "56025",
+  "name": "Criminal Underworld",
+  "text": "Each [[Criminal]] minion cannot take damage.",
+  "flavor": "The Hood has gathered the disparate elements of the criminal underworld together in one unified gang."
+ },
+ {
+  "code": "56026",
+  "name": "The Hood's Mantle",
+  "text": "Attach to The Hood. Otherwise, attach to the villain.\n<b>Hero Response</b>: After you make a basic attack against attached enemy, spend [energy] [physical] resources → discard this card.\n<hr />\n[star] <b>Boost</b>: Attach to The Hood. Otherwise, attach to the villain.",
+  "traits": "Armor."
+ },
+ {
+  "code": "56027",
+  "name": "Madame Masque",
+  "text": "<b>When Revealed</b>: Place 2 threat on the Criminal Underwold side scheme. Otherwise, find Criminal Underworld and reveal it.\n<hr />\n[star] <b>Boost</b>: Place 2 threat on the Criminal Underworld side scheme. Otherwise, this card gains [boost][boost].",
+  "traits": "Criminal."
+ },
+ {
+  "code": "56028",
+  "name": "Jigsaw",
+  "text": "Quickstrike.\n[star] <b>Forced Response</b>: After Jigsaw attacks and damages a character, place 2 threat on the Criminal Underworld side scheme.",
+  "traits": "Criminal.",
+  "flavor": "\"Bad kitty!\""
+ },
+ {
+  "code": "56029a",
+  "name": "Hulkling",
+  "text": "<i>Chosen Shape</i> — <b>Forced Response</b>: After a [[Shapeshift]] upgrade enters play under your control, discard each other [[Shapeshift]] upgrade you control and ready Hulkling.",
+  "traits": "Avenger. Kree. Skrull."
+ },
+ {
+  "code": "56030",
+  "name": "Wiccan",
+  "subname": "William Kaplan",
+  "text": "<b>Response</b>: After you play Wiccan from your hand, search your deck and discard pile for an identity-specific event and add it to your hand. <i>(Shuffle.)</i>",
+  "traits": "Avenger. Mystic.",
+  "flavor": "\"Hang on, Teddy! I got your back!\""
+ },
+ {
+  "code": "56031",
+  "name": "Altman Residence",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Altman Residence → heal 2 damage from Teddy Altman and shuffle 1 Hulkling card from your discard pile into your deck.",
+  "traits": "Location."
+ },
+ {
+  "code": "56032",
+  "name": "Winged Shape",
+  "text": "Hulkling gets +1 THW, +1 ATK, +1 DEF, and gains the [[Aerial]] trait.\n<b>Hero Response</b>: After you play an event, exhaust Winged Shape → remove 2 threat from a scheme.",
+  "traits": "Shapeshift."
+ },
+ {
+  "code": "56033",
+  "name": "Hulk Shape",
+  "text": "Hulkling gets +2 ATK and +1 DEF.\n<b>Hero Response</b>: After you play an event, exhaust Hulk Shape → deal 2 damage to an enemy.",
+  "traits": "Shapeshift."
+ },
+ {
+  "code": "56034",
+  "name": "Armored Shape",
+  "text": "Hulkling gets +1 ATK, +2 DEF, and gains retaliate 1.\n<b>Hero Response</b>: After you play an event, exhaust Armored Shape → heal 2 damage from Hulkling.",
+  "traits": "Shapeshift."
+ },
+ {
+  "code": "56035",
+  "name": "Imitation Shape",
+  "text": "Hulkling gets +2 THW.\n<b>Forced Interrupt</b>: When an enemy would attack you, it schemes instead.\n<b>Hero Response</b>: After you play an event, exhaust Imitation Shape → draw 1 card.",
+  "traits": "Shapeshift."
+ },
+ {
+  "code": "56036",
+  "name": "Alien Physiology",
+  "text": "<b>Resource</b>: Exhaust Alien Physiology → generate a [wild] resource ([wild] [wild] resources instead if paying for a Hulkling card).",
+  "traits": "Superpower.",
+  "flavor": "\"When I first discovered my powers, I thought I was a mutant. But it turns out I'm an alien!\""
+ },
+ {
+  "code": "56037",
+  "name": "Shapeshifter Strike",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy. Ready your [[Shapeshift]] upgrade.",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"You don't touch my friends!\" —Hulkling"
+ },
+ {
+  "code": "56038",
+  "name": "Armored Defense",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When an enemy attacks, deal damage to it equal to your DEF. After this attack, give Hulkling a tough status card.",
+  "traits": "Defense. Superpower."
+ },
+ {
+  "code": "56039",
+  "name": "Impersonation",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 4 threat from a scheme. If this removes the last threat from that scheme, you may change to alter-ego form.",
+  "traits": "Superpower. Thwart.",
+  "flavor": "\"I'm the Young Avengers' resident shape-changer.\" —Hulkling"
+ },
+ {
+  "code": "56040",
+  "name": "Shapeshifter",
+  "text": "<b>Hero Action</b>: Search your deck and discard pile for a [[Shapeshift]] upgrade and add it to your hand. <i>(Shuffle.)</i>",
+  "traits": "Superpower.",
+  "flavor": "\"Didn't see that coming, did you?\" —Hulkling"
+ },
+ {
+  "code": "56041",
+  "name": "Patriot",
+  "subname": "Elijah Bradley",
+  "text": "<b>Response</b>: After you engage a minion, give Patriot a tough status card.",
+  "traits": "Avenger.",
+  "flavor": "\"I'm ready for anything.\""
+ },
+ {
+  "code": "56042",
+  "name": "Brother Voodoo",
+  "subname": "Jericho Drumm",
+  "text": "<b>Response</b>: After Brother Voodoo enters play, search the top 5 cards of your deck for an event card and add it to your hand. Shuffle your deck.",
+  "traits": "Avenger. Mystic.",
+  "flavor": "\"My name is Jericho Drumm. They call me Brother Voodoo.\"",
+  "_dup_of": "09012"
+ },
+ {
+  "code": "56043",
+  "name": "Hidden Base",
+  "text": "Uses (3 stronghold counters).\n<b>Alter-Ego Response</b>: After you change form, exhaust Hidden Base and remove 1 stronghold counter from it → give your identity a tough status card.",
+  "traits": "Location."
+ },
+ {
+  "code": "56044",
+  "name": "The Night Nurse",
+  "text": "Uses (3 medical counters).\n<b>Action</b>: Exhaust The Night Nurse and remove 1 medical counter from her → heal 1 damage from a hero and discard 1 status card from it.",
+  "traits": "Persona.",
+  "_dup_of": "09019"
+ },
+ {
+  "code": "56045",
+  "name": "Excelsior",
+  "text": "Restricted. <i>(Max 2 restricted cards per player.)</i>\n<b>Response</b>: After your hero defends against an enemy attack, spend a [energy] resource → deal 2 damage to an enemy.",
+  "traits": "Kree. Skrull. Weapon."
+ },
+ {
+  "code": "56046",
+  "name": "Defensive Conditioning",
+  "text": "Play under any player's control. Max 1 per player.\nYou get +3 hit points and your hero gets +1 DEF.",
+  "traits": "Condition."
+ },
+ {
+  "code": "56047",
+  "name": "\"I Can Do This All Day\"",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When an enemy attacks, declare your hero as the defender without exhausting them.",
+  "traits": "Defense."
+ },
+ {
+  "code": "56048",
+  "name": "Taunt",
+  "text": "<b>Hero Action</b>: The villain attacks you. Other characters cannot defend against this attack. Draw 3 cards.",
+  "traits": "Tactic.",
+  "flavor": "\"Is that all you got?\" —Captain America",
+  "_dup_of": "42016"
+ },
+ {
+  "code": "56049",
+  "name": "Tackle",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Stun an enemy. If you paid for this card using a [physical] resource, deal 3 damage to that enemy.",
+  "traits": "Attack.",
+  "flavor": "That's gonna hurt in the morning.",
+  "_dup_of": "05015"
+ },
+ {
+  "code": "56050",
+  "name": "Cuts Both Ways",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When an enemy attacks, you gain retaliate 1 until the end of the phase.",
+  "traits": "Defense.",
+  "flavor": "\"Two can play that game!\" —Wiccan"
+ },
+ {
+  "code": "56051",
+  "name": "Preservation",
+  "text": "Max 1 per deck.\n<b>Hero Response</b>: After you spend this card, heal 1 damage from your hero.",
+  "_dup_of": "21064"
+ },
+ {
+  "code": "56052",
+  "name": "Iron Lad",
+  "subname": "Nathaniel Richards",
+  "text": "[star] <b>Interrupt</b>: When Iron Lad uses a basic power, exhaust another [[Avenger]] ally you control → add that ally's matching power to Iron Lad's power for this use.",
+  "traits": "Avenger.",
+  "flavor": "\"We became Young Avengers for a reason.\""
+ },
+ {
+  "code": "56053",
+  "name": "Assess the Situation",
+  "text": "<b>Action:</b> You get +1 hand size until the end of the phase.",
+  "traits": "Tactic.",
+  "flavor": "\"Well, if I run, that's not cool. And if I stay and get tasered, that's not cool either. I'm in a bit of a pickle.\" —Tony Stark",
+  "_dup_of": "12033"
+ },
+ {
+  "code": "56054",
+  "name": "Complicated Lineage",
+  "text": "<b><i>Give to the Teddy Altman player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Teddy Altman → remove Complicated Lineage from the game.\n• Discard each [[Shapeshift]] upgrade you control. Discard this card."
+ },
+ {
+  "code": "56055",
+  "name": "Super Skrull",
+  "text": "[star] <b>Forced Interrupt</b>: When Super Skrull attacks you, discard the top card of your deck. If that card's printed resource has:\n[energy] – Super Skrull gets +2 ATK for this attack.\n[mental] – Discard 1 card from your hand.\n[physical] – Give Super Skrull a tough status card.\n[wild] – Discard an upgrade you control.",
+  "traits": "Elite. Skrull."
+ },
+ {
+  "code": "56056",
+  "name": "Skrull Business",
+  "text": "<b>Forced Response</b>: After any number of cards are discarded from the top of a player's deck, place those cards facedown under this scheme.",
+  "flavor": "Super Skrull was sent to abduct Hulkling after his true heritage was revealed."
+ },
+ {
+  "code": "56057",
+  "name": "Fantastic Powers",
+  "text": "Attached minion gets +3 hit points and gains retaliate 1.\n<b>When Revealed</b>: Find Super Skrull. Put him into play engaged with you and attach Fantastic Powers to him. If you are in hero form, Super Skrull attacks you.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "56058",
+  "name": "You're Coming With Me!",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Discard the top 3 cards of your deck. Place 1 threat on the main scheme for each different resource icon on the discarded cards.\n<b>When Revealed (Hero)</b>: Discard the top 3 cards of your deck. Take 1 damage for each different resource icon on the discarded cards <i>([energy], [mental], [physical], or [wild])</i>."
+ },
+ {
+  "code": "56059",
+  "name": "Iron Man",
+  "text": "[star] Iron Man gets +1 SCH for each [[Tech]] attachment on him (to a maximum of +3 SCH).\n<b>Setup</b>: The enemy team searches the encounter deck for an Iron Man attachment and your team reveals it.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56060",
+  "name": "Iron Man",
+  "text": "Steady.\n[star] Iron Man gets +1 SCH for each [[Tech]] attachment on him (to a maximum of +3 SCH).\n<b>When Revealed</b>: Deal each player an encounter card. Iron Man cannot take damage this phase.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56061",
+  "name": "Iron Man",
+  "text": "[star] Iron Man gets +1 SCH for each [[Tech]] attachment on him (to a maximum of +3 SCH).\n<b>When Revealed</b>: The enemy team searches the encounter deck for an Iron Man attachment and your team reveals it.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56062",
+  "name": "Iron Man",
+  "text": "Steady.\n[star] Iron Man gets +1 SCH for each [[Tech]] attachment on him (to a maximum of +3 SCH).\n<b>When Revealed</b>: Deal each player an encounter card. Iron Man cannot take damage this phase.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56063a",
+  "name": "Superhero Registration Act",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56064a",
+  "name": "Pro-Registration Tactics",
+  "flavor": "Iron Man and his Avengers are ordered to apprehend any superpowered individuals who refuse to register with S.H.I.E.L.D. That includes former teammates such as Captain America and Spider-Woman."
+ },
+ {
+  "code": "56065",
+  "name": "Powered Gauntlets",
+  "text": "Attach to Iron Man.\n[star] Iron Man's attacks gain ranged.\n<b>Hero Response</b>: After you make a basic attack against Iron Man, spend [energy] [physical] resources → discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "56066",
+  "name": "Rocket Boots",
+  "text": "Attach to Iron Man.\nIron Man gains the [[Aerial]] trait.\n<b>Hero Response</b>: After you make a basic attack against Iron Man, spend [energy] [physical] resources → discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "56067",
+  "name": "Mark V Helmet",
+  "text": "Attach to Iron Man and give him a tough status card.\nIron Man gains stalwart.\n<b>Hero Response</b>: After you make a basic attack against Iron Man, spend [mental] [physical] resources → discard this card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "56068",
+  "name": "Arc Reactor",
+  "text": "Attach to Iron Man and give him a tough status card.\nIron Man gains retaliate 1.\n<b>Hero Response</b>: After you make a basic attack against Iron Man, spend [mental] [physical] resources → discard this card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "56069",
+  "name": "Mark V Armor",
+  "text": "Attach to Iron Man.\n<b>Forced Response</b>: When Iron Man would take any amount of damage, place it here instead. Then, if there is at least 5 damage here, discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "56070",
+  "name": "Repulsor Blast",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Discard an upgrade or support you control.\n<b>When Revealed (Hero)</b>: Discard the top 4 cards of your deck. For each printed [energy] and [wild] resource discarded this way, deal 1 damage to your hero."
+ },
+ {
+  "code": "56071",
+  "name": "Supersonic Punch",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Iron Man schemes. If he has a [[Tech]] attachment, you are confused.\n<b>When Revealed (Hero)</b>: Iron Man attacks you. If he has a [[Tech]] attachment, this attack gains piercing.",
+  "flavor": "\"That's it. Now I'm mad!\" —Iron Man"
+ },
+ {
+  "code": "56072",
+  "name": "Stark Tower",
+  "text": "<b>When Defeated</b>: The enemy team searches the encounter deck and discard pile for an Iron Man attachment and your team reveals it.",
+  "flavor": "Iron Man's vast wealth gives his Avengers a significant advantage over Captain America's outlaws."
+ },
+ {
+  "code": "56073",
+  "name": "Yellow Jacket",
+  "text": "Toughness.\n<b>When Revealed</b>: Give the enemy leader a tough status card.\n<hr />\n[star] <b>Boost</b>: Give the enemy leader a tough status card.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56074",
+  "name": "Wasp",
+  "text": "Teamwork ([[Avenger]]).\n<b>When Revealed</b>: Place 1 threat on the main scheme.\n<hr />\n[star] <b>Boost</b>: Place 1 threat on the main scheme.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56075",
+  "name": "U.S. Agent",
+  "text": "Retaliate 1. Toughness.\n<b>When Revealed</b>: Deal 1 damage to your identity.\n<hr />\n[star] <b>Boost</b>: Deal 1 damage to your identity.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56076",
+  "name": "Mighty Avengers",
+  "text": "<b>When Revealed</b>: Resolve the \"<b>When Revealed</b>\" ability of each minion in play. If no \"<b>When Revealed</b>\" abilities were resolved this way, this card gains surge.",
+  "flavor": "\"Do us all a favor and stay down!\" —Doc Samson"
+ },
+ {
+  "code": "56077",
+  "name": "Earth's Mightiest Heroes",
+  "text": "Hinder 1[per_hero].\nEach [[Avenger]] minion gains the printed keywords of each other [[Avenger]] minion.",
+  "flavor": "\"We've got you outnumbered and outgunned.\" —Iron Man"
+ },
+ {
+  "code": "56078",
+  "name": "Doc Samson",
+  "text": "Guard.\n<b>When Revealed</b>: You are confused. If you were already confused, place 2 threat on the main scheme.\n<hr />\n[star] <b>Boost</b>: You are confused.",
+  "traits": "Avenger. Gamma."
+ },
+ {
+  "code": "56079",
+  "name": "Hellcat",
+  "text": "Quickstrike.\n<b>When Revealed</b>: You are stunned. If you were already stunned, take 2 indirect damage.\n<hr />\n[star] <b>Boost</b>: You are stunned.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56080",
+  "name": "Drafted",
+  "text": "Attached minion gets +2 hit points and gains the [[Avenger]] trait.\n<b>When Revealed</b>: In competitive mode, the enemy team attaches Drafted to a minion engaged with them and that minion engages you. Otherwise, discard cards from the encounter deck until a minion is discarded. Reveal that minion and attach Drafted to it."
+ },
+ {
+  "code": "56081",
+  "name": "Mighty Avengers",
+  "text": "<b>When Revealed</b>: Resolve the \"<b>When Revealed</b>\" ability of each minion in play. If no \"<b>When Revealed</b>\" abilities were resolved this way, this card gains surge.",
+  "flavor": "\"Do us all a favor and stay down!\" —Doc Samson"
+ },
+ {
+  "code": "56082",
+  "name": "The Fifty State Initiative",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: Shuffle each [[Avenger]] minion in the encounter discard pile into the encounter deck.",
+  "flavor": "S.H.I.E.L.D. wants each state to have its own government-sponsored super team."
+ },
+ {
+  "code": "56083",
+  "name": "Maria Hill",
+  "text": "Retaliate 2.\n<b>When Revealed</b>: The enemy team searches the encounter deck and discard pile for a copy of Life Model Decoy and attaches it to Maria Hill.",
+  "traits": "Elite. S.H.I.E.L.D.",
+  "flavor": "\"It's S.H.I.E.L.D.'s mission to protect the world!\""
+ },
+ {
+  "code": "56084",
+  "name": "Life Model Decoy",
+  "text": "The enemy team attaches this card to a minion or their leader. (Limit 1 per character.)\nAttached character gains stalwart.\n<b>Forced Interrupt</b>: When attached character would take any amount of damage from an attack, prevent that damage and discard this card instead.",
+  "traits": "Tech."
+ },
+ {
+  "code": "56085",
+  "name": "Executive Order",
+  "text": "<b>When Revealed</b>: Place 2 threat on each scheme. If Maria Hill is in play, this card gains surge.\n<hr />\n[star] <b>Boost</b>: If Maria Hill is in play, this card gains [boost][boost][boost].",
+  "flavor": "\"Stand down, Captain. You are NOT in command here!\" —Maria Hill"
+ },
+ {
+  "code": "56086",
+  "name": "S.H.I.E.L.D. Helicarrier",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: The player who defeated this scheme deals 1 damager to each character they control and each minion engaged with them.",
+  "flavor": "S.H.I.E.L.D. exerts influence across the world by deploying its helicarriers."
+ },
+ {
+  "code": "56087",
+  "name": "Venom",
+  "text": "[star] Venom's attacks gain piercing.\n<b>When Revealed</b>: Venom attacks your leader. Otherwise, Venom activates against you.",
+  "traits": "Thunderbolt.",
+  "flavor": "\"Just a bite! We won't kill them!\""
+ },
+ {
+  "code": "56088",
+  "name": "Bullseye",
+  "text": "<b>When Revealed</b>: The enemy team discards an attachment from your leader. Otherwise, discard an upgrade you control.",
+  "traits": "Thunderbolt.",
+  "flavor": "\"This is too rich: I'm working for S.H.I.E.L.D. and Daredevil's the outlaw!\""
+ },
+ {
+  "code": "56089",
+  "name": "Justice Like Lightning",
+  "text": "<b>When Revealed</b>: Each minion activates against the player it is engaged with. Otherwise, the enemy leader activates against you. Do not give it a boost card for this activation.",
+  "flavor": "\"We're all guilty. This is justice!\" —Penance"
+ },
+ {
+  "code": "56090",
+  "name": "Excessive Force",
+  "text": "<b>When Revealed</b>: Place 1 threat on the main scheme for each minion in play. Otherwise, this card gains surge.\n<hr />\n[star] <b>Boost</b>: The enemy leader attacks your leader <i>(after this activation)</i>. Do not give it a boost card for that attack."
+ },
+ {
+  "code": "56091",
+  "name": "Dangerous Recruits",
+  "text": "Hinder 1[per_hero].\n<b>Forced Interrupt</b>: When a minion is defeated, give it to the enemy leader as a facedown boost card.",
+  "flavor": "\"They've all been fitted with explosive implants to ensure their compliance.\" —Maria Hill"
+ },
+ {
+  "code": "56092",
+  "name": "Captain Marvel",
+  "text": "<b>Setup</b>: The enemy team finds Energy Channel and attaches it to Captain Marvel.\n<b>Forced Response</b>: After Captain Marvel attacks and defeats a character, place 1 energy counter on Energy Channel.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56093",
+  "name": "Captain Marvel",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Captain Marvel cannot take damage this phase.\n<b>Forced Response</b>: After Captain Marvel attacks and defeats a character, place 1 energy counter on Energy Channel.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56094",
+  "name": "Captain Marvel",
+  "text": "<b>Setup</b>: The enemy team finds Energy Channel and attaches it to Captain Marvel.\n<b>Forced Response</b>: After Captain Marvel attacks and defeats a character, place 1 energy counter on Energy Channel.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56095",
+  "name": "Captain Marvel",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Captain Marvel cannot take damage this phase.\n<b>Forced Response</b>: After Captain Marvel attacks and defeats a character, place 1 energy counter on Energy Channel.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56096a",
+  "name": "Superhero Registration Act",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56097a",
+  "name": "Pro-Registration Tactics",
+  "flavor": "Iron Man and his Avengers are ordered to apprehend any superpowered individuals who refuse to register with S.H.I.E.L.D. That includes former teammates such as Captain America and Spider-Woman."
+ },
+ {
+  "code": "56098",
+  "name": "Energy Channel",
+  "text": "Permanent.\n<b>Forced Response</b>: After a leader, hero, or ally attacks Captain Marvel, place 1 energy counter here. Then, if there are at least 4 energy counters here, remove all of them → Captain Marvel attacks that character. This attack gains overkill.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "56099",
+  "name": "Captain Marvel's Helmet",
+  "text": "Attach to Captain Marvel.\nCaptain Marvel gains stalwart.\n<b>Hero Response</b>: After you make a basic attack against Captain Marvel, spend 3 resources of the same type → discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "56100",
+  "name": "Cosmic Flight",
+  "text": "Attach to Captain Marvel.\n<b>Forced Interrupt</b>: When Captain Marvel would take more than 3 damage from an attack, reduce that amount to 3. Then, discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "56101",
+  "name": "Photonic Blast",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Discard an ally or support you control.\n<b>When Revealed (Hero)</b>: Captain Marvel attacks you. Place 1 energy counter on Energy Channel."
+ },
+ {
+  "code": "56102",
+  "name": "Crisis Interdiction",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Captain Marvel schemes. Place 1 energy counter on Energy Channel.\n<b>When Revealed (Hero)</b>: Place 2 threat on each scheme."
+ },
+ {
+  "code": "56103",
+  "name": "Energy Absorption",
+  "text": "<b>When Revealed</b>: Place 1 energy counter on Energy Channel. Heal 1 damage from Captain Marvel for each energy counter on Energy Channel.\n<hr />\n[star] <b>Boost</b>: Place 1 energy counter on Energy Channel."
+ },
+ {
+  "code": "56104",
+  "name": "Alpha Flight Station",
+  "text": "<b>When Defeated</b>: Place 3 energy counters on Energy Channel.",
+  "flavor": "\"Keep your sensors locked on North America. I want to know the location of Cap's headquarters.\" —Captain Marvel"
+ },
+ {
+  "code": "56105",
+  "name": "Cape-Killer",
+  "text": "Quickstrike.\n[star] <b>Forced Interrupt</b>: When Cape-Killer attacks an identity with the [[Unregistered]] trait, it gets +2 ATK for this attack.",
+  "traits": "S.H.I.E.L.D.",
+  "flavor": "S.H.I.E.L.D. formed an elite unit to confront and capture renegade superheroes."
+ },
+ {
+  "code": "56106",
+  "name": "Unregistered Super",
+  "text": "Your identity gains the [[Unregistered]] trait.\n<b>Alter-Ego Action</b>: Discard an identity-specific card from your hand → discard this card."
+ },
+ {
+  "code": "56107",
+  "name": "Bring Them In",
+  "text": "<b>When Revealed</b>: Exhaust each [[Unregistered]] identity. Otherwise, the enemy team searches the encounter deck and discard pile for a copy of Unregistered Super and deals it to you as a facedown encounter card."
+ },
+ {
+  "code": "56108",
+  "name": "Arrest Order",
+  "text": "<b>When Defeated</b>: The defeating player deals the topmost [[S.H.I.E.L.D.]] minion in the encounter discard pile to themself as a facedown encounter card.",
+  "flavor": "\"Look what happens when you break the law!\" —S.H.I.E.L.D. Officer"
+ },
+ {
+  "code": "56109",
+  "name": "S.H.I.E.L.D. Soldier",
+  "text": "<b>When Revealed</b>: Put the topmost [[S.H.I.E.L.D.]] minion in the encounter discard pile into play engaged with you.\n<hr />\n[star] <b>Boost</b>: Put this minion into play engaged with you.",
+  "traits": "S.H.I.E.L.D."
+ },
+ {
+  "code": "56110",
+  "name": "Rapid Response",
+  "text": "<b>When Revealed</b>: Discard cards from the encounter deck until a minion is discarded. If you are in:\n• Alter-ego form, place threat on the main scheme equal to that minion's SCH.\n• Hero form, deal damage to your hero equal to that minion's ATK."
+ },
+ {
+  "code": "56111",
+  "name": "S.H.I.E.L.D. Patrol",
+  "text": "Hinder 1[per_hero].\nEach minion gains guard.",
+  "flavor": "\"Stay alert. Cap's Avengers were last seen in this area.\" —S.H.I.E.L.D. Officer"
+ },
+ {
+  "code": "56112",
+  "name": "Colleen Wing",
+  "text": "<b>When Revealed</b>: Choose an ally you control (the enemy team chooses instead if you have the [[Unregistered]] trait). Discard that ally.",
+  "traits": "Hero for Hire.",
+  "flavor": "\"I don't like hunting down our friends, but it's better us than the Thunderbolts.\""
+ },
+ {
+  "code": "56113",
+  "name": "Shang-Chi",
+  "text": "<b>When Revealed</b>: Choose an upgrade you control (the enemy team chooses instead if you have the [[Unregistered]] trait). Discard that upgrade.",
+  "traits": "Hero for Hire.",
+  "flavor": "\"There is no shame in a righteous cause.\""
+ },
+ {
+  "code": "56114",
+  "name": "Unregistered Super",
+  "text": "Your identity gains the [[Unregistered]] trait.\n<b>Alter-Ego Action</b>: Discard an identity-specific card from your hand → discard this card."
+ },
+ {
+  "code": "56115",
+  "name": "Bounty Hunting",
+  "text": "<b>When Revealed</b>: Discard 1 card from your hand (at random if you have the [[Unregistered]] trait). Place 1 threat on the main scheme for each resource icon on that card.",
+  "flavor": "\"I'm glad you guys went rogue; it's gonna be a big payday for me.\" —Paladin"
+ },
+ {
+  "code": "56116",
+  "name": "Heroes for Hire",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: The enemy team searches the encounter deck and discard pile for a copy of Unregistered Super and deals it to the defeating player as a facedown encounter card."
+ },
+ {
+  "code": "56117",
+  "name": "Paladin",
+  "text": "Quickstrike. Toughness.\n<b>When Revealed</b>: Discard 1 card from your hand (at random if you have the [[Unregistered]] trait).",
+  "traits": "Elite. Hero for Hire.",
+  "flavor": "\"I'm not in this for your political agenda. I'm in it for the money.\""
+ },
+ {
+  "code": "56118",
+  "name": "Paladin's Pistol",
+  "text": "Attack to Paladin. Otherwise, attach to the enemy leader.\n[star] <b>Forced Interrupt</b>: When attached character attacks, this attack gains ranged and overkill. Discard this card after this attack.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "56119",
+  "name": "Bounty Hunting",
+  "text": "<b>When Revealed</b>: Discard 1 card from your hand (at random if you have the [[Unregistered]] trait). Place 1 threat on the main scheme for each resource icon on that card.",
+  "flavor": "\"I'm glad you guys went rogue; it's gonna be a big payday for me.\" —Paladin"
+ },
+ {
+  "code": "56120",
+  "name": "Government Contractor",
+  "text": "Hinder 1[per_hero].\nEach identity gains the [[Unregistered]] trait.",
+  "flavor": "When Captain America took his resistance underground, Iron Man contracted Paladin and the Heroes for Hire to track him down."
+ },
+ {
+  "code": "56121a",
+  "name": "Superhero Registration Act",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56122a",
+  "name": "Superhero Registration Act",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56123a",
+  "name": "Pro-Registration Tactics",
+  "flavor": "Iron Man and his Avengers are ordered to apprehend any superpowered individuals who refuse to register with S.H.I.E.L.D. That includes former teammates such as Captain America and Spider-Woman."
+ },
+ {
+  "code": "56124a",
+  "name": "Pro-Registration Tactics",
+  "flavor": "Iron Man and his Avengers are ordered to apprehend any superpowered individuals who refuse to register with S.H.I.E.L.D. That includes former teammates such as Captain America and Spider-Woman."
+ },
+ {
+  "code": "56125",
+  "name": "Righteous Cause",
+  "text": "<b>When Revealed</b>: The enemy leader schemes. If there is more than 1 player on your team, give the enemy leader an additional boost card for this activation.",
+  "flavor": "\"I was a double agent for years. There's not much I won't do for a just cause.\" —Spider-Woman"
+ },
+ {
+  "code": "56126",
+  "name": "Whatever It Takes",
+  "text": "<b>When Revealed (Alter-Ego)</b>: The enemy leader attacks your leader.\n<b>When Revealed (Hero)</b>: The enemy leader attacks you.",
+  "flavor": "\"I'm on target. Commence attack.\" —Captain Marvel"
+ },
+ {
+  "code": "56127",
+  "name": "Targeted Strike",
+  "text": "<b>When Revealed</b>: The enemy team searches the top 5 cards of the encounter deck for a card and deals it to you as a facedown encounter card.\n<hr />\n[star] <b>Boost</b>: The card gains [boost] for each player on your team."
+ },
+ {
+  "code": "56128a",
+  "name": "Choosing Sides",
+  "text": "Permanent.\nThe enemy leader cannot take more than 2 damage from each attack.\n<b>Forced Response</b>: After the last threat is removed from here, the enemy team searches the top 5 cards of the encounter deck for 1[per_hero] encounter cards and deals one to each player as a facedown encounter card. Flip this card."
+ },
+ {
+  "code": "56129",
+  "name": "The Futurist",
+  "text": "<b>Action</b>: Your Iron Man leader schemes. Do not give him a boost card for this activation.",
+  "flavor": "\"Steve's thinking is stuck in the past. This is the future, whether he likes it or not.\" —Iron Man"
+ },
+ {
+  "code": "56130",
+  "name": "Target Lock",
+  "text": "<b>Action</b>: Your Iron Man leader attacks the enemy leader. If you spent a [mental] resource to pay for this event, choose an attachment on the enemy leader with the text \"<b>Hero Response</b>\" or \"<b>Hero Interrupt</b>\" and discard it."
+ },
+ {
+  "code": "56131",
+  "name": "High-Tech Suit",
+  "text": "Attach to your Iron Man leader. Counts as a [[Tech]] attachment.\n<b>Hero Action</b>: Spend [energy] [mental] resources → discard this card. Any player may trigger this ability."
+ },
+ {
+  "code": "56132",
+  "name": "Suit Up",
+  "text": "<b>Hero Response</b>: After you spend this resource, give your Iron Man leader a tough status card."
+ },
+ {
+  "code": "56133",
+  "name": "Provoked Response",
+  "text": "<b>Forced Interrupt</b>: When the enemy leader would attack you, it attacks your Captain Marvel leader instead. She cannot take more than 3 damage from this attack. Discard this card."
+ },
+ {
+  "code": "56134",
+  "name": "You Started This",
+  "text": "<b>Action</b>: Your Captain Marvel leader attacks the enemy leader. If you spent a [energy] resource to pay for this event, confuse the enemy leader.",
+  "flavor": "\"You should've known this was coming!\" —Captain Marvel"
+ },
+ {
+  "code": "56135",
+  "name": "Alpha Flight Recruit",
+  "text": "Attach to an ally.\n<b>Response</b>: After any number of energy counters are placed on your Captain Marvel leader's Energy Channel attachment, heal 1 damage from attached ally.",
+  "traits": "Title."
+ },
+ {
+  "code": "56136",
+  "name": "Raw Power",
+  "text": "<b>Hero Response</b>: After you spend this resource, place 2 energy counters on your Captain Marvel leader's Energy Channel attachment."
+ },
+ {
+  "code": "56137",
+  "name": "Captain America",
+  "text": "<b>Setup</b>: The enemy team finds Cap's Shield and attaches it to Captain America.\n<b>Forced Response</b>: After Cap's Shield is attached to Captain America, give him a tough status card.",
+  "traits": "Avenger.",
+  "flavor": "\"Just because it's the law doesn't mean it's right.\""
+ },
+ {
+  "code": "56138",
+  "name": "Captain America",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Captain America cannot take damage this phase.\n<b>Forced Response</b>: After Cap's Shield is attached to Captain America, give him a tough status card.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56139",
+  "name": "Captain America",
+  "text": "<b>Setup</b>: The enemy team finds Cap's Shield and attaches it to Captain America.\n<b>Forced Response</b>: After Cap's Shield is attached to Captain America, give him a tough status card.",
+  "traits": "Avenger.",
+  "flavor": "\"Just because it's the law doesn't mean it's right.\""
+ },
+ {
+  "code": "56140",
+  "name": "Captain America",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Captain America cannot take damage this phase.\n<b>Forced Response</b>: After Cap's Shield is attached to Captain America, give him a tough status card.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56141a",
+  "name": "Superhero Resistance",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56142a",
+  "name": "Resistance Tactics",
+  "flavor": "Captain America and his Avengers are forced to go underground or face arrest for refusing to register with S.H.I.E.L.D. When Iron Man and Captain Marvel start rounding up their superpowered friends, the resistance decides to fight back."
+ },
+ {
+  "code": "56143",
+  "name": "Cap's Shield",
+  "text": "Permanent. Attach to Captain America.\nAttached character gains retaliate 1 and attacks against them lose piercing.\n<b>Forced Response</b>: After a hero or the Captain America leader uses their ATK to attack and damage attached character, attach Cap's Shield to the attacker.",
+  "traits": "Item."
+ },
+ {
+  "code": "56144",
+  "name": "Cap's Helmet",
+  "text": "Attach to Captain America.\nCaptain America gains stalwart.\n<b>Hero Response</b>: After you make a basic attack against Captain America, spend 3 resources of the same type → discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Armor."
+ },
+ {
+  "code": "56145",
+  "name": "Super-Soldier Serum",
+  "text": "Attach to Captain America.\n[star] <b>Forced Interrupt</b>: When Captain America attacks, this attack gains overkill. At the end of this attack, discard this card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Item."
+ },
+ {
+  "code": "56146",
+  "name": "Shield Block",
+  "text": "<b>When Revealed</b>: If Cap's Shield is attached to Captain America, give him a tough status card and a facedown boost card. Otherwise, attach Cap's Shield to him and give him a facedown boost card.",
+  "flavor": "\"Take your best shot!\" —Captain America"
+ },
+ {
+  "code": "56147",
+  "name": "Shield Toss",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Captain America schemes.\n<b>When Revealed (Hero)</b>: If Cap's Shield is attached to Captain America, deal 2 damage to each character you control. Otherwise, attach Cap's Shield to Captain America."
+ },
+ {
+  "code": "56148",
+  "name": "Heroic Strike",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Discard an ally or upgrade you control.\n<b>When Revealed (Hero)</b>: Captain America attacks you. If this attack damages a character, stun that character."
+ },
+ {
+  "code": "56149",
+  "name": "Fearless Determination",
+  "text": "<b>When Defeated</b>: Attach Cap's Shield to Captain America. He activates against the player who defeated this scheme.",
+  "flavor": "Captain America's stand against the Superhero Registration Act gives other heroes a figure to rally behind."
+ },
+ {
+  "code": "56150",
+  "name": "Falcon",
+  "text": "Teamwork ([[Avenger]]).\n<b>When Defeated</b>: Give this card to the enemy leader as a facedown boost card.\n<hr />\n[star] <b>Boost</b>: You are confused. If you were already confused, this card gains [boost][boost].",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56151",
+  "name": "Hercules",
+  "text": "Teamwork ([[Avenger]]).\n<b>When Defeated</b>: Give this card to the enemy leader as a facedown boost card.\n<hr />\n[star] <b>Boost</b>: You are stunned. If you were already stunned, this card gains [boost][boost].",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56152",
+  "name": "Goliath",
+  "text": "Teamwork ([[Avenger]]).\n<b>When Defeated</b>: Give this card to the enemy leader as a facedown boost card.\n<hr />\n[star] <b>Boost</b>: Give the enemy leader a tough status card. If they were already tough, this card gains [boost][boost].",
+  "traits": "Avenger. Giant."
+ },
+ {
+  "code": "56153",
+  "name": "Freedom Fighters",
+  "text": "<b>When Revealed</b>: Resolve the \"<b>Boost</b>\" ability of each minion in play. If no \"<b>Boost</b>\" abilities were resolved this way, this card gains surge.\n<hr />\n[star] <b>Boost</b>: Resolve the \"<b>Boost</b>\" ability of each minion engaged with you."
+ },
+ {
+  "code": "56154",
+  "name": "New Avengers",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: Shuffle each minion in the encounter discard pile into the encounter deck.",
+  "flavor": "\"Tony's team is in for a big surprise!\" —Captain America"
+ },
+ {
+  "code": "56155",
+  "name": "Black Panther",
+  "text": "Teamwork ([[Avenger]]).\n<b>When Defeated</b>: Give this card to the enemy leader as a facedown boost card.\n<hr />\n[star] <b>Boost</b>: Exhaust each upgrade you control.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56156",
+  "name": "Spectrum",
+  "text": "Teamwork ([[Avenger]]).\n<b>When Defeated</b>: Give this card to the enemy leader as a facedown boost card.\n<hr />\n[star] <b>Boost</b>: Exhaust a character you control.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "56157",
+  "name": "Freedom Fighters",
+  "text": "<b>When Revealed</b>: Resolve the \"<b>Boost</b>\" ability of each minion in play. If no \"<b>Boost</b>\" abilities were resolved this way, this card gains surge.\n<hr />\n[star] <b>Boost</b>: Resolve the \"<b>Boost</b>\" ability of each minion engaged with you."
+ },
+ {
+  "code": "56158",
+  "name": "Switching Sides",
+  "text": "<b>When Revealed</b>: Discard an ally you control. In competitive mode, any player on the enmy team may spend resources equal to that ally's cost to put it into play under their control. If no ally left play this way, this card gains surge."
+ },
+ {
+  "code": "56159",
+  "name": "Secret Avengers",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: The enemy team searches the top 5 cards of the encounter deck for a card. Give that card to the enemy leader as a facedown boost card."
+ },
+ {
+  "code": "56160",
+  "name": "Namor",
+  "text": "Stalwart. Toughness. Villainous.\n<b>When Revealed</b>: Namor activates against you.",
+  "traits": "Atlantis. Elite.",
+  "flavor": "\"Once more, the surface-dwellers' war has injured my Atlanteans and the Sub-Mariner must avenge them.\""
+ },
+ {
+  "code": "56161",
+  "name": "Neptune's Trident",
+  "text": "Attach to Namor. Otherwise, attach to the enemy leader.\n[star] Attached character's attacks gain piercing.\n<b>Hero Action</b>: Spend [energy] [physical] resources → discard this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "56162",
+  "name": "Horn of Proteus",
+  "text": "Attach to Namor. Otherwise, attach to the enemy leader.\n[star] <b>Forced Interrupt</b>: When attached character schemes, give it a tough status card.\n<b>Hero Action</b>: Spend [mental] [physical] resources → discard this card.",
+  "traits": "Item."
+ },
+ {
+  "code": "56163",
+  "name": "Imperius Rex!",
+  "text": "<b>When Revealed</b>: If Namor is in play, he activates against you. Otherwise, the enemy leader activates against you.\n<hr />\n[star] <b>Boost</b>: Give the activating enemy an additional boost card."
+ },
+ {
+  "code": "56164",
+  "name": "Ruler of Atlantis",
+  "text": "Hinder 1[per_hero].\nEach [[Atlantis]] minion cannot take damage.",
+  "flavor": "\"There is nothing Namor will not dare or do to defend his people.\" —Namor"
+ },
+ {
+  "code": "56165",
+  "name": "Atlantean Guard",
+  "text": "Guard.\n<b>When Revealed</b>: Discard the top 3 cards of your deck.",
+  "traits": "Atlantis.",
+  "flavor": "\"For Namor and the glory of Atlantis!\""
+ },
+ {
+  "code": "56166",
+  "name": "Atlanteans",
+  "text": "<b>When Revealed</b>: Discard the top 3 cards of your deck. If you are in:\n• Alter-ego form, place 1 threat on the main scheme for each different card type discarded this way.\n• Hero form, take 1 indirect damage for each different card type discarded this way."
+ },
+ {
+  "code": "56167",
+  "name": "Atlantis Attacks",
+  "text": "Hinder 1[per_hero].\n<b>When Revealed</b>: Discard the top 1[per_hero] cards of your deck. Place 1 acceleration token here for each different card type discarded this way.",
+  "flavor": "The Atlanteans as a people share a deep mistrust of surface-dwellers and enmity for the pollution of their waters."
+ },
+ {
+  "code": "56168",
+  "name": "Spider-Woman",
+  "text": "<b>Setup</b>: The enemy team finds Finesse and attaches it to Spider-Woman.\n[star] <b>Forced Interrupt</b>: When Spider-Woman attacks, she gets +1 ATK for each skill counter on Finesse for this attack. Remove each skill counter from Finesse.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56169",
+  "name": "Spider-Woman",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Spider-Woman cannot take damage this phase.\n[star] <b>Forced Interrupt</b>: When Spider-Woman attacks, she gets +1 ATK for each skill counter on Finesse for this attack. Remove each skill counter from Finesse.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56170",
+  "name": "Spider-Woman",
+  "text": "<b>Setup</b>: The enemy team finds Finesse and attaches it to Spider-Woman.\n[star] <b>Forced Interrupt</b>: When Spider-Woman attacks, she gets +1 ATK for each skill counter on Finesse for this attack. Remove each skill counter from Finesse.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56171",
+  "name": "Spider-Woman",
+  "text": "Steady.\n<b>When Revealed</b>: Deal each player an encounter card. Spider-Woman cannot take damage this phase.\n[star] <b>Forced Interrupt</b>: When Spider-Woman attacks, she gets +1 ATK for each skill counter on Finesse for this attack. Remove each skill counter from Finesse.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "56172a",
+  "name": "Superhero Resistance",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56173a",
+  "name": "Resistance Tactics",
+  "flavor": "Captain America and his Avengers are forced to go underground or face arrest for refusing to register with S.H.I.E.L.D. When Iron Man and Captain Marvel start rounding up their superpowered friends, the resistance decides to fight back."
+ },
+ {
+  "code": "56174",
+  "name": "Finesse",
+  "text": "Permanent.\nMax 3 skill counters here.\n<b>Forced Interrupt</b>: When a treachery is revealed, place 1 skill counter here.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "56175",
+  "name": "Contaminant Immunity",
+  "text": "Attach to Spider-Woman.\n<b>Forced Interrupt</b>: When Spider-Woman would be stunned or confused, discard this card instead. Give her a tough status card.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "56176",
+  "name": "Pheromones",
+  "text": "<b>When Revealed</b>: You are stunned and confused. Place 1 skill counter on Finesse.\n<hr />\n[star] <b>Boost</b>: You are stunned. Otherwise, you are confused."
+ },
+ {
+  "code": "56177",
+  "name": "Venom Blast",
+  "text": "<b>When Revealed (Alter-Ego)</b>: This card gains surge.\n<b>When Revealed (Hero)</b>: Spider-Woman attacks you. If this attack removed the following skill counters from Finesse:\n• At least 1, this attack gains ranged.\n• At least 2, this attack gains piercing.\n• At least 3, this attack gains overkill."
+ },
+ {
+  "code": "56178",
+  "name": "Inconspicuous",
+  "text": "<b>When Revealed</b>: Chooose:\n• Discard the highest-cost card you control\n• Spider-Woman schemes.\n<hr />\n[star] <b>Boost</b>: This card gains [boost] for each status card on your identity."
+ },
+ {
+  "code": "56179",
+  "name": "Self-propelled Glide",
+  "text": "<b>Forced Interrupt</b>: When Spider-Woman would take damage from an attack, reduce the amount of damage she takes by 1 for each skill counter on Finesse.",
+  "flavor": "\"I've made a career out of staying one step ahead of S.H.I.E.L.D.\" —Spider-Woman"
+ },
+ {
+  "code": "56180",
+  "name": "Spider-Man",
+  "text": "<b>When Revealed</b>: Spider-Man attacks each character with Tangled Up attached. If no attack was made this way, the enemy team searches the encounter deck and discard pile for a copy of Tangled Up and gives it to you as a facedown encounter card.",
+  "traits": "Avenger. Elite."
+ },
+ {
+  "code": "56181",
+  "name": "Tangled Up",
+  "text": "Attach to your leader. Otherwise, attach to your hero.\n<b>Forced Interrupt</b>: When attached character would scheme, thwart, or attack, discard this card instead.\n<hr />\n[star] <b>Boost</b>: If the Spider-Man minion is in play, reveal this card.",
+  "traits": "Condition."
+ },
+ {
+  "code": "56182",
+  "name": "Spectacular!",
+  "text": "<b>When Revealed</b>: Place 2 threat on the main scheme. In competitive mode, remove 2 threat from your leader's main scheme.",
+  "flavor": "\"Friendly neighborhood Spider-Man swinging through!\" —Spider-Man"
+ },
+ {
+  "code": "56183",
+  "name": "Neighborhood Hero",
+  "text": "<b>When Revealed</b>: In competitive mode, move 2 threat from your leader's main scheme to this scheme. Otherwise, place 2[per_hero] threat here.",
+  "flavor": "\"This isn't about politics; it's about saving lives!\" —Spider-Man"
+ },
+ {
+  "code": "56184",
+  "name": "Luke Cage",
+  "text": "<b>When Revealed</b>: Stun your leader. Otherwise, you are stunned.\n<hr />\n[star] <b>Boost</b>: Stun your leader. Otherwise, you are stunned.",
+  "traits": "Defender.",
+  "flavor": "\"You S.H.I.E.L.D. boys better get out of my face.\""
+ },
+ {
+  "code": "56185",
+  "name": "Jessica Jones",
+  "text": "<b>When Revealed</b>: Confuse your leader. Otherwise, you are confused.\n<hr />\n[star] <b>Boost</b>: Confuse your leader. Otherwise, you are confused.",
+  "traits": "Defender.",
+  "flavor": "\"I thought I was done with all this superhero crap.\""
+ },
+ {
+  "code": "56186",
+  "name": "Protect the Innocent",
+  "text": "<b>When Revealed</b>: Give the enemy leader and each minion a tough status card. If the enemy leader was already tough, this card gains surge.",
+  "flavor": "\"Since when is it illegal to save lives?\" —Daredevil"
+ },
+ {
+  "code": "56187",
+  "name": "Street Defenders",
+  "text": "<b>When Revealed</b>: Each minion activates against the player it is engaged with. Otherwise, the enemy leader activates against you. Do not give it a boost card for this activation."
+ },
+ {
+  "code": "56188",
+  "name": "The Defenders",
+  "text": "Hinder 1[per_hero].\nEach minion gains guard.",
+  "flavor": "The Defenders were formed to protect people often overlooked by the Avengers."
+ },
+ {
+  "code": "56189",
+  "name": "Daredevil",
+  "text": "<b>When Revealed</b>: The enemy team exhausts a character you control.\n<hr />\n[star] <b>Boost</b>: Exhaust a character you control.",
+  "traits": "Defender.",
+  "flavor": "\"My respect for the law doesn't blind my sense of right and wrong.\""
+ },
+ {
+  "code": "56190",
+  "name": "Iron Fist",
+  "text": "<b>When Revealed</b>: Iron Fist attacks your leader. Otherwise, Iron Fist activates against you.\n<hr />\n[star] <b>Boost</b>: The enemy leader attacks your leader <i>(after this activation)</i>. Do not give it a boost card for this attack.",
+  "traits": "Defender."
+ },
+ {
+  "code": "56191",
+  "name": "Resistance Fighter",
+  "text": "Attach to a minion of the enemy team's choice. Otherwise, this card gains surge.\nAttached minion gets +4 hit points and gains stalwart.\n<hr />\n[star] <b>Boost</b>: Attach this card to a minion engaged with you.",
+  "traits": "Condition."
+ },
+ {
+  "code": "56192",
+  "name": "Street Defenders",
+  "text": "<b>When Revealed</b>: Each minion activates against the player it is engaged with. Otherwise, the enemy leader activates against you. Do not give it a boost card for this activation."
+ },
+ {
+  "code": "56193",
+  "name": "Defend Hell's Kitchen",
+  "text": "Hinder 1[per_hero].\nThreat cannot be removed from this scheme while a [[Defender]] minion is in play.",
+  "flavor": "\"Tell S.H.I.E.L.D. to pull back. This city is under our protection.\" —Daredevil"
+ },
+ {
+  "code": "56194",
+  "name": "Cloak",
+  "text": "<b>When Revealed</b>: Place 2 threat on a scheme. In competitive mode, remove 2 threat from your leader's main scheme.\n<hr />\n[star] <b>Boost</b>: If Dagger is in play, reveal Cloak. Otherwise, place 1 threat on a scheme.",
+  "traits": "Defender."
+ },
+ {
+  "code": "56195",
+  "name": "Dagger",
+  "text": "<b>When Revealed</b>: Heal 2 damage from the enemy leader. Deal 2 damage to a character you control.\n<hr />\n[star] <b>Boost</b>: If Cloak is in play, reveal Dagger. Otherwise, deal 1 damage to a character you control.",
+  "traits": "Defender."
+ },
+ {
+  "code": "56196",
+  "name": "Darkforce",
+  "text": "Attach to the enemy leader and give them a tough status card.\n[star] <b>Forced Response</b>: After attached leader schemes and places threat on the main scheme, remove an equal amount of threat from your leader's main scheme. Discard this card."
+ },
+ {
+  "code": "56197",
+  "name": "Lightforce",
+  "text": "<b>When Revealed</b>: Heal 3 damage from the enemy leader. Take 3 indirect damage.",
+  "flavor": "\"Maybe my daggers will help them see the light!\" —Dagger"
+ },
+ {
+  "code": "56198",
+  "name": "Cloak and Dagger",
+  "text": "Hinder 1[per_hero].\n<b>When Defeated</b>: Heal 3 damage from the enemy leader and give them a tough status card.",
+  "flavor": "Cloak and Dagger were among the first to join Captain America's superhero resistance."
+ },
+ {
+  "code": "56199a",
+  "name": "Superhero Resistance",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56200a",
+  "name": "Superhero Resistance",
+  "text": "<b>Contents</b>: Chosen leader I and II <i>(III and IV for expert mode)</i>. Chosen leader's set, Standard set, and 3–4 modular sets.\n<b>Setup</b>: In competitive mode, the enemy team finds the Choosing Sides side scheme and your team reveals it. In cooperative mode, find the chosen leader's side scheme and reveal it."
+ },
+ {
+  "code": "56201a",
+  "name": "Resistance Tactics",
+  "flavor": "Captain America and his Avengers are forced to go underground or face arrest for refusing to register with S.H.I.E.L.D. When Iron Man and Captain Marvel start rounding up their superpowered friends, the resistance decides to fight back."
+ },
+ {
+  "code": "56202a",
+  "name": "Resistance Tactics",
+  "flavor": "Captain America and his Avengers are forced to go underground or face arrest for refusing to register with S.H.I.E.L.D. When Iron Man and Captain Marvel start rounding up their superpowered friends, the resistance decides to fight back."
+ },
+ {
+  "code": "56203",
+  "name": "Righteous Cause",
+  "text": "<b>When Revealed</b>: The enemy leader schemes. If there is more than 1 player on your team, give the enemy leader an additional boost card for this activation.",
+  "flavor": "\"I was a double agent for years. There's not much I won't do for a just cause.\" —Spider-Woman"
+ },
+ {
+  "code": "56204",
+  "name": "Whatever It Takes",
+  "text": "<b>When Revealed (Alter-Ego)</b>: The enemy leader attacks your leader.\n<b>When Revealed (Hero)</b>: The enemy leader attacks you.",
+  "flavor": "\"I'm on target. Commence attack.\" —Captain Marvel"
+ },
+ {
+  "code": "56205",
+  "name": "Targeted Strike",
+  "text": "<b>When Revealed</b>: The enemy team searches the top 5 cards of the encounter deck for a card and deals it to you as a facedown encounter card.\n<hr />\n[star] <b>Boost</b>: The card gains [boost] for each player on your team."
+ },
+ {
+  "code": "56206a",
+  "name": "Choosing Sides",
+  "text": "Permanent.\nThe enemy leader cannot take more than 2 damage from each attack.\n<b>Forced Response</b>: After the last threat is removed from here, the enemy team searches the top 5 cards of the encounter deck for 1[per_hero] encounter cards and deals one to each player as a facedown encounter card. Flip this card."
+ },
+ {
+  "code": "56207",
+  "name": "No, You Move!",
+  "text": "<b>Forced Interrupt</b>: When the enemy leader would attack you, attach Cap's Shield to your Captain America leader and resolve this attack against him instead. Discard this card."
+ },
+ {
+  "code": "56208",
+  "name": "Fighting Dirty",
+  "text": "<b>Action</b>: Your Captain America leader attacks the enemy leader. If you spent a [physical] resource to pay for this event, stun the enemy leader.",
+  "flavor": "\"Things are different this time. Now I'm fighting dirty.\" —Captain America"
+ },
+ {
+  "code": "56209",
+  "name": "Recruited by Cap",
+  "text": "<b>Action<b/>: Choose a minion engaged with you and choose a player on the enemy team. That minion engages that player.",
+  "flavor": "\"We're glad to have you on our side.\" —Captain America"
+ },
+ {
+  "code": "56210",
+  "name": "The People's Hero",
+  "text": "<b>Hero Response</b>: After you spend this resource, give your Captain America leader a facedown boost card."
+ },
+ {
+  "code": "56211",
+  "name": "Double Agent",
+  "text": "<b>Action</b>: Remove 2 threat from the main scheme. Place 2 threat on your leader's main scheme.",
+  "flavor": "\"When someone targets one of us, they answer to all of us.\" —Spider-Woman"
+ },
+ {
+  "code": "56212",
+  "name": "Spider-Blast",
+  "text": "<b>Action</b>: Your Spider-Woman leader attacks the enemy leader. If you spent a [mental] resource to pay for this event, confuse the enemy leader.",
+  "flavor": "\"From now on Spider-Woman fights back!\" —Spider-Woman"
+ },
+ {
+  "code": "56213",
+  "name": "Hard to Hit",
+  "text": "Attach to your Spider-Woman leader and give her a tough status card.\n<b>Forced Response</b>: After attached Spider-Woman resolves an attack, place 2 skill counters on her Finesse attachment. Discard this card.",
+  "traits": "Skill."
+ },
+ {
+  "code": "56214",
+  "name": "Secret Contact",
+  "text": "<b>Hero Response</b>: After you spend this resource, place 2 skill counters on your Spider-Woman leader's Finesse attachment."
+ }
+]

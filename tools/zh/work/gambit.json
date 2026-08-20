@@ -1,0 +1,223 @@
+[
+ {
+  "code": "37001a",
+  "name": "Gambit",
+  "text": "<i>Charge de Card</i> − <b>Action</b>: Place 1 charge counter here. (Limit once per round).\n<i>Throw de Card</i> − <b>Interrupt</b>: When you play an [[ATTACK]] event, remove up to 3 charge counters from here → that event deal +1 damage for each counter removed.",
+  "traits": "Thief. X-Men."
+ },
+ {
+  "code": "37002",
+  "name": "Rogue",
+  "subname": "Anna Marie",
+  "text": "Reduce the cost to play Rogue by 1 for each charge counter on your identity.\nToughness.",
+  "traits": "Aerial. X-Men.",
+  "flavor": "\"I can't take that crazy Cajun anywhere!\""
+ },
+ {
+  "code": "37003",
+  "name": "The Thieves Guild",
+  "text": "<b>Alter-Ego Response</b>: After you resolve your <i>\"Thief Extraordinaire\"</i> ability, exhaust The Thieves Guild → remove 1 threat from a scheme. If this removes the last threat from that scheme, draw 1 card.",
+  "traits": "Guild."
+ },
+ {
+  "code": "37004",
+  "name": "Gambit's Staff",
+  "text": "<b>Hero Interrupt</b>: When an enemy attacks, exhaust Gambit's Staff → deal 1 damage to that enemy.",
+  "traits": "Item. Weapon.",
+  "flavor": "\"You want to fight wit' Gambit, eh?\" −Gambit"
+ },
+ {
+  "code": "37005",
+  "name": "Gambit's Guild Armor",
+  "text": "<b>Hero Response</b>: After Gambit defends against an attack and takes no damage, exhaust Gambit's Guild Armor → ready Gambit.",
+  "traits": "Armor. Item.",
+  "flavor": "Members of the Thieves Guild wear custom armor to protect themselves from assassins."
+ },
+ {
+  "code": "37006",
+  "name": "Charged Card",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy. For this attack, If Gambit's <i>\"Throw de Card\"</i> ability removed at least:\n• 1 counter, this attack gains ranged.\n• 2 counters, this attack also gains piercing.\n• 3 counters, this attack also gains overkill.",
+  "traits": "Attack. Superpower."
+ },
+ {
+  "code": "37007",
+  "name": "Royal Flush",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Place 1 charge counter on Gambit. Deal 0 damage to an enemy. Deal 0 damage to an enemy. Deal 0 damage to an enemy.",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"Cover your eyes, mes amis. Dis hand gon' be fire!\" −Gambit"
+ },
+ {
+  "code": "37008",
+  "name": "Natural Agility",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When you defend against an attack, place 1 charge counter on Gambit → for each charge counter on Gambit, you get +1 DEF for that attack.",
+  "traits": "Defense. Superpower."
+ },
+ {
+  "code": "37009",
+  "name": "Creole Charmer",
+  "text": "<b>Alter-Ego Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme. If this removes the last threat from that scheme, confuse the villain.",
+  "traits": "Thwart.",
+  "flavor": "\"How can I be de thief when you de one stole my heart, chére?\" −Gambit"
+ },
+ {
+  "code": "37010",
+  "name": "Molecular Acceleration",
+  "text": "<b>Hero Interrupt</b>: When you spend this card, place 1 charge counter on Gambit."
+ },
+ {
+  "code": "37011",
+  "name": "Bishop",
+  "subname": "Lucas Bishop",
+  "text": "<b>Response</b>: After an enemy attacks you, place 1 energy counter here.\n[star] <b>Interrupt</b>: When Bishop attacks, remove each energy counter from him → for each counter discarded this way, he gets +2 ATK for this attack (to a maximum of +6 ATK).",
+  "traits": "X-Men."
+ },
+ {
+  "code": "37012",
+  "name": "Dazzler",
+  "subname": "Alison Blaire",
+  "text": "<b>Response</b>: After Dazzler enters play, confuse an enemy.",
+  "traits": "X-Men.",
+  "flavor": "\"All that noise. This city is a symphony, and I'm her speaker.\""
+ },
+ {
+  "code": "37013",
+  "name": "Operative Skill",
+  "text": "Uses (3 operative counters). Max 1 per player.\n<b>Interrupt</b>: When you thwart, remove 1 operative counter from here → that thwart removes 1 additional threat.",
+  "traits": "Skill."
+ },
+ {
+  "code": "37014",
+  "name": "Stealth Strike",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy. If that enemy is defeated by this attack, remove 2 threat from a scheme.",
+  "traits": "Attack.",
+  "flavor": "\"They'll never know what hit them.\" —Black Widow",
+  "_dup_of": "08013"
+ },
+ {
+  "code": "37015",
+  "name": "Breaking and Entering",
+  "text": "Play only if your identity has the [[SPY]] or [[THIEF]] trait.\n<b>Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "37016",
+  "name": "Passion for Justice",
+  "text": "Max 2 per deck.\n<b>Interrupt</b>: When you spend this card to play a [[THWART]] event, that event removes 1 additional threat.",
+  "_dup_of": "34020"
+ },
+ {
+  "code": "37017",
+  "name": "Professor X",
+  "subname": "Charles Xavier",
+  "text": "<b>Forced Response</b>: After Professor X enters play, choose one: confuse the villain, stun a minion, or ready an [[X-MEN]] character. At the end of the round, if Professor X is still in play, discard him.",
+  "traits": "Psionic. X-Men.",
+  "_dup_of": "32019"
+ },
+ {
+  "code": "37018",
+  "name": "X-Mansion",
+  "text": "<b>Alter-Ego Action</b>: Exhaust X-Mansion → heal 1 damage from a [[MUTANT]] or [[X-MEN]] character. Any player whose alter-ego has the [[MUTANT]] trait may trigger this ability.",
+  "traits": "Location. X-Men.",
+  "_dup_of": "32049"
+ },
+ {
+  "code": "37019",
+  "name": "Beauty and the Thief",
+  "text": "Team-Up (Gambit and Rogue). Max 1 per deck.\n<b>Hero Action</b> <i>(attack/thwart)</i>: Deal 4 damage to an enemy. Remove 4 threat from a scheme.",
+  "traits": "Attack. Thwart."
+ },
+ {
+  "code": "37020",
+  "name": "Hit and Run",
+  "text": "<b>Hero Action</b> <i>(attack/thwart)</i>: Deal 2 damage to an enemy. Remove 2 threat from a scheme.",
+  "traits": "Attack. Thwart.",
+  "flavor": "\"You'd be surprised how many problems you can solve with a controlled plasma blast\" −Havok",
+  "_dup_of": "18020"
+ },
+ {
+  "code": "37021",
+  "name": "Mutant Education",
+  "text": "Play only if your identity has the [[MUTANT]] trait.\n<b>Alter-Ego Action</b>: Choose up to 2 identity-specific cards in your discard pile and shuffle them into your deck. If X-Mansion is in play, draw 1 card."
+ },
+ {
+  "code": "37022",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "37023",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "37024",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "37025",
+  "name": "Guild Business",
+  "text": "<b><i>Give to the Remy LeBeau player.</i></b>\n<b>Alter-Ego Action</b>: Exhaust Remy LeBeau and spend a [energy] resource → remove Guild Business from the game."
+ },
+ {
+  "code": "37026",
+  "name": "Belladonna",
+  "text": "Quickstrike. Toughness.\n[star] <b>Forced Response</b>: After Belladonna attacks and defeats a character, place 2 threat on the main scheme.\n<i>(Gambit's nemesis minion.)</i>",
+  "traits": "Assassin. Elite."
+ },
+ {
+  "code": "37027",
+  "name": "The Assassins Guild",
+  "text": "<b>Forced Response</b>: After an [[ASSASSIN]] minion attacks and defeats a character, place 2 threat here.",
+  "flavor": "The Assassins Guild has sworn to kill Gambit and the rest of the Thieves Guild."
+ },
+ {
+  "code": "37028",
+  "name": "Guild Assassin",
+  "text": "Quickstrike.\n[star] <b>Forced Response</b>: After Guild Assassin attacks and defeats a character, place 1 threat on the main scheme.",
+  "traits": "Assassin."
+ },
+ {
+  "code": "37029",
+  "name": "Assassination Attempt",
+  "text": "<b>When Revealed</b>: Each [[ASSASSIN]] minion attacks you <i>(even if you are in alter-ego form)</i>. If there are no [[ASSASSIN]] minions in play, search the encounter deck and discard pile for an [[ASSASSIN]] minion and reveal it."
+ },
+ {
+  "code": "37030",
+  "name": "War Room",
+  "text": "Max 1 per player.\n<b>Response</b>: After an ally attacks and defeats a minion, exhaust War Room → remove 1 threat from a scheme.",
+  "traits": "Location."
+ },
+ {
+  "code": "37031",
+  "name": "X-Men Instruction",
+  "text": "Play only if your identity has the [[MUTANT]] trait.\n<b>Alter-Ego Action</b>: Choose up to 2 [[X-MEN]] allies in your discard pile and shuffle them into your deck. If X-Mansion is in play, draw 1 card."
+ },
+ {
+  "code": "37032",
+  "name": "Exodus",
+  "text": "Retaliate 1. Villainous.\n<b>When Revealed</b>: Search the encounter deck and discard pile for the Psionic Shield attachment and attach it to Exodus. <i>(Shuffle.)</i>",
+  "traits": "Acolyte. Elite. Psionic.",
+  "flavor": "\"I serve proudly in the house and name of Magneto!\""
+ },
+ {
+  "code": "37033",
+  "name": "Herald of Avalon",
+  "text": "<b>When Defeated</b>: The player who defeated this scheme searches the encounter deck and discard pile for Exodus and reveals him. <i>(Shuffle.)</i>",
+  "flavor": "Exodus sees Magneto as the savior of mutantkind and serves as his herald."
+ },
+ {
+  "code": "37034",
+  "name": "Psionic Shield",
+  "text": "Attach to a minion. Otherwise, Psionic Shield gains surge.\n<b>Forced Interrupt</b>: When attached minion would leave play, instead heal all damage from that minion. Then, discard this attachment.",
+  "traits": "Psionic."
+ },
+ {
+  "code": "37035",
+  "name": "Acolyte Frenzy",
+  "text": "<b>When Revealed</b>: Each [[ACOLYTE]] minion engaged with you activates against you. If you are not engaged with an [[ACOLYTE]] minion, this card gains surge.\n<hr />\n[star] <b>Boost</b>: You are stunned and confused."
+ }
+]

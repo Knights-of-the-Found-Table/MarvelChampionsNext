@@ -1,0 +1,235 @@
+[
+ {
+  "code": "23001a",
+  "name": "War Machine",
+  "text": "<i>Locked and Loaded</i> - <b>Response</b>: After you change to this form, place 5 ammo counters on War Machine.",
+  "traits": "Avenger. Soldier.",
+  "flavor": "\"Boom! Looking for this?\" —James Rhodes"
+ },
+ {
+  "code": "23002",
+  "name": "Iron Man",
+  "subname": "Tony Stark",
+  "text": "<b>Response:</b> After Iron Man enters play, search your deck and discard pile for a [[tech]] upgrade and add it to your hand. Shuffle your deck.",
+  "traits": "Avenger.",
+  "flavor": "\"What did you do to my suit, Rhodey?\""
+ },
+ {
+  "code": "23003",
+  "name": "Munitions Bunker",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Munitions Bunker → Place 2 ammo counters here.\n<b>Hero Action</b>: Exhaust Munitions Bunker → move each ammo counter here to War Machine.",
+  "traits": "Location. S.H.I.E.L.D."
+ },
+ {
+  "code": "23004",
+  "name": "Upgraded Chassis",
+  "text": "War Machine gains the [[aerial]] trait.\n<b>Hero Response</b>: After you change to hero form, exhaust Upgraded Chassis → give War Machine a tough status card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "23005",
+  "name": "Gauntlet Gun",
+  "text": "<b>Resource</b>: Exhaust Gauntlet Gun → generate a [wild] resource for a War Machine event and place 1 ammo counter on War Machine.",
+  "traits": "Tech. Weapon.",
+  "flavor": "\"Time to see what these babies can do.\" —James Rhodes"
+ },
+ {
+  "code": "23006",
+  "name": "Missile Launcher",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Exhaust Missile Launcher and remove 1 ammo counter from War Machine → deal 2 damage to an enemy. This attack gains ranged.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "23007",
+  "name": "Shoulder Cannon",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Exhaust Shoulder Cannon → deal 1 damage to an enemy. You may remove 1 ammo from War Machine to ready shoulder cannon.",
+  "traits": "Tech. Weapon.",
+  "flavor": "RATATATATAT!"
+ },
+ {
+  "code": "23008",
+  "name": "Repulsor Beam",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Remove 1 ammo counter from War Machine → deal 4 damage to an enemy.",
+  "traits": "Attack.",
+  "flavor": "\"Oh, you want some too?\" —James Rhodes"
+ },
+ {
+  "code": "23009",
+  "name": "Targeted Strike",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 1 ammo counter from War Machine → remove 3 threat from a scheme.",
+  "traits": "Thwart.",
+  "flavor": "\"This is the part where you surrender!\" —James Rhodes"
+ },
+ {
+  "code": "23010",
+  "name": "Scorched Earth",
+  "text": "<b>Hero Action</b>: Remove 3 ammo counters from War Machine → deal 3 damage to each enemy in play.",
+  "traits": "Tactic.",
+  "flavor": "\"I say we lift off and strafe the site from the air. It's the only way to be sure.\" —James Rhodes"
+ },
+ {
+  "code": "23011",
+  "name": "Full Auto",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Remove 4 ammo counters from War Machine and choose an enemy → deal 8 damage to that enemy. This attack gains overkill.",
+  "traits": "Attack.",
+  "flavor": "\"Hey, Tony! Let me see your Mark V do this!\" —James Rhodes"
+ },
+ {
+  "code": "23012",
+  "name": "Black Panther",
+  "subname": "T'Challa",
+  "text": "You may play the event attached to Black Panther as if it were in your hand.\n<b>Response:</b> After Black Panther enters play, choose a leadership (blue) event in your discard pile and attach it to him facedown.",
+  "traits": "Avenger. Wakanda."
+ },
+ {
+  "code": "23013",
+  "name": "Captain Marvel",
+  "subname": "Carol Danvers",
+  "text": "<b>Response:</b> After Captain Marvel enters play, discard the top 4 cards of your deck. If you discard a printed [energy] resource, deal 3 damage to an enemy. If you discard more than one printed [energy] resource, also stun that enemy.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "23014",
+  "name": "Falcon",
+  "subname": "Sam Wilson",
+  "text": "<b>Response</b>: After Falcon enters play, look at the top 3 cards of the encounter deck. For each treachery looked at this way, remove 1 threat from a scheme.",
+  "traits": "Aerial. Avenger.",
+  "_dup_of": "03011"
+ },
+ {
+  "code": "23015",
+  "name": "Goliath",
+  "subname": "Bill Foster",
+  "text": "<b>Action</b>: Goliath gets +4 ATK until the end of the phase. At the end of the phase, discard Goliath. (Max once per phase.)",
+  "traits": "Avenger.",
+  "flavor": "\"Sometimes being a gentleman means holding the door, and the rest of the building.\"",
+  "_dup_of": "04013"
+ },
+ {
+  "code": "23016",
+  "name": "Command Team",
+  "text": "Uses (3 command counters).\n<b>Action</b>: Exhaust Command Team and remove 1 command counter from it → ready an ally.",
+  "traits": "S.H.I.E.L.D."
+ },
+ {
+  "code": "23017",
+  "name": "Sneak Attack",
+  "text": "<b>Action</b>: Choose an ally in your hand that shares a [[trait]] with your identity → put that ally into play. If that ally is still in play at the end of the phase, discard it.",
+  "traits": "Tactic.",
+  "flavor": "\"Surprise!\" —Star-Lord"
+ },
+ {
+  "code": "23018",
+  "name": "Save the Day",
+  "text": "<b>Hero Action</b>: Discard an ally your control → remove threat from a scheme equal to that ally's printed cost.",
+  "traits": "Tactic.",
+  "flavor": "\"There are days, and boy, is this ever one of those days!\" —Spider-Man"
+ },
+ {
+  "code": "23019",
+  "name": "Go Down Swinging",
+  "text": "<b>Hero Action</b>: Discard an ally your control → deal damage to an enemy equal to that ally's printed cost.",
+  "traits": "Tactic.",
+  "flavor": "\"Spider-Man's banter can get on your nerves, but I tell you what - that kid never quits.\" —Captain America"
+ },
+ {
+  "code": "23020",
+  "name": "Make the Call",
+  "text": "<b>Action</b>: Pay the printed cost of an ally in any player's discard pile → put that ally into play under your control.",
+  "flavor": "\"This is a code red! All hands on deck!\" —Maria Hill",
+  "_dup_of": "01071"
+ },
+ {
+  "code": "23021",
+  "name": "Innovation",
+  "text": "Max 1 per deck.\n<b>Hero Response</b>: After you spend this card, heal 1 damage from an ally you control.",
+  "_dup_of": "21058"
+ },
+ {
+  "code": "23022",
+  "name": "Mockingbird",
+  "subname": "Bobbi Morse",
+  "text": "<b>Response</b>: After Mockingbird enters play, stun an enemy.",
+  "traits": "S.H.I.E.L.D. Spy.",
+  "_dup_of": "01083"
+ },
+ {
+  "code": "23023",
+  "name": "Quincarrier",
+  "text": "Play only if your identity has the [[Avenger]] trait.\n<b>Resource</b>: Exhaust Quincarrier → generate a [wild] resource.",
+  "traits": "Avenger. Vehicle.",
+  "flavor": "\"Too bad we could only get one of these.\" —Hawkeye",
+  "_dup_of": "08023"
+ },
+ {
+  "code": "23024",
+  "name": "Two Against the World",
+  "text": "Team-Up (Iron Man and War Machine). Max 1 per deck.\n<b>Hero Action</b>: Search your deck for a [[tech]] upgrade and put it into play. Shuffle your deck. Ready Iron Man and War Machine."
+ },
+ {
+  "code": "23025",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "23026",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "23027",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "23028",
+  "name": "Equipment Malfunction",
+  "text": "<b><i>Give to the James Rhodes player.</i></b>\nYou may flip to your alter-ego form. Choose:\n• Exhaust James Rhodes → remove Equipment Malfunction from the game.\n• Remove all ammo counters from your identity. If 2 or fewer ammo counters were removed this way, this card gains surge. Discard this obligation."
+ },
+ {
+  "code": "23029",
+  "name": "Living Laser",
+  "text": "Quickstrike.\n[star] Living Laser's attacks gain piercing.\n<i>(War Machine's nemesis minion.)</i>",
+  "traits": "Criminal.",
+  "flavor": "\"You and Stark - you both have it coming!\""
+ },
+ {
+  "code": "23030",
+  "name": "Deadly Light Show",
+  "text": "Hinder 1[per_hero]\n<b>When Defeated:</b> Deal 1 damage to each identity.",
+  "flavor": "<b><i>Living Laser is attacking a government office. The employees inside need help!</i></b>"
+ },
+ {
+  "code": "23031",
+  "name": "Laser Strike",
+  "text": "<b>When Revealed</b>: Discard an upgrade you control. If you cannot, this card gains surge.\n<hr />\n[star] <b>Boost</b>: If this resolves during an undefended attack, discard an upgrade you control."
+ },
+ {
+  "code": "23032",
+  "name": "As One!",
+  "text": "Alliance.\n<b>Hero Action</b> <i>(attack)</i>: Exhaust an [[avenger]] character and a [[guardian]] character → deal X damage to an enemy, where X is the combined ATK of those characters. This attack gains overkill.",
+  "traits": "Attack."
+ },
+ {
+  "code": "23033",
+  "name": "Vigilante Training",
+  "text": "Max 2 per deck. Uses (2 training counters).\n<b>Alter-Ego Action</b>: Exhaust this card and remove 1 training counter from it → choose a justice (yellow) event in your discard pile and shuffle it into your deck.",
+  "traits": "Condition."
+ },
+ {
+  "code": "23034",
+  "name": "Stand Together",
+  "text": "Alliance.\n<b>Hero Interrupt</b>: When a friendly character would take any amount of damage from an attack, exhaust an [[avenger]] character and a [[guardian]] character → prevent all of that damage. Deal that much damage to the attacking enemy.",
+  "traits": "Tactic."
+ },
+ {
+  "code": "23035",
+  "name": "Sidearm",
+  "text": "Attach to an ally. Max 1 per ally.\nAttached ally gets +1 ATK and its attacks gain ranged.",
+  "traits": "Weapon.",
+  "flavor": "\"Wow! Cool costume, mister!\" —Kid"
+ }
+]

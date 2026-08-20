@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/rooms"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
 
@@ -36,6 +37,17 @@ func main() {
 	listen := envOr("MC_LISTEN", ":3000")
 	staticDir := envOr("MC_STATIC_DIR", "web/dist")
 	cacheDir := envOr("MC_CACHE_DIR", "cache")
+
+	// Optional Simplified Chinese translation overlay: a directory of pack
+	// JSON files (tools/zh/out). Untranslated cards keep English values.
+	if zhDir := os.Getenv("MC_ZH_DIR"); zhDir != "" {
+		n, err := engine.ApplyChinese(engine.DB, zhDir)
+		if err != nil {
+			log.Fatalf("zh translations: %v", err)
+		}
+		engine.RelabelScenarios(engine.DB)
+		log.Printf("zh translations: %d cards overlaid from %s", n, zhDir)
+	}
 
 	secret := os.Getenv("MC_JWT_SECRET")
 	if secret == "" {

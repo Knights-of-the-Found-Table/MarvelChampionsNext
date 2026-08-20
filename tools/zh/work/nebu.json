@@ -1,0 +1,223 @@
+[
+ {
+  "code": "22001a",
+  "name": "Nebula",
+  "text": "<i>Combat Protocols</i> - <b>Forced Response</b>: After your turn begins, resolve the \"Special\" ability on each [[technique]] upgrade you control, then discard each [[technique]] upgrade resolved this way.",
+  "traits": "Guardian."
+ },
+ {
+  "code": "22002",
+  "name": "Gamora",
+  "text": "<b>Response:</b> After you play Gamora, choose a [[technique]] upgrade you control, then resolve its \"Special\" ability.",
+  "traits": "Guardian.",
+  "flavor": "\"Thanos trained us both for the same purpose.\""
+ },
+ {
+  "code": "22003",
+  "name": "Nebula's Ship",
+  "text": "<b>Resource</b>: Exhaust Nebula's Ship → generate a [wild] resource.",
+  "traits": "Vehicle.",
+  "flavor": "\"I liked it better when I was the one targeting your ship.\" —Gamora"
+ },
+ {
+  "code": "22004",
+  "name": "Cutthroat Ambition",
+  "text": "While Nebula is in hero form, her attacks gain piercing and overkill.\n<b>Special</b> <i>(thwart)</i>: Remove 3 threat from a scheme.",
+  "traits": "Technique.",
+  "flavor": "\"I am every bit the warrior you are!\" —Nebula"
+ },
+ {
+  "code": "22005",
+  "name": "Evasive Maneuvering",
+  "text": "While in hero form, Nebula ignores the guard keyword, the patrol keyword, and the crisis icon.\n<b>Special</b> : Choose to either stun or confuse an enemy.",
+  "traits": "Technique."
+ },
+ {
+  "code": "22006",
+  "name": "Unyielding Persistence",
+  "text": "While in hero form, Nebula gets +1 THW, +1 ATK, and gains stalwart.\n<b>Special</b> : Give Nebula a tough status card.",
+  "traits": "Technique."
+ },
+ {
+  "code": "22007",
+  "name": "Weapons Master",
+  "text": "While in hero form, Nebula gains retaliate 1.\n<b>Special</b> <i>(attack)</i>: Deal 4 damage to an enemy.",
+  "traits": "Technique."
+ },
+ {
+  "code": "22008",
+  "name": "Wide Stance",
+  "text": "While Nebula is in hero form, reduce the amount of damage she takes from each attack by 1.\n<b>Special</b> : Look at the top 3 cards of the encounter deck. Discard 1 and put the others back in any order.",
+  "traits": "Technique."
+ },
+ {
+  "code": "22009",
+  "name": "Combat Ready",
+  "text": "<b>Alter-Ego Action</b>: Choose one:\nShuffle up to 2 [[technique]] upgrades from your discard pile into your deck.\nDiscard cards from the top of your deck until you discard a [[technique]] upgrade. Put that upgrade into play, then resolve its \"Special\" ability.",
+  "traits": "Skill."
+ },
+ {
+  "code": "22010",
+  "name": "Lethal Intent",
+  "text": "<b>Hero Action</b>: Choose up to X [[technique]] upgrades you control. Resolve each of their \"Special\" abilities (in the order of your choice).",
+  "flavor": "\"The Guardians were wise to fear me, and even smarter to hire me on.\" —Nebula"
+ },
+ {
+  "code": "22011",
+  "name": "Eros",
+  "text": "<b>Response:</b> After you play Eros from your hand, confuse a minion for each [mental] resource you used to pay for him.",
+  "traits": "Guardian.",
+  "flavor": "\"This will not be easy, but we will save this universe...we will guard this galaxy.\""
+ },
+ {
+  "code": "22012",
+  "name": "Wraith",
+  "subname": "Zak-Del",
+  "text": "<b>Hero Interrupt:</b> When a boost card is turned faceup, exhaust Wraith and deal 1 damage to him → cancel that card's \"Boost\" effect.",
+  "traits": "Guardian.",
+  "flavor": "\"Do not despair: Destiny makes slaves of us all.\""
+ },
+ {
+  "code": "22013",
+  "name": "Venom",
+  "subname": "Flash Thompson",
+  "text": "While there is no threat on the main scheme, reduce all consequential damage Venom takes by 1.",
+  "traits": "Guardian.",
+  "flavor": "\"So much for doing this the easy way.\""
+ },
+ {
+  "code": "22014",
+  "name": "Justice Served",
+  "text": "Play under any player's control. Max 1 per player.\n<b>Hero Response</b>: After you thwart and remove the last threat from a scheme, discard Justice Served → ready your hero."
+ },
+ {
+  "code": "22015",
+  "name": "One Way or Another",
+  "text": "Max 1 per round.\n<b>Hero Action</b>: Search the encounter deck for a side scheme. Reveal that side scheme → draw 3 cards (shuffle the encounter deck)."
+ },
+ {
+  "code": "22016",
+  "name": "Determination",
+  "text": "Max 1 per deck.\n<b>Hero Response</b>: After you spend this card, remove 1 threat from the main scheme.",
+  "_dup_of": "21052"
+ },
+ {
+  "code": "22017",
+  "name": "The Power of Justice",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Justice <i>(yellow)</i> card.",
+  "_dup_of": "01062"
+ },
+ {
+  "code": "22018",
+  "name": "Brains Over Brawn",
+  "text": "<b>Hero Response</b> <i>(attack)</i>: After your hero makes a basic thwart, deal damage to an enemy equal to your hero's THW.",
+  "traits": "Attack.",
+  "flavor": "Despite his incredible strength, Spider-Man often triumphs by outwitting his foes."
+ },
+ {
+  "code": "22019",
+  "name": "Heroic Intuition",
+  "text": "Play under any player's control. Max 1 per player.\nYour hero gets +1 THW.",
+  "traits": "Skill.",
+  "_dup_of": "01065"
+ },
+ {
+  "code": "22020",
+  "name": "Cosmo",
+  "text": "<b>Interrupt</b>: When Cosmo attacks or thwarts, name a card type, then discard the top card of a player deck or the encounter deck. If that card is of the named type, Cosmo does not take consequential damage for this use.",
+  "traits": "Guardian.",
+  "_dup_of": "17020"
+ },
+ {
+  "code": "22021",
+  "name": "Knowhere",
+  "text": "Play only if your identity has the [[guardian]] trait.\nIncrease your ally limit by 1.\n<b>Response</b>: After a player plays a [[guardian]] ally, exhaust Knowhere → that player draws 1 card.",
+  "traits": "Location.",
+  "_dup_of": "17022"
+ },
+ {
+  "code": "22022",
+  "name": "Daughters of Thanos",
+  "text": "Team-Up (Gamora and Nebula). Max 1 per deck.\n<b>Hero Action</b>: Draw 3 cards.",
+  "flavor": "\"Thanos pitted us against each other as children, but now we are sisters. United at last.\" —Gamora"
+ },
+ {
+  "code": "22023",
+  "name": "First Aid",
+  "text": "<b>Action</b>: Heal 2 damage from any character.",
+  "flavor": "\"Does it still qualify as first aid if it's your second day in the hospital?\" —Clint Barton",
+  "_dup_of": "01086"
+ },
+ {
+  "code": "22024",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "22025",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "22026",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "22027",
+  "name": "Inferiority Complex",
+  "text": "<b><i>Give to Nebula player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust your alter-ego → remove Inferiority Complex from the game.\n• Choose and discard 2 [[Technique]] upgrades you control. If no upgrade was discarded this way, this card gains surge. Discard this obligation."
+ },
+ {
+  "code": "22028",
+  "name": "Gamora",
+  "text": "<b>Forced Interrupt</b>: When this minion would enter play, discard the Gamora ally from play.\n[star] <b>Forced Response</b>: After Gamora attacks and damages you, choose and discard an upgrade you control.\n<i>(Nebula's nemesis minion.)</i>",
+  "traits": "Elite. Outlaw."
+ },
+ {
+  "code": "22029",
+  "name": "Self-Preservation",
+  "text": "Nebula gets -1 THW, -1 ATK, and -1 DEF.\nGamora gets +1 ATK and her attacks gain piercing.",
+  "flavor": "\"We both did what we had to in order to survive. Why won't you let it go?\" —Gamora"
+ },
+ {
+  "code": "22030",
+  "name": "Lethal Weapon",
+  "text": "Attach to Gamora. If you cannot, attach to the villain.\n<b>Hero Action:</b> Discard an upgrade you control → discard this attachment.",
+  "traits": "Weapon.",
+  "flavor": "\"There's only one 'Most Dangerous Woman in the Galaxy', and that's me!\" —Gamora"
+ },
+ {
+  "code": "22031",
+  "name": "Old Rivals",
+  "text": "<b>When Revealed:</b> Gamora attacks you. If the Gamora hero or ally is in play, she attacks you <i>(resolve her ATK against you without exhausting her)</i>. If no attack was made this way, this card gains surge.",
+  "flavor": "\"This was a mistake.\" —Gamora"
+ },
+ {
+  "code": "22032",
+  "name": "Energy Spear",
+  "text": "Attach to a [[guardian]] ally. Max 1 per ally.\nAttached ally gets +2 ATK and gains piercing.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "22033",
+  "name": "Guardians of the Galaxy",
+  "text": "Play under any player's control. Max 1 [[team]] card per player.\nIf each of your characters has the [[guardian]] trait, this card gains: \"<b>Response</b>: After you play an upgrade on an ally, draw 1 card.\"",
+  "traits": "Team."
+ },
+ {
+  "code": "22034",
+  "name": "Defensive Training",
+  "text": "Max 2 per deck. Uses (2 training counters).\n<b>Alter-Ego Action</b>: Exhaust this card and remove 1 training counter from this → choose a Protection (green) event in your discard pile and shuffle it into your deck.",
+  "traits": "Condition."
+ },
+ {
+  "code": "22035",
+  "name": "Honorary Guardian",
+  "text": "Play only if your identity has the [[guardian]] trait.\nAttach to a friendly character. Max 1 per character.\nAttached character gets +1 hit point and gains the [[guardian]] trait.",
+  "traits": "Title."
+ }
+]

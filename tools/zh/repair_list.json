@@ -1,0 +1,826 @@
+{
+ "angel.json": [
+  {
+   "code": "42015",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  }
+ ],
+ "cw.json": [
+  {
+   "code": "56209",
+   "field": "text",
+   "missing": [],
+   "extra": [
+    "</b>"
+   ]
+  }
+ ],
+ "drax.json": [
+  {
+   "code": "19020",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "19031",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  }
+ ],
+ "fne.json": [
+  {
+   "code": "60017",
+   "field": "text",
+   "missing": [
+    "</i>",
+    "<i>"
+   ],
+   "extra": []
+  }
+ ],
+ "gam.json": [
+  {
+   "code": "18001a",
+   "field": "text",
+   "missing": [
+    "[attack]",
+    "[thwart]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18002",
+   "field": "text",
+   "missing": [
+    "[attack]",
+    "[thwart]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18006",
+   "field": "text",
+   "missing": [
+    "[thwart]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18007",
+   "field": "text",
+   "missing": [
+    "[attack]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18008",
+   "field": "text",
+   "missing": [
+    "[attack]",
+    "[thwart]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18009",
+   "field": "text",
+   "missing": [
+    "[attack]",
+    "[thwart]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18010",
+   "field": "text",
+   "missing": [
+    "[attack]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18013",
+   "field": "text",
+   "missing": [
+    "[attack]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18019",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18027",
+   "field": "text",
+   "missing": [
+    "[attack]",
+    "[traits]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "18030",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  }
+ ],
+ "gmw.json": [
+  {
+   "code": "16019",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16024",
+   "field": "text",
+   "missing": [
+    "[superpower]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16031",
+   "field": "text",
+   "missing": [
+    "[tech]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16033",
+   "field": "text",
+   "missing": [
+    "[tech]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16034",
+   "field": "text",
+   "missing": [
+    "[tech]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16039",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16047",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16052",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "16108",
+   "field": "text",
+   "missing": [],
+   "extra": []
+  }
+ ],
+ "hercules.json": [
+  {
+   "code": "59001a",
+   "field": "text",
+   "missing": [
+    "[gift]",
+    "[labor]"
+   ],
+   "extra": []
+  }
+ ],
+ "ironheart.json": [
+  {
+   "code": "29007",
+   "field": "text",
+   "missing": [
+    "[version]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "29008",
+   "field": "text",
+   "missing": [
+    "[version]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "29015",
+   "field": "text",
+   "missing": [
+    "[champion]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "29016",
+   "field": "text",
+   "missing": [
+    "[champion]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "29025",
+   "field": "text",
+   "missing": [
+    "[champion]"
+   ],
+   "extra": []
+  }
+ ],
+ "mts.json": [
+  {
+   "code": "21011",
+   "field": "text",
+   "missing": [
+    "[avenger]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21099",
+   "field": "back_text",
+   "missing": [
+    "[stronghold]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21099a",
+   "field": "text",
+   "missing": [
+    "[stronghold]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21127",
+   "field": "text",
+   "missing": [],
+   "extra": [
+    "</i>",
+    "<i>"
+   ]
+  },
+  {
+   "code": "21138",
+   "field": "text",
+   "missing": [
+    "[wounded]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21138",
+   "field": "back_text",
+   "missing": [
+    "[captive]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21138a",
+   "field": "text",
+   "missing": [
+    "[captive]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21155",
+   "field": "text",
+   "missing": [
+    "[undead]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "21157",
+   "field": "text",
+   "missing": [],
+   "extra": [
+    "</i>",
+    "<i>"
+   ]
+  }
+ ],
+ "mut_gen.json": [
+  {
+   "code": "32031a",
+   "field": "text",
+   "missing": [
+    "[attack]",
+    "[defense]"
+   ],
+   "extra": []
+  }
+ ],
+ "nebu.json": [
+  {
+   "code": "22001a",
+   "field": "text",
+   "missing": [
+    "[technique]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22002",
+   "field": "text",
+   "missing": [
+    "[technique]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22009",
+   "field": "text",
+   "missing": [
+    "[technique]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22010",
+   "field": "text",
+   "missing": [
+    "[technique]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22021",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22032",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22033",
+   "field": "text",
+   "missing": [
+    "[guardian]",
+    "[team]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "22035",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  }
+ ],
+ "sm.json": [
+  {
+   "code": "27083",
+   "field": "text",
+   "missing": [
+    "[quiet]",
+    "[ringing]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27084",
+   "field": "text",
+   "missing": [
+    "[illusion]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27085",
+   "field": "text",
+   "missing": [
+    "[illusion]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27086",
+   "field": "text",
+   "missing": [
+    "[illusion]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27117a",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27118a",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27119a",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27121",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27122",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27123",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27124",
+   "field": "text",
+   "missing": [
+    "[symbiote]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27127",
+   "field": "text",
+   "missing": [
+    "[location]",
+    "[persona]",
+    "[traits]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27133",
+   "field": "text",
+   "missing": [
+    "[civilian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27136",
+   "field": "text",
+   "missing": [
+    "[attack]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27170",
+   "field": "text",
+   "missing": [
+    "[persona]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "27171",
+   "field": "text",
+   "missing": [
+    "[traits]"
+   ],
+   "extra": []
+  }
+ ],
+ "stld.json": [
+  {
+   "code": "17001a",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17002",
+   "field": "text",
+   "missing": [
+    "[elite]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17008",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17009",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17014",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17015",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17017",
+   "field": "text",
+   "missing": [
+    "[weapon]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17019",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17021",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17022",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17028",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17029",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "17030",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  }
+ ],
+ "valk.json": [
+  {
+   "code": "25007",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "25023",
+   "field": "text",
+   "missing": [
+    "[asgard]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "25024",
+   "field": "text",
+   "missing": [
+    "[asgard]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "25031",
+   "field": "text",
+   "missing": [
+    "[enthralled]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "25032",
+   "field": "text",
+   "missing": [
+    "[attack]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "25033",
+   "field": "text",
+   "missing": [
+    "[avenger]",
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "25036",
+   "field": "text",
+   "missing": [
+    "[avenger]",
+    "[guardian]"
+   ],
+   "extra": []
+  }
+ ],
+ "vnm.json": [
+  {
+   "code": "20004",
+   "field": "text",
+   "missing": [
+    "[weapon]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "20005",
+   "field": "text",
+   "missing": [
+    "[weapon]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "20021",
+   "field": "text",
+   "missing": [
+    "[weapon]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "20026",
+   "field": "text",
+   "missing": [
+    "[weapon]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "20027",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "20028",
+   "field": "text",
+   "missing": [
+    "[guardian]"
+   ],
+   "extra": []
+  }
+ ],
+ "warm.json": [
+  {
+   "code": "23002",
+   "field": "text",
+   "missing": [
+    "[tech]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "23004",
+   "field": "text",
+   "missing": [
+    "[aerial]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "23017",
+   "field": "text",
+   "missing": [
+    "[trait]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "23024",
+   "field": "text",
+   "missing": [
+    "[tech]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "23032",
+   "field": "text",
+   "missing": [
+    "[avenger]",
+    "[guardian]"
+   ],
+   "extra": []
+  },
+  {
+   "code": "23034",
+   "field": "text",
+   "missing": [
+    "[avenger]",
+    "[guardian]"
+   ],
+   "extra": []
+  }
+ ]
+}

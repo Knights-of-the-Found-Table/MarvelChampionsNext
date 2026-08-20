@@ -1,0 +1,206 @@
+[
+ {
+  "code": "46001a",
+  "name": "Iceman",
+  "text": "<i>\"Freeze!\"</i> — <b>Interrupt</b>: When Iceman makes a basic attack or defense against an enemy, attach a set-aside copy of Frostbite to that enemy.",
+  "traits": "Ice. X-Men.",
+  "flavor": "\"Here comes the coolest hero on the team!\""
+ },
+ {
+  "code": "46002",
+  "name": "Frostbite",
+  "text": "Permanent.\nAttached enemy gets -1 SCH and -1 ATK.\n<b>Forced Response</b>: After attached enemy activates or leaves play, set this card aside.",
+  "traits": "Condition. Ice."
+ },
+ {
+  "code": "46003",
+  "name": "Snow Clone",
+  "text": "Cannot have upgrades attached.\n[star] Snow Clone takes -1 consequential damage ([cost]) after it attacks an enemy with Frostbite attached.",
+  "traits": "Ice. X-Men.",
+  "flavor": "\"You could say he's got an icy demeanor.\" —Iceman"
+ },
+ {
+  "code": "46004",
+  "name": "Power Belt",
+  "text": "You get +3 hit points.\n<b>Hero Resource</b>: Exhaust Power Belt → generate a [wild] resource for an [[Ice]] card.",
+  "traits": "Item. Tech.",
+  "flavor": "Beast made this high-tech belt to help Iceman better control his powers."
+ },
+ {
+  "code": "46005",
+  "name": "Cryokinetic Perception",
+  "text": "<b>Hero Response</b>: After you resolve your <i>\"Freeze!\"</i> ability, exhaust this card → draw 1 card. If that card has an [[Ice]] trait, ready Iceman.",
+  "traits": "Superpower.",
+  "flavor": "\"Anyone remember when I used to throw snowballs at Magneto?\" —Iceman"
+ },
+ {
+  "code": "46006",
+  "name": "Ice Slide",
+  "text": "Iceman gets +1 THW, +1 ATK, and +1 DEF, and gains the [[Aerial]] trait.\n<b>Forced Response</b>: After you change to alter-ego form, shuffle this card into your deck.",
+  "traits": "Ice. Superpower."
+ },
+ {
+  "code": "46007",
+  "name": "Frozen Solid",
+  "text": "Hero form only. Attach to an enemy. Max 1 per enemy.\n<b>Forced Interrupt</b>: When attached enemy would activate, discard Frozen Solid instead. Then, attach a set-aside copy of Frostbite to that enemy.",
+  "traits": "Condition. Ice."
+ },
+ {
+  "code": "46008",
+  "name": "Ice Wall",
+  "text": "<b>Forced Interrupt</b>: When an identity would take any amount of damage from an enemy attack, place that damage here instead. Then, if there is at least 8 damage here, discard this card and attach a set-aside copy of Frostbite to the enemy that just attacked.",
+  "traits": "Ice."
+ },
+ {
+  "code": "46009",
+  "name": "Arctic Attack",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Choose:\n• Deal 4 damage to an enemy and attach a set-aside copy of Frostbite to it.\n• Deal 6 damage to an enemy with Frostbite attached.",
+  "traits": "Attack. Ice. Superpower."
+ },
+ {
+  "code": "46010",
+  "name": "Ice Blast",
+  "text": "<b>Hero Action</b>: Choose a player. Attach a set-aside copy of Frostbite to the villain and each minion engaged with that player. Deal 3 damage to each enemy with a copy of Frostbite attached.",
+  "traits": "Ice. Superpower.",
+  "flavor": "\"Time to put these guys on ice.\" —Iceman"
+ },
+ {
+  "code": "46011",
+  "name": "Chill Out!",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme. Attach a set-aside copy of Frostbite to an enemy.",
+  "traits": "Ice. Superpower. Thwart.",
+  "flavor": "\"Seriously, dude. I'm all out of ice puns.\" —Iceman"
+ },
+ {
+  "code": "46012",
+  "name": "Shark-Girl",
+  "subname": "Iara Dos Santos",
+  "text": "[star] While Shark-Girl is attacking an enemy, she gets +1 ATK for each upgrade attached to that enemy.",
+  "traits": "X-Men.",
+  "flavor": "The only thing scarier than a ravenous teenager is one who can turn into a shark."
+ },
+ {
+  "code": "46013",
+  "name": "Glob",
+  "subname": "Robert Herman",
+  "text": "Play only if your identity has the [[X-Men]] trait.\n<b>Response</b>: After Glob enters play, deal 2 damage to an enemy with an upgrade attached.",
+  "traits": "X-Men."
+ },
+ {
+  "code": "46014",
+  "name": "Suppressing Fire",
+  "text": "Attach to a minion. Max 1 per minion.\n<b>Hero Interrupt</b>: When you attack and defeat attached minion, heal 2 damage from your hero.",
+  "traits": "Tactic."
+ },
+ {
+  "code": "46015",
+  "name": "Surprise Move",
+  "text": "<b>Hero Interrupt</b>: When you make a basic attack against an enemy with an upgrade attached, you get +2 ATK for this attack. If this attack defeats that enemy, ready your hero.",
+  "traits": "Tactic."
+ },
+ {
+  "code": "46016",
+  "name": "Take That!",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 7 damage to an enemy with an upgrade attached.",
+  "traits": "Attack.",
+  "flavor": "\"And don't come back!\" —Magik"
+ },
+ {
+  "code": "46017",
+  "name": "Looking for Trouble",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Discard cards from the top of the encounter deck until you discard a minion. Put that minion into play engaged with you → remove 3 threat from the main scheme.",
+  "traits": "Thwart.",
+  "_dup_of": "16043"
+ },
+ {
+  "code": "46018",
+  "name": "Keep Up the Pressure",
+  "text": "Victory 0.\n<b>When Defeated</b>: Each player may search their deck and discard pile for an [[Attack]] event and add it to their hand. <i>(Shuffle.)</i> Until the end of the phase, each [[Attack]] event deals 1 additional damage."
+ },
+ {
+  "code": "46019",
+  "name": "Shadowcat",
+  "subname": "Kitty Pryde",
+  "text": "Play only if your identity has the [[X-Men]] trait.\n<b>Response</b>: After you play Shadowcat from your hand, choose a side scheme in play → that scheme loses each [acceleration], [amplify], [crisis], and [hazard] icon until the end of the round.",
+  "traits": "X-Men."
+ },
+ {
+  "code": "46020",
+  "name": "Beak",
+  "subname": "Barnell Bohusk",
+  "text": "<b>Response</b>: After you play Beak from your hand, remove 1 threat from a scheme for each [[X-Men]] ally you control.",
+  "traits": "X-Men.",
+  "flavor": "\"I'm not really strong and I don't shoot death-rays, but I am good at making friends.\""
+ },
+ {
+  "code": "46021",
+  "name": "Team-Building Exercise",
+  "text": "<b>Hero Action</b>: Exhaust Team-Building Exercise → play a card from your hand that shares a trait with your hero, reducing its resource cost by 1.",
+  "flavor": "\"This is why we practice, people!\" —Phoenix",
+  "_dup_of": "12024"
+ },
+ {
+  "code": "46022",
+  "name": "Recuperation",
+  "text": "<b>Alter-Ego Action</b>: Heal damage from your alter-ego equal to your REC.",
+  "flavor": "\"You'll be fine.\" —Dr. Rao",
+  "_dup_of": "15031"
+ },
+ {
+  "code": "46023",
+  "name": "The Power in All of Us",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates when paying for a Basic (gray) card.",
+  "_dup_of": "13024"
+ },
+ {
+  "code": "46024",
+  "name": "Hot-Headed",
+  "text": "<b><i>Give to the Bobby Drake player.</i></b>\n<b>Forced Response</b>: After you attach a Frostbite upgrade to an enemy, take 1 damage.\n<b>Alter-Ego Response</b>: After you make a basic recovery, discard this card."
+ },
+ {
+  "code": "46025",
+  "name": "Pyro",
+  "text": "Quickstrike.\n[star] Pyro's attacks deal indirect damage.",
+  "traits": "Brotherhood of Mutants.",
+  "flavor": "\"You think those ice sculptures can stop me?!\""
+ },
+ {
+  "code": "46026",
+  "name": "Playing with Fire",
+  "text": "<b>When Defeated</b>: The player who defeated this scheme discards the top 3 cards of their deck and takes 1 indirect damage for each resource icon discarded this way."
+ },
+ {
+  "code": "46027",
+  "name": "Pyro's Flamethrower",
+  "text": "Attach to Pyro. Otherwise, this card gains surge.\n[star] <b>Forced Interrupt</b>: When Pyro attacks you, discard the top card of your deck. Pyro gets +1 ATK for this attack for each resource icon on that card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "46028",
+  "name": "Burn!",
+  "text": "<b>When Revealed</b>: Discard the top 2 cards of your deck (3 cards instead if Pyro is in play). Take 1 indirect damage for each resource icon discarded this way.\n<hr />\n[star] <b>Boost</b>: Discard the top card of your deck. This card gets +1 boost icon ([boost]) for each resource icon on that card."
+ },
+ {
+  "code": "46029",
+  "name": "Sauron",
+  "text": "<b>When Revealed</b>: Search the encounter deck and discard pile for the Life Drain attachment and reveal it.\n<hr />\n[star] <b>Boost</b>: Heal 3 damage from the activating enemy and give it a tough status card.",
+  "traits": "Brotherhood of Mutants."
+ },
+ {
+  "code": "46030",
+  "name": "Sauron Lives!",
+  "text": "<b>When Defeated</b>: The player who defeated this scheme searches the encounter deck and discard pile for Sauron and deals him to themself as a facedown encounter card.",
+  "flavor": "When Dr. Lykos absorbs mutant energy, he transforms into the terrifying Sauron!"
+ },
+ {
+  "code": "46031",
+  "name": "Life Drain",
+  "text": "Attach to the minion with the highest printed hit points. It activates against you. If no minion activated this way, this card gains surge.\n[star] <b>Forced Interrupt</b>: When attached enemy attacks you, take 2 damage and give the attacking enemy a tough status card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "46032",
+  "name": "The Eye of Sauron",
+  "text": "<b>When Revealed</b>: Discard the top 2 cards of your deck (top 3 cards instead if Sauron is in play). For each resource icon discarded this way, do the following:\n[energy] — Place 1 threat on the main scheme.\n[mental] — Discard 1 card from your hand.\n[physical] — Deal 1 damage to your identity.\n[wild] — Exhaust a character you control."
+ }
+]

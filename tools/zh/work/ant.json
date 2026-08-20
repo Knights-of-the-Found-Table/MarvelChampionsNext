@@ -1,0 +1,214 @@
+[
+ {
+  "code": "12001a",
+  "name": "Ant-Man",
+  "text": "<i>Puny Pest</i> — <b>Response:</b> After you change to this form, remove 1 threat from a scheme.",
+  "traits": "Avenger. Tiny.",
+  "flavor": "\"Why don't you pick on somebody your own size?\""
+ },
+ {
+  "code": "12001c",
+  "name": "Ant-Man",
+  "text": "<i>Giant Nuisance</i> — <b>Response:</b> After you change to this form, deal 1 damage to an enemy.",
+  "traits": "Avenger. Giant.",
+  "flavor": "\"Oh Yeah, tiny dude is big now!\""
+ },
+ {
+  "code": "12002",
+  "name": "Wasp",
+  "subname": "Nadia Van Dyne",
+  "text": "<b>Hero Response:</b> After Wasp enters play, deal 2 damage to an enemy if you are in [[Giant]] hero form or remove 2 threat from a scheme if you are in [[Tiny]] hero form.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "12003",
+  "name": "Giant Stomp",
+  "text": "Play only if you are in [[Giant]] hero form.\n<b>Hero Action</b> <i>(attack)</i>: Deal 1 damage to each minion. Deal 8 damage to an enemy.",
+  "traits": "Attack. Giant.",
+  "flavor": "\"I'd run if I were you.\" —Scott Lang"
+ },
+ {
+  "code": "12004",
+  "name": "Hive Mind",
+  "text": "Play only if you are in [[Tiny]] hero form.\n<b>Hero Action</b> <i>(thwart)</i>: Remove 2 threat from a scheme. Remove 1 additional threat from that scheme for each Army of Ants support you control.",
+  "traits": "Thwart. Tiny."
+ },
+ {
+  "code": "12005",
+  "name": "Resize",
+  "text": "<b>Hero Action:</b> Change to your other hero form. Draw 1 card.",
+  "traits": "Superpower.",
+  "flavor": "\"This is awesome!\" —Scott Lang"
+ },
+ {
+  "code": "12006",
+  "name": "Pym Particles",
+  "text": "<b>Hero Response:</b> After you spend this card, heal 2 damage from your hero if you are in [[Giant]] hero form or draw 1 card if you are in [[Tiny]] hero form."
+ },
+ {
+  "code": "12007",
+  "name": "Army of Ants",
+  "text": "<b>Hero Action:</b> If you are in [[Tiny]] hero form, exhaust Army of Ants → deal 1 damage to an enemy.",
+  "traits": "Ants. Tiny.",
+  "flavor": "\"Antvengers Assemble!\" —Scott Lang"
+ },
+ {
+  "code": "12008",
+  "name": "Ant-Man's Helmet",
+  "text": "<b>Hero Response:</b> After you change to [[Giant]] hero form, heal 2 damage from your hero.\n<b>Hero Response:</b> After you change to [[Tiny]] hero form, draw 1 card.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "12009",
+  "name": "Giant Strength",
+  "text": "<b>Hero Response:</b> After you change to [[Giant]] hero form, you get +1 ATK until the end of this turn.",
+  "traits": "Condition. Giant.",
+  "flavor": "\"My daughter lost her phone. I thought I'd look under these buildings.\" —Scott Lang"
+ },
+ {
+  "code": "12010",
+  "name": "Wrist Gauntlets",
+  "text": "<b>Hero Action:</b> If you are in [[Giant]] hero form, exhaust Wrist Gauntlets and spend [physical][physical] resources → stun an enemy.\n<b>Hero Action:</b> If you are in [[Tiny]] hero form, exhaust Wrist Gauntlets and spend [energy][energy] resources → confuse an enemy.",
+  "traits": "Item. Tech."
+ },
+ {
+  "code": "12011",
+  "name": "Ant-Man",
+  "subname": "Hank Pym",
+  "text": "Ant-Man gets +1 hit point for each pym counter on him.\n<b>Interrupt:</b> When Ant-Man enters play, place 1 pym counter on him (to a maximum of 4) for each resource you overpaid for Ant-Man's cost.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "12012",
+  "name": "Giant-Man",
+  "text": "Giant-Man gets +2 ATK while he has 3 or more remaining hit points.",
+  "traits": "Avenger. Giant.",
+  "flavor": "\"Size isn't everything. Unless you're stepping over a bridge.\""
+ },
+ {
+  "code": "12013",
+  "name": "Ronin",
+  "text": "Ronin gets +1 THW and +1 ATK while an upgrade is attached to them.",
+  "traits": "Avenger.",
+  "flavor": "\"Dunno who's wearing the suit this time, but they can definitely handle themself in a fight.\" —Spectrum"
+ },
+ {
+  "code": "12014",
+  "name": "Stinger",
+  "subname": "Cassie Lang",
+  "text": "Play only if your identity has the [[Avenger]] trait.\nStinger does not count against your ally limit.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "12015",
+  "name": "Call for Aid",
+  "text": "<b>Hero Action:</b> Discard cards from the top of your deck until you discard an [[Avenger]] ally, then add that ally to your hand.",
+  "flavor": "\"You rang?\" —Tony Stark"
+ },
+ {
+  "code": "12016",
+  "name": "Moxie",
+  "text": "<b>Hero Response:</b> After you change form, your hero gets +1 THW, +1 ATK, +1 DEF until the end of the round.",
+  "flavor": "\"If you mess with one of us, you mess with all of us!\" Even if I'm the last one.\" —Nova"
+ },
+ {
+  "code": "12017",
+  "name": "Power Gloves",
+  "text": "Attach to an [[Avenger]] ally. Max 1 per ally.\n<b>Response:</b> After attached ally attacks or thwarts, deal 1 damage to an enemy.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "12018",
+  "name": "Reinforced Suit",
+  "text": "Attach to an ally. Max 1 per ally.\nAttached ally gets +2 hit points.",
+  "traits": "Armor. Tech.",
+  "flavor": "\"Remember, it's not just the suit that gives you power, it's how you use it.\" —Hank Pym"
+ },
+ {
+  "code": "12019",
+  "name": "First Aid",
+  "text": "<b>Action</b>: Heal 2 damage from any character.",
+  "flavor": "\"Does it still qualify as first aid if it's your second day in the hospital?\" —Clint Barton",
+  "_dup_of": "01086"
+ },
+ {
+  "code": "12020",
+  "name": "Swarm Tactics",
+  "text": "Team-Up (Ant-Man and Wasp). Max 1 per deck.\n<b>Hero Action:</b> Change to your other hero form. Ready your hero.",
+  "traits": "Tactic."
+ },
+ {
+  "code": "12021",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "12022",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "12023",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "12024",
+  "name": "Team-Building Exercise",
+  "text": "<b>Hero Action</b>: Exhaust Team-Building Exercise → play a card from your hand that shares a trait with your hero, reducing its resource cost by 1."
+ },
+ {
+  "code": "12025",
+  "name": "Care for Cassie",
+  "text": "<b><i>Give to the Scott Lang player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Scott Lang → remove Care for Cassie from the game.\n• Choose and discard 1 card from your hand. You cannot change form until your next turn ends. Discard this obligation."
+ },
+ {
+  "code": "12026",
+  "name": "Tech Theft",
+  "text": "Treat the printed text box of each [[Tech]] player card as if it were blank.",
+  "flavor": "Yellowjacket has stolen priceless Pym Particle technology."
+ },
+ {
+  "code": "12027",
+  "name": "Yellowjacket",
+  "text": "While you are in [[Giant]] hero form, Yellowjacket gains the [[Giant]] trait and retaliate 1.\nWhile you are in [[Tiny]] hero form, Yellowjacket gains the [[Tiny]] trait and gets +1 ATK.\n(Ant-Man's nemesis minion.)"
+ },
+ {
+  "code": "12028",
+  "name": "Size Increase",
+  "text": "Attach to Yellowjacket, if able. If you cannot, attach to the villain.\nUses (3 counters).\n[star] <b>Forced Response:</b> After attached enemy activates, remove 1 size counter from here."
+ },
+ {
+  "code": "12029",
+  "name": "Yellowjacket's Plan",
+  "text": "<b>When Revealed:</b> Discard cards from the encounter deck until a card from the Ant-Man Nemesis set is discarded this way. Reveal that card.",
+  "flavor": "\"You think you can stop the future?!\" —Yellowjacket"
+ },
+ {
+  "code": "12030",
+  "name": "Moment of Triumph",
+  "text": "<b>Hero Response:</b> After you attack and defeat an enemy, heal 1 damage from your hero for each point of excess damage dealt to that enemy by that attack."
+ },
+ {
+  "code": "12031",
+  "name": "Lay Down the Law",
+  "text": "<b>Hero Response</b> <i>(thwart)</i>: After you change form, remove 3 threat from a scheme (4 threat instead if you paid for this card using a [mental] resource).",
+  "traits": "Thwart.",
+  "flavor": "\"Maybe this will teach you!\" —Captain America"
+ },
+ {
+  "code": "12032",
+  "name": "Muster Courage",
+  "text": "Play only if your identity has the [[Avenger]] trait.\n<b>Hero Action:</b> Give up to X friendly characters a tough status card (to a maximum of 3 characters), where X is equal to the villain's stage number."
+ },
+ {
+  "code": "12033",
+  "name": "Assess the Situation",
+  "text": "<b>Action:</b> You get +1 hand size until the end of the phase.",
+  "traits": "Tactic.",
+  "flavor": "\"Well, if I run, that's not cool. And if I stay and get tasered, that's not cool either. I'm in a bit of a pickle.\" —Tony Stark"
+ }
+]

@@ -1,0 +1,233 @@
+[
+ {
+  "code": "25001a",
+  "name": "Valkyrie",
+  "text": "Death Perception — <b>Hero Action</b>: Play the set-aside Death-Glow upgrade as if it were in your hand.",
+  "traits": "Asgard. Avenger.",
+  "flavor": "\"I am the chooser of the slain.\""
+ },
+ {
+  "code": "25002",
+  "name": "Death-Glow",
+  "text": "Attach to an enemy.\n<b>Forced Interrupt</b>: When attached enemy is defeated, set this card aside, out of play. If Valkyrie defeated that enemy, ready her.",
+  "traits": "Condition."
+ },
+ {
+  "code": "25003",
+  "name": "Annabelle Riggs",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Annabelle Riggs → search the top 5 cards of your deck for a Valkyrie card and add it to your hand. Shuffle the rest back into your deck.",
+  "traits": "Civilian.",
+  "flavor": "\"I've got friends on Earth who could use some help.\""
+ },
+ {
+  "code": "25004",
+  "name": "Valhalla",
+  "text": "<b>Response</b>: After Valkyrie attacks and defeats the enemy that has Death-Glow attached, exhaust Valhalla → draw 1 card and heal 1 damage from Valkyrie.",
+  "traits": "Asgard. Location."
+ },
+ {
+  "code": "25005",
+  "name": "Valkyrie's Spear",
+  "text": "Restricted.\nValkyrie gets +1 DEF (+2 DEF instead while defending against the enemy with Death Glow attached).",
+  "traits": "Asgard. Weapon."
+ },
+ {
+  "code": "25006",
+  "name": "Dragonfang",
+  "text": "Restricted.\nValkyrie gets +1 ATK (+2 ATK instead while attacking the enemy with Death-Glow attached).",
+  "traits": "Asgard. Weapon.",
+  "flavor": "\"Dragonfang strikes swiftly and deep. You might be wise to surrender.\" —Valkyrie"
+ },
+ {
+  "code": "25007",
+  "name": "Aragorn",
+  "text": "You get +4 hit points and gains the [[aerial]] trait.",
+  "traits": "Asgard. Creature.",
+  "flavor": "\"A fearless beast. If by his life or death he can save us all, he will.\" —Valkyrie"
+ },
+ {
+  "code": "25008",
+  "name": "Flight of the Valkyrior",
+  "text": "<b>Response</b>: After the enemy with Death-Glow is defeated, discard Flight of the Valkyrior → remove 5 threat from a scheme.",
+  "flavor": "The Valkyrior carry the spirits of fallen warriors to Valhalla, if they be worthy."
+ },
+ {
+  "code": "25009",
+  "name": "Visit Valhalla",
+  "text": "<b>Alter-Ego Action</b>: Return a Valkyrie card from your discard pile to your hand.",
+  "flavor": "As One of the Valkyrior, Valkyrie can open a portal to Valhalla whenever she wishes."
+ },
+ {
+  "code": "25010",
+  "name": "Chooser of the Slain",
+  "text": "<b>Hero Action</b>: Search the encounter deck and discard pile for a minion and put it into play engaged with you → draw 2 cards.",
+  "flavor": "\"Your time has come. Die with honor.\" —Valkyrie"
+ },
+ {
+  "code": "25011",
+  "name": "Shieldmaiden",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When the enemy with Death-Glow attached attacks, declare Valkyrie the defender without exhausting her. She gets +2 DEF for this attack.",
+  "traits": "Defense."
+ },
+ {
+  "code": "25012",
+  "name": "Have at Thee!",
+  "text": "<b>Hero Action</b>(attack): Deal 7 damage to an enemy. If that enemy has Death-Glow attached, this attack gains overkill.",
+  "traits": "Attack."
+ },
+ {
+  "code": "25013",
+  "name": "Thor",
+  "subname": "Odinson",
+  "text": "Toughness.\n<b>Interrupt</b>: When Thor attacks a minion engaged with a player, spend a [energy] resource → resolve this attack against each minion engaged with that player (in the order of your choice).",
+  "traits": "Asgard. Avenger."
+ },
+ {
+  "code": "25014",
+  "name": "Throg",
+  "subname": "Puddlegulp",
+  "text": "<b>Response</b>: After Throg enters play, give him a tough status card if you are engaged with a minion.",
+  "traits": "Asgard. Guardian.",
+  "flavor": "\"Ribbit!\""
+ },
+ {
+  "code": "25015",
+  "name": "Angela",
+  "subname": "Aldrif Odinsdottir",
+  "text": "<b>Forced Response</b>: After Angela enters play under your control, search the top 10 cards of the encounter deck for a minion and put it into play engaged with you. Shuffle the encounter deck. If a minion was not put into play this way, discard Angela.",
+  "traits": "Asgard. Guardian.",
+  "_dup_of": "18011"
+ },
+ {
+  "code": "25016",
+  "name": "Hall of Heroes",
+  "text": "<b>Response:</b> After you defeat a minion, place 1 glory counter here.\n<b>Alter-Ego Action:</b> Exhaust Hall of Heroes and remove 3 glory counters from it → draw 3 cards.",
+  "traits": "Asgard. Location.",
+  "_dup_of": "06017"
+ },
+ {
+  "code": "25017",
+  "name": "Combat Training",
+  "text": "Play under any player's control. Max 1 per player.\nYour hero gets +1 ATK.",
+  "traits": "Skill.",
+  "flavor": "\"Tony! She did it again!\" —Janet Van Dyne",
+  "_dup_of": "01057"
+ },
+ {
+  "code": "25018",
+  "name": "Quick Strike",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal damage to an enemy equal to your ATK.",
+  "traits": "Attack.",
+  "flavor": "\"And stay down!\" —Power Man"
+ },
+ {
+  "code": "25019",
+  "name": "Smash the Problem",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Exhaust your hero → remove threat from a scheme equal to your hero's ATK.",
+  "traits": "Thwart.",
+  "flavor": "\"Let Mjolnir speak!\" —Thor"
+ },
+ {
+  "code": "25020",
+  "name": "The Best Defense…",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When your hero defends against an attack, use its ATK instead of its DEF for this attack.",
+  "traits": "Defense.",
+  "flavor": "\"I know we're Guardians of the Galaxy, but we prefer shooting to being shot at.\" —Rocket Raccoon"
+ },
+ {
+  "code": "25021",
+  "name": "Audacity",
+  "text": "Max 1 per deck.\n<b>Hero Response</b>: After you spend this card, deal 1 damage to the villain.",
+  "_dup_of": "21046"
+ },
+ {
+  "code": "25022",
+  "name": "The Power of Aggression",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Aggression <i>(red)</i> card.",
+  "_dup_of": "01055"
+ },
+ {
+  "code": "25023",
+  "name": "The Bifrost",
+  "text": "Play only if your identity has the [[asgard]] trait.\n<b>Action</b>: Exhaust The Bifrost → search your deck for an [[asgard]] ally and play it <i>(paying its cost)</i>. Shuffle your deck.",
+  "traits": "Asgard. Location."
+ },
+ {
+  "code": "25024",
+  "name": "Godlike Stamina",
+  "text": "Play only if your identity has the [[asgard]] trait.\n<b>Action</b>: Heal 2 damage from your identity. You may discard a status card from your identity.",
+  "flavor": "\"Showoff.\" —Jane Foster"
+ },
+ {
+  "code": "25025",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "25026",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "25027",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "25028",
+  "name": "Trouble in Otherworld",
+  "text": "<b><i>Give to the Brunnhilde player.</i></b>\nValkyrie cannot attack the enemy with Death-Glow attached.\n<b>Alter-Ego Action</b>: Spend [energy][mental] resources → remove Trouble in Otherworld from the game."
+ },
+ {
+  "code": "25029",
+  "name": "Enchantress",
+  "text": "<b>When Revealed</b>: Search the encounter deck, discard pile, and set-aside area for a copy of Seduced and attach it to your identity. <i>(Shuffle.)</i>",
+  "traits": "Asgard. Elite.",
+  "flavor": "\"You can't fight what you want.\""
+ },
+ {
+  "code": "25030",
+  "name": "Powerful Enchantments",
+  "text": "Hinder 1[per_hero].\nPlayers cannot discard attachments that are attached to friendly characters.",
+  "flavor": "Behind Amora's charm lies a cruel ambition and the power to subdue those in her way."
+ },
+ {
+  "code": "25031",
+  "name": "Beguiled",
+  "text": "Treat attached ally as an [[enthralled]] minion with a blank text box.\nAttached minion's SCH is equal to its printed THW and it does not take consequential damage.\n<b>When Revealed</b>: Attach to the ally with the highest cost without Beguiled attached. Attached ally engages its controller. Otherwise, this card gains surge.",
+  "traits": "Condition."
+ },
+ {
+  "code": "25032",
+  "name": "Seduced",
+  "text": "Attach to your identity.\nYou cannot make basic attacks or play [[attack]] events.\n<b>Alter-Ego Action</b>: Spend [energy][mental] resources → discard this card.",
+  "flavor": "\"You love me, don't you?\" —Enchantress"
+ },
+ {
+  "code": "25033",
+  "name": "Problem Solvers",
+  "text": "Alliance.\n<b>Hero Action</b> <i>(thwart)</i>: Exhaust an [[avenger]] character and a [[guardian]] character → remove X threat from each scheme, where X is equal to the combined THW of those characters.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "25034",
+  "name": "Leadership Training",
+  "text": "Max 2 per deck. Uses (2 training counters).\n<b>Alter-ego Action</b>: Exhaust this card and remove 1 training counter from it → choose a leadership (blue) event in you discard pile and shuffle it into your deck.",
+  "traits": "Condition."
+ },
+ {
+  "code": "25035",
+  "name": "Anticipation",
+  "text": "Max 1 per player.\n<b>Hero Interrupt</b>: When you engage a minion, discard this card → ready your hero.",
+  "traits": "Preparation.",
+  "flavor": "\"Bout time you showed up!\" —Hawkeye"
+ },
+ {
+  "code": "25036",
+  "name": "Cosmic Alliance",
+  "text": "Alliance. <i>(The players can pay this card's costs as a group.)</i>\n<b>Hero Action</b>: Choose an [[avenger]] character and a [[guardian]] character → ready each of those characters."
+ }
+]

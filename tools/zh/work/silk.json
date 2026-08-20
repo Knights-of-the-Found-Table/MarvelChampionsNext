@@ -1,0 +1,238 @@
+[
+ {
+  "code": "52001a",
+  "name": "Silk",
+  "text": "If there are more than 4 tucked cards here, discard all but 4 of those cards.\n<i>Silk Sense</i> — <b>Response</b>: After you defeat a minion or side scheme, or resolve a treachery card, tuck that card under here from the encounter discard pile.",
+  "traits": "Web-Warrior."
+ },
+ {
+  "code": "52002",
+  "name": "Smooth as Silk",
+  "text": "<b>Hero Action</b>: Choose an enemy or scheme in play → discard cards from the top of the encounter deck until a card from the same encounter set as the chosen card is discarded. Tuck that discarded card under Silk."
+ },
+ {
+  "code": "52003",
+  "name": "Swinging Silk Kick",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 7 damage to an enemy. You may discard a card tucked under Silk from the same encounter set as that enemy. If you do, this attack deals 2 additional damage and gains overkill.",
+  "traits": "Aerial. Attack. Superpower."
+ },
+ {
+  "code": "52004",
+  "name": "Wallcrawl",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 2 threat from a scheme. Choose a scheme. You may discard a card tucked under Silk from the same encounter set as the chosen scheme to remove 3 threat from the chosen scheme.",
+  "traits": "Superpower. Thwart."
+ },
+ {
+  "code": "52005",
+  "name": "Get the Scoop",
+  "text": "<b>Alter-Ego Action</b>: Exhaust your identity → remove 2 threat from here. Any player may trigger this ability.\n<b>When Defeated</b>: The Cindy Moon player looks at the top 2 cards of the encounter deck and tucks 1 of those cards under their identity."
+ },
+ {
+  "code": "52006",
+  "name": "Albert Moon",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Albert Moon → choose:\n• Tuck the top card of the encounter deck under Cindy Moon.\n• Heal 1 damage from Cindy Moon for each card tucked under her.",
+  "traits": "Persona."
+ },
+ {
+  "code": "52007",
+  "name": "J. Jonah Jameson",
+  "text": "<b>Alter-Ego Action</b>: Exhaust this card → search your deck and discard pile for Get the Scoop and put it into play.\n<b>Action</b>: Exhaust this card → remove 2 threat from a side scheme.",
+  "traits": "Persona.",
+  "flavor": "\"I like you, Analog.\""
+ },
+ {
+  "code": "52008",
+  "name": "Eidetic Memory",
+  "text": "<b>Interrupt</b>: When you reveal a card from the same encounter set as a card tucked under your identity, exhaust Eidetic Memory → swap those cards. Reveal the card that had been tucked under Silk instead.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "52009",
+  "name": "Organic Webbing",
+  "text": "Silk gets +1 THW.\n<b>Hero Action</b>: Exhaust Organic Webbing and discard a card tucked under Silk → ready Silk. She gains the [[Aerial]] trait until the end of the round.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "52010",
+  "name": "Outwit",
+  "text": "<b>Hero Interrupt</b>: When Silk makes a basic thwart, exhaust Outwit → for this thwart she gets +1 THW for each card tucked under her from the same encounter set as the thwarted scheme.",
+  "traits": "Skill."
+ },
+ {
+  "code": "52011",
+  "name": "Spider Claws",
+  "text": "<b>Hero Interrupt</b>: When Silk makes a basic attack, exhaust Spider Claws → for this attack she gets +1 ATK for each card tucked under her from the same encounter set as the attacked enemy. This attack gains piercing.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "52012",
+  "name": "Spider Reflexes",
+  "text": "<b>Hero Interrupt</b>: When Silk defends, exhaust Spider Reflexes → for this attack she gets +1 DEF for each card tucked under her from the same encounter set as the attacking enemy. After this attack, tuck the top card of the encounter discard pile under Silk.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "52013",
+  "name": "Scarlet Spider",
+  "subname": "Ben Reilly",
+  "text": "<b>Interrupt</b>: When another [[Web-Warrior]] character would take any amount of damage, Scarlet Spider takes that damage instead.",
+  "traits": "Web-Warrior.",
+  "flavor": "\"Roses are red, spiders are two,\nOne comes in scarlet, the other in blue!\""
+ },
+ {
+  "code": "52014",
+  "name": "Spider-Byte",
+  "subname": "Margo Kess",
+  "text": "Reduce the cost to play Spider-Byte by 1 for each [[Tech]] card you control.",
+  "traits": "Web-Warrior.",
+  "flavor": "\"I'm just your friendly virtual reality webslinger!\""
+ },
+ {
+  "code": "52015",
+  "name": "Not Today!",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When your hero defends against an attack, it gets +2 DEF for that attack. If you take no damage from that attack, remove 2 threat from a scheme.",
+  "traits": "Defense.",
+  "_dup_of": "38016"
+ },
+ {
+  "code": "52016",
+  "name": "\"Stop Hitting Yourself\"",
+  "text": "<b>Hero Response</b> <i>(attack)</i>: After you defend against an enemy attack and take no damage, deal damage to that enemy equal to your DEF for that attack.",
+  "traits": "Attack."
+ },
+ {
+  "code": "52017",
+  "name": "Dr. Sinclair",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Dr. Sinclair and spend a [mental] resource → heal damage from your alter-ego equal to your REC. You may discard 1 status card from your identity. Any player may trigger this ability.",
+  "traits": "Persona. Therapist."
+ },
+ {
+  "code": "52018",
+  "name": "Energy Shield",
+  "text": "Attach to a character. Max 1 per character.\n<b>Interrupt</b>: When attached character would take any amount of damage, spend X [energy] resources → prevent X of that damage.",
+  "traits": "Item. Tech."
+ },
+ {
+  "code": "52019",
+  "name": "Ready for a Fight",
+  "text": "Requirement ([physical]). Max 1 per player.\n<b>Interrupt</b>: When an enemy would scheme, discard Ready for a Fight → change to hero form. That enemy attacks you instead.",
+  "traits": "Preparation."
+ },
+ {
+  "code": "52020",
+  "name": "Stun Gun",
+  "text": "Restricted. Uses (2 charge counters).\n<b>Hero Action</b>: Exhaust Stun Gun and remove 1 or 2 charge counters from it → if you removed:\n• 1 charge counter, stun a minion.\n• 2 charge counters, stun the villain.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "52021",
+  "name": "Madame Web",
+  "subname": "Julia Carpenter",
+  "text": "<b>Response</b>: After Madame Web enters play, look at the top X cards of the encounter deck, where X is the number of [[Web-Warrior]] cards you control. You may discard 1 card looked at this way and put the rest back in any order.",
+  "traits": "Web-Warrior."
+ },
+ {
+  "code": "52022",
+  "name": "Spider-Man",
+  "subname": "Peter Parker",
+  "text": "Requirement ([energy] [mental] [physical]). <i>(While paying for this card, spend the listed resources.)</i>\n<b>Response</b>: After Spider-Man attacks or thwarts, choose another [[Web-Warrior]] character → ready that character.",
+  "traits": "Web-Warrior.",
+  "flavor": "\"See, Miles, that's how you do it.\"",
+  "_dup_of": "27049"
+ },
+ {
+  "code": "52023",
+  "name": "Across the Spider-Verse",
+  "text": "Max 1 per deck.\n<b>Hero Action</b>: Exhaust a [[Web-Warrior]] card you control → search your discard pile for a [[Web-Warrior]] ally and put it into play, then choose a player. That player may spend 3 resources of any type to repeat this ability.",
+  "_dup_of": "27018"
+ },
+ {
+  "code": "52024",
+  "name": "Investigative Journalism",
+  "text": "Team-Up (Cindy Moon and Peter Parker). Max 1 per deck.\n<b>Alter-Ego Interrupt</b>: When an enemy would scheme, cancel that activation and confuse that enemy.",
+  "traits": "Skill."
+ },
+ {
+  "code": "52025",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "52026",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "52027",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "52028",
+  "name": "Silk Sense Overload",
+  "text": "<b><i>Give to the Cindy Moon player.</i></b>\n<b>Forced Interrupt</b>: When a card would be tucked under your identity by a player card effect, tuck it under here instead. Then, if there are 2 tucked cards here, you may discard this card (remove it from the game instead if there are 3 or more tucked cards here)."
+ },
+ {
+  "code": "52029",
+  "name": "Morlun",
+  "text": "[star] Morlun gets +1 SCH and +1 ATK for each encounter card tucked under each identity.\n<b>When Defeated</b>: Discard each copy of Hunting the Spider-Bride tucked under each identity.</b>",
+  "traits": "Elite. Inheritor."
+ },
+ {
+  "code": "52030",
+  "name": "The Great Hunt",
+  "text": "<b>When Revealed</b>: Place 1 additional threat here for each card tucked under each identity.",
+  "flavor": "\"There you are. The spinner at the center of the web. It's time. The Great Hunt begins.\" —Morlun"
+ },
+ {
+  "code": "52031",
+  "name": "Hunting the Spider-Bride",
+  "text": "Surge.\n<b>When Revealed</b>: If you have 4 cards tucked under your identity, discard 1 of those cards at random. Tuck this card under your identity.\n<b>Forced Response</b>: After a player card effect discards this card from under an identity, that identity takes 2 damage."
+ },
+ {
+  "code": "52032",
+  "name": "Spider-Man 2099",
+  "subname": "Miguel O'Hara",
+  "text": "[star] <b>Response</b>: After Spider-Man 2099 uses a basic power, return a [[Web-Warrior]] ally in play to its owner's hand.",
+  "traits": "Aerial. Web-Warrior.",
+  "flavor": "\"That's me: the Spider-Man of tomorrow, here to save today!\""
+ },
+ {
+  "code": "52033",
+  "name": "Spider-Woman",
+  "subname": "Jessica Drew",
+  "text": "<b>Response</b>: After a [[Web-Warrior]] ally <i>(including this one)</i> enters play, deal 1 damage to an enemy.",
+  "traits": "S.H.I.E.L.D. Web-Warrior.",
+  "flavor": "\"Everyone should see what's about to happen next!\""
+ },
+ {
+  "code": "52034",
+  "name": "Quick Quip",
+  "text": "Requirement ([mental]).\n<b>Hero Action</b>: Deal 1 damage to a [[Web-Warrior]] character you control → place a total of 2 confused status cards on up to 2 enemies.",
+  "traits": "Skill.",
+  "flavor": "\"We got more tentacles than a sushi bar!\" —Spider-Man"
+ },
+ {
+  "code": "52035",
+  "name": "Atlas",
+  "text": "Villainous. Victory 1.\n[star] Atlas gets +2 hit points for each growth counter on him.\n<b>Forced Response</b>: After the villain phase ends, place 1 growth counter on Atlas.",
+  "traits": "Elite. Thunderbolt."
+ },
+ {
+  "code": "52036",
+  "name": "Grow Invulnerable",
+  "text": "<b>When Revealed</b>: Place 1 additional threat here for each growth counter on Atlas.\n<b>If Atlas has 10 or more growth counters on him, the players lose the game.</b>"
+ },
+ {
+  "code": "52037",
+  "name": "Growing Strong",
+  "text": "<b>When Revealed</b>: Find Atlas and reveal him. <i>(If he is already in play, he engages you.)</i> Atlas activates against you. If no enemy activated this way, this card gains surge.\n<hr />\n[star] <b>Boost</b>: Give the activating enemy a tough status card."
+ },
+ {
+  "code": "52038",
+  "name": "Titanic Proportions",
+  "text": "<b>When Revealed</b>: The players as a group take X indirect damage, where X is the number of growth counters on Atlas. If X is less than 3, this card gains surge.\n<hr />\n[star] <b>Boost</b>: If Atlas is in play, place 1 growth counter on him."
+ }
+]

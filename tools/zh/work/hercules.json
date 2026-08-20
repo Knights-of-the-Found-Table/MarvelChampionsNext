@@ -1,0 +1,289 @@
+[
+ {
+  "code": "59001a",
+  "name": "Hercules",
+  "text": "<i>Atonement</i> — <b>Response</b>: After a [[labor]] card is added to the victory display, put the top card of the [[gift]] deck into play. Ready Hercules. You may flip to alter-ego form. (Limit once per phase.)",
+  "traits": "Avenger. Olympus."
+ },
+ {
+  "code": "59002",
+  "name": "Defeat the Hydra",
+  "text": "Victory 0.\nAttached minion gets +6 hit points and gains the [[Elite]] trait. Attached minion cannot take damage except from Hercules's attacks.\n<b>When Revealed</b>: Find a non-[[Elite]] minion with at least 6 printed hit points. Reveal it, heal all damage from it, and attach this card to it.",
+  "traits": "Labor."
+ },
+ {
+  "code": "59003",
+  "name": "Embody Pathos",
+  "text": "Victory 0.\nAttached side scheme gains assault. Threat cannot be removed from attached scheme except by Hercules's thwarts.\n<b>When Revealed</b>: Find an encounter side scheme that is not in play and reveal it, treating each [per_hero] on it as 1, and attach this card to it. Place 6 additional threat on it.",
+  "traits": "Labor."
+ },
+ {
+  "code": "59004",
+  "name": "Protect Humanity",
+  "text": "Uses (3 labor counters). Victory 0.\n<b>When Revealed</b>: Find Amadeus Cho and put him into play.\n<b>Forced Interrupt</b>: When the villain would attack Hercules, choose 1 of your allies. The villain attacks that ally instead. After that attack resolves, if Hercules defended, remove 1 labor counter from here.",
+  "traits": "Labor."
+ },
+ {
+  "code": "59005",
+  "name": "Nemean Lion Skin",
+  "text": "Permanent.\nHercules gets +2 hit points and gains steady.\n<b>Response</b>: After this card enters play, draw 4 cards.",
+  "traits": "Artifact. Gift."
+ },
+ {
+  "code": "59006",
+  "name": "Shield of Perseus",
+  "text": "Permanent.\nHercules gets +1 hit point and gains retaliate 1.\n<b>Response</b>: After this card enters play, draw 4 cards.",
+  "traits": "Artifact. Gift."
+ },
+ {
+  "code": "59007",
+  "name": "Sword of Peleus",
+  "text": "Permanent. Restricted.\nHercules gets +1 hit point and his basic attacks gain piercing.\n<b>Response</b>: After this card enters play, draw 4 cards.",
+  "traits": "Artifact. Gift. Weapon."
+ },
+ {
+  "code": "59008",
+  "name": "Amadeus Cho",
+  "text": "<b>Forced Interrupt</b>: When a minion would attack you, it attacks Amadeus Cho instead.\n<b>Action</b>: Exhaust Amadeus Cho → draw 1 card.",
+  "traits": "Genius."
+ },
+ {
+  "code": "59009",
+  "name": "The Gift of Battle",
+  "text": "Reduce the cost to play this card by 1 for each [[Gift]] card you control.\n<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy.",
+  "traits": "Attack.",
+  "flavor": "\"As Hercules has said countless times: have at thee!\" —Hercules"
+ },
+ {
+  "code": "59010",
+  "name": "Son of Zeus",
+  "text": "<b>Hero Action</b>: Ready Hercules. If you control at least:\n• 1 [[Gift]] card, ready an identity-specific upgrade you control.\n• 2 [[Gift]] cards, gain a tough status card.\n• 3 [[Gift]] cards, draw 1 card.",
+  "traits": "Olympus."
+ },
+ {
+  "code": "59011",
+  "name": "Wisdom of Athena",
+  "text": "Reduce the cost to play this card by 1 for each [[Gift]] card you control.\n<b>Hero Action</b> <i>(thwart)</i>: Remove 4 threat from a scheme.",
+  "traits": "Thwart.",
+  "flavor": "\"Zounds! Is that you, oh sister of mine?\" —Hercules"
+ },
+ {
+  "code": "59012",
+  "name": "Olympus",
+  "text": "<b>Resource</b>: Exhaust Olympus → generate a [wild] resource for each [[Gift]] card you control.",
+  "traits": "Location. Olympus.",
+  "flavor": "Although Olympus's influence may have waned since the Hellenistic period, the celebrating has not."
+ },
+ {
+  "code": "59013",
+  "name": "Gauntlets of Hercules",
+  "text": "<b>Hero Interrupt</b>: When Hercules defends against an attack, exhaust Gauntlets of Hercules → Hercules gains retaliate 1 for that attack for each [[Gift]] card you control.",
+  "traits": "Armor. Olympus."
+ },
+ {
+  "code": "59014",
+  "name": "Golden Mace",
+  "text": "Restricted.\n<b>Hero Interrupt</b>: When Hercules makes a basic attack, exhaust Golden Mace → Hercules gets +1 ATK for this attack for each [[Gift]] card you control. This attack gains overkill.",
+  "traits": "Olympus. Weapon."
+ },
+ {
+  "code": "59015",
+  "name": "Herc's Helm",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When the villain attacks, exhaust Herc's Helm → reduce the amount of damage this attack deals by 1.",
+  "traits": "Armor. Olympus."
+ },
+ {
+  "code": "59016",
+  "name": "Lion of Olympus",
+  "text": "Temporary. <i>(Discard this card at the end of the round.)</i>\nYour hero gets +1 THW, +1 ATK, and +1 DEF.",
+  "traits": "Olympus.",
+  "flavor": "Like the mighty lions native to ancient Greece, the ferocity of Hercules is incredible."
+ },
+ {
+  "code": "59017",
+  "name": "Prince of Power",
+  "text": "<b>Hero Response</b>: After Hercules attacks and defeats an enemy, exhaust Prince of Power → heal 1 damage from Hercules for each point of excess damage dealt to that enemy by that attack.",
+  "traits": "Olympus. Title."
+ },
+ {
+  "code": "59018",
+  "name": "Deathcry",
+  "subname": "Sharra Neramani",
+  "text": "[star] <b>Hero Interrupt</b>: When Deathcry makes a basic attack, deal your hero 1 damage → Deathcry takes -1 consequential damage ([cost]) for this attack.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "59019",
+  "name": "Namora",
+  "subname": "Aquaria Neptunia",
+  "text": "[star] Namora gets +1 hit point for each other ally you control.",
+  "traits": "Agent of Atlas. Atlantis.",
+  "flavor": "\"I've heard she can beat Captain Marvel in an arm wrestling contest.\" —Gorilla-Man"
+ },
+ {
+  "code": "59020",
+  "name": "Thor",
+  "subname": "Odinson",
+  "text": "[star] <b>Forced Response</b>: After Thor makes a basic thwart, discard cards from the top of the encounter deck until you discard a minion. Put that minion into play engaged with you.",
+  "traits": "Asgard. Avenger."
+ },
+ {
+  "code": "59021",
+  "name": "Teamwork",
+  "text": "<b>Hero Interrupt</b> When you use your basic thwart power <i>(THW)</i> or basic attack power <i>(ATK)</i>, exhaust an ally you control → add that ally's matching power to your hero's power for this use.",
+  "traits": "Tactic.",
+  "_dup_of": "06032"
+ },
+ {
+  "code": "59022",
+  "name": "Call for Backup",
+  "text": "Victory 0.\n<b>When Defeated</b>: Each player may search their deck and discard pile for an ally and put it into play. <i>(Shuffle.)</i>",
+  "flavor": "\"I already regret this.\" —Rocket Raccoon",
+  "_dup_of": "40018"
+ },
+ {
+  "code": "59023",
+  "name": "Recruitment Drive",
+  "text": "Alter-ego form only.\n<b>Action</b>: Discard Recruitment Drive and choose a player → reduce the resource cost of the next ally that player plays this phase to 0."
+ },
+ {
+  "code": "59024",
+  "name": "\"Avenge Me!\"",
+  "text": "Play only if your identity has the [[Avenger]] trait.\nAttach to an ally. Max 1 per ally.\n<b>Interrupt</b>: When attached ally is defeated, draw 2 cards.",
+  "traits": "Avenger."
+ },
+ {
+  "code": "59025",
+  "name": "Gilgamesh",
+  "text": "As an additional cost to play this card, if you do not have the [[Eternal]] trait, confuse your identity.",
+  "traits": "Eternal.",
+  "flavor": "Having lived for around a million years, even Gilgamesh had once forgotten who he was."
+ },
+ {
+  "code": "59026",
+  "name": "Ancient Rivalry",
+  "text": "Team-Up (Hercules and Thor). Max 1 per deck.\n<b>Hero Action</b>: Search your discard pile for an identity-specific upgrade and add it to your hand. Ready Hercules and Thor.",
+  "traits": "Asgard. Olympus."
+ },
+ {
+  "code": "59027",
+  "name": "Limitless Stamina",
+  "text": "Play only if your identity has at least 14 printed hit points.\n<b>Hero Action</b>: Ready your hero.",
+  "traits": "Superpower.",
+  "flavor": "\"What, you think this fight is almost over?! That was just warm-up practice.\" —Thor",
+  "_dup_of": "31023"
+ },
+ {
+  "code": "59028",
+  "name": "Evaluate Threat",
+  "text": "Victory 0.\nPlay only if your identity has the [[Avenger]] or [[S.H.I.E.L.D.]] trait.\n<b>When Defeated</b>: Each player may search their deck and discard pile for an [[Avenger]] or [[S.H.I.E.L.D.]] card and add it to their hand. <i>(Shuffle.)</i> Reduce the cost to play each of those cards by 2 until the end of the phase."
+ },
+ {
+  "code": "59029",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "59030",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "59031",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "59032",
+  "name": "Avengers Compound",
+  "text": "Play only if your identity has the [[Avenger]] trait. Max 1 per deck.\n<b>Action</b>: Exhaust Avengers Compound → choose: tuck 1 ally from your hand here if there is no ally tucked here, or play the ally tucked here as if it were in your hand.",
+  "traits": "Avenger. Location.",
+  "_dup_of": "58034"
+ },
+ {
+  "code": "59033",
+  "name": "Helicarrier",
+  "text": "Max 1 per player.\n<b>Action</b>: Exhaust Helicarrier → choose a player. Reduce the resource cost of the next card that player plays this phase by 1.",
+  "traits": "Location. S.H.I.E.L.D.",
+  "flavor": "\"A flying aircraft carrier? You're kidding, right?\" —Jennifer Walters",
+  "_dup_of": "01092"
+ },
+ {
+  "code": "59034",
+  "name": "Quincarrier",
+  "text": "Play only if your identity has the [[Avenger]] trait.\n<b>Resource</b>: Exhaust Quincarrier → generate a [wild] resource.",
+  "traits": "Avenger. Vehicle.",
+  "flavor": "\"Too bad we could only get one of these.\" —Hawkeye",
+  "_dup_of": "08023"
+ },
+ {
+  "code": "59035",
+  "name": "Appeal to Athena",
+  "text": "<b><i>Give to the Hercules player.</i></b>\nWhen counting [[Gift]] cards you control, you are considered to control none.\n<b>Alter-Ego Action</b>: Exhaust Hercules or spend [mental] [mental] → remove this obligation from the game."
+ },
+ {
+  "code": "59036",
+  "name": "Ares",
+  "text": "Retaliate 1.\n[star] <b>Forced Response</b>: After Ares schemes, deal yourself 1 facedown encounter card.\n<i>(Hercules's nemesis minion.)</i>",
+  "traits": "Elite. Olympus."
+ },
+ {
+  "code": "59037",
+  "name": "Lernean Hydra",
+  "text": "<b>Forced Response</b>: After a character you control attacks and damages Lernean Hydra, choose:\n• Spend a [physical] resource.\n• Lernean Hydra heals 2 damage.",
+  "traits": "Creature. Hydra."
+ },
+ {
+  "code": "59038",
+  "name": "Olympic Feud",
+  "text": "<b>When Revealed</b>: Place 1 additional threat here for each [[Olympus]] card in play.",
+  "flavor": "Hercules has twice thwarted attempts to overthrow Olympus orchestrated by his uncle Pluto and half-brother Ares."
+ },
+ {
+  "code": "59039",
+  "name": "Ares's Axe",
+  "text": "Attach to Ares. Otherwise, attach to the villain.\n[star] <b>Forced Response</b>: After attached enemy attacks, if no friendly character took damage from this attack, discard this card.",
+  "traits": "Weapon.",
+  "flavor": "From kukri to Shi'ar sniper rifles, Ares wields every weapon with equal malice toward all."
+ },
+ {
+  "code": "59040",
+  "name": "God of War",
+  "text": "Each minion attacks the player it is engaged with <i>(even if that player is in alter-ego form)</i>. If no minion activates this way, discard cards from the top of the encounter deck until a minion is discarded and reveal that minion."
+ },
+ {
+  "code": "59041",
+  "name": "All Versus All",
+  "text": "Hinder 2[per_hero].\n<b>Forced Response</b>: After a character is defeated, place 2 threat on this scheme.\n<b>When Defeated</b>: Set All Versus All aside."
+ },
+ {
+  "code": "59042",
+  "name": "Hecate",
+  "text": "<b>When Revealed/Defeated</b>: Find the All Versus All side scheme and reveal it.\n[star] <b>Forced Response</b>: After Hecate activates, place 2 threat on the All Versus All side scheme.",
+  "traits": "Olympus.",
+  "flavor": "\"Those who once adored you have turned on you.\""
+ },
+ {
+  "code": "59043",
+  "name": "Kyknos",
+  "text": "Retaliate 1. Toughness. Victory 0.\n[star] <b>Forced Response</b>: After Kyknos activates, place 2 threat on the All Versus All side scheme. Otherwise, place 1 threat on the main scheme.",
+  "traits": "Brute. Olympus.",
+  "flavor": "\"The penalty of death shall be meted out by Kyknos, the son of Ares.\""
+ },
+ {
+  "code": "59044",
+  "name": "Bewitched Officer",
+  "text": "Retaliate 1.\n[star] Bewitched Officer's attacks gain piercing and ranged.",
+  "traits": "Aerial. Dragon. Enthralled.",
+  "flavor": "\"Hey, pull over!\""
+ },
+ {
+  "code": "59045",
+  "name": "Roving Mobs",
+  "text": "Victory 0.\n<b>When Defeated</b>: Find the All Versus All side scheme and reveal it.",
+  "flavor": "Nowhere is safe under the wargospel of All Versus All."
+ }
+]

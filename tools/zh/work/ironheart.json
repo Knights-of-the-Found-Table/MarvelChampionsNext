@@ -1,0 +1,261 @@
+[
+ {
+  "code": "29001a",
+  "name": "Ironheart",
+  "text": "<i>Level Up!</i> — <b>Action</b>: Remove 6 progress counters from Ironheart → ready her and swap her with [[Version 2]] Ironheart.",
+  "traits": "Champion. Version 1.",
+  "flavor": "\"Time to try this untested bit of business...\""
+ },
+ {
+  "code": "29002a",
+  "name": "Ironheart",
+  "text": "<i>Level Up!</i> — <b>Action</b>: Remove 6 progress counters from Ironheart → ready her, give her a tough status card, and swap her with [[Version 3]] Ironheart.",
+  "traits": "Aerial. Champion. Version 2.",
+  "flavor": "\"It's Ironheart, bro.\""
+ },
+ {
+  "code": "29003a",
+  "name": "Ironheart",
+  "text": "<i>Maximum Efficiency</i> — <b>Hero Action</b>: Remove 1 progress counter from Ironheart → deal 2 damage to an enemy.",
+  "traits": "Aerial. Champion. Version 3.",
+  "flavor": "\"Oh, you wanna play, villain person? Let's play.\""
+ },
+ {
+  "code": "29004",
+  "name": "Brawn",
+  "subname": "Amadeus Cho",
+  "text": "While Brawn is exhausted, he gains: \"<b>Resource</b>: Generate a [mental] resource. (Limit once per phase.)\"",
+  "traits": "Champion. Gamma.",
+  "flavor": "\"No, I'm not Banner. I'm better.\""
+ },
+ {
+  "code": "29005",
+  "name": "Fly Over",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme and place 1 progress counter on Ironheart (2 progress counters instead if this thwart removes the last threat from that scheme).",
+  "traits": "Thwart.",
+  "flavor": "VRROOOSSHH!"
+ },
+ {
+  "code": "29006",
+  "name": "Photon Beam",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy and place 1 progress counter on Ironheart (2 progress counters instead if this attack defeats that enemy).",
+  "traits": "Attack.",
+  "flavor": "FSHHAAMMM!"
+ },
+ {
+  "code": "29007",
+  "name": "New and Improved",
+  "text": "<b>Hero Action</b>: Choose X different options, where X is equal to Ironheart's [[version]] number:\n• Search your deck for an Ironheart card and add it to your hand. <i>(Shuffle.)</i>\n• Give Ironheart a tough status card.\n• Ready Ironheart.",
+  "traits": "Skill."
+ },
+ {
+  "code": "29008",
+  "name": "Sector Scan",
+  "text": "Reduce the cost to play Sector Scan by X, where X is equal to Ironheart's [[version]] number.\n<b>Hero Action</b>: Until the end of the round, you may look at the top card of the encounter deck at any time."
+ },
+ {
+  "code": "29009",
+  "name": "Stroke of Genius",
+  "text": "<b>Response</b>: After you spend this card, place 1 progress counter on your identity and draw 1 card."
+ },
+ {
+  "code": "29010",
+  "name": "Ronnie Williams",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Ronnie Williams → choose:\n• Heal 2 damage from Riri Williams.\n• Place 1 progress counter on Riri Williams.",
+  "traits": "Persona."
+ },
+ {
+  "code": "29011",
+  "name": "Tony Stark A.I.",
+  "text": "<b>Action</b>: Exhaust Tony Stark A.I. → look at the top 2 cards of your deck. Add 1 to your hand and discard the other.",
+  "traits": "Persona.",
+  "flavor": "\"I downloaded my fabulous self into a digital frame in case my body was ever... you know, not working anymore.\""
+ },
+ {
+  "code": "29012",
+  "name": "Photon Blasters",
+  "text": "You get +2 hit points.\n<b>Hero Action</b>: Exhaust Photon Blasters → deal damage to an enemy equal to Ironheart's [[Version]] number.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "29013",
+  "name": "Propulsion Jets",
+  "text": "You get +2 hit points.\n<b>Hero Action</b>: Exhaust Propulsion Jets → remove threat from a scheme equal to Ironheart's [[Version]] number.",
+  "traits": "Tech."
+ },
+ {
+  "code": "29014",
+  "name": "Cloud 9",
+  "subname": "Abby Boylen",
+  "text": "<b>Hero Action</b>: Exhaust Cloud 9 → choose a player. Until the end of the phase, each [[Aerial]] character that player controls gets +1 THW.",
+  "traits": "Aerial. Champion.",
+  "flavor": "\"I'm only here 'cause I wanna fly!\""
+ },
+ {
+  "code": "29015",
+  "name": "Falcon",
+  "subname": "Joaquin Torres",
+  "text": "<b>Hero Response</b>: After Falcon attacks or thwarts, spend a [energy] resource → ready another [[champion]] character you control.",
+  "traits": "Aerial. Champion.",
+  "flavor": "\"Hey, uh, it's Joaquín. I'm here to rescue you. And, uh, good thing, right?\""
+ },
+ {
+  "code": "29016",
+  "name": "Patriot",
+  "subname": "Rayshaun Lucas",
+  "text": "<b>Hero Response</b>: After Patriot enters play, choose a [[champion]] character → that character gets +1 to each of its basic powers until the end of the round.",
+  "traits": "Champion.",
+  "flavor": "\"I'm surrounded by those who risk their lives for principles most people take for granted.\""
+ },
+ {
+  "code": "29017",
+  "name": "Go All Out",
+  "text": "Requirement ([energy]). <i>(While paying for this card, spend the listed resources.)</i>\n<b>Hero Action</b> <i>(attack)</i>: Exhaust your hero → deal damage to an enemy equal to the total of your hero's THW, ATK, and DEF values.",
+  "traits": "Attack."
+ },
+ {
+  "code": "29018",
+  "name": "Push Ahead",
+  "text": "Requirement ([mental]). <i>(While paying for this card, spend the listed resources.)</i>\n<b>Hero Action</b> <i>(thwart)</i>: Exhaust your hero → remove threat from a scheme equal to the total of your hero's THW, ATK, and DEF values.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "29019",
+  "name": "Morale Boost",
+  "text": "<b>Hero Action</b>: Choose a hero. Until the end of the round, that hero gets +1 THW, +1 ATK, and +1 DEF",
+  "flavor": "\"This is a stand I need to take. This time, no compromises.\" —Sam Wilson",
+  "_dup_of": "05032"
+ },
+ {
+  "code": "29020",
+  "name": "R&D Facility",
+  "text": "Requirement ([mental][mental]). Uses (3 research counters).\n<b>Hero Action</b>: Exhaust R&D Facility and remove 1 research counter from it → choose a friendly character in play. That character gets +1 THW and +1 ATK until the end of the phase.",
+  "traits": "Location. S.H.I.E.L.D."
+ },
+ {
+  "code": "29021",
+  "name": "The Power of Leadership",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Leadership <i>(blue)</i> card.",
+  "_dup_of": "01072"
+ },
+ {
+  "code": "29022",
+  "name": "Agent 13",
+  "subname": "Sharon Carter",
+  "text": "[star] <b>Response</b>: After Agent 13 attacks or thwarts, choose a [[S.H.I.E.L.D.]] support → ready that support.",
+  "traits": "S.H.I.E.L.D. Spy.",
+  "flavor": "\"I bear the scars of the past all over me. But there's more to me than that. I'm better now. Stronger. Wiser.\"",
+  "_dup_of": "27046"
+ },
+ {
+  "code": "29023",
+  "name": "Snowguard",
+  "subname": "Amka Aliyak",
+  "text": "<b>Response</b>: After Snowguard enters play, place up to 3 shift counters here. While the shift counters here are equal to (X), she gets:\n(1) +3 ATK and her attacks gain overkill.\n(2) +3 THW and gains the [[Aerial]] trait.\n(3) +5 hit points and gains retaliate 1.",
+  "traits": "Champion."
+ },
+ {
+  "code": "29024",
+  "name": "Vivian",
+  "text": "<b>Hero Response</b>: After Vivian enters play, choose an attachment, non-[[Elite]] minion, or non-permanent side scheme. Until the end of the round, treat that card's printed text box as if it were blank (except for [[Traits]]).",
+  "traits": "Aerial. Android. Champion."
+ },
+ {
+  "code": "29025",
+  "name": "\"Go for Champions!\"",
+  "text": "Max 1 per deck.\nPlay only if your identity has the [[Champion]] trait.\n<b>Hero Action</b>: Remove \"Go for Champions!\" from the game → Each [[champion]] character in play cannot take damage until the end of the round."
+ },
+ {
+  "code": "29026",
+  "name": "Helicarrier",
+  "text": "Max 1 per player.\n<b>Action</b>: Exhaust Helicarrier → choose a player. Reduce the resource cost of the next card that player plays this phase by 1.",
+  "traits": "Location. S.H.I.E.L.D.",
+  "flavor": "\"A flying aircraft carrier? You're kidding, right?\" —Jennifer Walters",
+  "_dup_of": "01092"
+ },
+ {
+  "code": "29027",
+  "name": "Ingenuity",
+  "text": "Play only if your identity has the [[Genius]] trait. Max 1 per player.\n<b>Resource</b>: Exhaust Ingenuity → generate a [mental] resource.",
+  "traits": "Skill."
+ },
+ {
+  "code": "29028",
+  "name": "A Minor Setback",
+  "text": "<b>Give to the Riri Williams player.</b>\nRemove 1 progress counter from your identity, then discard this card. If no progress counter was removed this way, deal yourself 1 facedown encounter card, then shuffle this card into the encounter deck."
+ },
+ {
+  "code": "29029",
+  "name": "Rule by Force",
+  "text": "While Lucia von Bardas is in play, this card gains a hazard icon ([hazard]). While Lucia von Bardas is not in play, this card gains an acceleration icon ([acceleration]).",
+  "flavor": "Lucia von Bardas has taken control of Latveria and will stop at nothing to prove the country's might once and for all."
+ },
+ {
+  "code": "29030",
+  "name": "Lucia von Bardas",
+  "text": "While Lucia von Bardas has tough status card, she gets +1 SCH and +1 ATK.\n<b>Forced Response</b>: After the villain phase ends, give Lucia von Bardas a tough status card.",
+  "traits": "Criminal. Cyborg. Elite."
+ },
+ {
+  "code": "29031",
+  "name": "Cyborg Tech",
+  "text": "Attach to the minion with the most traits. If you cannot, this card gains surge.\nAttached minion gets +3 hit points and gains retaliate 1.\n<hr />\n[star] <b>Boost</b>: Deal this card to yourself as a facedown encounter card.",
+  "traits": "Tech."
+ },
+ {
+  "code": "29032",
+  "name": "Political Retribution",
+  "text": "<b>When Revealed</b>: If Lucia von Bardas is in play, she schemes. If Rule by Force is in play, place 3 threat on it. If neither is in play, this card gains surge."
+ },
+ {
+  "code": "29033",
+  "name": "Bombshell",
+  "subname": "Lana Baumgartner",
+  "text": "Play only if your identity has the [[Champion]] trait.\n[star] Divide damage from Bombshell's attack among each enemy as evenly as possible.",
+  "traits": "Champion."
+ },
+ {
+  "code": "29034",
+  "name": "Wasp",
+  "subname": "Nadia Van Dyne",
+  "text": "Play only if your identity has the [[Champion]] trait.\nWasp ignores the guard keyword, patrol keyword, and crisis icon ([crisis]).",
+  "traits": "Champion.",
+  "flavor": "\"Gotta find me first!\""
+ },
+ {
+  "code": "29035",
+  "name": "Pinpoint",
+  "subname": "Qureshi Gupta",
+  "text": "Play only if your identity has the [[Champion]] trait.\n<b>Hero Interrupt</b>: When a player card would be placed into a discard pile from play, exhaust Pinpoint → shuffle that card into its owner's deck instead.",
+  "traits": "Champion."
+ },
+ {
+  "code": "29036",
+  "name": "Feedback Loop",
+  "text": "<b>When Revealed</b>: Each player must place threat here equal to the total number [energy] resources in their hand and on cards they control",
+  "flavor": "Zzzax controls the city's power supply and is causing havoc within the system!"
+ },
+ {
+  "code": "29037",
+  "name": "Zzzax",
+  "text": "[star] Zzzax gets +X ATK and +X hit points, where X is equal to the total number of [energy] resources on cards the engaged player controls.\n<hr />\n[star] <b>Boost</b>: If you have at least [energy] [energy] resources in your hand, put Zzzax into play engaged with you.",
+  "traits": "Criminal."
+ },
+ {
+  "code": "29038",
+  "name": "Haywire",
+  "text": "Attach to your identity.\nTreat the printed resource of each card in your hand as if it were [energy].\n<b>Hero Action</b>: Choose to either discard a card you control with a printed [energy] resource or take 2 indirect damage → discard this card."
+ },
+ {
+  "code": "29039",
+  "name": "Air Static",
+  "text": "<b>Forced Interrupt</b>: When the villain phase begins, deal 2 indirect damage to each player with a [energy] resource in their hand and/or on a card they control.\n<b>Hero Action</b>: Choose to either discard a card you control with a printed [energy] resource or take 2 indirect damage → discard this card.",
+  "traits": "Condition."
+ },
+ {
+  "code": "29040",
+  "name": "Zzzap!",
+  "text": "<b>When Revealed</b>: Take indirect damage equal to the total number of [energy] resources in your hand. If your identity was dealt 1 or fewer damage this way, this card gains surge.",
+  "flavor": "\"Me Zzzax! You zzzap!\""
+ }
+]

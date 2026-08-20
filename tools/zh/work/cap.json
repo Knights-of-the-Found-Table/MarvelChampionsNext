@@ -1,0 +1,226 @@
+[
+ {
+  "code": "03001a",
+  "name": "Captain America",
+  "text": "\"I Can Do This All Day!\" — <b>Action</b>: Discard 1 card from your hand → ready Captain America. (Limit once per round.)",
+  "traits": "Avenger. Soldier.",
+  "flavor": "\"My duty to my country comes first, no matter the cost!\""
+ },
+ {
+  "code": "03002",
+  "name": "Agent 13",
+  "subname": "Sharon Carter",
+  "text": "<b>Response</b>: After Agent 13 enters play, remove 2 threat from a scheme.",
+  "traits": "S.H.I.E.L.D.",
+  "flavor": "\"Cap, you said we'd fight as a team! I want to come with you!\""
+ },
+ {
+  "code": "03003",
+  "name": "Fearless Determination",
+  "text": "<b>Hero Action</b>: Captain America gets +1 THW until the end of the phase. Draw 1 card.",
+  "traits": "Superpower.",
+  "flavor": "\"No one dies on my watch.\" —Captain America"
+ },
+ {
+  "code": "03004",
+  "name": "Heroic Strike",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 6 damage to an enemy. If you paid for this card using a [physical] resource, stun that enemy.",
+  "traits": "Attack.",
+  "flavor": "\"No, you move.\" —Captain America"
+ },
+ {
+  "code": "03005",
+  "name": "Shield Block",
+  "text": "<b>Interrupt</b> <i>(defense)</i>: When you would take any amount of damage, exhaust Captain America's Shield → prevent all of that damage.",
+  "traits": "Defense.",
+  "flavor": "\"Is that all you've got?\" —Captain America"
+ },
+ {
+  "code": "03006",
+  "name": "Shield Toss",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Discard X cards from your hand, then return Captain America's Shield from play to your hand → deal 4 damage to X enemies.",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"Sharon! Duck!\" —Captain America"
+ },
+ {
+  "code": "03007",
+  "name": "Steve's Apartment",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Steve's Apartment → draw 1 card and heal 1 damage from Steve Rogers.",
+  "traits": "Location.",
+  "flavor": "Even Captain America needs a place to get away and rest."
+ },
+ {
+  "code": "03008",
+  "name": "Captain America's Helmet",
+  "text": "<b>Interrupt</b>: When Captain America would be defeated, set his hit point dial to 1 instead. Then, discard this card.",
+  "traits": "Armor.",
+  "flavor": "\"A soldier, even a super-soldier, is only as strong as his ideals.\" —Steve Rogers"
+ },
+ {
+  "code": "03009",
+  "name": "Captain America's Shield",
+  "text": "Restricted. <i>(Max 2 restricted cards per player.)</i>\nCaptain America gets +1 DEF and gains retaliate 1.",
+  "traits": "Item.",
+  "flavor": "\"This shield is a symbol of freedom.\" —Captain America"
+ },
+ {
+  "code": "03010",
+  "name": "Super-Soldier Serum",
+  "text": "<b>Resource</b>: Exhaust Super-Soldier Serum → generate a [physical] resource.",
+  "traits": "Item.",
+  "flavor": "\"The serum gave Cap his super-strength. But his heart, his unrelenting determination — those were Steve's long before he picked up the shield.\" —Sharon Carter"
+ },
+ {
+  "code": "03011",
+  "name": "Falcon",
+  "subname": "Sam Wilson",
+  "text": "<b>Response</b>: After Falcon enters play, look at the top 3 cards of the encounter deck. For each treachery looked at this way, remove 1 threat from a scheme.",
+  "traits": "Aerial. Avenger."
+ },
+ {
+  "code": "03012",
+  "name": "Hawkeye",
+  "subname": "Clint Barton",
+  "text": "Hawkeye enters play with 4 arrow counters on him.\n<b>Response</b>: After a minion enters play, remove 1 arrow counter from Hawkeye → deal 2 damage to that minion.",
+  "traits": "Avenger.",
+  "_dup_of": "01066"
+ },
+ {
+  "code": "03013",
+  "name": "Squirrel Girl",
+  "subname": "Doreen Green",
+  "text": "<b>Response</b>: After Squirrel Girl enters play, deal 1 damage to each enemy.",
+  "traits": "Avenger.",
+  "flavor": "\"Come on squirrels, let's get 'im!\""
+ },
+ {
+  "code": "03014",
+  "name": "Wonder Man",
+  "subname": "Simon Williams",
+  "text": "[star] As an additional cost for Wonder Man to attack, you must discard 1 card from your hand.",
+  "traits": "Avenger.",
+  "flavor": "\"It's time for a reckoning!\""
+ },
+ {
+  "code": "03015",
+  "name": "Avengers Assemble!",
+  "text": "Max 1 per round.\n<b>Hero Action</b></i>: Ready each [[Avenger]] character you control. Until the end of the phase, each [[Avenger]] character in play gets +1 THW and +1 ATK."
+ },
+ {
+  "code": "03016",
+  "name": "Make the Call",
+  "text": "<b>Action</b>: Pay the printed cost of an ally in any player's discard pile → put that ally into play under your control.",
+  "flavor": "\"This is a code red! All hands on deck!\" —Maria Hill",
+  "_dup_of": "01071"
+ },
+ {
+  "code": "03017",
+  "name": "Strength In Numbers",
+  "text": "<b>Action</b>: Exhaust any number of allies you control → draw 1 card for each ally exhausted this way.",
+  "flavor": "\"Good thing I brought friends.\" —Captain America"
+ },
+ {
+  "code": "03018",
+  "name": "The Power of Leadership",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Leadership <i>(blue)</i> card.",
+  "_dup_of": "01072"
+ },
+ {
+  "code": "03019",
+  "name": "Quinjet",
+  "text": "<b>Response:</b> After your turn begins, place 1 time counter on Quinjet.\n<b>Action:</b> Put an [[Avenger]] ally from your hand into play with printed cost equal to or less than the number of time counters on Quinjet. Then, discard Quinjet.",
+  "traits": "Avenger. Vehicle."
+ },
+ {
+  "code": "03020",
+  "name": "Mockingbird",
+  "subname": "Bobbi Morse",
+  "text": "<b>Response</b>: After Mockingbird enters play, stun an enemy.",
+  "traits": "S.H.I.E.L.D. Spy.",
+  "_dup_of": "01083"
+ },
+ {
+  "code": "03021",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "03022",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "03023",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "03024",
+  "name": "Avengers Tower",
+  "text": "If each of your allies has the [[Avenger]] trait, increase your ally limit by 1.\n<b>Action:</b> Exhaust Avengers Tower → reduce the cost of the next [[Avenger]] ally played this phase by 1.",
+  "traits": "Avenger. Location."
+ },
+ {
+  "code": "03025",
+  "name": "Honorary Avenger",
+  "text": "Play only if your identity has the [[Avenger]] trait.\nMax 1 per character.\nAttach to a friendly character.\nAttached character gets +1 hit point and gains the [[Avenger]] trait.",
+  "traits": "Title."
+ },
+ {
+  "code": "03026",
+  "name": "Man Out of Time",
+  "text": "<b><i>Give to the Steve Rogers player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Steve Rogers → remove Man Out of Time from the game.\n• Discard half of the cards in your hand, rounded down. Discard this obligation."
+ },
+ {
+  "code": "03027",
+  "name": "Hit Squad",
+  "text": "<b>When Revealed</b>: In player order, each player discards the top card of the encounter deck and takes 1 damage for each boost icon discarded this way.",
+  "flavor": "Baron Zemo leads a Hydra taskforce into the city to hunt down Avengers."
+ },
+ {
+  "code": "03028",
+  "name": "Baron Zemo",
+  "text": "Quickstrike.\nWhile Baron Zemo is engaged with you, you cannot thwart.\n<i>(Captain America's nemesis minion.)</i>",
+  "traits": "Hydra. Elite.",
+  "flavor": "\"To avenge my father, Captain America must die.\""
+ },
+ {
+  "code": "03029",
+  "name": "Hydra Soldier",
+  "text": "Guard. <i>(While this minion is engaged with you, you cannot attack the villain.)</i>\n<b>When Defeated</b>: Deal the engaged player an encounter card.",
+  "traits": "Hydra."
+ },
+ {
+  "code": "03030",
+  "name": "Hail Hydra!",
+  "text": "<b>When Revealed</b>: Each [[Hydra]] minion engaged with a hero attacks that hero. Each player who was not attacked this way searches the encounter deck and discard pile for a [[Hydra]] minion and puts it into play engaged with them. Shuffle the encounter deck if it was searched."
+ },
+ {
+  "code": "03031",
+  "name": "Enraged",
+  "text": "Attach to an ally. Max 1 per ally.\nAttached ally gets +2 ATK and takes +1 consequential damage after it attacks.",
+  "traits": "Condition.",
+  "flavor": "\"Should I be worried about him?\" —Spider-Man"
+ },
+ {
+  "code": "03032",
+  "name": "Followed",
+  "text": "Attach to a side scheme. Max 1 per scheme.\n<b>Interrupt</b>: When attached scheme is defeated, deal 4 damage to an enemy."
+ },
+ {
+  "code": "03033",
+  "name": "Expert Defense",
+  "text": "<b>Hero Interrupt</b> <i>(defense)</i>: When your hero defends against an attack, it gets +3 DEF for that attack.",
+  "traits": "Defense.",
+  "flavor": "\"Do these guys ever run out of ammo!\" —Captain America"
+ },
+ {
+  "code": "03034",
+  "name": "Enhanced Awareness",
+  "text": "Uses (3 mental counters).\n<b>Hero Resource</b>: Exhaust Enhanced Awareness and remove 1 mental counter from it → generate a [mental] resource.",
+  "traits": "Condition."
+ }
+]

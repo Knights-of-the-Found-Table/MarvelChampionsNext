@@ -1,0 +1,214 @@
+[
+ {
+  "code": "18001a",
+  "name": "Gamora",
+  "text": "<i>Finesse</i> — <b>Response</b>: After you play an [[attack]] event, remove 1 threat from a scheme. (Limit once per phase.)\n<i>Precision</i> — <b>Response</b>: After you play a [[thwart]] event, deal 1 damage to an enemy. (Limit once per phase.)",
+  "traits": "Guardian."
+ },
+ {
+  "code": "18002",
+  "name": "Nebula",
+  "text": "<b>Response</b>: After Nebula enters play, search your deck for an [[attack]] or [[thwart]] event and add it to your hand. Shuffle your deck.",
+  "traits": "Guardian.",
+  "flavor": "\"This will be a fast fight.\""
+ },
+ {
+  "code": "18003",
+  "name": "Acrobatic Move",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to an enemy.",
+  "traits": "Attack.",
+  "flavor": "\"If you really knew me as well as you thought you did, you would not have attacked me.\" —Gamora"
+ },
+ {
+  "code": "18004",
+  "name": "Crosscounter",
+  "text": "<b>Hero Interrupt</b> <i>(attack/defense/thwart)</i>: When you would take any amount of damage, prevent 3 of that damage. Deal 1 damage to an enemy. Remove 1 threat from a scheme.",
+  "traits": "Attack. Defense. Thwart.",
+  "flavor": "\"That decision will be your last!\" —Gamora"
+ },
+ {
+  "code": "18005",
+  "name": "Set the Pace",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 1 threat from a scheme.",
+  "traits": "Thwart.",
+  "flavor": "\"They don't realize it's over.\" —Gamora"
+ },
+ {
+  "code": "18006",
+  "name": "Decisive Blow",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy (7 damage instead if you have played a [[thwart]] event this turn).",
+  "traits": "Attack.",
+  "flavor": "\"Thanos built me for one purpose: to kill. He'll soon realize that was a poor decision.\" —Gamora"
+ },
+ {
+  "code": "18007",
+  "name": "Forward Momentum",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from a scheme (5 threat instead if you have played an [[attack]] event this turn).",
+  "traits": "Thwart.",
+  "flavor": "\"This isn't going to go well for you.\" —Gamora"
+ },
+ {
+  "code": "18008",
+  "name": "Conditioning Room",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Conditioning Room → return the bottommost [[attack]] or [[thwart]] event from your discard pile to your hand. Heal 1 damage from Gamora.",
+  "traits": "Location.",
+  "flavor": "\"I'm always prepared.\" —Gamora"
+ },
+ {
+  "code": "18009",
+  "name": "Keen Instincts",
+  "text": "<b>Resource</b>: Exhaust Keen Instincts → generate a [wild] resource for an [[attack]] or [[thwart]] event.",
+  "traits": "Skill.",
+  "flavor": "\"Take your chances with me. You won't regret it.\" —Gamora"
+ },
+ {
+  "code": "18010",
+  "name": "Gamora's Sword",
+  "text": "Restricted. <i>(Max 2 restricted cards per player).</i>\n<b>Response</b>: After you play an [[attack]] event, deal 1 damage to an enemy.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "18011",
+  "name": "Angela",
+  "subname": "Aldrif Odinsdottir",
+  "text": "<b>Forced Response</b>: After Angela enters play under your control, search the top 10 cards of the encounter deck for a minion and put it into play engaged with you. Shuffle the encounter deck. If a minion was not put into play this way, discard Angela.",
+  "traits": "Asgard. Guardian."
+ },
+ {
+  "code": "18012",
+  "name": "Clobber",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 3 damage to an enemy. If this is the first card you have played this round, return this card to your hand.",
+  "traits": "Attack.",
+  "flavor": "\"If I have to hit you again, you'll stay down. For good.\" —Gamora"
+ },
+ {
+  "code": "18013",
+  "name": "Plan of Attack",
+  "text": "<b>Action</b>: Search the top 4 cards of your deck (top 7 cards instead if you are in alter-ego form) for an [[attack]] event and add that card to your hand. Shuffle your deck.",
+  "traits": "Tactic.",
+  "flavor": "\"No, I have a plan. Attack.\" —Star-Lord"
+ },
+ {
+  "code": "18014",
+  "name": "Uppercut",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy.",
+  "traits": "Attack.",
+  "flavor": "SMACK!",
+  "_dup_of": "01054"
+ },
+ {
+  "code": "18015",
+  "name": "First Hit",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to the villain.\n<b>Hero Interrupt</b> <i>(attack)</i>: When a minion initiates an attack, deal 2 damage to that minion.",
+  "traits": "Attack."
+ },
+ {
+  "code": "18016",
+  "name": "Impede",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 3 threat from the main scheme. If this is the first card you have played this round, return this card to your hand.",
+  "traits": "Thwart.",
+  "flavor": "\"First, you'll have to go through me.\" —Star-Lord"
+ },
+ {
+  "code": "18017",
+  "name": "Combat Training",
+  "text": "Play under any player's control. Max 1 per player.\nYour hero gets +1 ATK.",
+  "traits": "Skill.",
+  "flavor": "\"Tony! She did it again!\" —Janet Van Dyne",
+  "_dup_of": "01057"
+ },
+ {
+  "code": "18018",
+  "name": "Godslayer",
+  "text": "Restricted.\n<b>Hero Interrupt</b>: When your hero makes a basic attack against a unique enemy ([unique]), exhaust Godslayer → your hero gets +2 ATK for that attack.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "18019",
+  "name": "Drax",
+  "text": "Play only if your identity has the [[guardian]] trait.\nDrax cannot attack minions.",
+  "traits": "Guardian.",
+  "flavor": "\"Behold, this battle has raised my spirits greatly!\""
+ },
+ {
+  "code": "18020",
+  "name": "Hit and Run",
+  "text": "<b>Hero Action</b> <i>(attack/thwart)</i>: Deal 2 damage to an enemy. Remove 2 threat from a scheme.",
+  "traits": "Attack. Thwart.",
+  "flavor": "\"You know, Lady Gamora, even when we first met—while I was beating you to death—I thought to myself, 'I bet she and I could be friends.'\" —Angela"
+ },
+ {
+  "code": "18021",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "18022",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "18023",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "18024",
+  "name": "Unfulfilled Destiny",
+  "text": "<b><i>Give to the Gamora player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust your alter-ego → remove Unfulfilled Destiny from the game.\n• Choose and discard 2 events from your hand. Discard this obligation."
+ },
+ {
+  "code": "18025",
+  "name": "Sibling Rivalry",
+  "text": "Players other than Gamora cannot remove threat from Sibling Rivalry\n<b>Forced Response</b>: After the villain phase begins, deal 1 facedown encounter card to Gamora.",
+  "flavor": "\"One day, sister, our father will see that I am far more worthy than you.\" —Nebula"
+ },
+ {
+  "code": "18026",
+  "name": "Nebula",
+  "text": "Retaliate 2.\n<b>Forced Interrupt</b>: When this minion would enter play, discard the Nebula ally from play.\n<i>(Gamora's nemesis minion.)</i>",
+  "traits": "Elite. Scoundrel."
+ },
+ {
+  "code": "18027",
+  "name": "In a Bind",
+  "text": "Attach to Gamora.\nTreat Gamora's printed text box as if it were blank <i>(except for [[traits]])</i>).\n<b>Hero Action</b>: Choose and discard an [[attack]] event from your hand and deal 1 damage to Gamora → discard this card."
+ },
+ {
+  "code": "18028",
+  "name": "Waylay",
+  "text": "<b>When Revealed</b>: Stun and confuse Gamora. If Gamora is already stunned or confused, this card gains surge.",
+  "flavor": "\"You won't be father's favorite for much longer, dear sister.\" —Nebula"
+ },
+ {
+  "code": "18029",
+  "name": "Pivotal Moment",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to the villain (5 damage instead if there is no threat on the main scheme).",
+  "traits": "Attack.",
+  "flavor": "\"This isn't quite what I had in mind... but I'll take it!\" —Rocket Raccoon"
+ },
+ {
+  "code": "18030",
+  "name": "Comms Implant",
+  "text": "Attach to a [[guardian]] ally. Max 1 per ally.\nAttached ally gets +1 THW and +1 hit point.",
+  "traits": "Item. Tech.",
+  "flavor": "\"So... you come here often?\" —Peter Quill"
+ },
+ {
+  "code": "18031",
+  "name": "True Grit",
+  "text": "<b>Response</b> <i>(thwart)</i>: After your hero defends against an enemy attack, remove threat from a scheme equal to your hero's THW.",
+  "traits": "Thwart.",
+  "flavor": "\"Just remember, I didn't start this!\" —Luke Cage"
+ },
+ {
+  "code": "18032",
+  "name": "Enhanced Reflexes",
+  "text": "Uses (3 energy counters). <b>Hero Resource:</b> Exhaust Enhanced Reflexes and remove 1 energy counter from it → generate a [energy] resource.",
+  "traits": "Condition.",
+  "_dup_of": "05024"
+ }
+]

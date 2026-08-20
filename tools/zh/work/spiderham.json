@@ -1,0 +1,252 @@
+[
+ {
+  "code": "30001a",
+  "name": "Spider-Ham",
+  "text": "Each toon counter on Spider-Ham can be spent as if it were a [wild] resource.\n<i>Spider-Nonsense</i> — <b>Response</b>: After Spider-Ham takes any amount of damage, place 1 toon counter on him.",
+  "traits": "Cartoon. Web-Warrior."
+ },
+ {
+  "code": "30002",
+  "name": "Captain Americat",
+  "subname": "Steve Mouser",
+  "text": "<b>Response</b>: After Captain Americat enters play, give someone a high five. Place 1 toon counter on your identity and shuffle 1 Spider-Ham card from your discard pile into your deck.",
+  "traits": "Cartoon.",
+  "flavor": "\"I fight in purr-suit of justice and freedom!\""
+ },
+ {
+  "code": "30003",
+  "name": "Ham It Up",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 1 threat from a scheme for each toon counter on Spider-Ham.",
+  "traits": "Cartoon. Thwart.",
+  "flavor": "\"Looks like pigs CAN fly!\" —Spider-Ham"
+ },
+ {
+  "code": "30004",
+  "name": "Hogwashed",
+  "text": "<b>Hero Action</b>: Remove 1 toon counter from Spider-Ham → loudly read this card's flavor text. Choose to either deal 5 damage to a minion or remove 5 threat from a side scheme.",
+  "traits": "Cartoon.",
+  "flavor": "POW! BAM! WHACK! SMACK! BOINK!"
+ },
+ {
+  "code": "30005",
+  "name": "\"I Don't Think So!\"",
+  "text": "<b>Hero Interrupt</b>: When you reveal a card from the encounter deck, remove 1 toon counter from Spider-Ham → say \"I don't think so!\" in your best Spider-Ham voice. Cancel the effects of that card and discard it.",
+  "traits": "Cartoon."
+ },
+ {
+  "code": "30006",
+  "name": "Petulant Pig",
+  "text": "<b>Hero Action</b>: Stick your tongue out at the villain. The villain attacks you. Draw 3 cards.",
+  "traits": "Cartoon.",
+  "flavor": "\"THBBPTHBPT!\" —Spider-Ham"
+ },
+ {
+  "code": "30007",
+  "name": "Swinging Web Pig",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 6 damage to an enemy. Confuse that enemy.",
+  "traits": "Cartoon. Attack.",
+  "flavor": "\"Am I a pig with the proportionate strength and agility of a spider? Or a spider with the physical limitations of a pig?\" —Peter Porker"
+ },
+ {
+  "code": "30008",
+  "name": "The Daily Beagle",
+  "text": "<b>Alter-Ego Action</b>: Exhaust The Daily Beagle → place 1 toon counter on Peter Porker.",
+  "traits": "Cartoon. Location.",
+  "flavor": "\"J. Jonah Jackal here with today's trusted, trademarked televised tirade—a tantrum tinged by a towering 'told you!'\" —J. Jonah Jackal"
+ },
+ {
+  "code": "30009",
+  "name": "Cartoon Physics",
+  "text": "<b>Interrupt</b>: When your identity would take any amount of damage, discard this card → wiggle your body and prevent all but 1 of that damage.",
+  "traits": "Cartoon. Superpower.",
+  "flavor": "\"Barely felt a thing…\" —Spider-Ham"
+ },
+ {
+  "code": "30010",
+  "name": "Huge Wooden Hammer",
+  "text": "Spider-Ham gets +1 ATK.\n<b>Hero Interrupt</b>: When Spider-Ham makes a basic attack, exhaust Huge Wooden Hammer and remove 1 toon counter from Spider-Ham → Spider-Ham gets +2 ATK for that attack. That attack gains overkill.",
+  "traits": "Cartoon. Weapon."
+ },
+ {
+  "code": "30011",
+  "name": "Organic Webbing",
+  "text": "Spider-Ham gets +1 THW.\n<b>Hero Action</b>: Exhaust Organic Webbing and remove 1 toon counter from Spider-Ham → ready Spider-Ham. He gains the [[Aerial]] trait until the end of the phase.",
+  "traits": "Cartoon. Superpower."
+ },
+ {
+  "code": "30012",
+  "name": "Lady Spider",
+  "subname": "May Reilly",
+  "text": "[star] <b>Response</b>: After Lady Spider thwarts and removes threat from a scheme, if you control another [[Web-Warrior]] card, remove an equal amount of threat from a different scheme.",
+  "traits": "Web-Warrior.",
+  "flavor": "\"Let no one cage you.\""
+ },
+ {
+  "code": "30013",
+  "name": "Spider-Man",
+  "subname": "Pavitr Prabhakar",
+  "text": "<b>Response</b>: After Spider-Man enters play, remove 1 threat from a scheme for each [[Web-Warrior]] card you control (including Spider-Man).",
+  "traits": "Web-Warrior.",
+  "flavor": "\"Villains from Ham's future. Gigantic robots now. Worlds in the Web are becoming entangled.\""
+ },
+ {
+  "code": "30014",
+  "name": "Even the Odds",
+  "text": "Requirement ([energy]).\n<b>Hero Action</b> <i>(thwart)</i>: Remove 1[per_hero] threat from each side scheme. Deal 1 damage to the villain for each side scheme defeated this way.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "30015",
+  "name": "Great Responsibility",
+  "text": "<b>Hero Interrupt</b>: When any amount of threat would be placed on a scheme, you take it as damage instead.",
+  "_dup_of": "01061"
+ },
+ {
+  "code": "30016",
+  "name": "Making an Entrance",
+  "text": "<b>Hero Interrupt:</b> When your hero makes a basic thwart, it gets +2 THW for that thwart. After that thwart ends, if your hero removed all threat from a scheme that way, heal 2 damage from your hero.",
+  "traits": "Skill.",
+  "_dup_of": "20013"
+ },
+ {
+  "code": "30017",
+  "name": "One Way or Another",
+  "text": "Max 1 per round.\n<b>Hero Action</b>: Search the encounter deck for a side scheme. Reveal that side scheme → draw 3 cards (shuffle the encounter deck).",
+  "_dup_of": "22015"
+ },
+ {
+  "code": "30018",
+  "name": "Followed",
+  "text": "Attach to a side scheme. Max 1 per scheme.\n<b>Interrupt</b>: When attached scheme is defeated, deal 4 damage to an enemy.",
+  "_dup_of": "03032"
+ },
+ {
+  "code": "30019",
+  "name": "Overwatch",
+  "text": "Attach to a scheme. Max 1 per scheme.\n<b>Hero Interrupt</b>: When any amount of threat is removed from attached scheme by a thwart, discard this card → remove an equal amount of threat from a different scheme."
+ },
+ {
+  "code": "30020",
+  "name": "Scarlet Spider",
+  "subname": "Kaine",
+  "text": "Play only if you control a [[Web-Warrior]] card.\n<b>Interrupt</b>: When you would reveal an encounter card, name a card type, then look at that card. If that card is of the named type, deal 1 damage to Scarlet Spider and draw 1 card.",
+  "traits": "Web-Warrior."
+ },
+ {
+  "code": "30021",
+  "name": "SP//dr",
+  "subname": "Peni Parker",
+  "text": "Play only if you control a [[Web-Warrior]] card.\n<b>When Defeated</b>: Add SP//dr to your hand if she was defeated by taking excess consequential damage.",
+  "traits": "Web-Warrior."
+ },
+ {
+  "code": "30022",
+  "name": "Team-Building Exercise",
+  "text": "<b>Hero Action</b>: Exhaust Team-Building Exercise → play a card from your hand that shares a trait with your hero, reducing its resource cost by 1.",
+  "_dup_of": "12024"
+ },
+ {
+  "code": "30023",
+  "name": "Web of Life and Destiny",
+  "text": "Ignore this card's resource cost if your identity has the [[Web-Warrior]] trait.\n<b>Response</b>: After a [[Web-Warrior]] ally leaves play, choose a player → that player draws 1 card.",
+  "traits": "Location. Web-Warrior.",
+  "_dup_of": "27023"
+ },
+ {
+  "code": "30024",
+  "name": "\"I Really Want a Hot Dog!\"",
+  "text": "<b>Give to the Peter Porker player.</b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Peter Porker and remove 1 toon counter from him → remove \"I Really Want a Hot Dog!\" from the game.\n• You are stunned. If you are already stunned, this card gains surge. Discard this obligation."
+ },
+ {
+  "code": "30025",
+  "name": "Nefarious Trap",
+  "text": "<b>When Defeated</b>: The Green Gobbler attacks the player who defeated this scheme. If The Green Gobbler is not in play, search the encounter deck and discard pile for him and put him into play engaged with the player who defeated this scheme."
+ },
+ {
+  "code": "30026",
+  "name": "The Green Gobbler",
+  "text": "<b>Forced Response</b>: After The Green Gobbler engages you, discard all counters from each card you control.\n<i>(Spider-Ham's nemesis minion.)</i>",
+  "traits": "Cartoon. Criminal.",
+  "flavor": "\"I'll succeed by any means necessary, even if I must resort to fowl play!\" —The Green Gobbler"
+ },
+ {
+  "code": "30027",
+  "name": "Gobbler Glider",
+  "text": "Surge.\nAttach to The Green Gobbler. If you cannot, attach to a minion.\nAttached minion gains the [[Aerial]] trait.",
+  "flavor": "\"Once I'm finished, I'll be at the top of the pecking order.\" —The Green Gobbler"
+ },
+ {
+  "code": "30028",
+  "name": "\"Feast on This!\"",
+  "text": "<b>When Revealed</b>: Take 2 damage. You are confused. If you already confused, this card gains surge.",
+  "flavor": "\"I hope you left room for some pumpkin DIE!\" —The Green Gobbler"
+ },
+ {
+  "code": "30029",
+  "name": "Warrior of the Great Web",
+  "text": "Attach to a character with \"Spider\" in its title. Max 1 per character.\nAttached character gains the [[Web-Warrior]] trait.\n<b>Response</b>: After a [[Web-Warrior]] ally leaves play, attached character gets +1 ATK until the end of the phase.",
+  "traits": "Title."
+ },
+ {
+  "code": "30030",
+  "name": "Hunting the Spider-Totems",
+  "text": "<b>Forced Interrupt</b>: When the villain phase begins, discard the top 3 cards of the encounter deck. Put each [[Inheritor]] minion discarded this way into play engaged with a player who controls a [[Web-Warrior]] character, if able. Otherwise, put each [[Inheritor]] minion discarded this way into play engaged with the first player.",
+  "flavor": "\"there is no 'mission'. This is what we do—we hunt the spiders. It's our way.\" —Karn"
+ },
+ {
+  "code": "30031",
+  "name": "Bora",
+  "text": "Each [[Inheritor]] minion gains 1 acceleration icon ([acceleration]).\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, place 1 threat on each scheme.",
+  "traits": "Inheritor.",
+  "flavor": "\"My dear brothers, let us devour them together!\""
+ },
+ {
+  "code": "30032",
+  "name": "Brix",
+  "text": "Each [[Inheritor]] minion gains patrol.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, place 2 threat on the main scheme.",
+  "traits": "Inheritor.",
+  "flavor": "\"In a twist of irony, the Web of Life and Destiny has brought us to this very moment. Your last moment.\""
+ },
+ {
+  "code": "30033",
+  "name": "Daemos",
+  "text": "Each [[Inheritor]] minion gains stalwart.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, stun a character you control.",
+  "traits": "Inheritor.",
+  "flavor": "\"I am Daemos, son of Solus. One of the Inheritors of All Creation. And you… are a mote. A speck. A bit of dust in the wind.\""
+ },
+ {
+  "code": "30034",
+  "name": "Jennix",
+  "text": "Each [[Inheritor]] minion gains guard.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, give Jennix a tough status card.",
+  "traits": "Inheritor.",
+  "flavor": "\"I prefer to make them struggle. I love the taste of adrenaline.\""
+ },
+ {
+  "code": "30035",
+  "name": "Karn",
+  "text": "Each [[Inheritor]] minion's attacks gain overkill and piercing.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, discard an upgrade or support you control.",
+  "traits": "Inheritor.",
+  "flavor": "\"You'll make a filling meal.\""
+ },
+ {
+  "code": "30036",
+  "name": "Morlun",
+  "text": "Each [[Inheritor]] minion gets +1 ATK.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, take 2 damage.",
+  "traits": "Elite. Inheritor.",
+  "flavor": "\"Mm. Never savored a life force so sweet.\""
+ },
+ {
+  "code": "30037",
+  "name": "Solus",
+  "text": "Each [[Inheritor]] minion gains villainous.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, give Solus 1 facedown boost card.",
+  "traits": "Elite. Inheritor.",
+  "flavor": "\"I am Solus. I herald the death of you all.\""
+ },
+ {
+  "code": "30038",
+  "name": "Verna",
+  "text": "Each [[Inheritor]] minion gains retaliate 1.\n<b>When Revealed</b>: If a [[Web-Warrior]] character is in play, deal 1 damage to each character you control.",
+  "traits": "Elite. Inheritor.",
+  "flavor": "\"I will feast on your bones!\""
+ }
+]

@@ -1,0 +1,199 @@
+[
+ {
+  "code": "17001a",
+  "name": "Star-Lord",
+  "text": "Each ally you control gains the [[guardian]] trait.\n\"What could go wrong?\" — <b>Interrupt:</b> When you play a card from your hand, deal yourself 1 facedown encounter card → reduce the cost to play that card by 3. (Limit once per round.)",
+  "traits": "Guardian."
+ },
+ {
+  "code": "17002",
+  "name": "Nova Prime",
+  "subname": "Richard Rider",
+  "text": "<b>Response:</b> After you play Nova Prime from your hand, defeat a non-[[elite]] minion.",
+  "traits": "Aerial. Nova Corps.",
+  "flavor": "\"This is for Nova Corps!\" —Nova Prime"
+ },
+ {
+  "code": "17003",
+  "name": "Daring Escape",
+  "text": "<b>Hero Action</b> Deal yourself 1 facedown encounter card → ready your hero and draw 1 card.",
+  "flavor": "\"Okay, not to brag, but that was probably the bravest thing that any one of us has ever done.\" —Star-Lord"
+ },
+ {
+  "code": "17004",
+  "name": "Gutsy Move",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 2 threat from a scheme. Remove 2 additional threat from that scheme for each facedown encounter card in front of you.",
+  "traits": "Thwart."
+ },
+ {
+  "code": "17005",
+  "name": "Sliding Shot",
+  "text": "Play only if you control an Element Gun.\n<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy. Deal 2 additional damage to that enemy for each facedown encounter card in front of you.",
+  "traits": "Attack."
+ },
+ {
+  "code": "17006",
+  "name": "Bad Boy",
+  "text": "<b>Hero Interrupt</b> When you would take any amount of damage from the villain's attack, discard this card → prevent all of that damage. Change to alter-ego form and draw 2 cards.",
+  "traits": "Vehicle.",
+  "flavor": "\"Ridin' in style!\" —Peter Quill"
+ },
+ {
+  "code": "17007",
+  "name": "Element Gun",
+  "text": "Restricted.\n<b>Hero Action</b> <i>(attack)</i>: Exhaust Element Gun and spend 1 resource of any type → deal 3 damage to an enemy. This attack gains piercing.",
+  "traits": "Tech. Weapon."
+ },
+ {
+  "code": "17008",
+  "name": "Jet Boots",
+  "text": "Star-Lord gains the [[aerial]] trait.\n<b>Hero Interrupt</b>: When Star-Lord would take any amount of damage, exhaust Jet Boots → prevent 1 of that damage for each facedown encounter card in front of you.",
+  "traits": "Item. Tech."
+ },
+ {
+  "code": "17009",
+  "name": "Leader of the Guardians",
+  "text": "Each [[guardian]] character you control gets +1 THW.",
+  "traits": "Title.",
+  "flavor": "\"I know we all hate each other and we all tried to kill one another. But from now on, and until the job is done, we're Guardians.\" —Peter Quill"
+ },
+ {
+  "code": "17010",
+  "name": "Star-Lord's Helmet",
+  "text": "While you are in hero form, you get +1 hand size for each facedown encounter card in front of you (to a maximum of +3 hand size)",
+  "traits": "Armor. Tech.",
+  "flavor": "\"You can't see that I'm judging you, but I'm judging you.\" —Star-Lord"
+ },
+ {
+  "code": "17011",
+  "name": "Adam Warlock",
+  "text": "<b>Response</b>: After Adam Warlock attacks or thwarts, discard 1 card at random from your hand. If that card's printed resource has:\n[physical] – Remove 3 threat from a scheme.\n[energy] – Heal 3 damage from an identity.\n[mental] – Deal 3 damage to an enemy.\n[wild] – Choose one of the above.",
+  "traits": "Aerial. Mystic."
+ },
+ {
+  "code": "17012",
+  "name": "Beta Ray Bill",
+  "text": "<b>Response:</b> After Beta Ray Bill attacks and defeats a minion, remove 2 threat from the main scheme.",
+  "traits": "Asgard.",
+  "flavor": "\"I may not be a native son of the realm eternal, but the power in my hammer comes from Odin himself. So I fight for Asgard, on this day and all tomorrows!\""
+ },
+ {
+  "code": "17013",
+  "name": "Yondu",
+  "text": "[star] Yondu's attacks gain ranged.<i>Ranged attacks ignore retaliate.)</i>",
+  "traits": "Guardian.",
+  "flavor": "\"Don't need no one. I do what I want, when I want, how I want.\" —Yondu"
+ },
+ {
+  "code": "17014",
+  "name": "Air Supremacy",
+  "text": "<b>Hero Action</b>: Choose up to X enemies, where X is equal to the number of [[aerial]] characters you control → deal 3 damage to each chosen enemy.",
+  "traits": "Aerial. Tactic."
+ },
+ {
+  "code": "17015",
+  "name": "Blaze of Glory",
+  "text": "Max 1 per round.\n<b>Hero Action</b>: Each [[guardian]] character gets +2 THW and +2 ATK this phase. At the end of the phase, deal 1 damage to each [[guardian]] character."
+ },
+ {
+  "code": "17016",
+  "name": "Get Ready",
+  "text": "<b>Action</b>: Ready an ally.",
+  "flavor": "\"We train hard every day so that when the time comes, we'll be ready.\" —Steve Rogers",
+  "_dup_of": "01069"
+ },
+ {
+  "code": "17017",
+  "name": "Target Practice",
+  "text": "<b>Interrupt</b>: When an ally with a [[weapon]] attachment upgrade makes an attack, discard Target Practice → that ally gets +2 ATK for that attack.",
+  "traits": "Skill.",
+  "flavor": "\"Man, too easy.\" —Star-Lord"
+ },
+ {
+  "code": "17018",
+  "name": "The Power of Leadership",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Leadership <i>(blue)</i> card.",
+  "_dup_of": "01072"
+ },
+ {
+  "code": "17019",
+  "name": "Laser Blaster",
+  "text": "Attach to a [[guardian]] ally. Max 1 per ally.\nAttached ally gets +1 ATK and its attacks gain overkill.",
+  "traits": "Tech. Weapon.",
+  "flavor": "\"I'll make short work of you.\" —Nebula"
+ },
+ {
+  "code": "17020",
+  "name": "Cosmo",
+  "text": "<b>Interrupt</b>: When Cosmo attacks or thwarts, name a card type, then discard the top card of a player deck or the encounter deck. If that card is of the named type, Cosmo does not take consequential damage for this use.",
+  "traits": "Guardian."
+ },
+ {
+  "code": "17021",
+  "name": "C.I.T.T.",
+  "text": "<b>Hero Action</b>: Exhaust C.I.T.T. and spend 2 resources of any type → ready a [[guardian]] character.",
+  "traits": "Vehicle.",
+  "flavor": "\"I don't know, I kind of like calling it the Cool Interstellar Travel Travelship.\" —Peter Quill"
+ },
+ {
+  "code": "17022",
+  "name": "Knowhere",
+  "text": "Play only if your identity has the [[guardian]] trait.\nIncrease your ally limit by 1.\n<b>Response</b>: After a player plays a [[guardian]] ally, exhaust Knowhere → that player draws 1 card.",
+  "traits": "Location."
+ },
+ {
+  "code": "17023",
+  "name": "Pulse Grenade",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Discard Pulse Grenade and choose an enemy → discard the top 2 cards of the encounter deck. Deal 1 damage to the chosen enemy for each boost icon discarded this way.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "17024",
+  "name": "Banishment",
+  "text": "<b><i>Give to the Peter Quill player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Peter Quill → remove Banishment from the game.\n• Discard an Element Gun from play. If you cannot, place 3 threat on the main scheme. Discard this obligation."
+ },
+ {
+  "code": "17025",
+  "name": "Budding Crime Syndicate",
+  "text": "Hinder 2[per_hero]. <i>(When revealed, place 2[per_hero] threat here.)</i>",
+  "flavor": "\"In your tiny head, the line between a criminal enterprise and an empire is thin. In reality, nobody cares. All they care about is who holds the gun.\" —J'son"
+ },
+ {
+  "code": "17026",
+  "name": "Mister Knife",
+  "text": "Retaliate 1.\nThe first treachery the engaged player reveals each villain phase gains surge.\n<i>(Star-Lord's nemesis minion.)</i>",
+  "traits": "Criminal. Elite."
+ },
+ {
+  "code": "17027",
+  "name": "Spartoi Cunning",
+  "text": "<b>When Revealed</b>: Discard 1 card at random from your hand, take 1 damage, and place 1 threat on the main scheme.",
+  "flavor": "\"How can you expect to win when the entire galaxy is against you?\" —J'son"
+ },
+ {
+  "code": "17028",
+  "name": "Dive Bomb",
+  "text": "Play only if your identity has the [[aerial]] trait.\n<b>Hero Action</b> <i>(attack)</i>: Deal 7 damage to an enemy. Deal 1 damage to each other enemy.",
+  "traits": "Aerial. Attack."
+ },
+ {
+  "code": "17029",
+  "name": "Agile Flight",
+  "text": "Play only if your identity has the [[aerial]] trait.\n<b>Hero Action</b> <i>(thwart)</i>: Remove a total of up to 5 threat from among schemes (as you choose).",
+  "traits": "Aerial. Thwart."
+ },
+ {
+  "code": "17030",
+  "name": "Ever Vigilant",
+  "text": "Play only if your identity has the [[aerial]] trait.\n<b>Hero Action</b>: Ready your hero and remove 2 threat from the main scheme.",
+  "traits": "Aerial. Skill.",
+  "flavor": "\"I feel like I've got the whole weight of the world on my shoulders.\" —Captain Marvel"
+ },
+ {
+  "code": "17031",
+  "name": "Enhanced Awareness",
+  "text": "Uses (3 mental counters).\n<b>Hero Resource</b>: Exhaust Enhanced Awareness and remove 1 mental counter from it → generate a [mental] resource.",
+  "traits": "Condition.",
+  "_dup_of": "03034"
+ }
+]

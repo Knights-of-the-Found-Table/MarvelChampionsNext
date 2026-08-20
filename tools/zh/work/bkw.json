@@ -1,0 +1,215 @@
+[
+ {
+  "code": "08001a",
+  "name": "Black Widow",
+  "text": "\"Widowmaker\" — <b>Response</b>: After you trigger the ability of a [[Preparation]] card you control, deal 1 damage to an enemy.",
+  "traits": "Avenger. Spy.",
+  "flavor": "\"My name is Madame Natasha. But you can call me Black Widow!\""
+ },
+ {
+  "code": "08002",
+  "name": "Winter Soldier",
+  "subname": "Bucky Barnes",
+  "text": "Reduce the cost to play Winter Soldier by 1 for each [[Preparation]] card you control.",
+  "traits": "Avenger. Spy.",
+  "flavor": "\"You shot at Natasha. That was your last act on Earth, pal.\""
+ },
+ {
+  "code": "08003",
+  "name": "Covert Ops",
+  "text": "<b>Action</b> <i>(thwart)</i>: Remove 4 threat from a scheme. Confuse the villain.",
+  "traits": "Thwart.",
+  "flavor": "\"It's all about calculating how willfully blind a person is going to be. And then exploiting that.\" —Natasha Romanoff"
+ },
+ {
+  "code": "08004",
+  "name": "Dance of Death",
+  "text": "<b>Hero Action</b>: Make the following 3 attacks in order:\n- Deal 1 damage to an enemy.\n- Deal 2 damage to an enemy.\n- Deal 3 damage to an enemy.",
+  "traits": "Attack."
+ },
+ {
+  "code": "08005",
+  "name": "Safe House #29",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Safe House #29 and choose a [[Preparation]] card in your discard pile → add that card to your hand.",
+  "traits": "Location. S.H.I.E.L.D.",
+  "flavor": "\"We should be safe here.\" —Black Widow"
+ },
+ {
+  "code": "08006",
+  "name": "Attacrobatics",
+  "text": "<b>Hero Interrupt</b> <i>(attack)</i>: When a boost card is turned faceup, discard Attacrobatics → cancel the boost icons on that card. Deal 1 damage to the villain for each boost icon canceled this way.",
+  "traits": "Attack. Preparation. Skill."
+ },
+ {
+  "code": "08007",
+  "name": "Black Widow's Gauntlet",
+  "text": "<b>Resource</b>: Exhaust Black Widow's Gauntlet → generate a [wild] resource for a [[Preparation]] card.",
+  "traits": "Tech.",
+  "flavor": "\"Not only are they lethal, but they look good, too.\" —Black Widow"
+ },
+ {
+  "code": "08008",
+  "name": "Grappling Hook",
+  "text": "<b>Hero Interrupt</b>: When you reveal a treachery, discard Grappling Hook → cancel the effects of that treachery and discard it.",
+  "traits": "Preparation. Tech.",
+  "flavor": "\"Bozhe moi!\" —Black Widow"
+ },
+ {
+  "code": "08009",
+  "name": "Synth-Suit",
+  "text": "Black Widow gets +1 DEF.\n<b>Hero Response</b>: After you trigger the ability of a [[Preparation]] card you control, exhaust Synth-Suit → ready Black Widow.",
+  "traits": "Armor. Tech."
+ },
+ {
+  "code": "08010",
+  "name": "Widow's Bite",
+  "text": "<b>Hero Response</b> <i>(attack)</i>: After a minion enters play, discard Widow's Bite → deal 2 damage to that minion and stun it.",
+  "traits": "Preparation. Tech.",
+  "flavor": "\"Nighty night.\" —Black Widow"
+ },
+ {
+  "code": "08011",
+  "name": "Agent Coulson",
+  "text": "<b>Response</b>: After Agent Coulson enters play, search your deck and discard pile for a [[Preparation]] card and add it to your hand. Shuffle your deck.",
+  "traits": "S.H.I.E.L.D. Spy.",
+  "flavor": "\"I'm a guy with a plan.\""
+ },
+ {
+  "code": "08012",
+  "name": "Quake",
+  "subname": "Daisy Johnson",
+  "text": "<b>Response</b>: After a minion schemes, exhaust Quake → deal 2 damage to that minion.",
+  "traits": "Avenger. S.H.I.E.L.D.",
+  "flavor": "\"I will bring this building down around you!\""
+ },
+ {
+  "code": "08013",
+  "name": "Stealth Strike",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy. If that enemy is defeated by this attack, remove 2 threat from a scheme.",
+  "traits": "Attack.",
+  "flavor": "\"They'll never know what hit them.\" —Black Widow"
+ },
+ {
+  "code": "08014",
+  "name": "The Power of Justice",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Justice <i>(yellow)</i> card.",
+  "_dup_of": "01062"
+ },
+ {
+  "code": "08015",
+  "name": "Interrogation Room",
+  "text": "Max 1 per player.\n<b>Response</b>: After you defeat a minion, exhaust Interrogation Room → remove 1 threat from a scheme.",
+  "traits": "Location.",
+  "flavor": "\"Oh, she's sorry! Let me get the keys and call you a car service!\" —Misty Knight",
+  "_dup_of": "01063"
+ },
+ {
+  "code": "08016",
+  "name": "Surveillance Team",
+  "text": "Uses (3 snoop counters). <i>(Enters play with 3 counters. When those are gone, discard this card)</i>\n<b>Action</b>: Exhaust Surveillance Team and remove 1 snoop counter from it → remove 1 threat from a scheme.",
+  "traits": "S.H.I.E.L.D.",
+  "_dup_of": "01064"
+ },
+ {
+  "code": "08017",
+  "name": "Counterintelligence",
+  "text": "Max 1 per player.\n<b>Interrupt</b>: When any amount of threat would be placed on the main scheme, discard Counterintelligence → prevent 3 of that threat.",
+  "traits": "Preparation. Skill."
+ },
+ {
+  "code": "08018",
+  "name": "Spycraft",
+  "text": "Play only if you control a [[Spy]] character.\n<b>Interrupt</b>: When you reveal an encounter card, discard Spycraft → cancel the effects of that card and discard it. Then, reveal another card from the encounter deck.",
+  "traits": "Preparation. Skill."
+ },
+ {
+  "code": "08019",
+  "name": "Nick Fury",
+  "text": "<b>Forced Response</b>: After Nick Fury enters play, choose one: remove 2 threat from a scheme, draw 3 cards, or deal 4 damage to an enemy. At the end of the round, if Nick Fury is still in play, discard him.",
+  "traits": "S.H.I.E.L.D. Spy.",
+  "_dup_of": "01084"
+ },
+ {
+  "code": "08020",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "08021",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "08022",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "08023",
+  "name": "Quincarrier",
+  "text": "Play only if your identity has the [[Avenger]] trait.\n<b>Resource</b>: Exhaust Quincarrier → generate a [wild] resource.",
+  "traits": "Avenger. Vehicle.",
+  "flavor": "\"Too bad we could only get one of these.\" —Hawkeye"
+ },
+ {
+  "code": "08024",
+  "name": "Target Acquired",
+  "text": "Max 1 per player.\n<b>Hero Response</b>: After a boost card is turned faceup, discard Target Acquired → cancel that card's boost ability.",
+  "traits": "Preparation. Skill."
+ },
+ {
+  "code": "08025",
+  "name": "Burn Notice",
+  "text": "<b><i>Give to the Natasha Romanoff player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Natasha Romanoff → remove this card from the game.\n• Discard the [[Preparation]] card you control with the highest cost. If you cannot, this card gains surge. Discard this obligation."
+ },
+ {
+  "code": "08026",
+  "name": "Taskmaster",
+  "text": "[star] Taskmaster gets +1 SCH and +1 ATK for each upgrade you control.\n<i>(Black Widow's nemesis minion.)</i>\n<hr />[star] <b>Boost</b>: For this activation, the villain gets +1 SCH and +1 ATK for each upgrade you control.",
+  "traits": "Hydra. Elite."
+ },
+ {
+  "code": "08027",
+  "name": "Killer for Hire",
+  "text": "<b>When Revealed</b>: Place an additional 1[per_hero] threat here."
+ },
+ {
+  "code": "08028",
+  "name": "Hydra Mercenary",
+  "text": "Guard. <i>(While this minion is engaged with you, you cannot attack the villain.)</i>",
+  "traits": "Hydra.",
+  "flavor": "\"What is Hydra doing here?\" —Carol Danvers"
+ },
+ {
+  "code": "08029",
+  "name": "Deadly Shot",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Discard an upgrade you control and place 1 threat on the main scheme.\n<b>When Revealed (Hero)</b>: Discard an upgrade you control and take 1 damage."
+ },
+ {
+  "code": "08030",
+  "name": "Counterattack",
+  "text": "Max 1 per player.\n<b>Hero Response</b> <i>(attack)</i>: After you take damage from an enemy attack, discard Counterattack → deal an equal amount of damage to that enemy.",
+  "traits": "Preparation. Tactic."
+ },
+ {
+  "code": "08031",
+  "name": "Rapid Response",
+  "text": "Max 1 per player.\n<b>Hero Response</b>: After an ally you control is defeated, discard Rapid Response → put that ally into play from your discard pile and deal 1 damage to it.",
+  "traits": "Preparation. Tactic."
+ },
+ {
+  "code": "08032",
+  "name": "Defensive Stance",
+  "text": "Max 1 per player.\n<b>Hero Interrupt</b>: When you would take any amount of damage, discard Defensive Stance → prevent 3 of that damage.",
+  "traits": "Preparation. Tactic."
+ },
+ {
+  "code": "08033",
+  "name": "Espionage",
+  "text": "Play only if you control a [[Spy]] character.\n<b>Interrupt</b>: When the surge keyword on an encounter card would be resolved, discard Espionage → draw 2 cards.",
+  "traits": "Preparation. Skill."
+ }
+]

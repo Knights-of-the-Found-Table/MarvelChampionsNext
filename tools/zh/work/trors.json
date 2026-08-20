@@ -1,0 +1,1108 @@
+[
+ {
+  "code": "04001a",
+  "name": "Hawkeye",
+  "text": "\"Quick Draw\" — <b>Action</b>: Exhaust Hawkeye → ready Hawkeye's bow.",
+  "traits": "Avenger.",
+  "flavor": "\"I may not be the mightiest Avenger, but I'm definitely the coolest.\""
+ },
+ {
+  "code": "04002",
+  "name": "Hawkeye's Bow",
+  "text": "Restricted.\nYour hero gets +1 ATK and each of your [[Arrow]] attacks gain ranged.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04003",
+  "name": "Hawkeye's Quiver",
+  "text": "You may play [[Arrow]] events attached to this card as if they were in your hand.\n<b>Hero Action</b>: Exhaust Hawkeye's Quiver → search the top 5 cards of your deck for an [[Arrow]] event and attach it faceup to this card.",
+  "traits": "Item."
+ },
+ {
+  "code": "04004",
+  "name": "Mockingbird",
+  "subname": "Bobbi Morse",
+  "text": "<b>Interrupt</b>: When the villain initiates an attack against you, spend 1 resource of any type and return Mockingbird to your hand → prevent all damage from this attack.",
+  "traits": "Avenger. S.H.I.E.L.D.",
+  "flavor": "\"Is that all you got?\""
+ },
+ {
+  "code": "04005",
+  "name": "Sonic Arrow",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Exhaust Hawkeye's Bow → confuse an enemy and deal 3 damage to it (5 damage instead if it is already confused)",
+  "traits": "Arrow. Attack.",
+  "flavor": "EEEEEEEEEEEEEEEEEE!!!"
+ },
+ {
+  "code": "04006",
+  "name": "Explosive Arrow",
+  "text": "<b>Hero Action</b>: Exhaust Hawkeye's Bow and choose a player → deal 3 damage to the villain and each minion engaged with that player.",
+  "traits": "Arrow.",
+  "flavor": "\"Anyone ever tell you how your eyes sparkle when you're angry?\" —Clint Barton"
+ },
+ {
+  "code": "04007",
+  "name": "Electric Arrow",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Exhaust Hawkeye's Bow → stun an enemy and deal 3 damage to it (5 damage instead if it is already stunned).",
+  "traits": "Arrow. Attack.",
+  "flavor": "\"Hail Hawkeye!\" —Clint Barton"
+ },
+ {
+  "code": "04008",
+  "name": "Cable Arrow",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Exhaust Hawkeye's Bow → remove 3 threat from a scheme, ignoring any crisis icons in play.",
+  "traits": "Arrow. Thwart.",
+  "flavor": "\"It's a great way to get around.\" —Clint Barton"
+ },
+ {
+  "code": "04009",
+  "name": "Vibranium Arrow",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Exhaust Hawkeye's Bow → deal 6 damage to an enemy. This attack gains piercing.",
+  "traits": "Arrow. Attack."
+ },
+ {
+  "code": "04010",
+  "name": "Expert Marksman",
+  "text": "<b>Resource</b>: Exhaust Expert Marksman → generate a [wild] resource for an [[Arrow]] event.",
+  "traits": "Skill.",
+  "flavor": "\"When you fight alongside gods and monsters, it's not enough to be great; you have to the best.\" —Clint Barton"
+ },
+ {
+  "code": "04011",
+  "name": "Hawkeye",
+  "subname": "Kate Bishop",
+  "text": "<b>Action</b>: Exhaust this ally and discard 1 card from your hand → deal X damage to an enemy, where X is the number of printed resources on that card.",
+  "traits": "Avenger.",
+  "flavor": "\"You see I', literally pointing arrows at your, right?.\""
+ },
+ {
+  "code": "04012",
+  "name": "Black Knight",
+  "subname": "Dane Whitman",
+  "text": "[star] Black Knight's basic attack gains piercing.",
+  "traits": "Avenger.",
+  "flavor": "\"As long as the Black Blade blazes darkly in my hand, I must fight on.\""
+ },
+ {
+  "code": "04013",
+  "name": "Goliath",
+  "subname": "Bill Foster",
+  "text": "<b>Action</b>: Goliath gets +4 ATK until the end of the phase. At the end of the phase, discard Goliath. (Max once per phase.)",
+  "traits": "Avenger.",
+  "flavor": "\"Sometimes being a gentleman means holding the door, and the rest of the building.\""
+ },
+ {
+  "code": "04014",
+  "name": "U.S. Agent",
+  "subname": "John Walker",
+  "text": "Retaliate 1.",
+  "traits": "Avenger.",
+  "flavor": "\"Cap isn't the only soldier who loves his country.\""
+ },
+ {
+  "code": "04015",
+  "name": "Sky Cycle",
+  "text": "Attach to an [[Avenger]] ally. Max 1 per ally.\nAttached ally gains [[Aerial]].\n<b>Action</b>: Exhaust Sky Cycle → ready attached ally.",
+  "traits": "Vehicle."
+ },
+ {
+  "code": "04016",
+  "name": "Team Training",
+  "text": "Play under any player's control. Max 1 per player.\nEach ally you control gets +1 hit point.",
+  "traits": "Condition.",
+  "flavor": "\"We mostly just wait for Cap to yell 'Avengers Assemble' and attack in the same direction as him\" —Clint Barton"
+ },
+ {
+  "code": "04017",
+  "name": "Ready for Action",
+  "text": "<b>Hero Action</b>: Give an ally you control a tough status card.",
+  "traits": "Tactic.",
+  "flavor": "\"Try that again. I dare you.\" —Jessica Drew"
+ },
+ {
+  "code": "04018",
+  "name": "Lead from the Front",
+  "text": "<b>Hero Action</b>: Choose a player. Each character that player controls gets +1 THW and +1 ATK until the end of the phase.",
+  "traits": "Tactic.",
+  "flavor": "\"Let's go everyone!\" —Carol Danvers",
+  "_dup_of": "01070"
+ },
+ {
+  "code": "04019",
+  "name": "The Power of Leadership",
+  "text": "Max 2 per deck.\nDouble the number of resources this card generates while paying for a Leadership <i>(blue)</i> card.",
+  "_dup_of": "01072"
+ },
+ {
+  "code": "04020",
+  "name": "War Machine",
+  "subname": "James Rhodes",
+  "text": "Toughness. <i>(This character enters play with a tough status card.)</i>\n[star] War Machine's basic attack gains ranged. <i>(Ranged attacks ignore retaliate.)</i>",
+  "traits": "Avenger. S.H.I.E.L.D."
+ },
+ {
+  "code": "04021",
+  "name": "Avengers Tower",
+  "text": "If each of your allies has the [[Avenger]] trait, increase your ally limit by 1.\n<b>Action:</b> Exhaust Avengers Tower → reduce the cost of the next [[Avenger]] ally played this phase by 1.",
+  "traits": "Avenger. Location.",
+  "_dup_of": "03024"
+ },
+ {
+  "code": "04022",
+  "name": "Earth's Mightiest Heroes",
+  "text": "<b>Hero Action</b>: Exhaust an [[avenger]] character you control → ready another [[avenger]] character you control.",
+  "flavor": "\"We come together to fight what can't be fought alone.\" —Luke Cage"
+ },
+ {
+  "code": "04023",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "04024",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "04025",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "04026",
+  "name": "Criminal Past",
+  "text": "<b><i>Give to the Clint Barton Player.</i></b>\nYou may flip to alter-ego form. Choose:\n• Exhaust Clint Barton → remove this card from the game.\n• Discard Hawkeye's Bow from play. Discard this obligation.\n"
+ },
+ {
+  "code": "04027",
+  "name": "Crossfire",
+  "text": "Quickstrike.\nCrossfire's attacks gain piercing.\n<hr />\n[star] <b>Boost</b>: If this boost resolves during an attack, the attack gains piercing.",
+  "traits": "Mercenary."
+ },
+ {
+  "code": "04028",
+  "name": "Marked for Death",
+  "text": "<b>When Revealed</b>: The Clint Barton player searches their hand, deck, discard pile, and play area for Mockingbird and places her faceup beneath this card. When this scheme is defeated, return Mockingbird to her owner's hand."
+ },
+ {
+  "code": "04029",
+  "name": "Crossfire's Rifle",
+  "text": "Attach to Crossfire. Otherwise, attach to the villain.\n[star] When attached enemy attacks, the attack gains ranged.\n<b>Hero Action</b>: Exhaust your hero and spend a [wild] resource → discard Crossfire's Rifle.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04030",
+  "name": "Sniper Shot",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Place 3 threat on the main scheme.\n<b>When Revealed (Hero)</b>: Deal 3 damage to your hero.",
+  "flavor": "\"I like to let them run a little before taking the shot.\" —Crossfire"
+ },
+ {
+  "code": "04031a",
+  "name": "Spider-Woman",
+  "text": "\"Superhuman Agility\" — <b>Interrupt</b>: When you play an aspect card, Spider-Woman gets +1 THW, +1 ATK, and +1 DEF until the end of the round. (limit once per round for each aspect.)",
+  "traits": "Avenger. Spy."
+ },
+ {
+  "code": "04032",
+  "name": "Captain Marvel",
+  "subname": "Carol Danvers",
+  "text": "<b>Response</b>: After Captain Marvel uses a basic power, draw 1 card.",
+  "traits": "Avenger.",
+  "flavor": "\"I gotta hand it to you, kid. This is one of the more impressive messes I've ever seen.\""
+ },
+ {
+  "code": "04033",
+  "name": "Finesse",
+  "text": "<b>Hero Resource</b>: Exhaust Finesse → generate a [wild] resource for an aspect card.",
+  "traits": "Condition.",
+  "flavor": "\"You don't yell'Avengers Assemble' every time we leave the house.\" —Jessica Drew"
+ },
+ {
+  "code": "04034",
+  "name": "Jessica Drew's Apartment",
+  "text": "<b>Alter-Ego Action</b>: Exhaust Jessica Drew's Apartment → search the top 5 cards of your deck for an aspect card and add it to your hand. Shuffle your deck.",
+  "traits": "Location."
+ },
+ {
+  "code": "04035",
+  "name": "Venom Blast",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 5 damage to an enemy.",
+  "traits": "Attack. Superpower.",
+  "flavor": "\"She hit me with her venom blast when she thought I was a Skrull. Hurt for a week.\" —Wolverine"
+ },
+ {
+  "code": "04036",
+  "name": "Pheromones",
+  "text": "<b>Hero Action</b>: Stun and confuse an enemy.",
+  "traits": "Superpower.",
+  "flavor": "\"Warn me before you use that power again, okay?\" —Peter Parker"
+ },
+ {
+  "code": "04037",
+  "name": "Contaminant Immunity",
+  "text": "<b>Hero Action</b>: Heal 3 damage from Spider-Woman and give her a tough status card.",
+  "traits": "Superpower."
+ },
+ {
+  "code": "04038",
+  "name": "Inconspicuous",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove a total of 3 threat from among schemes in play.",
+  "traits": "Skill. Thwart.",
+  "flavor": "\"Now all I gotta do is Spy-der Woman my way inside.\" —Jessica Drew"
+ },
+ {
+  "code": "04039",
+  "name": "Self-Propelled Glide",
+  "text": "<b>Hero Action</b>: Ready Spider-Woman. She gains [[aerial]] until the end of the round.",
+  "traits": "Superpower.",
+  "flavor": "\"People always think I can fly. I can't But I do glide really well.\" —Jessica Drew"
+ },
+ {
+  "code": "04040",
+  "name": "Spider-Girl",
+  "subname": "Anya Corazon",
+  "text": "<b>Response</b>: After you play Spider-Girl from your hand, stun and confuse a minion.",
+  "traits": "Avenger.",
+  "flavor": "\"Alright you bunch of losers. Who wants a piece of me?.\""
+ },
+ {
+  "code": "04041",
+  "name": "Combat Training",
+  "text": "Play under any player's control. Max 1 per player.\nYour hero gets +1 ATK.",
+  "traits": "Skill.",
+  "flavor": "\"Tony! She did it again!\" —Janet Van Dyne",
+  "_dup_of": "01057"
+ },
+ {
+  "code": "04042",
+  "name": "Tac Team",
+  "text": "Uses (3 attack counters). <i>(Enters play with 3 counters. When those are gone, discard this card)</i>\n<b>Action</b>: Exhaust Tac Team and remove 1 attack counter from it → deal 2 damage to an enemy.",
+  "traits": "S.H.I.E.L.D.",
+  "_dup_of": "01056"
+ },
+ {
+  "code": "04043",
+  "name": "Press the Advantage",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to an enemy. If that enemy is stunned or confused, draw 1 card.",
+  "traits": "Attack.",
+  "flavor": "\"You are in Wakanda now!\" —T'Challa"
+ },
+ {
+  "code": "04044",
+  "name": "Piercing Strike",
+  "text": "<b>Hero Action</b> <i>(attack)</i>: Deal 3 damage to an enemy. This attack gains piercing.",
+  "traits": "Attack."
+ },
+ {
+  "code": "04045",
+  "name": "Spider-Man",
+  "subname": "Peter Parker",
+  "text": "<b>Response</b>: After you play Spider-Man from your hand, remove 3 [per_hero] threat from a side scheme.",
+  "traits": "Avenger.",
+  "flavor": "\"Seriously, what is it with New York? Would it kill you to invade Denver once?.\""
+ },
+ {
+  "code": "04046",
+  "name": "Heroic Intuition",
+  "text": "Play under any player's control. Max 1 per player.\nYour hero gets +1 THW.",
+  "traits": "Skill.",
+  "_dup_of": "01065"
+ },
+ {
+  "code": "04047",
+  "name": "Skilled Investigator",
+  "text": "Play under any player's control. Max 1 per player.\n<b>Hero Response</b>: After a side scheme is defeated, exhaust Skilled Investigator → draw 1 card.",
+  "traits": "Skill."
+ },
+ {
+  "code": "04048",
+  "name": "Interrogation Room",
+  "text": "Max 1 per player.\n<b>Response</b>: After you defeat a minion, exhaust Interrogation Room → remove 1 threat from a scheme.",
+  "traits": "Location.",
+  "flavor": "\"Oh, she's sorry! Let me get the keys and call you a car service!\" —Misty Knight",
+  "_dup_of": "01063"
+ },
+ {
+  "code": "04049",
+  "name": "Clear the Area",
+  "text": "<b>Hero Action</b> <i>(thwart)</i>: Remove 2 threat from a scheme. If this removes the last threat on that scheme, draw 1 card.",
+  "traits": "Thwart.",
+  "flavor": "\"Don't be scared, honey. Just think about how jealous the other kids will be when you tell them how Iron Man rescued you.\" —Tony Stark"
+ },
+ {
+  "code": "04050",
+  "name": "Energy",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01088"
+ },
+ {
+  "code": "04051",
+  "name": "Genius",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01089"
+ },
+ {
+  "code": "04052",
+  "name": "Strength",
+  "text": "Max 1 per deck.",
+  "_dup_of": "01090"
+ },
+ {
+  "code": "04053",
+  "name": "Uncertain Loyalties",
+  "text": "<b><i>Give to the Jessica Drew Player.</i></b>\n• Exhaust Jessica Drew → remove Uncertain Loyalties from the game.\n• Place 3 threat on the main scheme. Discard this obligation.\n"
+ },
+ {
+  "code": "04054",
+  "name": "The Viper",
+  "text": "While the Viper is engaged with you, your hand size is reduced by 1.\n(Spider-Woman's nemesis minion.)",
+  "traits": "Elite. Hydra.",
+  "flavor": "\"It's time for you to come home, Jessica.\""
+ },
+ {
+  "code": "04055",
+  "name": "The Viper's Ambition",
+  "text": "<b>When Revealed</b>: Place an additional 1[per_hero] threat here.",
+  "flavor": "The Viper has given everything to Hydra in return for the promise of power."
+ },
+ {
+  "code": "04056",
+  "name": "Hydra Regular",
+  "text": "Incite 1. (When this card is revealed, place 1 threat on the main scheme.)",
+  "traits": "Hydra.",
+  "flavor": "\"When you consider what kind of person would join a terrorist organization bent on world domination, it's easy to see why Hydra's troops don't impress.\" —Jessica Drew"
+ },
+ {
+  "code": "04057",
+  "name": "Hail Hydra!",
+  "text": "<b>When Revealed</b>: Each [[Hydra]] minion engaged with a hero attacks that hero. Each player who was not attacked this way searches the encounter deck and discard pile for a [[Hydra]] minion and puts it into play engaged with them. Shuffle the encounter deck if it was searched."
+ },
+ {
+  "code": "04058",
+  "name": "Crossbones",
+  "text": "[star] While Crossbones has a [[Weapon]] attachment, his attacks gain piercing. <i>(Discard any tough status cards from the target before dealing damage.)</i>",
+  "traits": "Hydra. Mercenary.",
+  "flavor": "\"I consider myself a craftsman. I specialize in destruction and terror.\""
+ },
+ {
+  "code": "04059",
+  "name": "Crossbones",
+  "text": "[star] While Crossbones has a [[Weapon]] attachment, his attacks gain piercing.\n<b>When Revealed</b>: Search the encounter deck and discard pile for Crossbone's Machine Gun and attach it to Crossbones. Shuffle the encounter deck.",
+  "traits": "Hydra. Mercenary."
+ },
+ {
+  "code": "04060",
+  "name": "Crossbones",
+  "text": "[star] While Crossbones has a [[Weapon]] attachment, his attacks gain piercing.\n<b>When Revealed</b>: Reveal the top card of the Experimental Weapons deck.",
+  "traits": "Hydra. Mercenary.",
+  "flavor": "\"Those super-powered types might have more strength, but none of them have my style.\""
+ },
+ {
+  "code": "04061",
+  "name": "Attack on Mount Athena",
+  "flavor": "Crossbones is leading an army of Hydra soldiers in a direct assault on the Project P.E.G.A.S.U.S. facility in the Adirondack Mountains.",
+  "back_name": "Attack on Mount Athena",
+  "back_text": "<b>Contents:</b> Crossbones (I) and Crossbones (II). Crossbones, Experimental Weapons, and Standard Encounter sets. Three modular sets <i>(Hydra Assault, Weapon Master, and Legions of Hydra).</i>\n<b>Setup:</b> Create the Experimental Weapons deck and set it next to the main scheme deck. <i>(see rulebook page 5.)</i>"
+ },
+ {
+  "code": "04061a",
+  "name": "Attack on Mount Athena",
+  "text": "<b>Contents</b>: Crossbones (I) and Crossbones (II). Crossbones, Experimental Weapons, and Standard Encounter sets. Three modular sets <i>(Hydra Assault, Weapon Master, and Legions of Hydra).</i>\n<b>Setup</b>: Create the Experimental Weapons deck and set it next to the main scheme deck. <i>(see rulebook page 5.)</i>"
+ },
+ {
+  "code": "04062",
+  "name": "The Infinity Stone",
+  "text": "<b>When Revealed:</b> Reveal the top card of the Experimental Weapons deck.",
+  "back_name": "The Infinity Stone.",
+  "back_flavor": "Inside the Project P.E.G.A.S.U.S. facility, S.H.I.E.L.D. agents fight desperately to prevent Hydra from obtaining the Reality Stone stored within."
+ },
+ {
+  "code": "04062a",
+  "name": "The Infinity Stone.",
+  "flavor": "Inside the Project P.E.G.A.S.U.S. facility, S.H.I.E.L.D. agents fight desperately to prevent Hydra from obtaining the Reality Stone stored within."
+ },
+ {
+  "code": "04063",
+  "name": "The Getaway",
+  "text": "<b>When Revealed:</b> Reveal the top card of the Experimental Weapons deck.\n<b>If this stage is completed, the players lose the game.</b>",
+  "back_name": "The Getaway",
+  "back_flavor": "Hydra has seized the Infinity Stone, and Crossbones orders their withdrawal. You must stop them before they escape!"
+ },
+ {
+  "code": "04063a",
+  "name": "The Getaway",
+  "flavor": "Hydra has seized the Infinity Stone, and Crossbones orders their withdrawal. You must stop them before they escape!"
+ },
+ {
+  "code": "04064",
+  "name": "Crossbones' Machine Gun",
+  "text": "Attach to Crossbones. Uses (2[per_hero] ammo counters).\n[star] <b>Forced Interrupt</b>: When Crossbones attacks you, remove 1 ammo counter from this card and discard the top card of the encounter deck → take indirect damage equal to the number of boost icons on the discarded card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04065",
+  "name": "Crossbones' Armor",
+  "text": "Attach to Crossbones.\n<b>Forced Interrupt</b>: When Crossbones would take any amount of damage, place it here instead. If there is 5 or more damage here, discard Crossbones' Armor.",
+  "traits": "Armor.",
+  "flavor": "\"Bask in the glow, babe.\" —Crossbones"
+ },
+ {
+  "code": "04066",
+  "name": "Hydra Bomber",
+  "text": "<b>When Revealed</b>: Choose to either take 2 damage or place 1 threat on the main scheme.",
+  "traits": "Hydra.",
+  "flavor": "\"I know that if you cut off one head, two more will take its place. But what if it blows up instead?\" —She-Hulk"
+ },
+ {
+  "code": "04067",
+  "name": "Full Auto",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Surge.\n<b>When Revealed (Hero)</b>: Discard X cards from the top of the encounter deck, where X is Crossbones' ATK. Take 1 indirect damage for each boost icon discarded this way."
+ },
+ {
+  "code": "04068",
+  "name": "Hard as Nails",
+  "text": "<b>When Revealed</b>: Give the villain a tough status card. If you cannot, heal 3 damage from it instead.\n<hr />\n[star] <b>Boost</b>: Give the villain a tough status card. If you cannot, heal 3 damage from it instead."
+ },
+ {
+  "code": "04069",
+  "name": "Raid the Armory",
+  "text": "Incite 1. <i>(When this card is revealed place 1 threat on the main scheme.)</i>\n<b>When Revealed</b>: Discard cards from the top of the encounter deck until a [[Weapon]] attachment is discarded. Reveal that card."
+ },
+ {
+  "code": "04070",
+  "name": "Crossbones' Assault",
+  "text": "<b>When Defeated</b>: Crossbones activates against the player who defeated this scheme.",
+  "flavor": "Crossbones is a heartless killer, but he's not a psychopath. His assault on P.E.G.A.S.U.S. is ruthless and efficient."
+ },
+ {
+  "code": "04071",
+  "name": "Cornered Staff",
+  "text": "<b>When Revealed</b>: Discard 1[per_hero] cards from the top of the encounter deck. Place 1 additional threat here for each boost icon discarded this way.",
+  "flavor": "Hydra is rounding up P.E.G.A.S.U.S. staff to hold as hostages."
+ },
+ {
+  "code": "04072",
+  "name": "Laser Rifle",
+  "text": "Attach to the Villain.\n[star] <b>Forced Interrupt</b>: When attached villain attacks, the attack gains ranged.\n<b>Hero Action</b>: Spend [energy][physical] resources → discard this card.",
+  "traits": "Experimental. Weapon."
+ },
+ {
+  "code": "04073",
+  "name": "Energy Shield",
+  "text": "Attach to the villain.\nAttached villain gains retaliate 1.\n<b>Hero Action</b>: Spend [energy][mental] resources → discard this card.",
+  "traits": "Experimental. Weapon.",
+  "flavor": "\"You're never going to convince Cap that an energy shield is as good as his old frisbee.\" —Carol Danvers"
+ },
+ {
+  "code": "04074",
+  "name": "Power Gauntlets",
+  "text": "Attach to the Villain.\n[star] <b>Forced Response</b>: After the attached villain attacks and damages you, discard 1 card from your hand.\n<b>Hero Action</b>: Spend [mental][physical] resources → discard this card.",
+  "traits": "Experimental. Weapon."
+ },
+ {
+  "code": "04075",
+  "name": "Exo-Suit",
+  "text": "Attach to the villain.\n<b>Hero Action</b>: Spend [energy][mental][physical] resources → discard this card.",
+  "traits": "Experimental. Weapon.",
+  "flavor": "\"I never should have shared my tech with S.H.I.E.L.D.\" —Tony Stark"
+ },
+ {
+  "code": "04076",
+  "name": "Absorbing Man",
+  "text": "Absorbing Man gains the trait of each environment in play.",
+  "traits": "Brute.",
+  "flavor": "\"You know I beat Thor once? Picture that: Crusher Creel standing over the God of Thunder, and you think you scare me?\""
+ },
+ {
+  "code": "04077",
+  "name": "Absorbing Man",
+  "text": "Absorbing Man gains the trait of each environment in play.\n<b>When Revealed</b>: If Super Absorbing Power is in play, deal 1 encounter card to each player. Otherwise, search the encounter deck and discard pile for Super Absorbing Power and reveal it. Shuffle the encounter deck if it was searched this way.",
+  "traits": "Brute."
+ },
+ {
+  "code": "04078",
+  "name": "Absorbing Man",
+  "text": "Absorbing Man gains the trait of each environment in play.\n[star] <b>Forced Response</b>: After Absorbing Man activates against you, if he has the:\n• [[Ice]] or [[Stone]] trait, place 1 threat on the main scheme.\n• [[Metal]] or [[Wood]] trait, take 1 indirect damage.",
+  "traits": "Brute."
+ },
+ {
+  "code": "04079",
+  "name": "None Shall Pass",
+  "text": "[star] <b>Forced Response</b>: After resolving step one of the villain phase, place 1 delay counter here.\n<b>Forced Interrupt</b>: When an environment enters play, discard each other environment card in play.\n<b>If this stage is completed, the players lose the game.</b>",
+  "back_name": "None Shall Pass",
+  "back_text": "<b>Contents:</b> Absorbing Man (I) and Absorbing Man (II). Absorbing Man and Standard encounter sets. One modular encounter set <i>(Hydra Patrol).</i>\n<b>Setup:</b> Discard cards from the encounter deck until an environment is discarded. Put that card into play and shuffle the encounter discard pile into the encounter deck."
+ },
+ {
+  "code": "04079a",
+  "name": "None Shall Pass",
+  "text": "<b>Contents</b>: Absorbing Man (I) and Absorbing Man (II). Absorbing Man and Standard encounter sets. One modular encounter set <i>(Hydra Patrol).</i>\n<b>Setup</b>: Discard cards from the encounter deck until an environment is discarded. Put that card into play and shuffle the encounter discard pile into the encounter deck."
+ },
+ {
+  "code": "04080",
+  "name": "Dense Forest",
+  "text": "Surge.\n<b>Forced Response</b>: After Absorbing Man makes an undefended attack against you, take 1 indirect damage (2 indirect damage instead if there are 5 or more delay counters on the main scheme).\n<hr />\n[star] <b>Boost</b>: Put this card into play.",
+  "traits": "Wood."
+ },
+ {
+  "code": "04081",
+  "name": "Snowy Hillside",
+  "text": "Surge.\n<b>Forced Response</b>: After Absorbing Man makes an undefended attack against you, place 1 threat on the main scheme (2 threat instead if there are 5 or more delay counters on the main scheme).\n<hr />\n[star] <b>Boost</b>: Put this card into play.",
+  "traits": "Ice."
+ },
+ {
+  "code": "04082",
+  "name": "Rocky Outcrop",
+  "text": "Surge.\n<b>Forced Response</b>: After Absorbing Man makes an undefended attack against you, heal 1 damage from him (2 damage instead if there are 5 or more delay counters on the main scheme).\n<hr />\n[star] <b>Boost</b>: Put this card into play.",
+  "traits": "Stone."
+ },
+ {
+  "code": "04083",
+  "name": "Abandoned Facility",
+  "text": "Surge.\n<b>Forced Response</b>: After Absorbing Man makes an undefended attack against you, discard 1 resource icon from your hand (2 resources instead if there are 5 or more delay counters on the main scheme).\n<hr />\n[star] <b>Boost</b>: Put this card into play.",
+  "traits": "Metal."
+ },
+ {
+  "code": "04084",
+  "name": "Ball and Chain",
+  "text": "Attach to Absorbing Man.\n<b>Hero Action</b>: Spend a [physical] resource → shuffle this card into the encounter deck.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04085",
+  "name": "Stall Tactics",
+  "text": "<b>When Revealed</b>: Place 1 threat on the main scheme for every 2 delay counters on the main scheme. If no threat was placed this way, this card gains surge.\n<hr />\n[star] <b>Boost</b>: If there are 5 or more delay counters on the main scheme, take 1 indirect damage."
+ },
+ {
+  "code": "04086",
+  "name": "Swinging Stone",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Absorbing Man schemes. If Absorbing Man has the [[Stone]] trait, he gets +1 SCH for this activation.\n<b>When Revealed (Hero)</b>: Absorbing Man attacks you. If Absorbing Man has the [[Stone]] trait, he gets +1 ATK for this activation."
+ },
+ {
+  "code": "04087",
+  "name": "Steel Kick",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Place 2 threat on the main scheme (3 threat instead if Absorbing Man has the [[Metal]] trait.)\n<b>When Revealed (Hero)</b>: Take 3 indirect damage (4 indirect damage instead if Absorbing Man has the [[Metal]] trait.)"
+ },
+ {
+  "code": "04088",
+  "name": "Piercing Thorns",
+  "text": "<b>When Revealed</b>: Discard 1 card at random from your hand. If Absorbing Man has the [[Wood]] trait, discard 1 card you control.\n<hr />\n[star] <b>Boost</b>: If Absorbing Man has the [[Stone]] or [[Wood]] trait, you are stunned."
+ },
+ {
+  "code": "04089",
+  "name": "Omni-Morph Duplication",
+  "text": "<b>When Revealed</b>: If Absorbing Man has the:\n- [[Ice]] trait, exhaust your identity.\n- [[Metal]] trait, give Absorbing Man a tough status card and heal 1 damage from him.\n- [[Stone]] trait, give Absorbing Man 1 facedown boost card.\n- [[Wood]] trait, discard 1 card at random from your hand."
+ },
+ {
+  "code": "04090",
+  "name": "Icy Grip",
+  "text": "<b>When Revealed</b>: You are stunned. If Absorbing Man has the [[Ice]] trait, take 2 indirect damage.\n<hr />\n[star] <b>Boost</b>: If Absorbing Man has the [[Ice]] or [[Metal]] trait, give him a tough status card."
+ },
+ {
+  "code": "04091",
+  "name": "Avalanche!",
+  "text": "<b>When Revealed</b>: Each Player must choose to either spend a [energy] resource or take 2 indirect damage (3 indirect damage instead if there are 5 or more delay counters on the main scheme.)"
+ },
+ {
+  "code": "04092",
+  "name": "Super Absorbing Power",
+  "text": "Absorbing Man gains the [[Ice]], [[Metal]], [[Stone]], and [[Wood]] traits.\n<hr />\n[star] <b>Boost</b>: Reveal this card.",
+  "flavor": "Creel has the ability to absorb the properties of multiple elements at once, but it requires intense concentration."
+ },
+ {
+  "code": "04093",
+  "name": "Taskmaster",
+  "text": "<b>Forced Response</b>: After a player changes to hero form, they discard the top card of the encounter deck and take damage equal to the number of boost icons on that card.",
+  "traits": "Hydra. Mercenary.",
+  "flavor": "\"There's nothing you can do that I can't do better.\""
+ },
+ {
+  "code": "04094",
+  "name": "Taskmaster",
+  "text": "<b>When Revealed</b>: Deal each player an encounter card.\n<b>Forced Response</b>: After a player changes to hero form, they discard the top card of the encounter deck and take damage equal to the number of boost icons on that card.",
+  "traits": "Hydra. Mercenary."
+ },
+ {
+  "code": "04095",
+  "name": "Taskmaster",
+  "text": "<b>When Revealed</b>: Deal each player an encounter card.\n<b>Forced Response</b>: After a player changes to hero form, they discard the top card of the encounter deck and take damage equal to the number of boost icons on that card.",
+  "traits": "Hydra. Mercenary."
+ },
+ {
+  "code": "04096",
+  "name": "Hunting Down Heroes",
+  "text": "[star] <b>Forced Response</b>: After resolving step one of the villain phase, each player in hero form must choose to either place 1 threat here or take 1 damage.\n<b>If this stage is completed, the players lose the game.</b>",
+  "flavor": "The notorious Taskmaster has been appointed by Hydra's chief of police. His top priority is hunting down the outlaw heroes.",
+  "back_name": "Hunting Down Heroes",
+  "back_text": "<b>Contents:</b> Taskmaster (I) and Taskmaster (II). Taskmaster, Hydra Patrol, and Standard encounter sets. One modular encounter set <i>(Weapon Master).</i>\n<b>Setup:</b> Set each [[Captive]] ally aside out of play. Search the encounter deck for Hydra Patrol and put it into play. Shuffle the encounter deck."
+ },
+ {
+  "code": "04096a",
+  "name": "Hunting Down Heroes",
+  "text": "<b>Contents</b>: Taskmaster (I) and Taskmaster (II). Taskmaster, Hydra Patrol, and Standard encounter sets. One modular encounter set <i>(Weapon Master).</i>\n<b>Setup</b>: Set each [[Captive]] ally aside out of play. Search the encounter deck for Hydra Patrol and put it into play. Shuffle the encounter deck."
+ },
+ {
+  "code": "04097",
+  "name": "Moon Knight",
+  "subname": "Marc Spector",
+  "text": "<b>Response</b>: After you play Moon Knight from your hand, spend a [wild] resource → draw 2 cards.",
+  "traits": "Captive. Hero for Hire.",
+  "flavor": "\"Hydra took over so fast, I wasn't sure they were real.\""
+ },
+ {
+  "code": "04098",
+  "name": "Shang-Chi",
+  "text": "<b>Response</b>: After you play Shang-Chi from your hand, spend a [energy] resource → stun an enemy.",
+  "traits": "Captive. Hero for Hire.",
+  "flavor": "\"A Hydra strike team raided my house while I was meditating. I showed them out, but there were two more teams waiting outside.\""
+ },
+ {
+  "code": "10098",
+  "name": "Shang-Chi",
+  "text": "<b>Response:</b> After you play Shang-Chi from your hand, spend a [energy] resource → stun an enemy.",
+  "traits": "Captive. Hero for Hire."
+ },
+ {
+  "code": "04099",
+  "name": "White Tiger",
+  "subname": "Angela Del Toro",
+  "text": "<b>Response</b>: After you play White Tiger from your hand, spend [mental] resource → remove 3 threat from a scheme.",
+  "traits": "Captive. Hero for Hire.",
+  "flavor": "\"After Hydra took over and outlawed superheroes, a neighbor called the new chief of police to report me.\""
+ },
+ {
+  "code": "04100",
+  "name": "Elektra",
+  "text": "<b>Response</b>: After you play Elektra from your hand, spend a [physical] resource → deal 3 damage to an enemy.",
+  "traits": "Captive. Hero for Hire.",
+  "flavor": "\"I got caught when I tried to help some civilians escape a Hydra Patrol. Turns out the civilians were Hydra agents running a sting operation.\""
+ },
+ {
+  "code": "04101",
+  "name": "Hydra Hunter",
+  "text": "[star] Hydra's Hunter's attacks gain piercing and ranged.\n<hr />\n[star] <b>Boost</b>: If you are in hero form, take 1 damage. Otherwise place 1 threat on the main scheme.",
+  "traits": "Hydra."
+ },
+ {
+  "code": "04102",
+  "name": "Taskmaster's Sword",
+  "text": "Attach to Taskmaster.\n[star] Taskmaster's attacks gain piercing.\n<b>Hero Action</b>: Exhaust your hero and spend [mental][physical] resources → discard this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04103",
+  "name": "Taskmaster's Shield",
+  "text": "Attach to Taskmaster.\nTaskmaster gains retaliate 1.\n<b>Hero Action</b>: Exhaust your hero and spend [mental][physical] resources → discard this card.",
+  "traits": "Armor. Weapon.",
+  "flavor": "\"I learned this move from Captain America.\" —Taskmaster"
+ },
+ {
+  "code": "04104",
+  "name": "Photographic Reflexes",
+  "text": "Attach to Taskmaster.\n<b>Forced Interrupt</b>: when a player attacks Taskmaster, prevent all damage that would be dealt to Taskmaster and deal an equal amount of damage to that player's identity instead. Then, discard Photographic Reflexes. (Max once per attack.)"
+ },
+ {
+  "code": "04105",
+  "name": "Mimicry",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Discard the top 5 cards of your deck. If a [[Thwart]] card was discarded this way, Taskmaster schemes.\n<b>When Revealed (Hero)</b>: Discard the top 5 cards of your deck. If an [[Attack]] card was discarded this way, Taskmaster attacks you."
+ },
+ {
+  "code": "04106",
+  "name": "Hunted by Hydra",
+  "text": "Incite 1. <i>(When this card is revealed place 1 threat on the main scheme.)</i>\n<b>When Revealed</b>: Each player in hero form takes 1 damage and discards 1 card at random from their hand.",
+  "flavor": "\"It's a bad time to be a hero.\" —Bucky Barnes"
+ },
+ {
+  "code": "04107",
+  "name": "Captured by Hydra",
+  "text": "<b>When Revealed</b>: Place 1 random set-aside [[Captive]] ally facedown beneath this scheme. When this scheme is defeated, the player who defeated it takes that ally into their hand and removes this scheme from the game."
+ },
+ {
+  "code": "04108",
+  "name": "Taskmaster's Training Camp",
+  "text": "<b>Forced Response</b>: After a minion enters play, give it a tough status card.",
+  "flavor": "Taskmaster only accepts the best troops into his police force. before a Hydra soldier can enlist, they must survive his training camp."
+ },
+ {
+  "code": "04109",
+  "name": "Zola",
+  "text": "Retaliate 1.",
+  "traits": "Android. Hydra.",
+  "flavor": "\"My mutate program will transform these pathetic creatures into Hydra's elite shock-troops!\""
+ },
+ {
+  "code": "04110",
+  "name": "Zola",
+  "text": "Retaliate 1.\n<b>When Revealed</b>: Search the encounter deck and discard pile for the Test Subjects side scheme and reveal it.\n(Shuffle the encounter deck.)",
+  "traits": "Android. Hydra."
+ },
+ {
+  "code": "04111",
+  "name": "Zola",
+  "text": "Retaliate 1.\n<b>When Revealed</b>: Each player searches the encounter deck and discard pile for a minion and reveals it. (Shuffle the encounter deck.)",
+  "traits": "Android. Hydra."
+ },
+ {
+  "code": "04112",
+  "name": "The Island of Dr. Zola",
+  "text": "[star] <b>Forced Response</b>: After resolving step one of the villain phase, place 1 test counter here. Then, if there are 3 or more test counters here, discard cards from the top of the encounter deck until a minion is discarded. Put that minion into play engaged with the first player and remove 3 test counters from this scheme.",
+  "back_name": "The Island of Dr. Zola",
+  "back_text": "<b>Contents:</b> Zola (I) and Zola (II). Zola and Standard encounter sets. One modular encounter set <i>(Under Attack)</i>\n<b>Setup:</b> Search the encounter deck for Hydra Prison and reveal it. Each player searches the encounter deck for a copy of Ultimate Bio-Servant and puts it into play engaged with them. Shuffle the encounter deck."
+ },
+ {
+  "code": "04112a",
+  "name": "The Island of Dr. Zola",
+  "text": "<b>Contents</b>: Zola (I) and Zola (II). Zola and Standard encounter sets. One modular encounter set <i>(Under Attack)</i>\n<b>Setup</b>: Search the encounter deck for Hydra Prison and reveal it. Each player searches the encounter deck for a copy of Ultimate Bio-Servant and puts it into play engaged with them. Shuffle the encounter deck."
+ },
+ {
+  "code": "04113",
+  "name": "The Mad Doctor",
+  "text": "[star] <b>Forced Response</b>: After resolving step 1 of the villain phase, place 1 test counter here. Then, if there are 3 or more test counters here, discard cards from the top of the encounter deck until a minion is discarded. Put that minion into play engaged with the first player and remove 3 test counters from this scheme.\n<b>If this scheme is completed, the players lose the game.</b>",
+  "back_name": "The Mad Doctor",
+  "back_text": "<b>When Revealed:</b> Each player searches the encounter deck and discard pile for a minion and reveals it. Shuffle the encounter deck.",
+  "back_flavor": "Zola's mutates attack you with blind obedience and savage fury. It's up to you to put an end to this nightmare before the mad doctor unleashes them upon the world!"
+ },
+ {
+  "code": "04113a",
+  "name": "The Mad Doctor",
+  "text": "<b>When Revealed</b>: Each player searches the encounter deck and discard pile for a minion and reveals it. Shuffle the encounter deck.",
+  "flavor": "Zola's mutates attack you with blind obedience and savage fury. It's up to you to put an end to this nightmare before the mad doctor unleashes them upon the world!"
+ },
+ {
+  "code": "04114",
+  "name": "Ultimate Bio-Servant",
+  "text": "Toughness.\n[star] Ultimate Bio-Servant gets +1 ATK for each attachment on it.\n<hr />\n[star] <b>Boost</b>: Give the villain a tough status card.",
+  "traits": "Hydra. Mutate."
+ },
+ {
+  "code": "04115",
+  "name": "Zola's Mutate",
+  "text": "<b>When Revealed</b>: Discard cards from the top of the encounter deck until a [[Tech]] attachment is discarded. Attach that card to Zola's Mutate.\n<hr />\n[star] <b>Boost</b>: Shuffle Zola's Mutate into the encounter deck.",
+  "traits": "Hydra. Mutate."
+ },
+ {
+  "code": "04116",
+  "name": "Berserk Mutate",
+  "text": "Quickstrike.\n<hr />\n[star] <b>Boost</b>: Place 1 test counter on the main scheme. For each test counter on the main scheme, Zola gets +1 SCH and +1 ATK for this activation.",
+  "traits": "Hydra. Mutate."
+ },
+ {
+  "code": "04117",
+  "name": "Defensive Programming",
+  "text": "Attach to the minion with the most remaining hit points without another copy of Defensive Programming attached. If you cannot, this card gains surge.\nAttached minion gets +2 hit points and gains guard.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04118",
+  "name": "Pain Inhibitors",
+  "text": "Attach to the minion with the most remaining hit points without another copy of Pain Inhibitors attached. If you cannot, this card gains surge.\nAttached minion gets +2 hit points and gains retaliate 1.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04119",
+  "name": "Neurological Implants",
+  "text": "Attach to the minion with the most remaining hit points without another copy of Neurological Implants attached. If you cannot, this card gains surge.\nAttached minion gets +2 hit points.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04120",
+  "name": "Mind Ray",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Zola schemes. You are confused.\n<b>When Revealed (Hero)</b>: Zola attacks you. You are stunned.",
+  "flavor": "\"You thought Zola defenseless? You arrogant fool!\" —Arnim Zola"
+ },
+ {
+  "code": "04121",
+  "name": "Technological Enhancements",
+  "text": "Incite 1.\n<b>When Revealed</b>: Place 1 test counter on the main scheme.\n<hr />\n[star] <b>Boost</b>: Place 1 test counter on the main scheme."
+ },
+ {
+  "code": "04122",
+  "name": "Hydra Prison",
+  "text": "<b>When Revealed</b>: Each player searches their deck, discard pile and hand for a hero-specific ally and places it facedown beneath this scheme. Place X threat on this scheme where X is the total cost of all allies beneath it. Each player shuffles their deck.\n<b>When Defeated</b>: remove this scheme from the game and return each ally beneath it to its owner's hand."
+ },
+ {
+  "code": "04123",
+  "name": "Test Subjects",
+  "text": "<b>When Defeated</b>: The first player discards cards from the top of the encounter deck until they discard a minion. Reveal that minion.",
+  "flavor": "It is a fate worse than death."
+ },
+ {
+  "code": "04124",
+  "name": "Zola's Experiments",
+  "text": "<b>Forced Response</b>: After a minion enters play, attach the topmost [[Tech]] attachment in the encounter discard pile to that minion.",
+  "flavor": "The mad doctor never grows tired of experimenting on his victims."
+ },
+ {
+  "code": "04125",
+  "name": "Red Skull",
+  "text": "[star] Red Skull gets +1 ATK for each side scheme in play.",
+  "traits": "Hydra.",
+  "flavor": "\"Freedom is only for the one who rules! All others must be slaves!\""
+ },
+ {
+  "code": "04126",
+  "name": "Red Skull",
+  "text": "[star] Red Skull gets +1 ATK for each side scheme in play.\n<b>When Revealed</b>: Deal each player an encounter card.",
+  "traits": "Hydra.",
+  "flavor": "\"No one will stand in the way of my plans!\""
+ },
+ {
+  "code": "04127",
+  "name": "Red Skull",
+  "text": "[star] Red Skull gets +1 ATK for each side scheme in play.\n<b>When Revealed</b>: Deal each player an encounter card.",
+  "traits": "Hydra.",
+  "flavor": "\"The world will bow to Red Skull!\""
+ },
+ {
+  "code": "04128a",
+  "name": "The Rise of Red Skull",
+  "text": "<b>Contents</b>: Red Skull (I) and Red Skull (II). Red Skull and Standard encounter sets. Two modular encounter sets <i>(Hydra Assault and Hydra Patrol).</i>\n<b>Setup</b>: Put the Red House into play. Shuffle every other side scheme into the side-scheme deck and set it next to the encounter deck (see insert).\nSet The Sleeper aside, out of play."
+ },
+ {
+  "code": "04128",
+  "name": "The Rise of the Red Skull",
+  "text": "[star] <b>Forced Response</b>: After resolving step one of the villain phase, reveal the top of the side-scheme deck and put it into play.",
+  "flavor": "Red Skull plans to conquer the world with the power of the Reality Stone. He uses his strategic genius to keep you busy while he works towards his goal.",
+  "back_name": "The Rise of Red Skull",
+  "back_text": "<b>Contents:</b> Red Skull (I) and Red Skull (II). Red Skull and Standard encounter sets. Two modular encounter sets <i>(Hydra Assault and Hydra Patrol).</i>\n<b>Setup:</b> Put the Red House into play. Shuffle every other side scheme into the side-scheme deck and set it next to the encounter deck (see insert).\nSet The Sleeper aside, out of play."
+ },
+ {
+  "code": "04129",
+  "name": "New World Hydra",
+  "text": "[star] <b>Forced Response</b>: After resolving step one of the villain phase, reveal the top card of the side-scheme deck and put it into play.\n<b>If this scheme is completed, the players lose the game.</b>",
+  "back_name": "New World Hydra",
+  "back_text": "<b>When Revealed:</b> Reveal the top card of the side-scheme deck and put it into play.",
+  "back_flavor": "The Red Skull is one step closer to unlocking the full power of the Infinity Stone. You need to stop him before he does, and all reality is bent to his evil will."
+ },
+ {
+  "code": "04129a",
+  "name": "New World Hydra",
+  "text": "<b>When Revealed</b>: Reveal the top card of the side-scheme deck and put it into play.",
+  "flavor": "The Red Skull is one step closer to unlocking the full power of the Infinity Stone. You need to stop him before he does, and all reality is bent to his evil will."
+ },
+ {
+  "code": "04130",
+  "name": "The Sleeper",
+  "text": "Guard. Retaliate 1. Toughness.\n<b>When Revealed</b>: The Sleeper engages the first player.\n<b>When Defeated</b>: Remove The Sleeper from the game.",
+  "traits": "Elite. Hydra. Robot."
+ },
+ {
+  "code": "04131",
+  "name": "Hydra Exo-Soldier",
+  "text": "Toughness.\n<hr />\n[star] <b>Boost</b>: Give the villain a tough status card and another boost card.",
+  "traits": "Hydra.",
+  "flavor": "\"Careful, team. These guys pack a punch!\" —Captain America"
+ },
+ {
+  "code": "04132",
+  "name": "Red Skull's Luger",
+  "text": "Attach to Red Skull.\n[star] Red Skull's attacks gain piercing and ranged.\n<b>Hero Action</b>: Spend [energy] [mental] [physical] resources → discard this card.\n<hr />\n[star] <b>Boost</b>: Attach to Red Skull.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04133",
+  "name": "Red Skull's Right Hook",
+  "text": "Attach to Red Skull.\nRed Skull gains retaliate 1.\n<b>Hero Action</b>: Spend [energy][mental][physical] resources → discard this card.",
+  "traits": "Skill.",
+  "flavor": "\"I am your superior in every way!\" —Red Skull"
+ },
+ {
+  "code": "04134",
+  "name": "Master Strategist",
+  "text": "Attach to Red Skull.\n[star] <b>Forced Interrupt</b>: When Red Skull activates, give him an additional boost card for each side scheme in play. Then, discard this card. (Max once per activation.)",
+  "traits": "Skill.",
+  "flavor": "\"In chess, the only piece that truly matters is the King, and that's me.\" —Red Skull"
+ },
+ {
+  "code": "04135",
+  "name": "Twisted Reality",
+  "text": "Incite 1.\nAttach to a side scheme.\n<b>Forced Interrupt</b>: When attached side scheme is defeated, deal the first player an encounter card.",
+  "traits": "Condition.",
+  "flavor": "The Infinity Stone gives Red Skull the power to bend reality to his will."
+ },
+ {
+  "code": "04136",
+  "name": "Bitter Rival",
+  "text": "<b>When Revealed</b>: Exhaust a character you control for each side scheme in play.\n<hr />\n[star] <b>Boost</b>: Exhaust a character you control.",
+  "flavor": "\"This is the end for you, Herr Captain!\" —Red Skull"
+ },
+ {
+  "code": "04137",
+  "name": "Spreading Lies",
+  "text": "<b>When Revealed</b>: Place 2 threat on each scheme in play.\n<hr />\n[star] <b>Boost</b>: Give Red Skull a tough status card.",
+  "flavor": "\"With my great and unmatched cunning, Hydra will reign supreme!\" —Red Skull"
+ },
+ {
+  "code": "04138",
+  "name": "Infinite Power",
+  "text": "<b>When Revealed (Alter-Ego)</b>: Give Red Skull a tough status card. Red Skull schemes.\n<b>When Revealed (Hero)</b>: Give Red Skull a tough status card. Red Skull attacks you."
+ },
+ {
+  "code": "04139",
+  "name": "The Red House",
+  "text": "Red Skull cannot take damage.\n<b>Interrupt</b>: When a character thwarts this side scheme, they may use their ATK instead of their THW.",
+  "flavor": "Red Skull built his fortress over the White House as a symbol of Hydra's conquest over America."
+ },
+ {
+  "code": "04140",
+  "name": "The Sleeper Awakened",
+  "text": "This scheme cannot leave play while The Sleeper is in play.\n<b>When Revealed</b>: Put The Sleeper into play engaged with the first player. When The Sleeper is defeated, remove this card from the game.",
+  "flavor": "Rising from the Potomac River, The Sleeper has awakened to answer Red Skull's summons."
+ },
+ {
+  "code": "04141",
+  "name": "Prison Camps",
+  "text": "<b>When Defeated</b>: The player who defeated this scheme searches their deck and discard pile for an ally, puts it into play, and shuffles their deck.",
+  "flavor": "Under Hydra's rule, families are separated and incarcerated without due process."
+ },
+ {
+  "code": "04142",
+  "name": "Censor the Past",
+  "text": "<b>When Defeated</b>: Each player chooses up to 3 cards in their discard pile and shuffles them into their deck.",
+  "flavor": "Hydra controls all media outlets and uses propaganda to turn the masses against the heroes of the past."
+ },
+ {
+  "code": "04143",
+  "name": "Hydra Reinforcements",
+  "text": "<b>When Defeated</b>: The player who defeated this scheme discards a non-<b>Elite</b> minion.",
+  "flavor": "What Hydra lacks in skill, they make up for with sheer numbers."
+ },
+ {
+  "code": "04144",
+  "name": "Mass Chaos",
+  "text": "<b>When Revealed</b>: Each player discards the top 5 cards of their deck and places 1 threat here for each different type of resource icon ([energy],[mental],[physical], or [wild]) they discarded this way.",
+  "flavor": "Red Skull creates catastrophes across the country to keep his enemies busy."
+ },
+ {
+  "code": "04145",
+  "name": "Hydra Flame-Soldier",
+  "text": "[star] <b>Forced Response</b>: After Hydra Flame-Soldier makes an undefended attack against you, discard a support you control.\n<hr />\n[star] <b>Boost</b>: If this card resolves during an undefended attack, discard a support you control.",
+  "traits": "Hydra."
+ },
+ {
+  "code": "04146",
+  "name": "Hydra Jet-Trooper",
+  "text": "Quickstrike.\n<hr />\n[star] <b>Boost</b>: If you are in hero form, the villain attacks you after this activation. Do not deal any boost cards for that attack.",
+  "traits": "Hydra."
+ },
+ {
+  "code": "04147",
+  "name": "Hail Hydra!",
+  "text": "<b>When Revealed</b>: Each [[Hydra]] minion engaged with a hero attacks that hero. Each player who was not attacked this way searches the encounter deck and discard pile for a [[Hydra]] minion and puts it into play engaged with them. Shuffle the encounter deck if it was searched."
+ },
+ {
+  "code": "04148",
+  "name": "Combat Knife",
+  "text": "Attach to the villain.\n[star] Attached villain's attacks gain piercing.\n<b>Hero Action</b>: Spend [mental][physical] resources → discard this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04149",
+  "name": "Hydra Sidearm",
+  "text": "Attach to the Villain.\n[star] <b>Forced Interrupt</b>: When attached villain attacks, the attack gains ranged.\n<b>Hero Action</b>: Spend [mental][physical] resources → discard this card.",
+  "traits": "Weapon."
+ },
+ {
+  "code": "04150",
+  "name": "Weapon Master",
+  "text": "<b>When Reveled (Alter-Ego)</b>: The villain schemes. If they have a [[Weapon]] attachment, this card gains surge.\n<b>When Reveled (Hero)</b>: the villain attacks you. If they have a [[Weapon]] attachment, this card gains surge."
+ },
+ {
+  "code": "04151",
+  "name": "Concussion Grenade",
+  "text": "<b>When Revealed (Alter-Ego)</b>: You are confused. Place 1 threat on the main scheme (2 threat instead if you were already confused).\n<b>When Revealed (Hero)</b>: You are stunned. Deal 1 damage to your hero (2 instead if you were already stunned)."
+ },
+ {
+  "code": "04152",
+  "name": "Hydra Regular",
+  "text": "Incite 1. <i>(When this card is revealed, place 1 threat on the main scheme.)</i>",
+  "traits": "Hydra.",
+  "flavor": "\"When you consider the kind of person would join a terrorist organization bent on world domination, it's easy to see why Hydra's troops don't impress.\" —Jessica Drew"
+ },
+ {
+  "code": "04153",
+  "name": "Hydra Soldier",
+  "text": "Guard.<i>(While this minion is engaged with you, you cannot attack the villain.)</i>\n<b>When Defeated</b>: Deal the engaged player an encounter card.",
+  "traits": "Hydra."
+ },
+ {
+  "code": "04154",
+  "name": "Hydra Patrol",
+  "text": "<b>When Defeated</b>: Each player searches the encounter deck and discard pile for a [[Hydra]] minion and puts it into play engaged with them. Shuffle the encounter deck.",
+  "flavor": "Hydra Soldiers perform routine patrols to maintain control of their territory."
+ },
+ {
+  "code": "04155",
+  "name": "Adrenal Stims",
+  "text": "Setup.\n<b>Hero Action:</b> Discard this card and remove it from the campaign log → ready your hero and heal 5 damage from them.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04156",
+  "name": "Tactical Scanner",
+  "text": "Setup.\n<b>Hero Action:</b> Discard this card and remove it from the campaign log → draw 5 cards.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04157",
+  "name": "Emergency Teleporter",
+  "text": "Setup.\n<b>Hero Action:</b> Discard this card and remove it from the campaign log → search your deck and discard pile for an ally, put it into play, and give it a tough status card.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04158",
+  "name": "Laser Cannon",
+  "text": "Setup.\n<b>Hero Action:</b> Discard this card and remove it from the campaign log → deal 5 damage to the villain and each enemy engaged with you.",
+  "traits": "Tech."
+ },
+ {
+  "code": "04159a",
+  "name": "Basic Thwart Upgrade",
+  "text": "Permanent. Setup.\nYou get +2 hit points.\nYour hero gets +1 THW.",
+  "traits": "Condition."
+ },
+ {
+  "code": "04160a",
+  "name": "Basic Attack Upgrade",
+  "text": "Permanent. Setup.\nYou get +1 hit points.\nYour hero gets +1 ATK.",
+  "traits": "Condition."
+ },
+ {
+  "code": "04161a",
+  "name": "Basic Defense Upgrade",
+  "text": "Permanent. Setup.\nYou get +3 hit points.\nYour hero gets +1 DEF.",
+  "traits": "Condition."
+ },
+ {
+  "code": "04162a",
+  "name": "Basic Recovery Upgrade",
+  "text": "Permanent. Setup.\nYou get +4 hit points.\nYour alter-ego gets +1 REC.",
+  "traits": "Condition."
+ },
+ {
+  "code": "04163",
+  "name": "Zola's Algorithm",
+  "text": "<b>Alter-Ego Action</b> Exhaust your alter-ego and spend a [mental] resource → discard this card.",
+  "flavor": "\"A beautiful parasite growing inside the world's most secure computer systems.\" —Arnim Zola"
+ },
+ {
+  "code": "04164",
+  "name": "Medical Emergency",
+  "text": "<b>Forced Response:</b> At the end of your turn, take 1 damage if you are in hero form.\n<b>Alter-Ego Action:</b> Discard the top 5 cards of your deck and spend a [physical] resource → discard this card.",
+  "flavor": "\"This is going to need sutures.\" —Stephen Strange"
+ },
+ {
+  "code": "04165",
+  "name": "Martial Law",
+  "text": "Your hand size is reduced by 1.\n<b>Alter-Ego Action:</b> Deal yourself an encounter card and spend a [energy] resource → discard this card.",
+  "flavor": "\"Pull him aside for questioning.\" —Hydra Soldier"
+ },
+ {
+  "code": "04166",
+  "name": "Anti-Hero Propaganda",
+  "text": "Your hero gets -1 THW, -1 ATK, and -1 DEF.\n<b>Alter-Ego Action:</b> Take 2 damage and spend a [wild] resource → discard this card.",
+  "flavor": "\"These dissenters breed conflict. They are your true enemies.\" —Hydra News Media"
+ }
+]
