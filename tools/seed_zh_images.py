@@ -4,15 +4,15 @@
 # Usage:
 #   python tools/seed_zh_images.py <pics_dir> [cache_dir]
 #   pics_dir  = folder with images named by card code, e.g. 01001a.jpg / 40031.png
-#   cache_dir = MarvelChampionsNext image cache root
-#               (default: ./cache/images — matches cmd/server/main.go,
-#                which uses NewImageCache(filepath.Join(MC_CACHE_DIR, "images")))
+#   cache_dir = MarvelChampionsNext 中文卡图缓存目录
+#               (default: ./cache/images/zh — 与 cmd/server/main.go 挂载的
+#                /img/cards/zh/ 路由对应)
 #
 # The server (internal/api/images.go) stores cached images as {code}.img and
 # records sha256[:16] per code in manifest.json. This script reproduces that
 # layout exactly, so the server serves the Chinese images without ever
 # hitting marvelcdb. Codes absent from the pics dir keep falling back to
-# marvelcdb's English images.
+# the English images (the /img/cards/zh/ route serves them automatically).
 
 import hashlib
 import json
@@ -35,7 +35,7 @@ def main() -> int:
         print(__doc__)
         return 2
     src = Path(sys.argv[1])
-    cache = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("cache") / "images"
+    cache = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("cache") / "images" / "zh"
     if not src.is_dir():
         print(f"ERR: source dir not found: {src}")
         return 1

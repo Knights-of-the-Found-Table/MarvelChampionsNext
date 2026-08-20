@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { get, post, del, Deck } from '../api'
 import { CardImage } from '../cards'
+import { useT } from '../i18n'
 
 export default function Decks() {
   const navigate = useNavigate()
+  const t = useT()
   const [decks, setDecks] = useState<Deck[]>([])
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
@@ -67,7 +69,7 @@ export default function Decks() {
 
   return (
     <section>
-      <h2>Your decks</h2>
+      <h2>{t('decks.title')}</h2>
       {error && <p className="error">{error}</p>}
       <form className="row" onSubmit={importDeck}>
         <input
@@ -77,10 +79,10 @@ export default function Decks() {
           onChange={(e) => setUrl(e.target.value)}
         />
         <button type="submit" disabled={busy || !url}>
-          Import from marvelcdb
+          {t('decks.importUrl')}
         </button>
         <button type="button" disabled={busy} onClick={() => fileRef.current?.click()}>
-          Import .txt file
+          {t('decks.importFile')}
         </button>
         <input
           ref={fileRef}
@@ -90,7 +92,7 @@ export default function Decks() {
           onChange={importFile}
         />
       </form>
-      {decks.length === 0 && <p className="muted">No decks yet — import one from marvelcdb.</p>}
+      {decks.length === 0 && <p className="muted">{t('decks.empty')}</p>}
       <div className="deck-list">
         {decks.map((d) => (
           <div
@@ -102,11 +104,14 @@ export default function Decks() {
             <div style={{ flex: 1 }}>
               <strong>{d.name}</strong>
               <div className="muted">
-                {Object.keys(d.slots).length} card types · {Object.values(d.slots).reduce((a, b) => a + b, 0)} cards
+                {t('decks.cardStats', {
+                  types: Object.keys(d.slots).length,
+                  total: Object.values(d.slots).reduce((a, b) => a + b, 0),
+                })}
               </div>
             </div>
             <button className="danger" onClick={(e) => remove(e, d.id)}>
-              Delete
+              {t('decks.delete')}
             </button>
           </div>
         ))}

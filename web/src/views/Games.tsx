@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { get, post, GameListItem } from '../api'
+import { useT } from '../i18n'
 
 export default function Games() {
   const navigate = useNavigate()
+  const t = useT()
   const [games, setGames] = useState<GameListItem[]>([])
   const [error, setError] = useState('')
 
@@ -30,21 +32,21 @@ export default function Games() {
 
   return (
     <section>
-      <h2>Games</h2>
+      <h2>{t('games.title')}</h2>
       {error && <p className="error">{error}</p>}
       <p>
         <Link className="button" to="/new">
-          + New game
+          {t('games.new')}
         </Link>
       </p>
-      {games.length === 0 && <p className="muted">No games yet.</p>}
+      {games.length === 0 && <p className="muted">{t('games.empty')}</p>}
       <table className="games-table">
         <thead>
           <tr>
             <th>#</th>
-            <th>Name</th>
-            <th>Scenario</th>
-            <th>Status</th>
+            <th>{t('games.colName')}</th>
+            <th>{t('games.colScenario')}</th>
+            <th>{t('games.colStatus')}</th>
             <th></th>
           </tr>
         </thead>
@@ -54,11 +56,13 @@ export default function Games() {
               <td>{g.id}</td>
               <td>{g.name}</td>
               <td>{g.scenarioId}</td>
-              <td>{g.status}</td>
+              <td>{t(`status.${g.status}`)}</td>
               <td>
-                <Link to={`/games/${g.id}`}>{g.status === 'finished' ? 'Review' : g.status === 'lobby' ? 'Spectate' : 'Open'}</Link>{' '}
+                <Link to={`/games/${g.id}`}>
+                  {g.status === 'finished' ? t('games.review') : g.status === 'lobby' ? t('games.spectate') : t('games.open')}
+                </Link>{' '}
                 {g.status === 'lobby' && (
-                  <button onClick={() => join(g.id)}>Join</button>
+                  <button onClick={() => join(g.id)}>{t('games.join')}</button>
                 )}
               </td>
             </tr>

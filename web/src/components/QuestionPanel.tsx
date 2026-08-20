@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Choice, Question } from '../api'
 import { CardImage } from '../cards'
+import { useT } from '../i18n'
 
 interface Props {
   question: Question
@@ -10,6 +11,7 @@ interface Props {
 // QuestionPanel renders a question tree. choose_one descends into nested
 // Then-questions; choose_n collects a selection and confirms.
 export default function QuestionPanel({ question, onAnswer }: Props) {
+  const t = useT()
   const [stack, setStack] = useState<Question[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -54,17 +56,17 @@ export default function QuestionPanel({ question, onAnswer }: Props) {
   return (
     <div className="question card">
       <div className="row space-between">
-        <strong>{current.prompt || 'Choose'}</strong>
+        <strong>{current.prompt || t('q.choose')}</strong>
         <div className="row">
           {stack.length > 0 && (
             <button className="linklike" onClick={back}>
-              ‹ back
+              {t('q.back')}
             </button>
           )}
           {isMulti && (
             <span className="muted">
-              {selected.size} selected
-              {need > 1 ? ` (need ≥ ${need})` : ''}
+              {t('q.selected', { n: selected.size })}
+              {need > 1 ? ` ${t('q.need', { n: need })}` : ''}
             </span>
           )}
         </div>
@@ -85,7 +87,7 @@ export default function QuestionPanel({ question, onAnswer }: Props) {
             ))}
           </div>
           <button className="primary" onClick={confirmMulti} disabled={selected.size === 0}>
-            Confirm
+            {t('q.confirm')}
           </button>
         </>
       ) : (

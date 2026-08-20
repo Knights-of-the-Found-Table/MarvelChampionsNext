@@ -3,31 +3,40 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useLang, type Lang } from './i18n'
 
 interface Manifest {
   [code: string]: string
 }
 
-let manifest: Manifest | null = null
-let manifestPromise: Promise<Manifest | null> | null = null
+// 每个语言一份 manifest：zh 走 /img/cards/zh/（未种图的卡由服务端回退
+// 英文卡面），en 走原有路由。manifestLoaded 区分「未加载」与「已加载但
+// 为空」（zh 未种图时 manifest 是 404），避免每次挂载重复请求。
+let manifests: Record<Lang, Manifest | null> = { en: null, zh: null }
+let manifestLoaded: Record<Lang, boolean> = { en: false, zh: false }
+let manifestPromises: Record<Lang, Promise<Manifest | null> | null> = { en: null, zh: null }
 
-async function loadManifest(): Promise<Manifest | null> {
-  if (manifest) return manifest
-  if (manifestPromise) return manifestPromise
-  manifestPromise = fetch('/img/cards/manifest.json')
+async function loadManifest(lang: Lang): Promise<Manifest | null> {
+  if (manifestLoaded[lang]) return manifests[lang]
+  if (manifestPromises[lang]) return manifestPromises[lang]
+  manifestPromises[lang] = fetch(
+    lang === 'zh' ? '/img/cards/zh/manifest.json' : '/img/cards/manifest.json'
+  )
     .then((r) => (r.ok ? (r.json() as Promise<Manifest>) : null))
     .catch(() => null)
-  manifest = await manifestPromise
-  return manifest
+  manifests[lang] = await manifestPromises[lang]
+  manifestLoaded[lang] = true
+  return manifests[lang]
 }
 
-export function cardUrl(code: string, hash?: string): string {
-  const h = hash ?? manifest?.[code]
-  return h ? `/img/cards/${code}.${h}.png` : `/img/cards/${code}.png`
+export function cardUrl(code: string, lang: Lang, hash?: string): string {
+  const h = hash ?? manifests[lang]?.[code]
+  const prefix = lang === 'zh' ? '/img/cards/zh/' : '/img/cards/'
+  return h ? `${prefix}${code}.${h}.png` : `${prefix}${code}.png`
 }
 
-export async function preloadManifest(): Promise<void> {
-  await loadManifest()
+export async function preloadManifest(lang: Lang): Promise<void> {
+  await loadManifest(lang)
 }
 
 // ---- hover zoom preview -----------------------------------------------------
@@ -44,6 +53,7 @@ const coarsePointer =
   window.matchMedia('(hover: none) and (pointer: coarse)').matches
 
 export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement | null>) {
+  const lang = useLang()
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const timer = useRef<number | null>(null)
@@ -96,7 +106,7 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
     ? createPortal(
         <div className="card-zoom" style={pos}>
           <img
-            src={cardUrl(code)}
+            src={cardUrl(code, lang)}
             alt=""
             onError={(e) => {
               const img = e.currentTarget
@@ -130,13 +140,26 @@ export function CardImage({
 }) {
   const widths: Record<string, number> = { xs: 60, sm: 100, md: 160, lg: 220 }
   const imgRef = useRef<HTMLImageElement | null>(null)
+  const lang = useLang()
+  const [, setTick] = useState(0)
   const zoom = useCardZoom(code, imgRef)
+  // 语言切换后加载该语言的 manifest（模块级缓存），就绪后切到带
+  // 内容哈希的 URL；manifest 未就绪前用无哈希 URL，服务端照常出图。
+  useEffect(() => {
+    let alive = true
+    loadManifest(lang).then(() => {
+      if (alive) setTick((t) => t + 1)
+    })
+    return () => {
+      alive = false
+    }
+  }, [lang])
   return (
     <>
       <img
         ref={imgRef}
         className={className}
-        src={cardUrl(code)}
+        src={cardUrl(code, lang)}
         alt={code}
         width={widths[size]}
         loading="lazy"

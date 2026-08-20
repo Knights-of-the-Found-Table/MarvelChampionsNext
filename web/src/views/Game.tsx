@@ -3,10 +3,13 @@ import { useParams } from 'react-router-dom'
 import { get, post, getToken, GameView } from '../api'
 import { CardImage } from '../cards'
 import QuestionPanel from '../components/QuestionPanel'
+import { lname, useT, useZhMap } from '../i18n'
 
 export default function Game() {
   const { id } = useParams<{ id: string }>()
   const gameId = Number(id)
+  const t = useT()
+  const zh = useZhMap()
   const [view, setView] = useState<GameView | null>(null)
   const [error, setError] = useState('')
   const wsRef = useRef<WebSocket | null>(null)
@@ -66,24 +69,24 @@ export default function Game() {
   }
 
   if (error && !view) return <p className="error">{error}</p>
-  if (!view) return <p className="muted">Loading…</p>
+  if (!view) return <p className="muted">{t('deck.loading')}</p>
 
   return (
     <div className="game">
       <header className="game-header">
         <h2>
-          {view.name} <span className="muted">· Round {view.round}</span>
+          {view.name} <span className="muted">· {t('game.round', { n: view.round })}</span>
         </h2>
         <div className="row">
           {view.over ? (
             <span className={view.won ? 'victory' : 'defeat'}>
-              {view.won ? '🏆 Victory' : '💀 Defeat'} — {view.reason}
+              {t(view.won ? 'game.victory' : 'game.defeat')} — {view.reason}
             </span>
           ) : view.waitingFor ? (
-            <span className="muted">Waiting for {view.waitingFor}…</span>
+            <span className="muted">{t('game.waitingFor', { name: view.waitingFor })}</span>
           ) : null}
           <button onClick={undo} disabled={view.over}>
-            Undo
+            {t('game.undo')}
           </button>
         </div>
       </header>
@@ -95,15 +98,16 @@ export default function Game() {
             <div key={v.id} className="entity">
               <CardImage code={v.code} />
               <div className="entity-label">
-                <strong>{v.name}</strong> <span className="muted">stage {v.stageLabel}</span>
+                <strong>{lname(zh, v.code, v.name)}</strong>{' '}
+                <span className="muted">{t('game.stage', { label: v.stageLabel })}</span>
                 <div className={`hp ${v.hp <= v.maxHp / 3 ? 'low' : ''}`}>
-                  {v.hp}/{v.maxHp} HP
+                  {t('game.hp', { hp: v.hp, max: v.maxHp })}
                 </div>
                 <div className="muted">
-                  ATK {v.attack} · SCH {v.scheme}
-                  {v.stunned ? ' · stunned' : ''}
-                  {v.confused ? ' · confused' : ''}
-                  {v.tough ? ' · tough' : ''}
+                  {t('game.atkSch', { atk: v.attack, sch: v.scheme })}
+                  {v.stunned ? ` · ${t('status.stunned')}` : ''}
+                  {v.confused ? ` · ${t('status.confused')}` : ''}
+                  {v.tough ? ` · ${t('status.tough')}` : ''}
                 </div>
               </div>
             </div>
@@ -112,9 +116,9 @@ export default function Game() {
             <div className="entity">
               <CardImage code={view.mainScheme.code} />
               <div className="entity-label">
-                <strong>{view.mainScheme.name}</strong>
+                <strong>{lname(zh, view.mainScheme.code, view.mainScheme.name)}</strong>
                 <div className={`threat ${view.mainScheme.threat >= view.mainScheme.maxThreat - 2 ? 'high' : ''}`}>
-                  {view.mainScheme.threat}/{view.mainScheme.maxThreat} threat
+                  {t('game.threatMax', { n: view.mainScheme.threat, max: view.mainScheme.maxThreat })}
                 </div>
               </div>
             </div>
@@ -123,9 +127,9 @@ export default function Game() {
             <div key={s.id} className="entity">
               <CardImage code={s.code} />
               <div className="entity-label">
-                <strong>{s.name}</strong>
-                <div className="threat">{s.threat} threat</div>
-                {s.crisis && <div className="crisis">crisis</div>}
+                <strong>{lname(zh, s.code, s.name)}</strong>
+                <div className="threat">{t('game.threat', { n: s.threat })}</div>
+                {s.crisis && <div className="crisis">{t('game.crisis')}</div>}
               </div>
             </div>
           ))}
@@ -133,13 +137,11 @@ export default function Game() {
             <div key={m.id} className="entity">
               <CardImage code={m.code} size="sm" />
               <div className="entity-label">
-                <strong>{m.name}</strong>
-                <div className="hp">
-                  {m.hp}/{m.maxHp} HP
-                </div>
+                <strong>{lname(zh, m.code, m.name)}</strong>
+                <div className="hp">{t('game.hp', { hp: m.hp, max: m.maxHp })}</div>
                 <div className="muted">
-                  ATK {m.attack} · SCH {m.scheme}
-                  {m.guard ? ' · guard' : ''}
+                  {t('game.atkSch', { atk: m.attack, sch: m.scheme })}
+                  {m.guard ? ` · ${t('status.guard')}` : ''}
                 </div>
               </div>
             </div>
@@ -154,17 +156,17 @@ export default function Game() {
               <CardImage code={p.side === 'hero' ? p.heroCode : p.alterEgo} size="sm" />
               <div className="entity-label">
                 <strong>{p.name}</strong>
-                {p.firstPlayer && <span className="badge">first</span>}
+                {p.firstPlayer && <span className="badge">{t('status.first')}</span>}
                 <div className={`hp ${p.hp <= p.maxHp / 3 ? 'low' : ''}`}>
-                  {p.hp}/{p.maxHp} HP
+                  {t('game.hp', { hp: p.hp, max: p.maxHp })}
                 </div>
                 <div className="muted">
-                  deck {p.deckCount}
-                  {p.exhausted ? ' · exhausted' : ''}
-                  {p.stunned ? ' · stunned' : ''}
-                  {p.confused ? ' · confused' : ''}
-                  {p.tough ? ' · tough' : ''}
-                  {p.encounterDown ? ` · ${p.encounterDown} encounter card(s)` : ''}
+                  {t('game.deckCount', { n: p.deckCount })}
+                  {p.exhausted ? ` · ${t('status.exhausted')}` : ''}
+                  {p.stunned ? ` · ${t('status.stunned')}` : ''}
+                  {p.confused ? ` · ${t('status.confused')}` : ''}
+                  {p.tough ? ` · ${t('status.tough')}` : ''}
+                  {p.encounterDown ? ` · ${t('game.encounterCards', { n: p.encounterDown })}` : ''}
                 </div>
               </div>
             </div>
@@ -172,30 +174,28 @@ export default function Game() {
               <div key={a.id} className={`entity ${a.exhausted ? 'exhausted' : ''}`}>
                 <CardImage code={a.code} size="xs" />
                 <div className="entity-label">
-                  {a.name}
-                  <div className="hp">
-                    {a.hp}/{a.maxHp}
-                  </div>
+                  {lname(zh, a.code, a.name)}
+                  <div className="hp">{t('game.hp', { hp: a.hp, max: a.maxHp })}</div>
                 </div>
               </div>
             ))}
             {p.supports?.map((s) => (
               <div key={s.id} className={`entity ${s.exhausted ? 'exhausted' : ''}`}>
                 <CardImage code={s.code} size="xs" />
-                <div className="entity-label">{s.name}</div>
+                <div className="entity-label">{lname(zh, s.code, s.name)}</div>
               </div>
             ))}
             {p.upgrades?.map((u) => (
               <div key={u.id} className="entity">
                 <CardImage code={u.code} size="xs" />
-                <div className="entity-label">{u.name}</div>
+                <div className="entity-label">{lname(zh, u.code, u.name)}</div>
               </div>
             ))}
           </div>
           {p.hand && (
             <div className="hand row wrap">
               {p.hand.map((c) => (
-                <div key={c.id} className="hand-card" title={c.name}>
+                <div key={c.id} className="hand-card" title={lname(zh, c.code, c.name)}>
                   <CardImage code={c.code} size="sm" />
                 </div>
               ))}
@@ -203,7 +203,7 @@ export default function Game() {
           )}
           {!p.hand && p.handSize > 0 && (
             <p className="muted">
-              {p.name}: {p.handSize} cards in hand (hidden)
+              {t('game.hiddenHand', { name: p.name, n: p.handSize })}
             </p>
           )}
         </section>
@@ -214,15 +214,15 @@ export default function Game() {
           <QuestionPanel question={view.question} onAnswer={answer} />
         ) : view.over ? (
           <p className={view.won ? 'victory' : 'defeat'}>
-            Game over — {view.won ? 'victory' : 'defeat'}: {view.reason}
+            {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {view.reason}
           </p>
         ) : (
-          <p className="muted">{view.waitingFor ? `Waiting for ${view.waitingFor}…` : '…'}</p>
+          <p className="muted">{view.waitingFor ? t('game.waitingFor', { name: view.waitingFor }) : '…'}</p>
         )}
       </section>
 
       <details className="log">
-        <summary>Game log</summary>
+        <summary>{t('game.logTitle')}</summary>
         <pre>{(view.log ?? []).slice().reverse().join('\n')}</pre>
       </details>
     </div>

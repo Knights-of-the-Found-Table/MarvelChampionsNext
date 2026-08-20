@@ -57,11 +57,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("image cache: %v", err)
 	}
+	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"))
+	if err != nil {
+		log.Fatalf("zh image cache: %v", err)
+	}
 	server := &api.Server{
-		Store:  st,
-		Rooms:  rooms.NewManager(st),
-		Secret: []byte(secret),
-		Images: images,
+		Store:    st,
+		Rooms:    rooms.NewManager(st),
+		Secret:   []byte(secret),
+		Images:   images,
+		ZhImages: zhImages,
 	}
 
 	mux := http.NewServeMux()
@@ -73,9 +78,13 @@ func main() {
 
 	// Card images are fetched from marvelcdb on demand and cached on
 	// disk; content-addressed URLs (/img/cards/{code}.{hash}.png) are
-	// immutable, the manifest is always revalidated.
+	// immutable, the manifest is always revalidated. The zh routes serve
+	// Chinese card faces seeded into cache/images/zh; codes without a
+	// seeded face fall back to the English images.
 	mux.Handle("GET /img/cards/manifest.json", server.ManifestHandler())
 	mux.Handle("/img/cards/", server.ImageHandler())
+	mux.Handle("GET /img/cards/zh/manifest.json", server.ZhManifestHandler())
+	mux.Handle("/img/cards/zh/", server.ZhImageHandler())
 	// Static frontend with SPA fallback.
 	fs := http.FileServer(http.Dir(staticDir))
 	mux.Handle("/", spaHandler(staticDir, fs))

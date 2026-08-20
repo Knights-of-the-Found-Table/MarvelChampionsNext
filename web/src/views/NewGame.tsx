@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { get, post, Deck, ScenarioInfo, GameView } from '../api'
+import { useT } from '../i18n'
 
 export default function NewGame() {
   const navigate = useNavigate()
+  const t = useT()
   const [decks, setDecks] = useState<Deck[]>([])
   const [scenarios, setScenarios] = useState<ScenarioInfo[]>([])
   const [playerCount, setPlayerCount] = useState(1)
@@ -47,11 +49,11 @@ export default function NewGame() {
 
   return (
     <section>
-      <h2>New game</h2>
+      <h2>{t('newgame.title')}</h2>
       {error && <p className="error">{error}</p>}
       <form className="card form" onSubmit={start}>
         <label>
-          Players
+          {t('newgame.players')}
           <select
             value={playerCount}
             onChange={(e) => {
@@ -62,21 +64,21 @@ export default function NewGame() {
           >
             {[1, 2, 3, 4].map((n) => (
               <option key={n} value={n}>
-                {n} player{n > 1 ? 's' : ''}
+                {n === 1 ? t('newgame.playersOne') : t('newgame.playersMany', { n })}
               </option>
             ))}
           </select>
         </label>
         {Array.from({ length: playerCount }).map((_, i) => (
           <label key={i}>
-            Player {i + 1} deck
+            {t('newgame.playerDeck', { n: i + 1 })}
             <select
               value={deckIds[i] ?? ''}
               onChange={(e) =>
                 setDeckIds((ids) => ids.map((x, j) => (j === i ? Number(e.target.value) : x)))
               }
             >
-              {decks.length === 0 && <option value="">-- import a deck first --</option>}
+              {decks.length === 0 && <option value="">{t('newgame.importFirst')}</option>}
               {decks.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
@@ -86,7 +88,7 @@ export default function NewGame() {
           </label>
         ))}
         <label>
-          Scenario
+          {t('newgame.scenario')}
           <select value={scenarioId} onChange={(e) => setScenarioId(e.target.value)}>
             {scenarios.map((s) => (
               <option key={s.id} value={s.id}>
@@ -96,18 +98,18 @@ export default function NewGame() {
           </select>
         </label>
         <label>
-          Difficulty
+          {t('newgame.difficulty')}
           <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-            <option value="standard">Standard</option>
-            <option value="expert">Expert</option>
+            <option value="standard">{t('newgame.difficultyStandard')}</option>
+            <option value="expert">{t('newgame.difficultyExpert')}</option>
           </select>
         </label>
         <label>
-          Game name (optional)
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Scenario name by default" />
+          {t('newgame.gameName')}
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('newgame.gameNamePlaceholder')} />
         </label>
         <button type="submit" disabled={busy || deckIds.slice(0, playerCount).some((x) => x === null) || !scenarioId}>
-          {busy ? 'Creating…' : 'Create game'}
+          {busy ? t('newgame.creating') : t('newgame.create')}
         </button>
       </form>
     </section>

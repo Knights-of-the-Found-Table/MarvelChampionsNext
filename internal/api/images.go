@@ -89,6 +89,22 @@ func (c *imageCache) get(code string) (*cachedImage, error) {
 	return &cachedImage{body: body, mimeType: detectImage(body), hash: hash}, nil
 }
 
+// peek returns the cached image for a code without ever touching the
+// network. Used for the zh cache: a card that has no seeded Chinese face
+// must fall back to the English cache, not download an English face into
+// the zh cache.
+func (c *imageCache) peek(code string) (*cachedImage, bool) {
+	hash, ok := c.manifest[code]
+	if !ok {
+		return nil, false
+	}
+	body, err := os.ReadFile(c.imagePath(code))
+	if err != nil {
+		return nil, false
+	}
+	return &cachedImage{body: body, mimeType: detectImage(body), hash: hash}, true
+}
+
 func (c *imageCache) imagePath(code string) string {
 	return filepath.Join(c.dir, code+".img")
 }
@@ -160,6 +176,25 @@ func detectImage(body []byte) string {
 // does not match the current content returns 404 so the client refetches
 // the manifest.
 func (s *Server) ImageHandler() http.Handler {
+	// English faces: fetch from marvelcdb on miss.
+	return s.imageHandler(func(code string) (*cachedImage, error) {
+		return s.Images.get(code)
+	})
+}
+
+// ZhImageHandler serves Chinese card faces from the zh cache (mounted at
+// /img/cards/zh/). Only seeded faces are served — a code without one falls
+// back to the English cache, so zh mode always shows an image.
+func (s *Server) ZhImageHandler() http.Handler {
+	return s.imageHandler(func(code string) (*cachedImage, error) {
+		if img, ok := s.ZhImages.peek(code); ok {
+			return img, nil
+		}
+		return s.Images.get(code)
+	})
+}
+
+func (s *Server) imageHandler(getImage func(code string) (*cachedImage, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := filepath.Base(r.URL.Path)
 		if name == "" || name == "." || name == "/" {
@@ -177,7 +212,7 @@ func (s *Server) ImageHandler() http.Handler {
 			writeErr(w, http.StatusBadRequest, "invalid image name")
 			return
 		}
-		img, err := s.Images.get(code)
+		img, err := getImage(code)
 		if err != nil {
 			writeErr(w, http.StatusBadGateway, "card image unavailable: "+err.Error())
 			return
@@ -202,10 +237,20 @@ func (s *Server) ImageHandler() http.Handler {
 // ManifestHandler exposes the current {code: hash} manifest so clients can
 // build content-addressed URLs.
 func (s *Server) ManifestHandler() http.Handler {
+	return s.manifestHandler(s.Images)
+}
+
+// ZhManifestHandler exposes the zh cache's manifest (mounted at
+// /img/cards/zh/manifest.json); empty until Chinese faces are seeded.
+func (s *Server) ZhManifestHandler() http.Handler {
+	return s.manifestHandler(s.ZhImages)
+}
+
+func (s *Server) manifestHandler(c *imageCache) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-cache")
-		_, _ = w.Write(s.Images.manifestJSON())
+		_, _ = w.Write(c.manifestJSON())
 	})
 }
 

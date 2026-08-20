@@ -9,6 +9,7 @@
 # Node
 web/node_modules/
 web/dist/
+web/tsconfig.tsbuildinfo
 
 # Card images are downloaded at build/dev time, never committed
 web/public/img/cards/*
@@ -32,3 +33,5 @@ cache/
 *.db
 *.db-shm
 *.db-wal
+
+/.zcode

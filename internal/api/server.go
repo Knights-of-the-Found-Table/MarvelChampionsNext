@@ -23,6 +23,9 @@ type Server struct {
 	Secret []byte
 	// Images serves card images with on-demand marvelcdb fetching.
 	Images *imageCache
+	// ZhImages serves Chinese card faces seeded into cache/images/zh;
+	// codes without a seeded face fall back to Images.
+	ZhImages *imageCache
 }
 
 func (s *Server) Router() http.Handler {

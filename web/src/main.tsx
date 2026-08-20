@@ -10,9 +10,10 @@ import NewGame from './views/NewGame'
 import Games from './views/Games'
 import Game from './views/Game'
 import { getToken } from './api'
+import { LangProvider, getInitialLang } from './i18n'
 import { preloadManifest } from './cards'
 
-preloadManifest()
+preloadManifest(getInitialLang())
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   if (!getToken()) return <Navigate to="/login" replace />
@@ -36,6 +37,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <LangProvider>
+      <RouterProvider router={router} />
+    </LangProvider>
   </React.StrictMode>,
 )
