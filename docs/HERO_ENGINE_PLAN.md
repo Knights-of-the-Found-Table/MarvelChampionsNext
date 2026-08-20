@@ -11,9 +11,9 @@
 
 | 波次 | 卡号 | 英雄 | 包 | 机制要点 | 状态 |
 |---|---|---|---|---|---|
-| W1 | 06001a | 索尔 Thor | thor | 妙尔尼尔检索，简单数值 | ⬜ |
-| W1 | 10001a | 浩克 Hulk | hlk | 变身增伤，简单数值 | ⬜ |
-| W1 | 04001a | 鹰眼 Hawkeye | trors | 弓/箭矢体系（箭矢=attack/thwart 事件） | ⬜ |
+| W1 | 06001a | 索尔 Thor | thor | 妙尔尼尔检索，简单数值 | ✅ kaguya+shantu |
+| W1 | 10001a | 浩克 Hulk | hlk | 变身增伤，简单数值 | 🔨 kaguya |
+| W1 | 04001a | 鹰眼 Hawkeye | trors | 弓/箭矢体系（箭矢=attack/thwart 事件） | 🔨 shantu |
 | W1 | 04031a | 蜘蛛女侠 Spider-Woman | trors | 双派系构筑（构筑期规则，引擎内可简化） | ⬜ |
 | W2 | 08001a | 黑寡妇 Black Widow | bkw | Preparation 准备异能体系 | ⬜ |
 | W2 | 14001a | 快银 Quicksilver | qsv | 抽牌/弃牌循环 | ⬜ |
