@@ -44,6 +44,26 @@ func (g *Game) drawEncounter() (Card, bool) {
 	return card, true
 }
 
+// PeekEncounterTop returns the top card of the encounter deck without
+// drawing it. The encounter discard is reshuffled in first if the deck
+// is empty. Used by Loki's self-resolve interrupt.
+func (g *Game) PeekEncounterTop() (Card, bool) {
+	if len(g.EncounterDeck) == 0 {
+		if len(g.EncounterDiscard) == 0 {
+			return Card{}, false
+		}
+		// Reshuffle into a scratch list so the peek doesn't permanently
+		// reorder the discard pile.
+		scratch := append(CardList(nil), g.EncounterDiscard...)
+		g.shuffle(&scratch)
+		if len(scratch) == 0 {
+			return Card{}, false
+		}
+		return scratch[0], true
+	}
+	return g.EncounterDeck[0], true
+}
+
 // ---------------------------------------------------------------- threat
 
 func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {

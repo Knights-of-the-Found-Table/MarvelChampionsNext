@@ -114,3 +114,7 @@ func (g *Game) HandCard(pid PlayerID, cardID string) (Card, bool) {
 	}
 	return Card{}, false
 }
+
+// QueueLen returns the number of pending messages in the engine queue
+// (exported for tests).
+func (g *Game) QueueLen() int { return len(g.queue) }

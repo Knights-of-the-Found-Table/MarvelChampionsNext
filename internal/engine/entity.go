@@ -168,6 +168,13 @@ func behavior(code string) *Behavior {
 	return genericBehavior
 }
 
+// LookupBehavior returns the registered behavior for a card code, or
+// the shared generic one. Exported for tests that need to inspect
+// hand-written behaviors (e.g. presence of a HeroAbilities hook).
+func LookupBehavior(code string) *Behavior {
+	return behavior(code)
+}
+
 // genericBehavior is the fallback for cards without hand-written logic: pure
 // stats, keywords from the data layer, no text effects.
 var genericBehavior = &Behavior{}
