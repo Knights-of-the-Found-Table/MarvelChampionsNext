@@ -1,7 +1,8 @@
 // Package mirror resolves card-image download sources: plain HTTP mirrors
-// serving marvelcdb's exact path layout (/bundles/cards/{code}.png — the
-// mirror decides what bytes it returns, png, webp or otherwise; the MIME
-// type is detected from content when served).
+// serving marvelcdb's path layout (/bundles/cards/{code}.png|jpg — the
+// data itself is 2734 .png and 1067 .jpg paths, and the mirror decides
+// what bytes it returns, png, webp or otherwise; the MIME type is detected
+// from content when served).
 //
 // Languages are separate sources, exactly like marvelcdb's own language
 // domains: the default root (IMAGE_MIRROR, marvelcdb.com itself by
@@ -80,6 +81,49 @@ func (s HTTPSource) Fetch(path string) ([]byte, error) {
 	return fetchBody(s.Client, req)
 }
 
+// TryExtensions returns a Source that requests the exact path first and,
+// when it is missing (404), retries the same path with each common image
+// extension (.png, .jpg, .webp). marvelcdb's card data mixes real .png and
+// .jpg paths, while community mirrors may keep the pack's original .jpg
+// filenames or serve .webp keys — every source therefore tolerates all
+// three layouts. Non-404 failures are returned as-is.
+func TryExtensions(src Source) Source { return tryExtensions{src: src} }
+
+type tryExtensions struct{ src Source }
+
+func (t tryExtensions) Name() string { return t.src.Name() }
+
+func (t tryExtensions) Fetch(path string) ([]byte, error) {
+	var lastErr error
+	for _, variant := range extVariants(path) {
+		body, err := t.src.Fetch(variant)
+		if err == nil {
+			return body, nil
+		}
+		if !errors.Is(err, ErrNotFound) {
+			return nil, err
+		}
+		lastErr = err
+	}
+	return nil, lastErr
+}
+
+// extVariants lists the candidate paths: the exact path, then the same
+// path with each extension swapped in (deduplicated).
+func extVariants(path string) []string {
+	stem := path
+	if dot := strings.LastIndexByte(path, '.'); dot > strings.LastIndexByte(path, '/') {
+		stem = path[:dot]
+	}
+	variants := []string{path}
+	for _, ext := range []string{".png", ".jpg", ".webp"} {
+		if v := stem + ext; v != path {
+			variants = append(variants, v)
+		}
+	}
+	return variants
+}
+
 // Chain returns a Source that tries the given sources in order and returns
 // the first success. Failures are logged and the next source is tried; the
 // last error is returned when all sources fail.
@@ -130,14 +174,15 @@ type Env struct {
 
 // SourcesFromEnv resolves the source chains from environment variables:
 // IMAGE_MIRROR (default https://marvelcdb.com) and ZH_IMAGE_MIRROR. Both
-// serve marvelcdb's exact paths.
+// serve marvelcdb's path layout, with extension fallback for mirrors that
+// key images differently (.png/.jpg/.webp).
 func SourcesFromEnv() Env {
 	var env Env
 	root := envOr("IMAGE_MIRROR", defaultMarvelcdb)
-	env.Default = []Source{HTTPSource{BaseURL: root}}
+	env.Default = []Source{TryExtensions(HTTPSource{BaseURL: root})}
 	env.DefaultIsMirror = root != defaultMarvelcdb
 	if v := os.Getenv("ZH_IMAGE_MIRROR"); v != "" {
-		env.Zh = []Source{HTTPSource{BaseURL: v}}
+		env.Zh = []Source{TryExtensions(HTTPSource{BaseURL: v})}
 	}
 	return env
 }

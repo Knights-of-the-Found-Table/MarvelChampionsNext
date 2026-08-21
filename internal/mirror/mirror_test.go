@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -42,6 +44,16 @@ func (f fakeSource) Fetch(string) ([]byte, error) {
 	return f.body, f.err
 }
 
+// funcSource routes every fetch through a test-supplied function.
+type funcSource struct {
+	name  string
+	fetch func(path string) ([]byte, error)
+}
+
+func (f funcSource) Name() string { return f.name }
+
+func (f funcSource) Fetch(path string) ([]byte, error) { return f.fetch(path) }
+
 func TestChainFallsThrough(t *testing.T) {
 	firstCalls, secondCalls := 0, 0
 	first := fakeSource{name: "first", err: ErrNotFound, calls: &firstCalls}
@@ -73,9 +85,95 @@ func TestChainExhausted(t *testing.T) {
 	}
 }
 
+// The exact path is tried first; a 404 retries the other extensions
+// (.png/.jpg/.webp) in order.
+func TestTryExtensions(t *testing.T) {
+	var requested []string
+	var fetchFn func(path string) ([]byte, error)
+	src := TryExtensions(funcSource{name: "mirror", fetch: func(path string) ([]byte, error) {
+		requested = append(requested, path)
+		return fetchFn(path)
+	}})
+
+	// Exact hit: no extra requests.
+	fetchFn = func(path string) ([]byte, error) {
+		if path == "/bundles/cards/01001a.png" {
+			return []byte("img"), nil
+		}
+		return nil, ErrNotFound
+	}
+	if body, err := src.Fetch("/bundles/cards/01001a.png"); err != nil || string(body) != "img" {
+		t.Fatalf("exact fetch = %q, %v", body, err)
+	}
+	if len(requested) != 1 {
+		t.Fatalf("requested = %v", requested)
+	}
+
+	// .png missing: .jpg is retried before .webp.
+	requested = nil
+	fetchFn = func(path string) ([]byte, error) {
+		if strings.HasSuffix(path, ".jpg") {
+			return []byte("jpg"), nil
+		}
+		return nil, ErrNotFound
+	}
+	if body, err := src.Fetch("/bundles/cards/01001a.png"); err != nil || string(body) != "jpg" {
+		t.Fatalf("jpg fetch = %q, %v", body, err)
+	}
+	want := []string{"/bundles/cards/01001a.png", "/bundles/cards/01001a.jpg"}
+	if !reflect.DeepEqual(requested, want) {
+		t.Fatalf("requested = %v, want %v", requested, want)
+	}
+
+	// Only .webp exists.
+	requested = nil
+	fetchFn = func(path string) ([]byte, error) {
+		if strings.HasSuffix(path, ".webp") {
+			return []byte("webp"), nil
+		}
+		return nil, ErrNotFound
+	}
+	if body, err := src.Fetch("/bundles/cards/01001a.png"); err != nil || string(body) != "webp" {
+		t.Fatalf("webp fetch = %q, %v", body, err)
+	}
+
+	// A genuine .jpg path retries .png then .webp, deduplicated.
+	requested = nil
+	fetchFn = func(path string) ([]byte, error) { return nil, ErrNotFound }
+	if _, err := src.Fetch("/bundles/cards/01001b.jpg"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("err = %v, want ErrNotFound", err)
+	}
+	want = []string{"/bundles/cards/01001b.jpg", "/bundles/cards/01001b.png", "/bundles/cards/01001b.webp"}
+	if !reflect.DeepEqual(requested, want) {
+		t.Fatalf("requested = %v, want %v", requested, want)
+	}
+
+	// Non-404 failures surface immediately without extension retries.
+	requested = nil
+	fetchFn = func(path string) ([]byte, error) { return nil, errors.New("boom") }
+	if _, err := src.Fetch("/bundles/cards/01001a.png"); err == nil || err.Error() != "boom" {
+		t.Fatalf("err = %v, want boom", err)
+	}
+	if len(requested) != 1 {
+		t.Fatalf("requested = %v", requested)
+	}
+}
+
 func TestSourcesFromEnv(t *testing.T) {
 	for _, k := range []string{"IMAGE_MIRROR", "ZH_IMAGE_MIRROR"} {
 		t.Setenv(k, "")
+	}
+
+	unwrap := func(s Source) HTTPSource {
+		wrapped, ok := s.(tryExtensions)
+		if !ok {
+			t.Fatalf("source %#v is not extension-fallback wrapped", s)
+		}
+		http, ok := wrapped.src.(HTTPSource)
+		if !ok {
+			t.Fatalf("inner source %#v is not HTTPSource", wrapped.src)
+		}
+		return http
 	}
 
 	// No mirrors: default = bare marvelcdb, zh unconfigured.
@@ -83,7 +181,7 @@ func TestSourcesFromEnv(t *testing.T) {
 	if len(env.Default) != 1 || env.DefaultIsMirror || len(env.Zh) != 0 {
 		t.Fatalf("default: default=%d zh=%d mirror=%v", len(env.Default), len(env.Zh), env.DefaultIsMirror)
 	}
-	if http, ok := env.Default[0].(HTTPSource); !ok || http.BaseURL != "https://marvelcdb.com" {
+	if http := unwrap(env.Default[0]); http.BaseURL != "https://marvelcdb.com" {
 		t.Fatalf("default[0] = %#v", env.Default[0])
 	}
 
@@ -94,10 +192,10 @@ func TestSourcesFromEnv(t *testing.T) {
 	if !env.DefaultIsMirror {
 		t.Fatal("custom default root must be reported as a mirror")
 	}
-	if http, ok := env.Default[0].(HTTPSource); !ok || http.BaseURL != "https://images.example.com" {
+	if http := unwrap(env.Default[0]); http.BaseURL != "https://images.example.com" {
 		t.Fatalf("default[0] = %#v", env.Default[0])
 	}
-	if http, ok := env.Zh[0].(HTTPSource); !ok || http.BaseURL != "https://zh-images.example.com" {
+	if http := unwrap(env.Zh[0]); http.BaseURL != "https://zh-images.example.com" {
 		t.Fatalf("zh[0] = %#v", env.Zh[0])
 	}
 

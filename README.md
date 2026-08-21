@@ -47,10 +47,12 @@ container by `deploy/docker-compose.yml` via `env_file`.
 ### Image mirrors
 
 Card images are fetched on demand and cached locally. Mirrors are plain
-HTTP site roots serving marvelcdb's exact path layout
-(`/bundles/cards/{code}.png` — the mirror decides the file format, png,
-webp or otherwise; the MIME type is detected from content). Languages are
-separate sources, like marvelcdb's own language domains:
+HTTP site roots serving marvelcdb's path layout. Paths are requested
+exactly as in the card data (a mix of `.png` and `.jpg` — 2734/1067); a
+missing path is retried with the other extensions (`.png`/`.jpg`/`.webp`)
+so mirrors keyed differently still work, and the MIME type is detected
+from content regardless of the URL. Languages are separate sources, like
+marvelcdb's own language domains:
 
 - **default (English)**: `IMAGE_MIRROR` (default marvelcdb.com),
 - **Chinese**: `ZH_IMAGE_MIRROR` — the zh cache fetches from it on demand;
