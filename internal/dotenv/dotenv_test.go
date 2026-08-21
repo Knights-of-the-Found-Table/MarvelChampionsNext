@@ -8,20 +8,20 @@ import (
 
 func TestLoad(t *testing.T) {
 	path := filepath.Join(t.TempDir(), ".env")
-	content := "# comment\n\nR2_ENDPOINT=https://e.example.com\n R2_BUCKET = my-bucket \nBROKEN_LINE_NO_EQUALS\ncrlf=ok\r\n"
+	content := "# comment\n\nZH_IMAGE_MIRROR=https://zh.example.com\n IMAGE_MIRROR = https://en.example.com \nBROKEN_LINE_NO_EQUALS\ncrlf=ok\r\n"
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	t.Setenv("R2_BUCKET", "from-real-env")
+	t.Setenv("IMAGE_MIRROR", "from-real-env")
 	if n, err := Load(path); err != nil || n != 2 {
 		t.Fatalf("load = %d, %v (want 2 set)", n, err)
 	}
-	if os.Getenv("R2_ENDPOINT") != "https://e.example.com" {
-		t.Fatalf("R2_ENDPOINT = %q", os.Getenv("R2_ENDPOINT"))
+	if os.Getenv("ZH_IMAGE_MIRROR") != "https://zh.example.com" {
+		t.Fatalf("ZH_IMAGE_MIRROR = %q", os.Getenv("ZH_IMAGE_MIRROR"))
 	}
-	if got := os.Getenv("R2_BUCKET"); got != "from-real-env" {
-		t.Fatalf("real env must win: R2_BUCKET = %q", got)
+	if got := os.Getenv("IMAGE_MIRROR"); got != "from-real-env" {
+		t.Fatalf("real env must win: IMAGE_MIRROR = %q", got)
 	}
 	if os.Getenv("crlf") != "ok" {
 		t.Fatalf("crlf = %q", os.Getenv("crlf"))

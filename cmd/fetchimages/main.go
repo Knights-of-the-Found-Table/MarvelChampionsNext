@@ -1,6 +1,6 @@
 // Command fetchimages downloads card images into the cache directory and
 // writes a manifest of content hashes. It fetches through the same source
-// chain as the server (R2/HTTP mirrors first when configured, marvelcdb.com
+// chain as the server (IMAGE_MIRROR when configured, marvelcdb.com
 // otherwise); images are never committed to the repository. This tool runs
 // at docker build time and optionally during local development.
 //
@@ -39,10 +39,10 @@ func main() {
 	}
 
 	sources := mirror.SourcesFromEnv()
-	chain := mirror.Chain(sources.Sources...)
+	chain := mirror.Chain(sources.Default...)
 	// Only rate-limit when hitting marvelcdb directly; a mirror is our own
 	// infrastructure.
-	polite := sources.DirectMarvelcdb
+	polite := !sources.DefaultIsMirror
 
 	db := data.MustLoad()
 

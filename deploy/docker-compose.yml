@@ -6,9 +6,8 @@ services:
     ports:
       - "3000:3000"
     # The repo-root .env (KEY=VALUE) carries optional card-image mirror
-    # settings straight into the container: R2_* for the preferred image
-    # mirror and MC_MARVELCDB_IMAGES for an HTTP mirror root. See
-    # deploy/.env.example.
+    # roots straight into the container: IMAGE_MIRROR for the default
+    # (English) language and ZH_IMAGE_MIRROR for Chinese. See .env.example.
     env_file:
       - path: ../.env
         required: false

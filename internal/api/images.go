@@ -18,11 +18,11 @@ import (
 )
 
 // imageCache serves card images with on-demand fetching: the first request
-// for a card downloads it through the configured source chain (R2/HTTP
-// mirrors first, marvelcdb last) into the cache directory, records its
-// content hash in manifest.json, and every later request is served locally.
-// Content-addressed URLs (/img/cards/{code}.{hash}.png) get immutable
-// caching, exactly like the previous build-time pipeline.
+// for a card downloads it through the configured source chain (a mirror
+// when configured, marvelcdb otherwise) into the cache directory, records
+// its content hash in manifest.json, and every later request is served
+// locally. Content-addressed URLs (/img/cards/{code}.{hash}.png) get
+// immutable caching, exactly like the previous build-time pipeline.
 type imageCache struct {
 	dir    string
 	source mirror.Source
@@ -201,21 +201,24 @@ func detectImage(body []byte) string {
 // does not match the current content returns 404 so the client refetches
 // the manifest.
 func (s *Server) ImageHandler() http.Handler {
-	// English faces: fetch through the source chain on miss (R2/HTTP
-	// mirrors first, marvelcdb last).
+	// Default (English) faces: fetch through the default chain on miss
+	// (IMAGE_MIRROR or marvelcdb).
 	return s.imageHandler(func(code string) (*cachedImage, error) {
 		return s.Images.get(code)
 	})
 }
 
 // ZhImageHandler serves the zh routes (/img/cards/zh/): locally seeded
-// Chinese faces first; every other code comes from the shared source chain
-// via the main cache — with a mirror configured that content is the
-// Chinese pack, naturally. The zh cache itself never touches the network,
-// so its manifest lists exactly the seeded faces.
+// faces first, then on-demand fetches from the Chinese mirror
+// (ZH_IMAGE_MIRROR) — a separate language source with marvelcdb's exact
+// paths, never a path prefix. Codes the zh chain cannot resolve fall back
+// to the default chain, so zh mode always shows an image.
 func (s *Server) ZhImageHandler() http.Handler {
 	return s.imageHandler(func(code string) (*cachedImage, error) {
 		if img, ok := s.ZhImages.peek(code); ok {
+			return img, nil
+		}
+		if img, err := s.ZhImages.get(code); err == nil {
 			return img, nil
 		}
 		return s.Images.get(code)

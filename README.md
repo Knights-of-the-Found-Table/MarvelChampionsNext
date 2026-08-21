@@ -36,11 +36,9 @@ docker compose up --build -d   # http://localhost:3000
 | `MC_DB_PATH` | `marvelchampions.db` | SQLite database file. |
 | `MC_STATIC_DIR` | `web/dist` | Directory with the built frontend. |
 | `MC_CACHE_DIR` | `cache` | On-demand card image cache. |
-| `MC_PREWARM_IMAGES` | `auto` | Background cache prewarm at startup so every image URL is content-hashed. `auto` = on when a mirror is configured, off against bare marvelcdb; `1`/`0` force it. |
-| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | empty | Read-only credentials for the private Cloudflare R2 image mirror (S3 SigV4). |
-| `R2_ENDPOINT` | derived | R2 S3 endpoint; when empty it is derived from `CLOUDFLARE_ACCOUNT_ID` as `https://{id}.r2.cloudflarestorage.com`. |
-| `R2_BUCKET` | empty | Mirror bucket, using marvelcdb's exact paths. Activates when credentials, endpoint and bucket are all set. |
-| `MC_MARVELCDB_IMAGES` | `https://marvelcdb.com` | HTTP image mirror (site root), used as the fallback root. Must serve marvelcdb's path layout. |
+| `MC_PREWARM_IMAGES` | `auto` | Background cache prewarm at startup so every image URL is content-hashed. `auto` = on for every mirror-backed cache, off against bare marvelcdb; `1`/`0` force it. |
+| `IMAGE_MIRROR` | `https://marvelcdb.com` | Default-language (English) image mirror root. Must serve marvelcdb's path layout (`/bundles/cards/{code}.png`). |
+| `ZH_IMAGE_MIRROR` | empty | Chinese image mirror root — a separate language source with the same paths, like marvelcdb's language domains. |
 
 A repo-root `.env` file (see `.env.example`) is loaded by the server on
 startup — real environment variables win — and passed into the docker
@@ -48,25 +46,20 @@ container by `deploy/docker-compose.yml` via `env_file`.
 
 ### Image mirrors
 
-Card images are fetched on demand and cached locally, always under
-marvelcdb's exact paths (`/bundles/cards/{code}.png`). One source chain is
-shared by everything the server serves:
+Card images are fetched on demand and cached locally. Mirrors are plain
+HTTP site roots serving marvelcdb's exact path layout
+(`/bundles/cards/{code}.png` — the mirror decides the file format, png,
+webp or otherwise; the MIME type is detected from content). Languages are
+separate sources, like marvelcdb's own language domains:
 
-1. the R2 mirror when `R2_*` is configured (read-only, SigV4-signed GETs;
-   `.png` paths from card data are retried as `.jpg`, the pack's original
-   filenames),
-2. then the HTTP root — marvelcdb.com, or `MC_MARVELCDB_IMAGES`.
+- **default (English)**: `IMAGE_MIRROR` (default marvelcdb.com),
+- **Chinese**: `ZH_IMAGE_MIRROR` — the zh cache fetches from it on demand;
+  codes it lacks fall back to the default root. Locally seeded faces in
+  `cache/images/zh` (see `tools/seed_zh_images.py`) always take priority.
 
-The mirror's content defines what gets distributed: a bucket holding the
-Chinese community card pack makes every served image Chinese, with no
-language-specific source or path anywhere in the server. Codes the mirror
-lacks fall back to the HTTP root. Locally seeded faces in
-`cache/images/zh` (see `tools/seed_zh_images.py`) still take priority over
-the chain on the zh routes.
-
-With a mirror configured the server prewarms the whole card set in the
-background (`MC_PREWARM_IMAGES`), completing the hash manifest so image
-URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and cached
-immutably by browsers; un-hashed URLs and manifests revalidate via ETag.
-The cache persists in `MC_CACHE_DIR` (the docker image keeps it on the
-`/data` volume), so repeat boots only fetch what is missing.
+With a mirror configured the server prewarms that language's whole card
+set in the background (`MC_PREWARM_IMAGES`), completing the hash manifest
+so image URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and
+cached immutably by browsers; un-hashed URLs and manifests revalidate via
+ETag. The cache persists in `MC_CACHE_DIR` (the docker image keeps it on
+the `/data` volume), so repeat boots only fetch what is missing.

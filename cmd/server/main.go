@@ -78,40 +78,52 @@ func main() {
 	}
 	defer st.Close()
 
-	// One image source chain, shared by both caches: the R2 mirror first
-	// when configured, the marvelcdb HTTP root (or MC_MARVELCDB_IMAGES)
-	// last. The mirror serves marvelcdb's exact paths — its content is
-	// what gets distributed (the Chinese pack, naturally); .png paths
-	// from card data are retried as .jpg, the pack's filenames.
+	// Image sources, one chain per language: the default root
+	// (IMAGE_MIRROR or marvelcdb.com) and optionally a Chinese root
+	// (ZH_IMAGE_MIRROR) — separate language sources with marvelcdb's
+	// exact paths, like marvelcdb's own language domains.
 	imgSources := mirror.SourcesFromEnv()
-	for _, src := range imgSources.Sources {
-		log.Printf("image source: %s", src.Name())
+	for _, src := range imgSources.Default {
+		log.Printf("image source (default): %s", src.Name())
+	}
+	for _, src := range imgSources.Zh {
+		log.Printf("image source (zh): %s", src.Name())
 	}
 
-	images, err := api.NewImageCache(filepath.Join(cacheDir, "images"), imgSources.Sources...)
+	images, err := api.NewImageCache(filepath.Join(cacheDir, "images"), imgSources.Default...)
 	if err != nil {
 		log.Fatalf("image cache: %v", err)
 	}
-	// The zh cache holds only locally seeded Chinese faces; it never
-	// fetches — zh routes fall back to the main cache's chain.
-	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"))
+	// The zh cache serves locally seeded faces plus ZH_IMAGE_MIRROR
+	// fetches; codes it cannot resolve fall back to the default chain.
+	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"), imgSources.Zh...)
 	if err != nil {
 		log.Fatalf("zh image cache: %v", err)
 	}
 
-	// Prewarm the cache in the background when a mirror backs the chain
-	// (MC_PREWARM_IMAGES=1 forces it, =0 disables): filling the manifest
-	// makes every image URL content-addressed. The cache persists in
-	// MC_CACHE_DIR, so repeat boots only fetch what is missing.
-	if prewarm := envOr("MC_PREWARM_IMAGES", "auto"); prewarm == "1" || (prewarm != "0" && !imgSources.DirectMarvelcdb) {
-		codes := make([]string, 0)
-		for _, def := range engine.DB.All() {
-			if def.ImageSrc != "" {
-				codes = append(codes, def.Code)
+	// Prewarm mirror-backed caches in the background (MC_PREWARM_IMAGES=1
+	// forces both even against bare marvelcdb, =0 disables): filling the
+	// manifests makes every image URL content-addressed. The caches
+	// persist in MC_CACHE_DIR, so repeat boots only fetch what is missing.
+	if prewarm := envOr("MC_PREWARM_IMAGES", "auto"); prewarm != "0" {
+		prewarmDefault := prewarm == "1" || imgSources.DefaultIsMirror
+		prewarmZh := prewarm == "1" || len(imgSources.Zh) > 0
+		if prewarmDefault || prewarmZh {
+			codes := make([]string, 0)
+			for _, def := range engine.DB.All() {
+				if def.ImageSrc != "" {
+					codes = append(codes, def.Code)
+				}
+			}
+			if prewarmDefault {
+				log.Printf("images: prewarming %d card images (default) in the background", len(codes))
+				go api.PrewarmImages(images, codes, 4, 25*time.Millisecond)
+			}
+			if prewarmZh {
+				log.Printf("images: prewarming %d card images (zh) in the background", len(codes))
+				go api.PrewarmImages(zhImages, codes, 4, 25*time.Millisecond)
 			}
 		}
-		log.Printf("images: prewarming %d card images in the background", len(codes))
-		go api.PrewarmImages(images, codes, 4, 25*time.Millisecond)
 	}
 	server := &api.Server{
 		Store:    st,

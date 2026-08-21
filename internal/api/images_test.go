@@ -151,15 +151,10 @@ func TestImageCacheFallsBackAcrossSources(t *testing.T) {
 	}
 }
 
-// The zh cache holds only seeded faces (no sources, never fetches): a
-// seeded code serves its face untouched, anything else is served by the
-// main cache's chain without writing into the zh directory.
-func TestZhImageHandlerSeededAndFallback(t *testing.T) {
-	enSrc := &stubSource{body: []byte("chain-image")}
-	en, err := NewImageCache(t.TempDir(), enSrc)
-	if err != nil {
-		t.Fatal(err)
-	}
+// zh routes: seeded faces first (untouched by the network), then the zh
+// chain (ZH_IMAGE_MIRROR); codes the zh chain lacks fall back to the
+// default chain without storing anything in the zh directory.
+func TestZhImageHandlerSeededMirrorAndFallback(t *testing.T) {
 	zhDir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(zhDir, "01001a.img"), []byte("seeded-image"), 0o644); err != nil {
 		t.Fatal(err)
@@ -168,7 +163,13 @@ func TestZhImageHandlerSeededAndFallback(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(zhDir, "manifest.json"), raw, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	zh, err := NewImageCache(zhDir)
+	zhSrc := &stubSource{body: []byte("zh-mirror-image")}
+	zh, err := NewImageCache(zhDir, zhSrc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	enSrc := &stubSource{body: []byte("default-image")}
+	en, err := NewImageCache(t.TempDir(), enSrc)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,16 +186,64 @@ func TestZhImageHandlerSeededAndFallback(t *testing.T) {
 	if rec := get("/img/cards/zh/01001a.png"); rec.Code != http.StatusOK || rec.Body.String() != "seeded-image" {
 		t.Fatalf("seeded: status %d body %q", rec.Code, rec.Body.String())
 	}
-	if enSrc.callCount() != 0 {
-		t.Fatalf("chain source called %d times for a seeded face", enSrc.callCount())
+	if zhSrc.callCount() != 0 || enSrc.callCount() != 0 {
+		t.Fatalf("fetches for a seeded face: zh=%d en=%d", zhSrc.callCount(), enSrc.callCount())
 	}
 
-	// Unseeded code: served by the chain, nothing lands in the zh dir.
-	if rec := get("/img/cards/zh/01006a.png"); rec.Code != http.StatusOK || rec.Body.String() != "chain-image" {
+	// Unseeded code present at the zh mirror: fetched from it.
+	if rec := get("/img/cards/zh/01006a.png"); rec.Code != http.StatusOK || rec.Body.String() != "zh-mirror-image" {
+		t.Fatalf("zh mirror: status %d body %q", rec.Code, rec.Body.String())
+	}
+	if enSrc.callCount() != 0 {
+		t.Fatalf("default chain used %d times for a zh mirror hit", enSrc.callCount())
+	}
+}
+
+// When the zh chain cannot resolve a code (mirror not configured or
+// missing), the default chain serves it and nothing lands in the zh dir.
+func TestZhImageHandlerDefaultFallback(t *testing.T) {
+	zhDir := t.TempDir()
+	zh, err := NewImageCache(zhDir, &stubSource{err: mirror.ErrNotFound})
+	if err != nil {
+		t.Fatal(err)
+	}
+	en, err := NewImageCache(t.TempDir(), &stubSource{body: []byte("default-image")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := &Server{Images: en, ZhImages: zh}
+
+	req := httptest.NewRequest(http.MethodGet, "/img/cards/zh/01006a.png", nil)
+	rec := httptest.NewRecorder()
+	srv.ZhImageHandler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || rec.Body.String() != "default-image" {
 		t.Fatalf("fallback: status %d body %q", rec.Code, rec.Body.String())
 	}
 	if _, err := os.Stat(filepath.Join(zhDir, "01006a.img")); !os.IsNotExist(err) {
-		t.Fatalf("zh cache stored a chain image: %v", err)
+		t.Fatalf("zh cache stored a default-chain image: %v", err)
+	}
+
+	// No zh sources at all: get errors out fast and the default chain serves.
+	bare, err := NewImageCache(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv.ZhImages = bare
+	rec = httptest.NewRecorder()
+	srv.ZhImageHandler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/img/cards/zh/01007a.png", nil))
+	if rec.Code != http.StatusOK || rec.Body.String() != "default-image" {
+		t.Fatalf("no-sources fallback: status %d body %q", rec.Code, rec.Body.String())
+	}
+}
+
+// Mirrors may serve webp (or jpeg) bytes under the .png paths; the MIME
+// type is sniffed from content, not from the URL.
+func TestDetectImageWebP(t *testing.T) {
+	body := append([]byte(nil), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+	copy(body, "RIFF")
+	copy(body[8:], "WEBPVP8 ")
+	if got := detectImage(body); got != "image/webp" {
+		t.Fatalf("detectImage(webp) = %q", got)
 	}
 }
 
