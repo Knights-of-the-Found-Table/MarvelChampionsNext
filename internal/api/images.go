@@ -5,11 +5,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
@@ -53,39 +55,36 @@ type cachedImage struct {
 	hash     string
 }
 
-// get returns an image for a card code, fetching and caching on miss.
+// get returns an image for a card code, fetching and caching on miss. The
+// network fetch happens outside the lock so concurrent prewarm workers and
+// requests do not serialize; a duplicate fetch of the same code writes
+// identical bytes and is harmless.
 func (c *imageCache) get(code string) (*cachedImage, error) {
-	if hash, ok := c.manifest[code]; ok {
-		if body, err := os.ReadFile(c.imagePath(code)); err == nil {
-			return &cachedImage{body: body, mimeType: detectImage(body), hash: hash}, nil
-		}
-	}
 	c.mu.Lock()
-	defer c.mu.Unlock()
-	// Double-check after acquiring the lock.
-	if hash, ok := c.manifest[code]; ok {
-		if body, err := os.ReadFile(c.imagePath(code)); err == nil {
-			return &cachedImage{body: body, mimeType: detectImage(body), hash: hash}, nil
-		}
+	img, ok := c.cached(code)
+	c.mu.Unlock()
+	if ok {
+		return img, nil
 	}
 	remote := c.remotePath(code)
 	body, err := c.source.Fetch(remote)
 	if err != nil {
 		return nil, fmt.Errorf("fetch %s: %w", remote, err)
 	}
-	hash := hashBytes(body)
+	img = &cachedImage{body: body, mimeType: detectImage(body), hash: hashBytes(body)}
 	if err := os.WriteFile(c.imagePath(code), body, 0o644); err != nil {
 		return nil, err
 	}
-	c.manifest[code] = hash
+	c.mu.Lock()
+	c.manifest[code] = img.hash
 	c.saveManifest()
-	return &cachedImage{body: body, mimeType: detectImage(body), hash: hash}, nil
+	c.mu.Unlock()
+	return img, nil
 }
 
-// peek returns the cached image for a code without ever touching the
-// network. Used for the zh cache so locally seeded faces win over the
-// shared source chain.
-func (c *imageCache) peek(code string) (*cachedImage, bool) {
+// cached returns the on-disk image for a code recorded in the manifest.
+// Callers must hold c.mu (the manifest map is only mutated under it).
+func (c *imageCache) cached(code string) (*cachedImage, bool) {
 	hash, ok := c.manifest[code]
 	if !ok {
 		return nil, false
@@ -95,6 +94,57 @@ func (c *imageCache) peek(code string) (*cachedImage, bool) {
 		return nil, false
 	}
 	return &cachedImage{body: body, mimeType: detectImage(body), hash: hash}, true
+}
+
+// peek returns the cached image for a code without ever touching the
+// network. Used for the zh cache so locally seeded faces win over the
+// shared source chain.
+func (c *imageCache) peek(code string) (*cachedImage, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.cached(code)
+}
+
+// PrewarmImages downloads the given card codes into the cache so the
+// manifest — and with it every content-addressed image URL — covers them.
+// Meant for mirror-backed deployments, started in the background at server
+// startup; the on-disk cache keeps repeat runs nearly free. Returns the
+// number of codes resolved from the cache and the number that failed.
+func PrewarmImages(img *imageCache, codes []string, workers int, delay time.Duration) (cached, failed int) {
+	if workers < 1 {
+		workers = 1
+	}
+	var (
+		mu    sync.Mutex
+		wg    sync.WaitGroup
+		sem   = make(chan struct{}, workers)
+		total = len(codes)
+	)
+	for _, code := range codes {
+		wg.Add(1)
+		go func(code string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			_, err := img.get(code)
+			mu.Lock()
+			defer mu.Unlock()
+			if err != nil {
+				failed++
+				log.Printf("images: prewarm %s: %v", code, err)
+			} else {
+				cached++
+			}
+			done := cached + failed
+			if done%500 == 0 {
+				log.Printf("images: prewarm %d/%d (failed=%d)", done, total, failed)
+			}
+		}(code)
+		time.Sleep(delay)
+	}
+	wg.Wait()
+	log.Printf("images: prewarm finished: %d/%d resolved, %d failed", cached, total, failed)
+	return cached, failed
 }
 
 func (c *imageCache) imagePath(code string) string {
@@ -158,18 +208,14 @@ func (s *Server) ImageHandler() http.Handler {
 	})
 }
 
-// ZhImageHandler serves Chinese card faces from the zh cache (mounted at
-// /img/cards/zh/). Locally seeded faces first; misses are fetched through
-// the same source chain as the English cache — the mirror when configured
-// holds the Chinese pack, and its fallback may store an English face here,
-// which is no different from what the English cache would serve. A chain
-// with nothing at all falls back to the English cache.
+// ZhImageHandler serves the zh routes (/img/cards/zh/): locally seeded
+// Chinese faces first; every other code comes from the shared source chain
+// via the main cache — with a mirror configured that content is the
+// Chinese pack, naturally. The zh cache itself never touches the network,
+// so its manifest lists exactly the seeded faces.
 func (s *Server) ZhImageHandler() http.Handler {
 	return s.imageHandler(func(code string) (*cachedImage, error) {
 		if img, ok := s.ZhImages.peek(code); ok {
-			return img, nil
-		}
-		if img, err := s.ZhImages.get(code); err == nil {
 			return img, nil
 		}
 		return s.Images.get(code)
@@ -203,8 +249,14 @@ func (s *Server) imageHandler(getImage func(code string) (*cachedImage, error)) 
 			writeErr(w, http.StatusNotFound, "stale content hash")
 			return
 		}
+		etag := `"` + img.hash + `"`
 		w.Header().Set("Content-Type", img.mimeType)
-		w.Header().Set("ETag", `"`+img.hash+`"`)
+		w.Header().Set("ETag", etag)
+		if r.Header.Get("If-None-Match") == etag {
+			// Cheap revalidation for un-hashed URLs.
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
 		if wantHash != "" {
 			// Content-addressed URL: cache forever.
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
@@ -230,9 +282,16 @@ func (s *Server) ZhManifestHandler() http.Handler {
 
 func (s *Server) manifestHandler(c *imageCache) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body := c.manifestJSON()
+		etag := `"` + hashBytes(body) + `"`
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-cache")
-		_, _ = w.Write(c.manifestJSON())
+		w.Header().Set("ETag", etag)
+		if r.Header.Get("If-None-Match") == etag {
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+		_, _ = w.Write(body)
 	})
 }
 

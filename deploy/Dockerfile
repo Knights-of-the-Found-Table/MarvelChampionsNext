@@ -33,6 +33,7 @@ COPY --from=gobuild /out/server /app/server
 COPY --from=webbuild /web/dist /app/web/dist
 ENV MC_LISTEN=:3000 \
     MC_DB_PATH=/data/marvelchampions.db \
+    MC_CACHE_DIR=/data/cache \
     MC_STATIC_DIR=/app/web/dist
 VOLUME ["/data"]
 EXPOSE 3000

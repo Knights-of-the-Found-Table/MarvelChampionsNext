@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/dotenv"
@@ -91,9 +92,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("image cache: %v", err)
 	}
-	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"), imgSources.Sources...)
+	// The zh cache holds only locally seeded Chinese faces; it never
+	// fetches — zh routes fall back to the main cache's chain.
+	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"))
 	if err != nil {
 		log.Fatalf("zh image cache: %v", err)
+	}
+
+	// Prewarm the cache in the background when a mirror backs the chain
+	// (MC_PREWARM_IMAGES=1 forces it, =0 disables): filling the manifest
+	// makes every image URL content-addressed. The cache persists in
+	// MC_CACHE_DIR, so repeat boots only fetch what is missing.
+	if prewarm := envOr("MC_PREWARM_IMAGES", "auto"); prewarm == "1" || (prewarm != "0" && !imgSources.DirectMarvelcdb) {
+		codes := make([]string, 0)
+		for _, def := range engine.DB.All() {
+			if def.ImageSrc != "" {
+				codes = append(codes, def.Code)
+			}
+		}
+		log.Printf("images: prewarming %d card images in the background", len(codes))
+		go api.PrewarmImages(images, codes, 4, 25*time.Millisecond)
 	}
 	server := &api.Server{
 		Store:    st,

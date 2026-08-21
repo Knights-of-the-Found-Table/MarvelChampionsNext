@@ -36,6 +36,7 @@ docker compose up --build -d   # http://localhost:3000
 | `MC_DB_PATH` | `marvelchampions.db` | SQLite database file. |
 | `MC_STATIC_DIR` | `web/dist` | Directory with the built frontend. |
 | `MC_CACHE_DIR` | `cache` | On-demand card image cache. |
+| `MC_PREWARM_IMAGES` | `auto` | Background cache prewarm at startup so every image URL is content-hashed. `auto` = on when a mirror is configured, off against bare marvelcdb; `1`/`0` force it. |
 | `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | empty | Read-only credentials for the private Cloudflare R2 image mirror (S3 SigV4). |
 | `R2_ENDPOINT` | derived | R2 S3 endpoint; when empty it is derived from `CLOUDFLARE_ACCOUNT_ID` as `https://{id}.r2.cloudflarestorage.com`. |
 | `R2_BUCKET` | empty | Mirror bucket, using marvelcdb's exact paths. Activates when credentials, endpoint and bucket are all set. |
@@ -62,3 +63,10 @@ language-specific source or path anywhere in the server. Codes the mirror
 lacks fall back to the HTTP root. Locally seeded faces in
 `cache/images/zh` (see `tools/seed_zh_images.py`) still take priority over
 the chain on the zh routes.
+
+With a mirror configured the server prewarms the whole card set in the
+background (`MC_PREWARM_IMAGES`), completing the hash manifest so image
+URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and cached
+immutably by browsers; un-hashed URLs and manifests revalidate via ETag.
+The cache persists in `MC_CACHE_DIR` (the docker image keeps it on the
+`/data` volume), so repeat boots only fetch what is missing.

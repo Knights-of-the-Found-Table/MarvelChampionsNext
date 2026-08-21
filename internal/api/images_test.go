@@ -4,10 +4,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
@@ -109,21 +111,24 @@ func TestManifestHandler(t *testing.T) {
 }
 
 // stubSource is a canned image source for exercising the source chain.
+// Concurrent-safe: PrewarmImages exercises sources from worker goroutines.
 type stubSource struct {
 	body  []byte
 	err   error
-	calls int
+	calls int64
 }
 
 func (s *stubSource) Name() string { return "stub" }
 
 func (s *stubSource) Fetch(string) ([]byte, error) {
-	s.calls++
+	atomic.AddInt64(&s.calls, 1)
 	if s.err != nil {
 		return nil, s.err
 	}
 	return s.body, nil
 }
+
+func (s *stubSource) callCount() int64 { return atomic.LoadInt64(&s.calls) }
 
 // A miss at the first source (404) falls through to the next one.
 func TestImageCacheFallsBackAcrossSources(t *testing.T) {
@@ -141,81 +146,124 @@ func TestImageCacheFallsBackAcrossSources(t *testing.T) {
 	if rec.Code != http.StatusOK || rec.Body.String() != "mirrored-image" {
 		t.Fatalf("status %d body %q", rec.Code, rec.Body.String())
 	}
-	if missing.calls != 1 || serving.calls != 1 {
-		t.Fatalf("calls: missing=%d serving=%d", missing.calls, serving.calls)
+	if missing.callCount() != 1 || serving.callCount() != 1 {
+		t.Fatalf("calls: missing=%d serving=%d", missing.callCount(), serving.callCount())
 	}
 }
 
-// With Chinese mirror sources configured, zh misses are fetched from them;
-// when they lack the image the English chain serves it without ever storing
-// an English face in the zh cache.
-func TestZhImageHandlerMirrorFetchAndFallback(t *testing.T) {
-	enSrc := &stubSource{body: []byte("en-image")}
+// The zh cache holds only seeded faces (no sources, never fetches): a
+// seeded code serves its face untouched, anything else is served by the
+// main cache's chain without writing into the zh directory.
+func TestZhImageHandlerSeededAndFallback(t *testing.T) {
+	enSrc := &stubSource{body: []byte("chain-image")}
 	en, err := NewImageCache(t.TempDir(), enSrc)
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv := &Server{Images: en}
+	zhDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(zhDir, "01001a.img"), []byte("seeded-image"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	raw, _ := json.Marshal(map[string]string{"01001a": hashString([]byte("seeded-image"))})
+	if err := os.WriteFile(filepath.Join(zhDir, "manifest.json"), raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	zh, err := NewImageCache(zhDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := &Server{Images: en, ZhImages: zh}
 
-	get := func() *httptest.ResponseRecorder {
-		req := httptest.NewRequest(http.MethodGet, "/img/cards/zh/01001a.png", nil)
+	get := func(url string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodGet, url, nil)
 		rec := httptest.NewRecorder()
 		srv.ZhImageHandler().ServeHTTP(rec, req)
 		return rec
 	}
 
-	// zh mirror has the image: served from the zh chain, English untouched.
-	zhHit, err := NewImageCache(t.TempDir(), &stubSource{body: []byte("zh-image")})
-	if err != nil {
-		t.Fatal(err)
+	// Seeded face wins without a single fetch.
+	if rec := get("/img/cards/zh/01001a.png"); rec.Code != http.StatusOK || rec.Body.String() != "seeded-image" {
+		t.Fatalf("seeded: status %d body %q", rec.Code, rec.Body.String())
 	}
-	srv.ZhImages = zhHit
-	if rec := get(); rec.Code != http.StatusOK || rec.Body.String() != "zh-image" {
-		t.Fatalf("zh hit: status %d body %q", rec.Code, rec.Body.String())
-	}
-	if enSrc.calls != 0 {
-		t.Fatalf("english source used %d times for a zh hit", enSrc.calls)
+	if enSrc.callCount() != 0 {
+		t.Fatalf("chain source called %d times for a seeded face", enSrc.callCount())
 	}
 
-	// zh mirror misses: English fallback, nothing written into the zh cache.
-	zhDir := t.TempDir()
-	zhMiss, err := NewImageCache(zhDir, &stubSource{err: mirror.ErrNotFound})
-	if err != nil {
-		t.Fatal(err)
+	// Unseeded code: served by the chain, nothing lands in the zh dir.
+	if rec := get("/img/cards/zh/01006a.png"); rec.Code != http.StatusOK || rec.Body.String() != "chain-image" {
+		t.Fatalf("fallback: status %d body %q", rec.Code, rec.Body.String())
 	}
-	srv.ZhImages = zhMiss
-	if rec := get(); rec.Code != http.StatusOK || rec.Body.String() != "en-image" {
-		t.Fatalf("en fallback: status %d body %q", rec.Code, rec.Body.String())
-	}
-	if _, err := os.Stat(filepath.Join(zhDir, "01001a.img")); !os.IsNotExist(err) {
-		t.Fatalf("zh cache stored an English face: %v", err)
+	if _, err := os.Stat(filepath.Join(zhDir, "01006a.img")); !os.IsNotExist(err) {
+		t.Fatalf("zh cache stored a chain image: %v", err)
 	}
 }
 
-// Seeded faces win over network sources without a single fetch.
-func TestZhImageHandlerSeededFaceWins(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "01001a.img"), []byte("seeded-image"), 0o644); err != nil {
-		t.Fatal(err)
+func TestImageHandlerETagRevalidation(t *testing.T) {
+	srv, hash := seedImage(t)
+	h := srv.ImageHandler()
+	etag := `"` + hash + `"`
+
+	req := httptest.NewRequest(http.MethodGet, "/img/cards/01001a.png", nil)
+	req.Header.Set("If-None-Match", etag)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusNotModified || rec.Body.Len() != 0 {
+		t.Fatalf("matching etag: %d %q", rec.Code, rec.Body.String())
 	}
-	raw, _ := json.Marshal(map[string]string{"01001a": hashString([]byte("seeded-image"))})
-	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), raw, 0o644); err != nil {
-		t.Fatal(err)
+
+	req.Header.Set("If-None-Match", `"deadbeefdeadbeef"`)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || rec.Body.String() != "fake-image-bytes" {
+		t.Fatalf("stale etag: %d %q", rec.Code, rec.Body.String())
 	}
-	network := &stubSource{body: []byte("network-image")}
-	zh, err := NewImageCache(dir, network)
+}
+
+func TestManifestHandlerETag(t *testing.T) {
+	srv, _ := seedImage(t)
+	h := srv.ManifestHandler()
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/img/cards/manifest.json", nil))
+	if rec.Code != http.StatusOK || rec.Header().Get("ETag") == "" {
+		t.Fatalf("first: %d etag=%q", rec.Code, rec.Header().Get("ETag"))
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/img/cards/manifest.json", nil)
+	req.Header.Set("If-None-Match", rec.Header().Get("ETag"))
+	rec2 := httptest.NewRecorder()
+	h.ServeHTTP(rec2, req)
+	if rec2.Code != http.StatusNotModified || rec2.Body.Len() != 0 {
+		t.Fatalf("revalidation: %d %q", rec2.Code, rec2.Body.String())
+	}
+}
+
+func TestPrewarmImages(t *testing.T) {
+	src := &stubSource{body: []byte("prewarmed")}
+	images, err := NewImageCache(t.TempDir(), src)
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv := &Server{Images: zh, ZhImages: zh}
 
-	req := httptest.NewRequest(http.MethodGet, "/img/cards/zh/01001a.png", nil)
-	rec := httptest.NewRecorder()
-	srv.ZhImageHandler().ServeHTTP(rec, req)
-	if rec.Code != http.StatusOK || rec.Body.String() != "seeded-image" {
-		t.Fatalf("status %d body %q", rec.Code, rec.Body.String())
+	cached, failed := PrewarmImages(images, []string{"01001a", "01006a", "01007"}, 2, 0)
+	if cached != 3 || failed != 0 {
+		t.Fatalf("prewarm = %d cached, %d failed", cached, failed)
 	}
-	if network.calls != 0 {
-		t.Fatalf("network source called %d times", network.calls)
+	for _, code := range []string{"01001a", "01006a", "01007"} {
+		if img, ok := images.peek(code); !ok || string(img.body) != "prewarmed" {
+			t.Fatalf("%s not in cache after prewarm", code)
+		}
+	}
+	if string(images.manifestJSON()) == "{}" {
+		t.Fatal("manifest empty after prewarm")
+	}
+
+	failing, err := NewImageCache(t.TempDir(), &stubSource{err: errors.New("boom")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cached, failed = PrewarmImages(failing, []string{"01001a", "01006a"}, 2, 0)
+	if cached != 0 || failed != 2 {
+		t.Fatalf("failing prewarm = %d cached, %d failed", cached, failed)
 	}
 }
