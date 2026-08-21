@@ -11,7 +11,9 @@ import (
 	"path/filepath"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/dotenv"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/rooms"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
 
@@ -35,6 +37,14 @@ import (
 )
 
 func main() {
+	// Optional repo-root .env (KEY=VALUE) with e.g. the image-mirror
+	// credentials; real environment variables take precedence.
+	if n, err := dotenv.Load(".env"); err != nil {
+		log.Printf(".env: %v", err)
+	} else if n > 0 {
+		log.Printf("loaded %d variables from .env", n)
+	}
+
 	dbPath := envOr("MC_DB_PATH", "marvelchampions.db")
 	listen := envOr("MC_LISTEN", ":3000")
 	staticDir := envOr("MC_STATIC_DIR", "web/dist")
@@ -67,11 +77,21 @@ func main() {
 	}
 	defer st.Close()
 
-	images, err := api.NewImageCache(filepath.Join(cacheDir, "images"))
+	// One image source chain, shared by both caches: the R2 mirror first
+	// when configured, the marvelcdb HTTP root (or MC_MARVELCDB_IMAGES)
+	// last. The mirror serves marvelcdb's exact paths — its content is
+	// what gets distributed (the Chinese pack, naturally); .png paths
+	// from card data are retried as .jpg, the pack's filenames.
+	imgSources := mirror.SourcesFromEnv()
+	for _, src := range imgSources.Sources {
+		log.Printf("image source: %s", src.Name())
+	}
+
+	images, err := api.NewImageCache(filepath.Join(cacheDir, "images"), imgSources.Sources...)
 	if err != nil {
 		log.Fatalf("image cache: %v", err)
 	}
-	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"))
+	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"), imgSources.Sources...)
 	if err != nil {
 		log.Fatalf("zh image cache: %v", err)
 	}
@@ -90,11 +110,11 @@ func main() {
 		_, _ = w.Write([]byte("ok"))
 	})
 
-	// Card images are fetched from marvelcdb on demand and cached on
-	// disk; content-addressed URLs (/img/cards/{code}.{hash}.png) are
-	// immutable, the manifest is always revalidated. The zh routes serve
-	// Chinese card faces seeded into cache/images/zh; codes without a
-	// seeded face fall back to the English images.
+	// Card images are fetched on demand through the shared source chain
+	// and cached on disk; content-addressed URLs (/img/cards/{code}.{hash}.png)
+	// are immutable, the manifest is always revalidated. The zh routes
+	// serve the zh cache (locally seeded faces first, then the same chain);
+	// anything unresolved falls back to the English cache.
 	mux.Handle("GET /img/cards/manifest.json", server.ManifestHandler())
 	mux.Handle("/img/cards/", server.ImageHandler())
 	mux.Handle("GET /img/cards/zh/manifest.json", server.ZhManifestHandler())
@@ -129,4 +149,3 @@ func spaHandler(dir string, fs http.Handler) http.Handler {
 		http.ServeFile(w, r, filepath.Join(dir, "index.html"))
 	})
 }
-

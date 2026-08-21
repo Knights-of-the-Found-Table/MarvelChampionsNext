@@ -1,7 +1,8 @@
-// Command fetchimages downloads card images from marvelcdb.com into
-// web/public/img/cards and writes a manifest of content hashes. Images are
-// never committed to the repository; this tool runs at docker build time and
-// optionally during local development.
+// Command fetchimages downloads card images into the cache directory and
+// writes a manifest of content hashes. It fetches through the same source
+// chain as the server (R2/HTTP mirrors first when configured, marvelcdb.com
+// otherwise); images are never committed to the repository. This tool runs
+// at docker build time and optionally during local development.
 //
 // The manifest powers permanent client-side caching: image URLs carry
 // ?v=<sha256-prefix> and the server marks them immutable.
@@ -12,25 +13,36 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
-	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/dotenv"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
 )
-
-const imageBase = "https://marvelcdb.com"
 
 func main() {
 	outDir := flag.String("out", filepath.Join(envOr("MC_CACHE_DIR", "cache"), "images"), "output directory for card images")
 	packs := flag.String("packs", "", "comma-separated pack codes to limit the fetch (default: all)")
 	flag.Parse()
+
+	// Optional repo-root .env, e.g. with an HTTP mirror override; real
+	// environment variables take precedence.
+	if n, err := dotenv.Load(".env"); err != nil {
+		log.Printf(".env: %v", err)
+	} else if n > 0 {
+		log.Printf("loaded %d variables from .env", n)
+	}
+
+	sources := mirror.SourcesFromEnv()
+	chain := mirror.Chain(sources.Sources...)
+	// Only rate-limit when hitting marvelcdb directly; a mirror is our own
+	// infrastructure.
+	polite := sources.DirectMarvelcdb
 
 	db := data.MustLoad()
 
@@ -47,13 +59,12 @@ func main() {
 		codes = append(codes, def.Code)
 	}
 	sort.Strings(codes)
-	log.Printf("fetching %d card images into %s", len(codes), *outDir)
+	log.Printf("fetching %d card images from %s into %s", len(codes), chain.Name(), *outDir)
 
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
 		log.Fatalf("mkdir: %v", err)
 	}
 
-	client := &http.Client{Timeout: 60 * time.Second}
 	manifest := map[string]string{}
 	fetched, skipped, failed := 0, 0, 0
 	for i, code := range codes {
@@ -68,8 +79,7 @@ func main() {
 			skipped++
 			continue
 		}
-		url := imageBase + def.ImageSrc
-		body, err := fetch(client, url)
+		body, err := chain.Fetch(def.ImageSrc)
 		if err != nil {
 			log.Printf("WARN %s: %v", code, err)
 			failed++
@@ -83,7 +93,9 @@ func main() {
 		if i%200 == 0 {
 			log.Printf("progress: %d/%d", i, len(codes))
 		}
-		time.Sleep(150 * time.Millisecond) // stay polite
+		if polite {
+			time.Sleep(150 * time.Millisecond) // stay polite with marvelcdb
+		}
 	}
 
 	manifestPath := filepath.Join(*outDir, "manifest.json")
@@ -95,23 +107,6 @@ func main() {
 		log.Fatalf("write manifest: %v", err)
 	}
 	log.Printf("done: fetched=%d cached=%d failed=%d manifest=%s", fetched, skipped, failed, manifestPath)
-}
-
-func fetch(client *http.Client, url string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "marvelchampions-go/fetchimages")
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status %s", resp.Status)
-	}
-	return io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 }
 
 func hashBytes(b []byte) string {

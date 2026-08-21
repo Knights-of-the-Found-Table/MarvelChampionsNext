@@ -5,53 +5,46 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
 )
 
 // imageCache serves card images with on-demand fetching: the first request
-// for a card downloads it from marvelcdb into the cache directory, records
-// its content hash in manifest.json, and every later request is served
-// locally. Content-addressed URLs (/img/cards/{code}.{hash}.png) get
-// immutable caching, exactly like the previous build-time pipeline.
+// for a card downloads it through the configured source chain (R2/HTTP
+// mirrors first, marvelcdb last) into the cache directory, records its
+// content hash in manifest.json, and every later request is served locally.
+// Content-addressed URLs (/img/cards/{code}.{hash}.png) get immutable
+// caching, exactly like the previous build-time pipeline.
 type imageCache struct {
-	dir      string
-	imageURL string // marvelcdb site root
-	client   *http.Client
+	dir    string
+	source mirror.Source
 
 	mu       sync.Mutex
 	manifest map[string]string
 }
 
-// NewImageCache builds an on-demand image cache rooted at dir.
-func NewImageCache(dir string) (*imageCache, error) {
+// NewImageCache builds an on-demand image cache rooted at dir. Sources are
+// tried in order on a miss; with no sources the cache serves only what is
+// already on disk.
+func NewImageCache(dir string, sources ...mirror.Source) (*imageCache, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
 	c := &imageCache{
 		dir:      dir,
-		imageURL: envOrImage("MC_MARVELCDB_IMAGES", "https://marvelcdb.com"),
-		client:   &http.Client{Timeout: 60 * time.Second},
+		source:   mirror.Chain(sources...),
 		manifest: map[string]string{},
 	}
 	if raw, err := os.ReadFile(filepath.Join(dir, "manifest.json")); err == nil {
 		_ = json.Unmarshal(raw, &c.manifest)
 	}
 	return c, nil
-}
-
-func envOrImage(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return def
 }
 
 type cachedImage struct {
@@ -76,7 +69,7 @@ func (c *imageCache) get(code string) (*cachedImage, error) {
 		}
 	}
 	remote := c.remotePath(code)
-	body, err := c.fetch(remote)
+	body, err := c.source.Fetch(remote)
 	if err != nil {
 		return nil, fmt.Errorf("fetch %s: %w", remote, err)
 	}
@@ -90,9 +83,8 @@ func (c *imageCache) get(code string) (*cachedImage, error) {
 }
 
 // peek returns the cached image for a code without ever touching the
-// network. Used for the zh cache: a card that has no seeded Chinese face
-// must fall back to the English cache, not download an English face into
-// the zh cache.
+// network. Used for the zh cache so locally seeded faces win over the
+// shared source chain.
 func (c *imageCache) peek(code string) (*cachedImage, bool) {
 	hash, ok := c.manifest[code]
 	if !ok {
@@ -114,23 +106,6 @@ func (c *imageCache) remotePath(code string) string {
 		return def.ImageSrc
 	}
 	return "/bundles/cards/" + code + ".png"
-}
-
-func (c *imageCache) fetch(path string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, c.imageURL+path, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "marvelchampionsnext/server")
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status %s", resp.Status)
-	}
-	return io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 }
 
 func (c *imageCache) saveManifest() {
@@ -176,18 +151,25 @@ func detectImage(body []byte) string {
 // does not match the current content returns 404 so the client refetches
 // the manifest.
 func (s *Server) ImageHandler() http.Handler {
-	// English faces: fetch from marvelcdb on miss.
+	// English faces: fetch through the source chain on miss (R2/HTTP
+	// mirrors first, marvelcdb last).
 	return s.imageHandler(func(code string) (*cachedImage, error) {
 		return s.Images.get(code)
 	})
 }
 
 // ZhImageHandler serves Chinese card faces from the zh cache (mounted at
-// /img/cards/zh/). Only seeded faces are served — a code without one falls
-// back to the English cache, so zh mode always shows an image.
+// /img/cards/zh/). Locally seeded faces first; misses are fetched through
+// the same source chain as the English cache — the mirror when configured
+// holds the Chinese pack, and its fallback may store an English face here,
+// which is no different from what the English cache would serve. A chain
+// with nothing at all falls back to the English cache.
 func (s *Server) ZhImageHandler() http.Handler {
 	return s.imageHandler(func(code string) (*cachedImage, error) {
 		if img, ok := s.ZhImages.peek(code); ok {
+			return img, nil
+		}
+		if img, err := s.ZhImages.get(code); err == nil {
 			return img, nil
 		}
 		return s.Images.get(code)

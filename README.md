@@ -36,3 +36,29 @@ docker compose up --build -d   # http://localhost:3000
 | `MC_DB_PATH` | `marvelchampions.db` | SQLite database file. |
 | `MC_STATIC_DIR` | `web/dist` | Directory with the built frontend. |
 | `MC_CACHE_DIR` | `cache` | On-demand card image cache. |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | empty | Read-only credentials for the private Cloudflare R2 image mirror (S3 SigV4). |
+| `R2_ENDPOINT` | derived | R2 S3 endpoint; when empty it is derived from `CLOUDFLARE_ACCOUNT_ID` as `https://{id}.r2.cloudflarestorage.com`. |
+| `R2_BUCKET` | empty | Mirror bucket, using marvelcdb's exact paths. Activates when credentials, endpoint and bucket are all set. |
+| `MC_MARVELCDB_IMAGES` | `https://marvelcdb.com` | HTTP image mirror (site root), used as the fallback root. Must serve marvelcdb's path layout. |
+
+A repo-root `.env` file (see `.env.example`) is loaded by the server on
+startup — real environment variables win — and passed into the docker
+container by `deploy/docker-compose.yml` via `env_file`.
+
+### Image mirrors
+
+Card images are fetched on demand and cached locally, always under
+marvelcdb's exact paths (`/bundles/cards/{code}.png`). One source chain is
+shared by everything the server serves:
+
+1. the R2 mirror when `R2_*` is configured (read-only, SigV4-signed GETs;
+   `.png` paths from card data are retried as `.jpg`, the pack's original
+   filenames),
+2. then the HTTP root — marvelcdb.com, or `MC_MARVELCDB_IMAGES`.
+
+The mirror's content defines what gets distributed: a bucket holding the
+Chinese community card pack makes every served image Chinese, with no
+language-specific source or path anywhere in the server. Codes the mirror
+lacks fall back to the HTTP root. Locally seeded faces in
+`cache/images/zh` (see `tools/seed_zh_images.py`) still take priority over
+the chain on the zh routes.

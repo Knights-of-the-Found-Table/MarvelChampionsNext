@@ -5,6 +5,13 @@ services:
       dockerfile: deploy/Dockerfile
     ports:
       - "3000:3000"
+    # The repo-root .env (KEY=VALUE) carries optional card-image mirror
+    # settings straight into the container: R2_* for the preferred image
+    # mirror and MC_MARVELCDB_IMAGES for an HTTP mirror root. See
+    # deploy/.env.example.
+    env_file:
+      - path: ../.env
+        required: false
     environment:
       # Required: without a stable secret every container restart invalidates
       # all login tokens. Copy .env.example to .env (same directory) to set it.
