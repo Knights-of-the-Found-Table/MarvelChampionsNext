@@ -236,6 +236,44 @@ func TestZhImageHandlerDefaultFallback(t *testing.T) {
 	}
 }
 
+// Cache-Control tiers: an un-hashed zh fallback (no Chinese face exists,
+// the default-language image is served) caches for a day; zh hits and
+// default-route images stay no-cache.
+func TestZhFallbackCacheControl(t *testing.T) {
+	en, err := NewImageCache(t.TempDir(), &stubSource{body: []byte("default-image")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := &Server{Images: en}
+
+	cacheControl := func(zh *imageCache, url string) string {
+		srv.ZhImages = zh
+		req := httptest.NewRequest(http.MethodGet, url, nil)
+		rec := httptest.NewRecorder()
+		srv.ZhImageHandler().ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s: status %d", url, rec.Code)
+		}
+		return rec.Header().Get("Cache-Control")
+	}
+
+	zhHit, err := NewImageCache(t.TempDir(), &stubSource{body: []byte("zh-image")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cc := cacheControl(zhHit, "/img/cards/zh/01006a.png"); cc != "no-cache" {
+		t.Fatalf("zh hit cache-control = %q, want no-cache", cc)
+	}
+
+	zhMiss, err := NewImageCache(t.TempDir(), &stubSource{err: mirror.ErrNotFound})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cc := cacheControl(zhMiss, "/img/cards/zh/01006a.png"); cc != "public, max-age=86400" {
+		t.Fatalf("zh fallback cache-control = %q, want public, max-age=86400", cc)
+	}
+}
+
 // Mirrors may serve webp (or jpeg) bytes under the .png paths; the MIME
 // type is sniffed from content, not from the URL.
 func TestDetectImageWebP(t *testing.T) {

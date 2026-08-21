@@ -203,8 +203,9 @@ func detectImage(body []byte) string {
 func (s *Server) ImageHandler() http.Handler {
 	// Default (English) faces: fetch through the default chain on miss
 	// (IMAGE_MIRROR or marvelcdb).
-	return s.imageHandler(func(code string) (*cachedImage, error) {
-		return s.Images.get(code)
+	return s.imageHandler(func(code string) (*cachedImage, bool, error) {
+		img, err := s.Images.get(code)
+		return img, false, err
 	})
 }
 
@@ -214,18 +215,25 @@ func (s *Server) ImageHandler() http.Handler {
 // paths, never a path prefix. Codes the zh chain cannot resolve fall back
 // to the default chain, so zh mode always shows an image.
 func (s *Server) ZhImageHandler() http.Handler {
-	return s.imageHandler(func(code string) (*cachedImage, error) {
+	return s.imageHandler(func(code string) (*cachedImage, bool, error) {
 		if img, ok := s.ZhImages.peek(code); ok {
-			return img, nil
+			return img, false, nil
 		}
 		if img, err := s.ZhImages.get(code); err == nil {
-			return img, nil
+			return img, false, nil
 		}
-		return s.Images.get(code)
+		img, err := s.Images.get(code)
+		return img, true, err
 	})
 }
 
-func (s *Server) imageHandler(getImage func(code string) (*cachedImage, error)) http.Handler {
+// imageHandler serves images resolved by getImage, which returns the
+// image plus whether it is the default-language fallback for the zh
+// routes. Cache policy: content-addressed URLs are immutable; a zh
+// fallback has no Chinese face and never will (until the mirror gains
+// one, after which the manifest serves a hashed URL), so browsers may
+// hold it for a day; other un-hashed URLs revalidate every time.
+func (s *Server) imageHandler(getImage func(code string) (*cachedImage, bool, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := filepath.Base(r.URL.Path)
 		if name == "" || name == "." || name == "/" {
@@ -243,7 +251,7 @@ func (s *Server) imageHandler(getImage func(code string) (*cachedImage, error)) 
 			writeErr(w, http.StatusBadRequest, "invalid image name")
 			return
 		}
-		img, err := getImage(code)
+		img, fallback, err := getImage(code)
 		if err != nil {
 			writeErr(w, http.StatusBadGateway, "card image unavailable: "+err.Error())
 			return
@@ -260,10 +268,13 @@ func (s *Server) imageHandler(getImage func(code string) (*cachedImage, error)) 
 			w.WriteHeader(http.StatusNotModified)
 			return
 		}
-		if wantHash != "" {
+		switch {
+		case wantHash != "":
 			// Content-addressed URL: cache forever.
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
-		} else {
+		case fallback:
+			w.Header().Set("Cache-Control", "public, max-age=86400")
+		default:
 			w.Header().Set("Cache-Control", "no-cache")
 		}
 		w.WriteHeader(http.StatusOK)

@@ -63,5 +63,7 @@ With a mirror configured the server prewarms that language's whole card
 set in the background (`MC_PREWARM_IMAGES`), completing the hash manifest
 so image URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and
 cached immutably by browsers; un-hashed URLs and manifests revalidate via
-ETag. The cache persists in `MC_CACHE_DIR` (the docker image keeps it on
-the `/data` volume), so repeat boots only fetch what is missing.
+ETag, and a zh fallback (no Chinese face exists, the default-language
+image is served) caches for a day. The cache persists in `MC_CACHE_DIR`
+(the docker image keeps it on the `/data` volume), so repeat boots only
+fetch what is missing.
