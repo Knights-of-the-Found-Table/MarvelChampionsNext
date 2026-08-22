@@ -665,6 +665,20 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case AllForOneDamage:
+		n := 3
+		if p := g.Player(m.Player); p != nil {
+			if !p.Exhausted && g.EntityHasTrait(p.ID, "avenger") {
+				n++
+			}
+			for _, id := range p.Allies {
+				if a := g.Allies[id]; a != nil && a.Exhausted && a.EDef().HasTrait("avenger") {
+					n++
+				}
+			}
+		}
+		g.Push(DamageEntity{Target: m.Target, Damage: n, Source: m.Player})
+
 	case SpawnSymbiote:
 		def, ok := DB.Lookup("20025")
 		if !ok {

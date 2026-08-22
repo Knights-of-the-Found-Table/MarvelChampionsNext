@@ -404,6 +404,12 @@ type (
 	// SpawnSymbiote puts an Enraged Symbiote into play engaged with the
 	// first player (Struggle for Control).
 	SpawnSymbiote struct{}
+	// AllForOneDamage deals 3 + 1-per-exhausted-Avenger damage (computed
+	// at resolve time).
+	AllForOneDamage struct {
+		Player PlayerID
+		Target EntityID
+	}
 	// ChangeFormAgain flips the identity ignoring the once-per-turn limit
 	// (Resize, Swarm Tactics).
 	ChangeFormAgain struct{ Player PlayerID }
@@ -700,6 +706,7 @@ func (CostDiscountApply) msg()        {}
 func (SetAntForm) msg()               {}
 func (SetMassForm) msg()              {}
 func (SpawnSymbiote) msg()            {}
+func (AllForOneDamage) msg()          {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
 func (RapidReturn) msg()              {}
