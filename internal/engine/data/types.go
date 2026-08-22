@@ -35,8 +35,8 @@ type CardDef struct {
 	// CardSet is the marvelcdb card_set_code (hero set or encounter set).
 	CardSet string `json:"cardSet,omitempty"`
 
-	Cost   *int  `json:"cost,omitempty"`
-	Unique bool  `json:"unique"`
+	Cost   *int `json:"cost,omitempty"`
+	Unique bool `json:"unique"`
 
 	Traits   []string  `json:"traits,omitempty"`
 	Keywords []Keyword `json:"keywords,omitempty"`
@@ -44,9 +44,9 @@ type CardDef struct {
 	// Resources lists printed resource icons: energy, physical, mental, wild.
 	Resources []string `json:"resources,omitempty"`
 
-	Text     string `json:"text,omitempty"`
-	Quantity int    `json:"quantity,omitempty"`
-	DeckLimit int   `json:"deckLimit,omitempty"`
+	Text      string `json:"text,omitempty"`
+	Quantity  int    `json:"quantity,omitempty"`
+	DeckLimit int    `json:"deckLimit,omitempty"`
 
 	// Stats (pointers so that "absent" stays distinguishable from 0).
 	HP       *int `json:"hp,omitempty"`
@@ -56,8 +56,8 @@ type CardDef struct {
 	Recover  *int `json:"recover,omitempty"`
 	Scheme   *int `json:"scheme,omitempty"`
 	HandSize *int `json:"handSize,omitempty"`
-	Boost    *int  `json:"boost,omitempty"`
-	Stage    *int  `json:"stage,omitempty"`
+	Boost    *int `json:"boost,omitempty"`
+	Stage    *int `json:"stage,omitempty"`
 	// StageLabel keeps the raw stage marker ("I", "2A", "B", ...) for exotic
 	// multi-villain layouts where a plain number is not enough.
 	StageLabel string `json:"stageLabel,omitempty"`
@@ -109,38 +109,38 @@ type rawCard struct {
 	PackCode string `json:"pack_code"`
 	PackName string `json:"pack_name"`
 
-	TypeCode        string `json:"type_code"`
-	LinkedToCode    string `json:"linked_to_code"`
-	DoubleSided     bool   `json:"double_sided"`
-	FactionCode     string `json:"faction_code"`
-	CardSetCode     string `json:"card_set_code"`
+	TypeCode     string `json:"type_code"`
+	LinkedToCode string `json:"linked_to_code"`
+	DoubleSided  bool   `json:"double_sided"`
+	FactionCode  string `json:"faction_code"`
+	CardSetCode  string `json:"card_set_code"`
 
-	Cost      *int  `json:"cost"`
-	IsUnique  bool  `json:"is_unique"`
+	Cost      *int   `json:"cost"`
+	IsUnique  bool   `json:"is_unique"`
 	Traits    string `json:"traits"`
 	Text      string `json:"real_text"`
 	Quantity  int    `json:"quantity"`
 	DeckLimit int    `json:"deck_limit"`
 
-	ResourceEnergy  *int `json:"resource_energy"`
+	ResourceEnergy   *int `json:"resource_energy"`
 	ResourcePhysical *int `json:"resource_physical"`
-	ResourceMental  *int `json:"resource_mental"`
-	ResourceWild    *int `json:"resource_wild"`
+	ResourceMental   *int `json:"resource_mental"`
+	ResourceWild     *int `json:"resource_wild"`
 
-	Health      *int `json:"health"`
-	Attack      *int `json:"attack"`
-	Thwart      *int `json:"thwart"`
-	Defense     *int `json:"defense"`
-	Recover     *int `json:"recover"`
-	Scheme      *int `json:"scheme"`
-	HandSize    *int  `json:"hand_size"`
-	Boost       *int  `json:"boost"`
-	Stage       string `json:"stage"`
+	Health   *int   `json:"health"`
+	Attack   *int   `json:"attack"`
+	Thwart   *int   `json:"thwart"`
+	Defense  *int   `json:"defense"`
+	Recover  *int   `json:"recover"`
+	Scheme   *int   `json:"scheme"`
+	HandSize *int   `json:"hand_size"`
+	Boost    *int   `json:"boost"`
+	Stage    string `json:"stage"`
 
-	BaseThreat       *int `json:"base_threat"`
-	EscalationThreat *int `json:"escalation_threat"`
-	Threat           *int `json:"threat"`
-	SchemeHazard     *int `json:"scheme_hazard"`
+	BaseThreat         *int `json:"base_threat"`
+	EscalationThreat   *int `json:"escalation_threat"`
+	Threat             *int `json:"threat"`
+	SchemeHazard       *int `json:"scheme_hazard"`
 	SchemeAcceleration *int `json:"scheme_acceleration"`
 
 	ImageSrc     string `json:"imagesrc"`

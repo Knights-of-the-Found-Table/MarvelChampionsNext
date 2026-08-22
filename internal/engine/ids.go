@@ -11,16 +11,16 @@ import (
 type EntityID string
 
 const (
-	KindPlayer     = "player"
-	KindVillain    = "villain"
-	KindMinion     = "minion"
-	KindAlly       = "ally"
-	KindSupport    = "support"
-	KindUpgrade    = "upgrade"
-	KindAttachment = "attachment"
-	KindTreachery  = "treachery"
-	KindSideScheme = "sidescheme"
-	KindMainScheme = "mainscheme"
+	KindPlayer      = "player"
+	KindVillain     = "villain"
+	KindMinion      = "minion"
+	KindAlly        = "ally"
+	KindSupport     = "support"
+	KindUpgrade     = "upgrade"
+	KindAttachment  = "attachment"
+	KindTreachery   = "treachery"
+	KindSideScheme  = "sidescheme"
+	KindMainScheme  = "mainscheme"
 	KindEnvironment = "environment"
 )
 

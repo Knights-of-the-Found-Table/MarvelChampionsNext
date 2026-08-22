@@ -284,6 +284,11 @@ func sortedIDs[T any](m map[EntityID]T) []EntityID {
 // Push appends messages to the queue.
 func (g *Game) Push(msgs ...Message) { g.queue = append(g.queue, msgs...) }
 
+// PushFront enqueues messages at the front of the queue, so they resolve
+// right after the current pending question instead of after everything
+// already queued.
+func (g *Game) PushFront(msgs ...Message) { g.queue = append(msgs, g.queue...) }
+
 // Run processes messages until the queue drains or a question blocks.
 func (g *Game) Run() {
 	for !g.Over {
@@ -728,7 +733,8 @@ func (g *Game) UnmarshalJSON(b []byte) error {
 // current scenario registration. Games persisted before the b-face
 // convention switch stored base codes ("01097") or a-face codes ("56063a")
 // — the Drang scenario even pointed at a treachery — while the image layer
-// and zh names now key by the registered b-face codes.
+// and zh names now key by the registered b-face codes. A scheme caught
+// mid-reveal (its FlipMainScheme still queued) keeps its a face.
 func (g *Game) migrateMainSchemeCodes() {
 	if g.MainScheme == nil {
 		return
@@ -737,8 +743,15 @@ func (g *Game) migrateMainSchemeCodes() {
 	if len(stages) == 0 {
 		return
 	}
+	revealing := false
+	for _, m := range g.queue {
+		if f, ok := m.(FlipMainScheme); ok && f.Scheme == g.MainScheme.ID {
+			revealing = true
+			break
+		}
+	}
 	g.MainScheme.StageCodes = append([]string(nil), stages...)
-	if g.MainScheme.Stage >= 1 && g.MainScheme.Stage <= len(stages) {
+	if !revealing && g.MainScheme.Stage >= 1 && g.MainScheme.Stage <= len(stages) {
 		g.MainScheme.Code = stages[g.MainScheme.Stage-1]
 	}
 }
@@ -867,7 +880,9 @@ func heroNemesisSet(heroBase string) string {
 	return ""
 }
 
-// setupScenario builds villains, main scheme and the encounter deck.
+// setupScenario builds villains, main scheme and the encounter deck. The
+// deck is gathered before the main scheme spawns: a-side setup effects
+// (e.g. Klaw searching for a side scheme) need to see it.
 func (g *Game) setupScenario(scen *ScenarioDef) {
 	for _, base := range scen.VillainBases {
 		stages := VillainStageCodes(base)
@@ -876,12 +891,12 @@ func (g *Game) setupScenario(scen *ScenarioDef) {
 		}
 		g.spawnVillain(stages, 1)
 	}
-	if len(scen.MainSchemeStages) > 0 {
-		g.spawnMainScheme(scen.MainSchemeStages, 1)
-	}
 	g.EncounterDeck = scen.gatherEncounterDeck()
 	if g.Difficulty == "expert" {
 		g.EncounterDeck = append(g.EncounterDeck, EncounterSetCards("expert")...)
+	}
+	if len(scen.MainSchemeStages) > 0 {
+		g.spawnMainScheme(scen.MainSchemeStages, 1)
 	}
 }
 
@@ -903,12 +918,16 @@ func (g *Game) spawnVillain(stages []string, stage int) *Villain {
 	return v
 }
 
+// spawnMainScheme brings a scheme stage in on its a face ("01097a"),
+// queues the a face's reveal effects and then the flip to the b face —
+// the stage codes registered in scenarios are b codes carrying the
+// gameplay stats, which are read up front.
 func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 	code := stages[stage-1]
 	def := DB.MustLookup(code)
 	s := &MainScheme{
 		ID:         g.nextEntityID(KindMainScheme),
-		Code:       code,
+		Code:       data.BaseCode(code) + "a",
 		StageCodes: stages,
 		Stage:      stage,
 		MaxThreat:  deref(def.Threat, 10),
@@ -916,6 +935,10 @@ func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 		Hazard:     def.Hazards,
 	}
 	g.MainScheme = s
-	g.logf("Main scheme: %s (threat %d/%d)", def.Name, s.Threat, s.MaxThreat)
+	g.logf("Main scheme: %s reveals stage %s", def.Name, s.EDef().StageLabel)
+	if b := behavior(s.Code); b.MainSchemeRevealed != nil {
+		g.Push(b.MainSchemeRevealed(g, s)...)
+	}
+	g.Push(FlipMainScheme{Scheme: s.ID})
 	return s
 }

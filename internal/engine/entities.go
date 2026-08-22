@@ -12,11 +12,11 @@ type Villain struct {
 	// stageCodes lists the card codes for each villain stage (index 0 =
 	// stage 1); advancing swaps the code.
 	stageCodes []string
-	Stage     int `json:"stage"`
-	MaxHP     int `json:"maxHp"`
-	Damage    int `json:"damage"`
-	SchemeVal int `json:"scheme"`
-	AttackVal int `json:"attack"`
+	Stage      int `json:"stage"`
+	MaxHP      int `json:"maxHp"`
+	Damage     int `json:"damage"`
+	SchemeVal  int `json:"scheme"`
+	AttackVal  int `json:"attack"`
 
 	Stunned  bool `json:"stunned"`
 	Confused bool `json:"confused"`
@@ -34,11 +34,11 @@ type Villain struct {
 	Undamageable bool `json:"undamageable,omitempty"`
 }
 
-func (v *Villain) EID() EntityID          { return v.ID }
-func (v *Villain) ECode() string          { return v.Code }
-func (v *Villain) EDef() *data.CardDef    { return DB.MustLookup(v.Code) }
-func (v *Villain) EOwner() PlayerID       { return "" }
-func (v *Villain) EExhausted() bool       { return false }
+func (v *Villain) EID() EntityID       { return v.ID }
+func (v *Villain) ECode() string       { return v.Code }
+func (v *Villain) EDef() *data.CardDef { return DB.MustLookup(v.Code) }
+func (v *Villain) EOwner() PlayerID    { return "" }
+func (v *Villain) EExhausted() bool    { return false }
 func (v *Villain) React(g *Game, msg Message) []Message {
 	b := behavior(v.Code)
 	if b.React != nil {
@@ -75,8 +75,8 @@ type Minion struct {
 	// GuardMinion marks Guard keyword (must be attacked before others).
 	Guard bool `json:"guard"`
 	// IsDrone marks facedown player-deck drones (Ultron scenario).
-	IsDrone bool     `json:"isDrone,omitempty"`
-	Source  *Card    `json:"source,omitempty"` // the facedown card, if any
+	IsDrone bool  `json:"isDrone,omitempty"`
+	Source  *Card `json:"source,omitempty"` // the facedown card, if any
 	// EngagedWith records which player the minion is engaged with.
 	EngagedWith PlayerID `json:"engagedWith,omitempty"`
 	// BlankText marks the text box as blank until the end of the phase
@@ -276,7 +276,7 @@ type SideScheme struct {
 	Crisis    bool     `json:"crisis,omitempty"`
 	Hazard    int      `json:"hazard,omitempty"`
 	// PlayerSide marks a player-owned scheme (Focus the Senses).
-	PlayerSide bool      `json:"playerSide,omitempty"`
+	PlayerSide bool     `json:"playerSide,omitempty"`
 	Owner      PlayerID `json:"owner,omitempty"`
 	// StoredCards holds cards tucked under the scheme (Open the Dark
 	// Dimension).

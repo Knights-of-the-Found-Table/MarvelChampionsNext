@@ -1,4 +1,4 @@
-﻿package thor_test
+package thor_test
 
 import (
 	"strings"
@@ -313,6 +313,7 @@ func TestWorthyFetchesMjolnir(t *testing.T) {
 
 	_ = mjolnir
 }
+
 // TestThorsHelmetAddsHP: Thor's Helmet grants +5 max HP.
 func TestThorsHelmetAddsHP(t *testing.T) {
 	g := newThorGame(t, "01097", 5)

@@ -29,11 +29,11 @@ type Pack struct {
 
 // Database is the immutable, read-only card database built from the snapshot.
 type Database struct {
-	Packs    []Pack
-	Cards    map[string]*CardDef
-	byPack   map[string][]*CardDef
-	bySet    map[string][]*CardDef
-	sorted   []*CardDef
+	Packs  []Pack
+	Cards  map[string]*CardDef
+	byPack map[string][]*CardDef
+	bySet  map[string][]*CardDef
+	sorted []*CardDef
 }
 
 // add registers a definition unless the code was already seen; reprints in

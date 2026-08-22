@@ -341,8 +341,15 @@ func (g *Game) handle(msg Message) {
 			next := old.Stage + 1
 			if next-1 < len(stages) {
 				g.spawnMainScheme(stages, next)
-				g.logf("Main scheme advances to stage %d", next)
 			}
+		}
+
+	case FlipMainScheme:
+		if g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
+			s := g.MainScheme
+			s.Code = s.StageCodes[s.Stage-1]
+			g.logf("Main scheme flips to stage %s (threat %d/%d)",
+				s.EDef().StageLabel, s.Threat, s.MaxThreat)
 		}
 
 	case GameOver:
@@ -1158,14 +1165,14 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		// Perimeter): they enter play with their printed threat and can
 		// be thwarted like any other scheme.
 		s := &SideScheme{
-			ID:          g.nextEntityID(KindSideScheme),
-			Code:        def.Code,
-			Owner:       p.ID,
-			PlayerSide:  true,
-			Threat:      deref(def.BaseThreat, 2),
-			MaxThreat:   deref(def.BaseThreat, 2),
-			Crisis:      strings.Contains(def.Text, "Crisis") || strings.Contains(def.Text, "crisis"),
-			Hazard:      def.Hazards,
+			ID:         g.nextEntityID(KindSideScheme),
+			Code:       def.Code,
+			Owner:      p.ID,
+			PlayerSide: true,
+			Threat:     deref(def.BaseThreat, 2),
+			MaxThreat:  deref(def.BaseThreat, 2),
+			Crisis:     strings.Contains(def.Text, "Crisis") || strings.Contains(def.Text, "crisis"),
+			Hazard:     def.Hazards,
 		}
 		g.SideSchemes[s.ID] = s
 		g.logf("%s plays %s (threat %d)", p.Name, def.Name, s.Threat)
@@ -1411,11 +1418,11 @@ type EventCard struct {
 	Paid  CostPaid
 }
 
-func (e *EventCard) EID() EntityID          { return EntityID("event") }
-func (e *EventCard) ECode() string          { return e.Code }
-func (e *EventCard) EDef() *data.CardDef    { return DB.MustLookup(e.Code) }
-func (e *EventCard) EOwner() PlayerID       { return e.Owner }
-func (e *EventCard) EExhausted() bool       { return false }
+func (e *EventCard) EID() EntityID                        { return EntityID("event") }
+func (e *EventCard) ECode() string                        { return e.Code }
+func (e *EventCard) EDef() *data.CardDef                  { return DB.MustLookup(e.Code) }
+func (e *EventCard) EOwner() PlayerID                     { return e.Owner }
+func (e *EventCard) EExhausted() bool                     { return false }
 func (e *EventCard) React(g *Game, msg Message) []Message { return nil }
 
 func (g *Game) revealEncounterCard(pid PlayerID, card Card) {

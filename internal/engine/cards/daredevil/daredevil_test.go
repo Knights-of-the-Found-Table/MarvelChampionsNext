@@ -15,8 +15,8 @@ import (
 // Honor" (Daredevil / Protection).
 func deck63988() map[string]int {
 	return map[string]int{
-		"01079": 2, // The Power of Protection
-		"01081": 1, // Armored Vest
+		"01079": 2,                         // The Power of Protection
+		"01081": 1,                         // Armored Vest
 		"01088": 1, "01089": 1, "01090": 1, // basic resources
 		"09020": 1, // Unflappable
 		"16024": 1, // Deft Focus

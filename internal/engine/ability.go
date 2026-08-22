@@ -4,9 +4,9 @@ import "fmt"
 
 // Ability types.
 const (
-	AbilityAction   = "action"
-	AbilityTrigger  = "triggered" // interrupt or response
-	AbilityForced   = "forced"
+	AbilityAction  = "action"
+	AbilityTrigger = "triggered" // interrupt or response
+	AbilityForced  = "forced"
 )
 
 // Triggers recognized by the engine; reactive abilities declare one.
@@ -22,7 +22,7 @@ const (
 // the index in the ability slice, which must stay deterministic.
 type Ability struct {
 	Label string `json:"label"`
-	Type  string `json:"type"`   // action | triggered | forced
+	Type  string `json:"type"` // action | triggered | forced
 	// Trigger is set for reactive abilities; the engine gathers matching
 	// abilities at known points and asks the player.
 	Trigger string `json:"trigger,omitempty"`

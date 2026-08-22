@@ -79,7 +79,7 @@ func registerSenses() {
 	// identity.
 	engine.RegisterBehavior("60002", &engine.Behavior{
 		OnPlay: senseAttach(true, true),
-		React:  senseDefeatTrigger("60002", func(g *engine.Game, p *engine.Player, u *engine.Upgrade) []engine.Message {
+		React: senseDefeatTrigger("60002", func(g *engine.Game, p *engine.Player, u *engine.Upgrade) []engine.Message {
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		}),
 	})
@@ -88,7 +88,7 @@ func registerSenses() {
 	// play this phase costs 2 less.
 	engine.RegisterBehavior("60003", &engine.Behavior{
 		OnPlay: senseAttach(true, true),
-		React:  senseDefeatTrigger("60003", func(g *engine.Game, p *engine.Player, u *engine.Upgrade) []engine.Message {
+		React: senseDefeatTrigger("60003", func(g *engine.Game, p *engine.Player, u *engine.Upgrade) []engine.Message {
 			p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{Amount: 2})
 			g.Logf("%s's next card this phase costs 2 less", p.Name)
 			return nil
@@ -98,7 +98,7 @@ func registerSenses() {
 	// 60004 Heightened Hearing: attached enemy's attack gets -3 ATK
 	// (engine auto-consumes via AttachedEnemyAttackMod).
 	engine.RegisterBehavior("60004", &engine.Behavior{
-		OnPlay:                   senseAttach(true, false),
+		OnPlay:                 senseAttach(true, false),
 		AttachedEnemyAttackMod: -3,
 	})
 
@@ -203,7 +203,7 @@ func senseDefeatTrigger(code string, effect func(g *engine.Game, p *engine.Playe
 		effectMsgs = append(effectMsgs, effect(g, p, u)...)
 		return []engine.Message{engine.AskQuestion{
 			Player: u.Owner,
-			Question: engine.Ask(name + " — discard it for its effect?",
+			Question: engine.Ask(name+" — discard it for its effect?",
 				engine.Choice{
 					ID: "use", Label: "Discard " + name + " → use its effect", Kind: engine.ChoiceLabel,
 				}.Msgs(effectMsgs...),

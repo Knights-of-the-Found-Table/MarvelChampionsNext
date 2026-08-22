@@ -12,8 +12,8 @@ type Card struct {
 	ID   string `json:"id"`
 	Code string `json:"code"`
 	// Owner is the player id for player cards, "" for encounter cards.
-	Owner PlayerID `json:"owner,omitempty"`
-	FaceDown bool  `json:"faceDown,omitempty"`
+	Owner    PlayerID `json:"owner,omitempty"`
+	FaceDown bool     `json:"faceDown,omitempty"`
 }
 
 func (c Card) Def() *data.CardDef { return DB.MustLookup(c.Code) }

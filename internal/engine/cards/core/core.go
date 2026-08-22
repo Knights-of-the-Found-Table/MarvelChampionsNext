@@ -82,6 +82,32 @@ func registerKlaw() {
 	engine.RegisterBehavior("01114", klawBoost)
 	engine.RegisterBehavior("01115", klawBoost)
 
+	// Stage 1A setup: search the encounter deck for the Defense Network
+	// side scheme and reveal it (the deck is shuffled during game start,
+	// right after the a-face effects resolve).
+	engine.RegisterBehavior("01116a", &engine.Behavior{
+		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
+			return findAndRevealSideScheme(g, "01125")
+		},
+	})
+
+	// Stage 2A: discard encounter cards until a minion shows up; it enters
+	// play engaged with the first player.
+	engine.RegisterBehavior("01117a", &engine.Behavior{
+		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
+			for len(g.EncounterDeck) > 0 {
+				c := g.EncounterDeck[0]
+				g.EncounterDeck = g.EncounterDeck[1:]
+				if c.Def().Type == "minion" {
+					return []engine.Message{engine.RevealEncounterCard{Player: firstPlayer(g), Card: c}}
+				}
+				g.EncounterDiscard = append(g.EncounterDiscard, c)
+				g.Logf("%s is discarded", c.Def().Name)
+			}
+			return nil
+		},
+	})
+
 	// Klaw II: When Revealed: search for The "Immortal" Klaw side scheme.
 	engine.RegisterBehavior("01114", &engine.Behavior{
 		React: klawBoost.React,

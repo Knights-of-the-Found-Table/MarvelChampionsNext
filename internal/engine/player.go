@@ -19,13 +19,13 @@ type CostDiscount struct {
 
 // Player is one identity (hero + alter-ego) controlled by a user.
 type Player struct {
-	ID            PlayerID `json:"id"`
-	Name          string   `json:"name"` // display name
-	UserID        string   `json:"userId,omitempty"`
-	HeroCode      string   `json:"heroCode"`
-	AlterEgoCode  string   `json:"alterEgoCode"`
-	Side          string   `json:"side"`
-	FormChanged   bool     `json:"formChanged"` // once per turn
+	ID           PlayerID `json:"id"`
+	Name         string   `json:"name"` // display name
+	UserID       string   `json:"userId,omitempty"`
+	HeroCode     string   `json:"heroCode"`
+	AlterEgoCode string   `json:"alterEgoCode"`
+	Side         string   `json:"side"`
+	FormChanged  bool     `json:"formChanged"` // once per turn
 
 	MaxHP  int `json:"maxHp"`
 	Damage int `json:"damage"`
@@ -35,9 +35,9 @@ type Player struct {
 	Confused  bool `json:"confused"`
 	Tough     bool `json:"tough"`
 
-	Deck     CardList `json:"deck"`
-	Hand     CardList `json:"hand"`
-	Discard  CardList `json:"discard"`
+	Deck    CardList `json:"deck"`
+	Hand    CardList `json:"hand"`
+	Discard CardList `json:"discard"`
 
 	// Obligation deck for hero-specific obligations; the cards are merged
 	// into the encounter deck at game start and resolve for their owner
@@ -71,13 +71,13 @@ type Player struct {
 	EncounterDown CardList `json:"encounterDown"`
 
 	// Nemesis set state.
-	NemesisDeck    CardList `json:"nemesisDeck"`
-	NemesisDiscard CardList `json:"nemesisDiscard"`
+	NemesisDeck    CardList   `json:"nemesisDeck"`
+	NemesisDiscard CardList   `json:"nemesisDiscard"`
 	NemesisInPlay  []EntityID `json:"nemesisInPlay"`
 
-	EndedTurn    bool `json:"endedTurn"`
-	FirstPlayer  bool `json:"firstPlayer"`
-	KOed         bool `json:"koed"`
+	EndedTurn   bool `json:"endedTurn"`
+	FirstPlayer bool `json:"firstPlayer"`
+	KOed        bool `json:"koed"`
 
 	// Until-end-of-phase stat modifiers (Fearless Determination,
 	// Avengers Assemble...); cleared at each phase change.
@@ -94,7 +94,7 @@ type Player struct {
 	UsedAbilityRounds map[string]int `json:"usedAbilityRounds,omitempty"`
 }
 
-func (p *Player) EID() EntityID    { return p.ID }
+func (p *Player) EID() EntityID { return p.ID }
 func (p *Player) ECode() string {
 	if p.IsHero() {
 		return p.HeroCode

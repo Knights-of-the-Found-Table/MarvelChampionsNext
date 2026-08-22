@@ -86,6 +86,135 @@ func TestUnmarshalMigratesSchemeCodes(t *testing.T) {
 			t.Errorf("%s: stageCodes = %v, want %v", tc.scenarioID, g.MainScheme.StageCodes, tc.wantStages)
 		}
 	}
+
+	// A scheme caught mid-reveal (its flip still queued) keeps the a face
+	// and only has its stage list refreshed.
+	blob := `{"scenarioId":"01097","mainScheme":{"id":"m1","code":"01097a","stageCodes":["01097b"],"stage":1},` +
+		`"queue":[{"t":"engine.FlipMainScheme","m":{"Scheme":"m1"}}]}`
+	g := &engine.Game{}
+	if err := g.UnmarshalJSON([]byte(blob)); err != nil {
+		t.Fatalf("mid-reveal: unmarshal: %v", err)
+	}
+	if g.MainScheme.Code != "01097a" || !slices.Equal(g.MainScheme.StageCodes, []string{"01097b"}) {
+		t.Errorf("mid-reveal: code=%q stageCodes=%v, want 01097a / [01097b]",
+			g.MainScheme.Code, g.MainScheme.StageCodes)
+	}
+}
+
+// TestSchemeAFaceLifecycle covers the a→b reveal flow: a stage enters on
+// its a face, the a face's reveal effects settle, then the scheme flips to
+// the b face (the code the view exposes in play).
+func TestSchemeAFaceLifecycle(t *testing.T) {
+	// Rhino 1A has no reveal effect; the scheme simply ends on 1B.
+	g := newScenarioGame(t, "01097")
+	if g.MainScheme.Code != "01097b" {
+		t.Errorf("rhino: scheme code = %q, want 01097b", g.MainScheme.Code)
+	}
+
+	// Klaw 1A setup searches the encounter deck for the Defense Network
+	// side scheme and reveals it.
+	g = newScenarioGame(t, "01116")
+	if g.MainScheme.Code != "01116b" {
+		t.Errorf("klaw: scheme code = %q, want 01116b", g.MainScheme.Code)
+	}
+	found := false
+	for _, s := range g.SideSchemes {
+		if s.Code == "01125" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("klaw: Defense Network side scheme not revealed at setup")
+	}
+
+	// Ultron 1A setup puts the Ultron Drones environment into play.
+	g = newScenarioGame(t, "01137")
+	if g.MainScheme.Code != "01137b" {
+		t.Errorf("ultron: scheme code = %q, want 01137b", g.MainScheme.Code)
+	}
+	if len(g.Environments) == 0 {
+		t.Error("ultron: Ultron Drones environment not in play after setup")
+	}
+
+	// Klaw stage 2A: advancing discards encounter cards until a minion
+	// shows up; it enters play engaged with the first player. The advance
+	// is front-inserted at the current pause point; answers resume their
+	// interrupted flow ahead of it, so pick a seed whose first villain
+	// activation doesn't complete the stage-1 scheme first.
+	var g2 *engine.Game
+	for seed := int64(1); seed <= 50 && g2 == nil; seed++ {
+		cand := newScenarioGameSeed(t, "01116", seed)
+		cand.PushFront(engine.ReplaceMainScheme{Scheme: cand.MainScheme.ID})
+		pq := cand.Pending()
+		if pq == nil {
+			continue
+		}
+		paths := pickDefault(pq.Question)
+		if paths == nil {
+			continue
+		}
+		if err := cand.Answer(pq.Player, paths); err != nil {
+			t.Fatalf("seed %d answer: %v", seed, err)
+		}
+		if !cand.Over {
+			g2 = cand
+		}
+	}
+	if g2 == nil {
+		t.Fatal("no seed survived the first villain activation")
+	}
+	g = g2
+	for i := 0; i < 30 && !g.Over && g.MainScheme.Code != "01117b"; i++ {
+		pq := g.Pending()
+		if pq == nil {
+			break
+		}
+		paths := pickDefault(pq.Question)
+		if paths == nil {
+			t.Fatalf("no answerable choice in question %q", pq.Question.Prompt)
+		}
+		if err := g.Answer(pq.Player, paths); err != nil {
+			t.Fatalf("answer: %v", err)
+		}
+	}
+	if g.Over {
+		start := max(0, len(g.Log)-20)
+		for _, l := range g.Log[start:] {
+			t.Log(l)
+		}
+		t.Fatalf("klaw: game over during advance: %s", g.Reason)
+	}
+	if g.MainScheme.Code != "01117b" {
+		t.Errorf("klaw: scheme code after advance = %q, want 01117b", g.MainScheme.Code)
+	}
+	engaged := false
+	for _, mn := range g.Minions {
+		if mn.EngagedWith != "" {
+			engaged = true
+		}
+	}
+	if !engaged {
+		t.Error("klaw: no engaged minion after stage 2A reveal")
+	}
+}
+
+func newScenarioGame(t *testing.T, scenarioID string) *engine.Game {
+	return newScenarioGameSeed(t, scenarioID, 1)
+}
+
+func newScenarioGameSeed(t *testing.T, scenarioID string, seed int64) *engine.Game {
+	t.Helper()
+	g, err := engine.NewGame(engine.NewGameOptions{
+		Seed:       seed,
+		ScenarioID: scenarioID,
+		Players: []engine.PlayerSpec{
+			{Name: "Tester", HeroBase: "01001", Deck: spiderDeck()},
+		},
+	})
+	if err != nil {
+		t.Fatalf("NewGame: %v", err)
+	}
+	return g
 }
 
 // TestSchemeStageStats spot-checks that switching stage codes to the b face

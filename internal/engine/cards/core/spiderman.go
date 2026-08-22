@@ -10,8 +10,8 @@ func registerSpiderMan() {
 	engine.RegisterBehavior("01001", &engine.Behavior{
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{{
-				Label:  "Spider-Sense — draw 1 card",
-				Type:   engine.AbilityTrigger,
+				Label:   "Spider-Sense — draw 1 card",
+				Type:    engine.AbilityTrigger,
 				Trigger: engine.TriggerVillainAttacksYou,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DrawCards{Player: self, N: 1}}

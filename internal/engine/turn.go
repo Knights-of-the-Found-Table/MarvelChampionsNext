@@ -389,7 +389,7 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 	p := g.Player(a.Owner)
 	atk := a.AttackVal + a.BonusATK + a.PermATK
 	consq := 1 + g.attachedConsequential(a)
-	consequential := func(target EntityID) []Message{
+	consequential := func(target EntityID) []Message {
 		// Elektra-style allies redirect consequential damage to the
 		// owner.
 		self := a.ID
@@ -526,9 +526,9 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 	}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
 	if p.IsHero() && !p.Exhausted {
 		choices = append(choices, Choice{
-			ID: "hero-defend",
+			ID:    "hero-defend",
 			Label: fmt.Sprintf("Exhaust %s to defend (+%d DEF)", p.HeroDef().Name, p.DefenseStat(g)),
-			Kind: ChoiceBasicPower,
+			Kind:  ChoiceBasicPower,
 		}.Msgs(Defends{Defender: p.ID, Against: attackerID}))
 	}
 	for _, id := range p.Allies {
@@ -537,9 +537,9 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 			continue
 		}
 		choices = append(choices, Choice{
-			ID:       "ally-defend-" + a.ID.String(),
-			Label:    fmt.Sprintf("%s defends (+%d DEF)", a.EDef().Name, a.Defense()),
-			Kind:     ChoiceBasicPower, SourceID: a.ID, CardCode: a.Code,
+			ID:    "ally-defend-" + a.ID.String(),
+			Label: fmt.Sprintf("%s defends (+%d DEF)", a.EDef().Name, a.Defense()),
+			Kind:  ChoiceBasicPower, SourceID: a.ID, CardCode: a.Code,
 		}.Msgs(Defends{Defender: a.ID, Against: attackerID}))
 	}
 	// Defense events playable from hand (Shield Block, Wiggle Room...).

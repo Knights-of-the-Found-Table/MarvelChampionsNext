@@ -30,8 +30,8 @@ type (
 	PlayerTurnStart struct{ Player PlayerID }
 	PlayerTurnEnd   struct{ Player PlayerID }
 
-	ReadyAll struct{ Player PlayerID }
-	ReadyEntity struct{ ID EntityID }
+	ReadyAll      struct{ Player PlayerID }
+	ReadyEntity   struct{ ID EntityID }
 	ExhaustEntity struct{ ID EntityID }
 
 	DrawCards struct {
@@ -39,7 +39,7 @@ type (
 		N      int
 	}
 	ShufflePlayerDeck struct{ Player PlayerID }
-	DiscardCards struct {
+	DiscardCards      struct {
 		Player PlayerID
 		Cards  []Card
 	}
@@ -152,9 +152,16 @@ type (
 	MinionDefeated      struct{ MinionID EntityID }
 
 	// Schemes
-	MainSchemeMaxed struct{ Scheme EntityID }
-	SchemeDefeated  struct{ Scheme EntityID }
-	ReplaceMainScheme struct{ Scheme EntityID; NextCode string }
+	MainSchemeMaxed   struct{ Scheme EntityID }
+	SchemeDefeated    struct{ Scheme EntityID }
+	ReplaceMainScheme struct {
+		Scheme   EntityID
+		NextCode string
+	}
+	// FlipMainScheme turns a main scheme from its revealed a face to the
+	// b face of the current stage; queued after the a face's reveal
+	// effects so they settle first.
+	FlipMainScheme struct{ Scheme EntityID }
 
 	// Game end
 	GameOver struct {
@@ -205,7 +212,7 @@ type (
 	// FlipVillainPersona swaps a double-sided villain between its a/b
 	// sides (Risky Business).
 	FlipVillainPersona struct {
-		VillainID   EntityID
+		VillainID    EntityID
 		FlipToNorman bool
 	}
 
@@ -331,7 +338,7 @@ type (
 
 	// AllyDefeated opens the interrupt window before an ally is
 	// destroyed; AllyDestroyed performs the destruction.
-	AllyDefeated struct{ AllyID EntityID }
+	AllyDefeated  struct{ AllyID EntityID }
 	AllyDestroyed struct{ AllyID EntityID }
 
 	// SupportStoreCard attaches a facedown hand card to a support
@@ -353,8 +360,8 @@ type (
 		Card   Card
 	}
 	TreacheryResolve struct {
-		Player   PlayerID
-		Card     Card
+		Player    PlayerID
+		Card      Card
 		Cancelled bool
 	}
 
@@ -376,7 +383,7 @@ type (
 	// ApplyStatBonus grants an identity until-end-of-phase stat bonuses
 	// (Morale Boost).
 	ApplyStatBonus struct {
-		Target PlayerID
+		Target        PlayerID
 		ATK, THW, DEF int
 	}
 
@@ -459,90 +466,91 @@ type (
 	}
 )
 
-func (StartGame) msg()             {}
-func (BeginRound) msg()            {}
-func (EndRound) msg()              {}
-func (BeginPhase) msg()            {}
-func (EndPhase) msg()              {}
-func (PlayerTurnStart) msg()       {}
-func (PlayerTurnEnd) msg()         {}
-func (ReadyAll) msg()              {}
-func (ReadyEntity) msg()           {}
-func (ExhaustEntity) msg()        {}
-func (DrawCards) msg()             {}
-func (ShufflePlayerDeck) msg()     {}
-func (DiscardCards) msg()          {}
-func (ChangeForm) msg()            {}
-func (PlayCard) msg()              {}
-func (ResourcePay) msg()           {}
-func (BasicThwart) msg()           {}
-func (BasicAttack) msg()           {}
-func (BasicRecover) msg()          {}
-func (VillainActivates) msg()      {}
-func (MinionActivates) msg()       {}
-func (SchemeThreat) msg()          {}
-func (ThwartScheme) msg()          {}
-func (DamageEntity) msg()          {}
-func (HealEntity) msg()            {}
-func (StunEntity) msg()            {}
-func (ConfuseEntity) msg()         {}
-func (ToughEntity) msg()           {}
-func (ClearStun) msg()             {}
-func (ClearConfuse) msg()          {}
-func (Defends) msg()               {}
-func (DealBoost) msg()             {}
-func (RevealBoost) msg()           {}
-func (ClearBoosts) msg()           {}
-func (RevealEncounterCard) msg()   {}
-func (VillainDefeated) msg()       {}
-func (AdvanceVillainStage) msg()   {}
-func (MinionDefeated) msg()        {}
-func (MainSchemeMaxed) msg()       {}
-func (SchemeDefeated) msg()        {}
-func (ReplaceMainScheme) msg()     {}
-func (GameOver) msg()              {}
-func (AskQuestion) msg()           {}
+func (StartGame) msg()                {}
+func (BeginRound) msg()               {}
+func (EndRound) msg()                 {}
+func (BeginPhase) msg()               {}
+func (EndPhase) msg()                 {}
+func (PlayerTurnStart) msg()          {}
+func (PlayerTurnEnd) msg()            {}
+func (ReadyAll) msg()                 {}
+func (ReadyEntity) msg()              {}
+func (ExhaustEntity) msg()            {}
+func (DrawCards) msg()                {}
+func (ShufflePlayerDeck) msg()        {}
+func (DiscardCards) msg()             {}
+func (ChangeForm) msg()               {}
+func (PlayCard) msg()                 {}
+func (ResourcePay) msg()              {}
+func (BasicThwart) msg()              {}
+func (BasicAttack) msg()              {}
+func (BasicRecover) msg()             {}
+func (VillainActivates) msg()         {}
+func (MinionActivates) msg()          {}
+func (SchemeThreat) msg()             {}
+func (ThwartScheme) msg()             {}
+func (DamageEntity) msg()             {}
+func (HealEntity) msg()               {}
+func (StunEntity) msg()               {}
+func (ConfuseEntity) msg()            {}
+func (ToughEntity) msg()              {}
+func (ClearStun) msg()                {}
+func (ClearConfuse) msg()             {}
+func (Defends) msg()                  {}
+func (DealBoost) msg()                {}
+func (RevealBoost) msg()              {}
+func (ClearBoosts) msg()              {}
+func (RevealEncounterCard) msg()      {}
+func (VillainDefeated) msg()          {}
+func (AdvanceVillainStage) msg()      {}
+func (MinionDefeated) msg()           {}
+func (MainSchemeMaxed) msg()          {}
+func (SchemeDefeated) msg()           {}
+func (ReplaceMainScheme) msg()        {}
+func (FlipMainScheme) msg()           {}
+func (GameOver) msg()                 {}
+func (AskQuestion) msg()              {}
 func (WindowAfterEnemyAttacked) msg() {}
-func (WindowAfterThwarted) msg()   {}
-func (RunAbility) msg()            {}
-func (RevealNemesisSet) msg()      {}
-func (SpawnDrone) msg()            {}
-func (TakeDeckCard) msg()          {}
-func (FlipVillainPersona) msg()    {}
-func (MillPlayerDeck) msg()        {}
-func (DealEncounterToPlayer) msg() {}
-func (BoostEnemyAttack) msg()      {}
-func (ObligationResolve) msg()     {}
-func (DiscardControlled) msg()     {}
-func (AddAccelerationToken) msg()  {}
-func (RevealNextEncounter) msg()   {}
-func (PlayDefenseEvent) msg()      {}
-func (AddEntityCounter) msg()      {}
-func (ReturnControlled) msg()      {}
-func (AllyEntersPlayFree) msg()    {}
-func (MinionEntersPlay) msg()      {}
-func (AttachUpgrade) msg()         {}
-func (EventPlayed) msg()           {}
-func (SetEventBonus) msg()         {}
-func (ReturnDiscardCard) msg()     {}
-func (DiscardToBottom) msg()       {}
-func (AllyDefeated) msg()          {}
-func (AllyDestroyed) msg()         {}
-func (SupportStoreCard) msg()      {}
-func (SupportRetrieveCards) msg()  {}
-func (TreacheryWindow) msg()       {}
-func (TreacheryResolve) msg()      {}
-func (ConsumeHandCard) msg()       {}
-func (PlayDiscardAlly) msg()       {}
-func (ApplyStatBonus) msg()        {}
-func (WindowDefended) msg()        {}
-func (SenseEnterPlay) msg()        {}
-func (ShuffleIntoDeck) msg()       {}
-func (GrantTrait) msg()            {}
-func (InvokeSpecial) msg()         {}
-func (AllyAttackWindow) msg()      {}
-func (SideDeckDiscardTop) msg()    {}
-func (UpgradeEnterPlay) msg()      {}
-func (SideDeckToHand) msg()        {}
-func (RecycleFromDiscard) msg()    {}
-func (SwapHandWithDeckTop) msg()   {}
+func (WindowAfterThwarted) msg()      {}
+func (RunAbility) msg()               {}
+func (RevealNemesisSet) msg()         {}
+func (SpawnDrone) msg()               {}
+func (TakeDeckCard) msg()             {}
+func (FlipVillainPersona) msg()       {}
+func (MillPlayerDeck) msg()           {}
+func (DealEncounterToPlayer) msg()    {}
+func (BoostEnemyAttack) msg()         {}
+func (ObligationResolve) msg()        {}
+func (DiscardControlled) msg()        {}
+func (AddAccelerationToken) msg()     {}
+func (RevealNextEncounter) msg()      {}
+func (PlayDefenseEvent) msg()         {}
+func (AddEntityCounter) msg()         {}
+func (ReturnControlled) msg()         {}
+func (AllyEntersPlayFree) msg()       {}
+func (MinionEntersPlay) msg()         {}
+func (AttachUpgrade) msg()            {}
+func (EventPlayed) msg()              {}
+func (SetEventBonus) msg()            {}
+func (ReturnDiscardCard) msg()        {}
+func (DiscardToBottom) msg()          {}
+func (AllyDefeated) msg()             {}
+func (AllyDestroyed) msg()            {}
+func (SupportStoreCard) msg()         {}
+func (SupportRetrieveCards) msg()     {}
+func (TreacheryWindow) msg()          {}
+func (TreacheryResolve) msg()         {}
+func (ConsumeHandCard) msg()          {}
+func (PlayDiscardAlly) msg()          {}
+func (ApplyStatBonus) msg()           {}
+func (WindowDefended) msg()           {}
+func (SenseEnterPlay) msg()           {}
+func (ShuffleIntoDeck) msg()          {}
+func (GrantTrait) msg()               {}
+func (InvokeSpecial) msg()            {}
+func (AllyAttackWindow) msg()         {}
+func (SideDeckDiscardTop) msg()       {}
+func (UpgradeEnterPlay) msg()         {}
+func (SideDeckToHand) msg()           {}
+func (RecycleFromDiscard) msg()       {}
+func (SwapHandWithDeckTop) msg()      {}

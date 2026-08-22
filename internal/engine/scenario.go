@@ -12,8 +12,8 @@ import (
 // cards packages; the scenario id is its first main scheme code (matching the
 // reference implementation convention).
 type ScenarioDef struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 	// VillainBases are base codes of the scenario's villains (stages are
 	// derived from the card data by stage number).
 	VillainBases []string `json:"villainBases"`

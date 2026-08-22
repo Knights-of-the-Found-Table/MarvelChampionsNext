@@ -128,7 +128,7 @@ func ChooseScheme(name string, amount func(g *engine.Game, e engine.Entity) int)
 		}
 		return []engine.Message{engine.AskQuestion{
 			Player:   pid,
-			Question: engine.Ask(name + " — choose a scheme", choices...),
+			Question: engine.Ask(name+" — choose a scheme", choices...),
 		}}
 	}
 }

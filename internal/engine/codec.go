@@ -31,7 +31,7 @@ func init() {
 		Defends{}, DealBoost{}, RevealBoost{}, ClearBoosts{},
 		RevealEncounterCard{}, VillainDefeated{}, AdvanceVillainStage{},
 		MinionDefeated{}, MainSchemeMaxed{}, SchemeDefeated{},
-		ReplaceMainScheme{}, GameOver{}, AskQuestion{},
+		ReplaceMainScheme{}, FlipMainScheme{}, GameOver{}, AskQuestion{},
 		WindowAfterEnemyAttacked{}, WindowAfterThwarted{}, RunAbility{},
 		ApplyVillainScheme{}, ResourcePayStub{}, RevealNemesisSet{}, SpawnDrone{},
 		TakeDeckCard{}, FlipVillainPersona{}, MillPlayerDeck{}, DealEncounterToPlayer{}, BoostEnemyAttack{},

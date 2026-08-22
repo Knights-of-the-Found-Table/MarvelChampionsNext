@@ -67,6 +67,28 @@ func registerUltron() {
 		},
 	})
 
-	// The Crimson Cowl (main scheme I): when revealed, each player spawns
-	// a Drone. Handled via the scheme stage hook below.
+	// Main scheme 1A setup: put the Ultron Drones environment into play
+	// (the encounter deck is shuffled during game start, right after).
+	engine.RegisterBehavior("01137a", &engine.Behavior{
+		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
+			env := &engine.Environment{ID: g.NextEntityID("environment"), Code: "01140"}
+			g.AddEnvironment(env)
+			g.Logf("%s enters play", env.EDef().Name)
+			return nil
+		},
+	})
+
+	// Main scheme stages 2A/3A: each player puts the top card of their
+	// deck into play facedown as a Drone engaged with them.
+	droneStage := &engine.Behavior{
+		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
+			msgs := make([]engine.Message, 0, len(g.Players))
+			for _, p := range g.Players {
+				msgs = append(msgs, engine.SpawnDrone{Player: p.ID})
+			}
+			return msgs
+		},
+	}
+	engine.RegisterBehavior("01138a", droneStage)
+	engine.RegisterBehavior("01139a", droneStage)
 }

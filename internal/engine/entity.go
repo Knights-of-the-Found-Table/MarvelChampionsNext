@@ -45,14 +45,19 @@ type Behavior struct {
 	VillainDamageable func(g *Game, v *Villain, damage int) bool
 	// Villain: customize stage advancement (e.g. Rhino stage I undamageable).
 	VillainStage func(g *Game, v *Villain, nextStage int) []Message
+	// MainScheme: runs when a stage's a face is revealed (game setup or
+	// stage advance), before the scheme flips to its b face; keyed by the
+	// stage's a-side card code. The flip is queued after the returned
+	// messages, so the effects settle first.
+	MainSchemeRevealed func(g *Game, s *MainScheme) []Message
 	// Villain forced behavior on activation; default scheme/attack applies
 	// when nil.
 	VillainActivate func(g *Game, v *Villain, p *Player) []Message
 	// Treachery resolution; default discards the treachery with no effect.
 	ResolveTreachery func(g *Game, t *Treachery, p *Player) []Message
 	// Attachment effects on attach/detach.
-	OnAttach   func(g *Game, t *Attachment, target EntityID) []Message
-	OnDetach   func(g *Game, t *Attachment) []Message
+	OnAttach func(g *Game, t *Attachment, target EntityID) []Message
+	OnDetach func(g *Game, t *Attachment) []Message
 	// Damage modifiers, e.g. Retaliate-like auras or extra consequential
 	// damage. Return added effects keyed by event.
 	Modifiers func(g *Game, e Entity, target EntityID) []Modifier
@@ -119,10 +124,10 @@ type Behavior struct {
 
 // ResourceAbility describes an exhaust-to-generate-resources ability.
 type ResourceAbility struct {
-	Icon    string // generated icon: energy | physical | mental | wild
-	HeroOnly    bool // "Hero Resource": hero form required
-	EventOnly   bool // only usable when paying for an event
-	UsesCounters bool // consumes one counter from the source per use
+	Icon         string // generated icon: energy | physical | mental | wild
+	HeroOnly     bool   // "Hero Resource": hero form required
+	EventOnly    bool   // only usable when paying for an event
+	UsesCounters bool   // consumes one counter from the source per use
 }
 
 // StatBonus is a persistent stat adjustment applied to an identity.

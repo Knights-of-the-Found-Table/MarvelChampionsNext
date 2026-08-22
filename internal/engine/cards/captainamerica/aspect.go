@@ -187,8 +187,8 @@ func registerMakeTheCall() {
 					}
 					cost := cardutil.Cost(def)
 					choices = append(choices, engine.Choice{
-						Label:    fmt.Sprintf("%s (cost %d) — from %s's discard pile", def.Name, cost, pl.Name),
-						Kind:     engine.ChoiceCard, CardCode: def.Code,
+						Label: fmt.Sprintf("%s (cost %d) — from %s's discard pile", def.Name, cost, pl.Name),
+						Kind:  engine.ChoiceCard, CardCode: def.Code,
 					}.WithThen(g.CustomPaymentQuestion(p, cost,
 						fmt.Sprintf("Pay %d resources for %s", cost, def.Name),
 						map[string]any{

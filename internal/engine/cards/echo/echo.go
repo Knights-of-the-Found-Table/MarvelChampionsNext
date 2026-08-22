@@ -71,7 +71,7 @@ func registerSignatures() {
 			}
 			choices = append(choices, cardutil.Skip())
 			return []engine.Message{engine.AskQuestion{
-				Player:   pid,
+				Player: pid,
 				Question: engine.Ask("Photographic Reflexes — take a tucked event to hand (its cost is reduced by 2)",
 					choices...),
 			}}
