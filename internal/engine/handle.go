@@ -665,6 +665,31 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case SpawnSymbiote:
+		def, ok := DB.Lookup("20025")
+		if !ok {
+			return
+		}
+		fp := g.Players[0]
+		for _, p := range g.Players {
+			if p.FirstPlayer {
+				fp = p
+				break
+			}
+		}
+		mn := &Minion{
+			ID:          g.nextEntityID(KindMinion),
+			Code:        def.Code,
+			MaxHP:       deref(def.HP, 4),
+			AttackVal:   deref(def.Attack, 2),
+			SchemeVal:   deref(def.Scheme, 1),
+			Tough:       def.HasKeyword("Toughness"),
+			Guard:       def.HasKeyword("Guard"),
+			EngagedWith: fp.ID,
+		}
+		g.Minions[mn.ID] = mn
+		g.logMajorf("Enraged Symbiote enters play engaged with %s", fp.Name)
+
 	case SetMassForm:
 		if p := g.Player(m.Player); p != nil {
 			var kept []string

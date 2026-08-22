@@ -401,6 +401,9 @@ type (
 		Player PlayerID
 		Form   string `json:"form,omitempty"` // "dense" | "intangible" | "" to flip
 	}
+	// SpawnSymbiote puts an Enraged Symbiote into play engaged with the
+	// first player (Struggle for Control).
+	SpawnSymbiote struct{}
 	// ChangeFormAgain flips the identity ignoring the once-per-turn limit
 	// (Resize, Swarm Tactics).
 	ChangeFormAgain struct{ Player PlayerID }
@@ -696,6 +699,7 @@ func (AttachUpgrade) msg()            {}
 func (CostDiscountApply) msg()        {}
 func (SetAntForm) msg()               {}
 func (SetMassForm) msg()              {}
+func (SpawnSymbiote) msg()            {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
 func (RapidReturn) msg()              {}
