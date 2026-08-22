@@ -413,6 +413,15 @@ type (
 	// AddVengeance adds a vengeance counter to Drax and raises his ATK
 	// bonus accordingly.
 	AddVengeance struct{ Player PlayerID }
+	// ResolveTechnique runs a technique upgrade's Special after it was
+	// put into play by an effect (Combat Ready).
+	ResolveTechnique struct {
+		Player PlayerID
+		Code   string
+	}
+	// DiscardAttachmentMsg removes an attachment from play into the
+	// encounter discard (Lethal Weapon).
+	DiscardAttachmentMsg struct{ ID EntityID }
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -669,6 +678,8 @@ func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
 func (RapidReturn) msg()              {}
 func (AddVengeance) msg()             {}
+func (ResolveTechnique) msg()         {}
+func (DiscardAttachmentMsg) msg()     {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

@@ -690,6 +690,26 @@ func (g *Game) handle(msg Message) {
 			g.Logf("%s changes form", p.Name)
 		}
 
+	case ResolveTechnique:
+		if p := g.Player(m.Player); p != nil {
+			// The technique just entered play; find it by code.
+			for _, id := range p.Upgrades {
+				if u := g.Upgrades[id]; u != nil && u.Code[:5] == m.Code[:5] {
+					if b := behavior(u.Code); b.React != nil {
+						g.Push(b.React(g, u, PlayerTurnStart{Player: p.ID})...)
+					}
+					break
+				}
+			}
+		}
+
+	case DiscardAttachmentMsg:
+		if a := g.Attachments[m.ID]; a != nil {
+			g.Delete(m.ID)
+			g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
+			g.Logf("%s is discarded", a.EDef().Name)
+		}
+
 	case AddVengeance:
 		if p := g.Player(m.Player); p != nil && p.GrowthCounters < 3 {
 			p.GrowthCounters++
