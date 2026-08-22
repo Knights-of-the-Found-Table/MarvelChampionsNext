@@ -415,6 +415,17 @@ type (
 		Player PlayerID
 		N      int
 	}
+	// AddProgressCounters adjusts Ironheart's progress counters.
+	AddProgressCounters struct {
+		Player PlayerID
+		N      int
+	}
+	// SwapHeroSide switches the identity to another printed hero side
+	// (Ironheart's Level Up!).
+	SwapHeroSide struct {
+		Player   PlayerID
+		HeroCode string
+	}
 	// ReplaySideSchemeReveal re-runs a side scheme's When Revealed
 	// (Citywide Crisis).
 	ReplaySideSchemeReveal struct{ Scheme EntityID }
@@ -716,6 +727,8 @@ func (SetMassForm) msg()              {}
 func (SpawnSymbiote) msg()            {}
 func (AllForOneDamage) msg()          {}
 func (HoodFoulPlay) msg()             {}
+func (AddProgressCounters) msg()      {}
+func (SwapHeroSide) msg()             {}
 func (ReplaySideSchemeReveal) msg()   {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}

@@ -665,6 +665,21 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case AddProgressCounters:
+		if p := g.Player(m.Player); p != nil {
+			p.GrowthCounters += m.N
+			if m.N > 0 {
+				g.Logf("%s gains %d progress counter(s) (%d total)", p.Name, m.N, p.GrowthCounters)
+			}
+		}
+
+	case SwapHeroSide:
+		if p := g.Player(m.Player); p != nil {
+			p.HeroCode = m.HeroCode
+			p.ExtraTraits = p.ExtraTraits[:0] // re-derive dynamic traits
+			g.LogMajorf("%s swaps to %s", p.Name, p.HeroDef().Name)
+		}
+
 	case HoodFoulPlay:
 		// Foul Play: discard N encounter cards, dealing non-Hood cards to
 		// the player facedown.
