@@ -12,6 +12,7 @@ func init() {
 	registerSignatures()
 	registerNemesis()
 	registerObligation()
+	registerRemaining()
 }
 
 // registerHulk installs the Hulk / Bruce Banner identity (10001a/b).

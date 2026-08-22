@@ -144,6 +144,8 @@ func (g *Game) Entity(id EntityID) Entity {
 		return g.Treacheries[id]
 	case KindSideScheme:
 		return g.SideSchemes[id]
+	case KindMainScheme:
+		return g.MainScheme
 	case KindEnvironment:
 		return g.Environments[id]
 	}

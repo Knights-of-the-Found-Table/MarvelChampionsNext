@@ -111,6 +111,16 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	if n <= 0 {
 		return
 	}
+	// Total Destruction: threat cannot be removed while Abomination is in
+	// play.
+	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "10027" {
+		for _, mn := range g.Minions {
+			if mn.Code == "10026" {
+				g.logf("threat cannot be removed from Total Destruction while Abomination is in play")
+				return
+			}
+		}
+	}
 	if adj, ok := g.eventBonusFor(n, source, "threat"); ok {
 		n = adj
 	}
