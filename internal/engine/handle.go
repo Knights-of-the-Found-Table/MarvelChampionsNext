@@ -515,6 +515,24 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case EngageMinion:
+		if mn := g.Minions[m.MinionID]; mn != nil {
+			mn.EngagedWith = m.Player
+			if p := g.Player(m.Player); p != nil {
+				g.logf("%s engages %s", mn.EDef().Name, p.Name)
+			}
+		}
+
+	case DiscardEncounterCard:
+		for i, c := range g.EncounterDeck {
+			if c.ID == m.Card.ID {
+				g.EncounterDeck = append(g.EncounterDeck[:i], g.EncounterDeck[i+1:]...)
+				g.EncounterDiscard = append(g.EncounterDiscard, c)
+				g.Logf("%s discards %s from the encounter deck", "Heimdall", c.Def().Name)
+				return
+			}
+		}
+
 	case BoostEnemyAttack:
 		switch e := g.Entity(m.Enemy).(type) {
 		case *Villain:

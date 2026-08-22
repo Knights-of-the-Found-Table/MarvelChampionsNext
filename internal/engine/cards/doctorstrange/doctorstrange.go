@@ -14,6 +14,7 @@ import (
 var invocationCodes = []string{"09032", "09033", "09034", "09035", "09036"}
 
 func init() {
+	registerRemainingDRS()
 	registerDoctorStrange()
 	registerSignatures()
 	registerInvocations()

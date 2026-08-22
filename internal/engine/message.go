@@ -281,6 +281,14 @@ type (
 	// DealEncounterToPlayer deals one facedown encounter card to a player
 	// (revealed in the next villain-phase reveal step).
 	DealEncounterToPlayer struct{ Player PlayerID }
+	// EngageMinion engages a minion with a player (Get Over Here!).
+	EngageMinion struct {
+		MinionID EntityID
+		Player   PlayerID
+	}
+	// DiscardEncounterCard removes a specific card from the encounter deck
+	// and discards it (Heimdall).
+	DiscardEncounterCard struct{ Card Card }
 
 	// BoostEnemyAttack permanently raises an enemy's attack (attachments
 	// like Goblin Glider).
@@ -603,6 +611,8 @@ func (TakeDeckCard) msg()             {}
 func (FlipVillainPersona) msg()       {}
 func (MillPlayerDeck) msg()           {}
 func (DealEncounterToPlayer) msg()    {}
+func (EngageMinion) msg()             {}
+func (DiscardEncounterCard) msg()     {}
 func (BoostEnemyAttack) msg()         {}
 func (ObligationResolve) msg()        {}
 func (DiscardControlled) msg()        {}

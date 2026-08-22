@@ -37,7 +37,7 @@ func init() {
 		ReplaceMainScheme{}, FlipMainScheme{}, GameOver{}, AskQuestion{},
 		WindowAfterEnemyAttacked{}, WindowAfterThwarted{}, RunAbility{},
 		ApplyVillainScheme{}, ResourcePayStub{}, RevealNemesisSet{}, SpawnDrone{},
-		TakeDeckCard{}, FlipVillainPersona{}, MillPlayerDeck{}, DealEncounterToPlayer{}, BoostEnemyAttack{},
+		TakeDeckCard{}, FlipVillainPersona{}, MillPlayerDeck{}, DealEncounterToPlayer{}, EngageMinion{}, DiscardEncounterCard{}, BoostEnemyAttack{},
 		ObligationResolve{}, DiscardControlled{}, AddAccelerationToken{}, RevealNextEncounter{},
 		PlayDefenseEvent{}, AddEntityCounter{}, ReturnControlled{},
 		AllyEntersPlayFree{}, MinionEntersPlay{}, AttachUpgrade{}, CostDiscountApply{},

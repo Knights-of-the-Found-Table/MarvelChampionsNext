@@ -12,6 +12,7 @@ import (
 )
 
 func init() {
+	registerRemainingThor()
 	registerThor()
 	registerSignatures()
 	registerNemesis()
