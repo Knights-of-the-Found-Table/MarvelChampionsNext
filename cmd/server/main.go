@@ -45,6 +45,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spiderwoman"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/starlord"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/thor"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/valkyrie"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wreckingcrew"
 )
 
