@@ -404,6 +404,12 @@ type (
 		Player PlayerID
 		N      int
 	}
+	// RapidReturn puts a just-defeated ally back into play from its
+	// owner's discard pile with 1 damage (Rapid Response).
+	RapidReturn struct {
+		Player PlayerID
+		Code   string
+	}
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -658,6 +664,7 @@ func (CostDiscountApply) msg()        {}
 func (SetAntForm) msg()               {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
+func (RapidReturn) msg()              {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

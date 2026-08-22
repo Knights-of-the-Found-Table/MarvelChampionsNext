@@ -690,6 +690,28 @@ func (g *Game) handle(msg Message) {
 			g.Logf("%s changes form", p.Name)
 		}
 
+	case RapidReturn:
+		if p := g.Player(m.Player); p != nil {
+			for i, c := range p.Discard {
+				if c.Code == m.Code && c.Def().Type == "ally" {
+					p.Discard = append(p.Discard[:i], p.Discard[i+1:]...)
+					a := &Ally{
+						ID:        g.nextEntityID(KindAlly),
+						Code:      c.Code,
+						Owner:     p.ID,
+						MaxHP:     deref(c.Def().HP, 1),
+						AttackVal: deref(c.Def().Attack, 0),
+						ThwartVal: deref(c.Def().Thwart, 0),
+						Damage:    1,
+					}
+					g.Allies[a.ID] = a
+					p.Allies = append(p.Allies, a.ID)
+					g.logf("%s returns to play with 1 damage (Rapid Response)", a.EDef().Name)
+					return
+				}
+			}
+		}
+
 	case TempHandSizeMsg:
 		if p := g.Player(m.Player); p != nil {
 			p.TempHandSize += m.N
