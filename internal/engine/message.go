@@ -106,6 +106,16 @@ type (
 		MinionID EntityID
 		Player   PlayerID
 	}
+	// MinionActivations drives the villain-phase step where the minions
+	// engaged with a player activate against them, in that player's chosen
+	// order.
+	MinionActivations struct{ Player PlayerID }
+	// AskMinionOrder asks a player which of the remaining engaged minions
+	// activates next.
+	AskMinionOrder struct {
+		Player    PlayerID
+		Remaining []EntityID
+	}
 
 	// SchemeThreat adds threat; ThwartScheme removes it.
 	SchemeThreat struct {
@@ -513,6 +523,8 @@ func (BasicAttack) msg()              {}
 func (BasicRecover) msg()             {}
 func (VillainActivates) msg()         {}
 func (MinionActivates) msg()          {}
+func (MinionActivations) msg()        {}
+func (AskMinionOrder) msg()           {}
 func (SchemeThreat) msg()             {}
 func (ThwartScheme) msg()             {}
 func (DamageEntity) msg()             {}

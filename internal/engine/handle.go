@@ -291,6 +291,12 @@ func (g *Game) handle(msg Message) {
 	case MinionActivates:
 		g.handleMinionActivates(m)
 
+	case MinionActivations:
+		g.beginMinionActivations(m.Player)
+
+	case AskMinionOrder:
+		g.handleAskMinionOrder(m)
+
 	case SchemeThreat:
 		g.addThreat(m.Scheme, m.N, m.Source)
 
@@ -1152,8 +1158,8 @@ func (g *Game) handleBeginPhase(phase Phase) {
 			}
 		}
 		// Step 2: the villain activates once per player in player order;
-		// after each activation, minions engaged with that player activate
-		// against them.
+		// after each activation, the minions engaged with that player
+		// activate against them (order chosen by that player).
 		for _, p := range order {
 			if p.KOed {
 				continue
@@ -1161,11 +1167,7 @@ func (g *Game) handleBeginPhase(phase Phase) {
 			for _, id := range sortedIDs(g.Villains) {
 				g.Push(VillainActivates{VillainID: id, Player: p.ID})
 			}
-			for _, id := range sortedIDs(g.Minions) {
-				if mn := g.Minions[id]; mn != nil && mn.EngagedWith == p.ID {
-					g.Push(MinionActivates{MinionID: id, Player: p.ID})
-				}
-			}
+			g.Push(MinionActivations{Player: p.ID})
 		}
 		// Step 3: deal one encounter card per player, plus one additional
 		// card per hazard icon in play (extras dealt in player order).
@@ -1300,6 +1302,74 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 			g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: mn.SchemeVal, Source: mn.ID})
 		}
 	}
+}
+
+// engagedMinions returns the ids of the minions currently engaged with the
+// player, in stable order.
+func (g *Game) engagedMinions(pid PlayerID) []EntityID {
+	var out []EntityID
+	for _, id := range sortedIDs(g.Minions) {
+		if mn := g.Minions[id]; mn != nil && mn.EngagedWith == pid {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
+// beginMinionActivations starts the engaged-minion activation step for a
+// player: with two or more minions engaged, the player picks the order in
+// which they activate (official villain phase step 2b).
+func (g *Game) beginMinionActivations(pid PlayerID) {
+	p := g.Player(pid)
+	if p == nil || p.KOed {
+		return
+	}
+	ids := g.engagedMinions(pid)
+	if len(ids) == 0 {
+		return
+	}
+	if len(ids) == 1 {
+		g.Push(MinionActivates{MinionID: ids[0], Player: pid})
+		return
+	}
+	g.Push(AskMinionOrder{Player: pid, Remaining: ids})
+}
+
+// handleAskMinionOrder asks which of the remaining engaged minions
+// activates next; the chosen minion resolves fully before the rest are
+// considered (its messages are queued ahead of the follow-up ask).
+func (g *Game) handleAskMinionOrder(m AskMinionOrder) {
+	p := g.Player(m.Player)
+	if p == nil || p.KOed {
+		return
+	}
+	var live []EntityID
+	for _, id := range m.Remaining {
+		if mn := g.Minions[id]; mn != nil && mn.EngagedWith == p.ID {
+			live = append(live, id)
+		}
+	}
+	if len(live) == 0 {
+		return
+	}
+	if len(live) == 1 {
+		g.Push(MinionActivates{MinionID: live[0], Player: p.ID})
+		return
+	}
+	var choices []Choice
+	for i, id := range live {
+		mn := g.Minions[id]
+		rest := append([]EntityID{}, live[:i]...)
+		rest = append(rest, live[i+1:]...)
+		choices = append(choices, Choice{
+			Label: fmt.Sprintf("%s — ATK %d / SCH %d", mn.EDef().Name, mn.AttackVal, mn.SchemeVal),
+			Kind:  ChoiceTarget, SourceID: id, CardCode: mn.Code,
+		}.Msgs(
+			MinionActivates{MinionID: id, Player: p.ID},
+			AskMinionOrder{Player: p.ID, Remaining: rest},
+		))
+	}
+	g.Push(AskQuestion{Player: p.ID, Question: Ask("Choose the next minion to activate", choices...)})
 }
 
 func (g *Game) handleDefends(m Defends) {

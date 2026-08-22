@@ -581,6 +581,94 @@ func TestCrisisSideSchemeBlocksMainSchemeThwart(t *testing.T) {
 	}
 }
 
+// TestMinionActivationOrderChosenByPlayer: with 2+ minions engaged, the
+// player chooses the order in which they activate (official villain phase
+// step 2b); with a single minion no order question is asked.
+func TestMinionActivationOrderChosenByPlayer(t *testing.T) {
+	g := newRulesGame(t, 16)
+	keepHands(t, g)
+	p := g.Players[0]
+	p.Side = engine.SideHero
+	// Two distinct minions: Sandman (ATK 3) and Hydra Mercenary (ATK 1).
+	sandman := &engine.Minion{ID: g.NextEntityID("minion"), Code: "01102", MaxHP: 4, AttackVal: 3, SchemeVal: 2, EngagedWith: p.ID}
+	merc := &engine.Minion{ID: g.NextEntityID("minion"), Code: "01101", MaxHP: 3, AttackVal: 1, SchemeVal: 0, EngagedWith: p.ID}
+	g.Minions[sandman.ID] = sandman
+	g.Minions[merc.ID] = merc
+
+	// End the turn; the player is in hero form so the villain attacks
+	// first (Spider-Sense interrupts wrap the defense prompt).
+	pq := g.Pending()
+	if err := g.Answer(pq.Player, []string{"end-turn"}); err != nil {
+		t.Fatalf("end turn: %v", err)
+	}
+	if pq = g.Pending(); pq != nil && pq.Question.Prompt == "Discard cards before drawing up?" {
+		if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+			t.Fatalf("keep: %v", err)
+		}
+	}
+	if pq = g.Pending(); pq != nil && strings.Contains(pq.Question.Prompt, "Discard down to hand size") {
+		if err := g.Answer(pq.Player, pickDefault(pq.Question)); err != nil {
+			t.Fatalf("discard down: %v", err)
+		}
+	}
+	// Villain attack: take it via the interrupts' defense subtree.
+	pq = g.Pending()
+	if pq == nil || pq.Question.Prompt != "Interrupts" {
+		t.Fatalf("expected villain attack interrupts, got %q", promptOf(pq))
+	}
+	takePath := ""
+	for _, c := range pq.Question.Choices {
+		if c.Then == nil {
+			continue
+		}
+		for _, d := range c.Then.Choices {
+			if d.Label == "Take the attack" {
+				takePath = d.ID
+			}
+		}
+	}
+	if takePath == "" {
+		t.Fatal("no take-the-attack path")
+	}
+	if err := g.Answer(pq.Player, []string{takePath}); err != nil {
+		t.Fatalf("take villain attack: %v", err)
+	}
+
+	// The player now chooses which minion activates first.
+	pq = g.Pending()
+	if pq == nil || pq.Question.Prompt != "Choose the next minion to activate" {
+		t.Fatalf("expected minion order question, got %q", promptOf(pq))
+	}
+	if pq.Player != p.ID {
+		t.Fatalf("order question should ask the engaged player, asks %s", pq.Player)
+	}
+	var mercPath string
+	for _, c := range pq.Question.Choices {
+		if c.SourceID == merc.ID {
+			mercPath = c.ID
+		}
+	}
+	if mercPath == "" {
+		t.Fatal("Hydra Mercenary should be orderable first")
+	}
+	if err := g.Answer(pq.Player, []string{mercPath}); err != nil {
+		t.Fatalf("pick merc first: %v", err)
+	}
+	// The chosen minion's attack resolves first.
+	pq = g.Pending()
+	if pq == nil || !strings.Contains(pq.Question.Prompt, "Hydra Mercenary attacks for 1") {
+		t.Fatalf("expected Hydra Mercenary's attack first, got %q", promptOf(pq))
+	}
+	if err := g.Answer(pq.Player, []string{"take"}); err != nil {
+		t.Fatalf("take merc attack: %v", err)
+	}
+	// The remaining single minion activates without another order question.
+	pq = g.Pending()
+	if pq == nil || !strings.Contains(pq.Question.Prompt, "Sandman attacks for 3") {
+		t.Fatalf("expected Sandman's attack second (no extra order ask), got %q", promptOf(pq))
+	}
+}
+
 // TestChangeFormAllowedWhileExhausted: changing form keeps the character's
 // ready/exhausted state and is allowed while exhausted.
 func TestChangeFormAllowedWhileExhausted(t *testing.T) {
