@@ -137,7 +137,7 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		if len(g.thwartableSchemes()) > 0 && !a.Confused {
 			choices = append(choices, Choice{
 				ID:    "ally-thw-" + a.ID.String(),
-				Label: fmt.Sprintf("%s thwarts (%d)", a.EDef().Name, a.ThwartVal+a.BonusTHW),
+				Label: fmt.Sprintf("%s thwarts (%d)", a.EDef().Name, a.ThwartVal+a.BonusTHW+a.PermTHW),
 				Kind:  ChoiceBasicPower, SourceID: a.ID,
 			}.WithThen(Ask("Choose a scheme", g.schemeChoicesForAlly(a)...)))
 		}
@@ -243,6 +243,15 @@ func (g *Game) abilityChoices(p *Player) []Choice {
 		if u := g.Upgrades[id]; u != nil {
 			if hb := behavior(u.Code); hb.Abilities != nil {
 				appendAbilities(u, hb.Abilities(g, u))
+			}
+		}
+	}
+	// Encounter cards in play with action abilities (Enhanced Ivory Horn);
+	// any player may trigger them on their turn.
+	for _, id := range sortedIDs(g.Attachments) {
+		if a := g.Attachments[id]; a != nil {
+			if hb := behavior(a.Code); hb.Abilities != nil {
+				appendAbilities(a, hb.Abilities(g, a))
 			}
 		}
 	}
@@ -371,6 +380,9 @@ func (g *Game) abilityPaymentQuestion(p *Player, src Entity, idx int, ab Ability
 	q.Choices = g.resourcePayChoices(p, nil, nil)
 	q.Validate = fmt.Sprintf("payment:%d", ab.Cost)
 	q.Context = map[string]any{"abilitySource": src.EID().String(), "abilityIndex": idx, "player": p.ID.String()}
+	if ab.CostIcons != "" {
+		q.Context["abilityIcons"] = ab.CostIcons
+	}
 	return q
 }
 
@@ -547,7 +559,7 @@ func (g *Game) schemeChoices(n int) []Choice {
 
 func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 	var out []Choice
-	thw := a.ThwartVal + a.BonusTHW
+	thw := a.ThwartVal + a.BonusTHW + a.PermTHW
 	consequential := func(target EntityID) []Message {
 		self := a.ID
 		if behavior(a.Code).ConsequentialToOwner {
@@ -556,6 +568,7 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 		return []Message{
 			ExhaustEntity{ID: a.ID},
 			ThwartScheme{Scheme: target, N: thw, Source: a.Owner},
+			AllyThwartWindow{Ally: a.ID, Scheme: target},
 			DamageEntity{Target: self, Damage: 1, Source: a.ID},
 		}
 	}
@@ -627,7 +640,11 @@ func (g *Game) otherDefenderQuestion(attackerID EntityID, atk int, p *Player, fo
 // substitute defenses (Bamf!).
 func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 	var choices []Choice
-	if p.IsHero() && !p.Exhausted {
+	heroDefendOK := p.IsHero() && !p.Exhausted
+	if mn := g.Minions[attackerID]; mn != nil && behavior(mn.Code).ForceAllyDefense && mn.EngagedWith == p.ID {
+		heroDefendOK = false // Melter: must defend with an ally if able
+	}
+	if heroDefendOK {
 		choices = append(choices, Choice{
 			ID:    "hero-defend",
 			Label: fmt.Sprintf("Exhaust %s to defend (+%d DEF)", p.HeroDef().Name, p.DefenseStat(g)),

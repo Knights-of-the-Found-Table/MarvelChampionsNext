@@ -545,6 +545,11 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 		if total < cost {
 			return nil, fmt.Errorf("need %d resource icons, selected %d", cost, total)
 		}
+		if iconSpec, ok := q.Context["abilityIcons"].(string); ok && iconSpec != "" {
+			if err := checkIconRequirements(icons, iconSpec); err != nil {
+				return nil, err
+			}
+		}
 		paid := CostPaid{CardIDs: paidIDs, Icons: icons}
 		if invID, ok := q.Context["invocationCard"].(string); ok {
 			card, found := p.SenseDeck.Find(invID)
@@ -760,6 +765,35 @@ func discountMatches(d CostDiscount, def *data.CardDef) bool {
 }
 
 // ctxInt coerces a JSON context value (float64) or in-memory int.
+// checkIconRequirements verifies paid resources against icon-specific cost
+// constraints ("physical:3" / "energy:1 mental:1"); each wild resource
+// counts as one resource of any single type.
+func checkIconRequirements(icons []string, spec string) error {
+	wilds := 0
+	pool := map[string]int{}
+	for _, ic := range icons {
+		if ic == "wild" {
+			wilds++
+			continue
+		}
+		pool[ic]++
+	}
+	for _, part := range strings.Fields(spec) {
+		var icon string
+		var n int
+		if _, err := fmt.Sscanf(part, "%[^:]:%d", &icon, &n); err != nil || n <= 0 {
+			return fmt.Errorf("bad icon requirement %q", part)
+		}
+		use := min(n, pool[icon])
+		pool[icon] -= use
+		if n-use > wilds {
+			return fmt.Errorf("need %d [%s] resources among the payment", n-use+use, icon)
+		}
+		wilds -= n - use
+	}
+	return nil
+}
+
 func ctxInt(v any) int {
 	switch x := v.(type) {
 	case int:

@@ -16,6 +16,8 @@ func init() {
 	registerTreacheries()
 	registerAspectCards()
 	registerCoreObligations()
+	registerRemainingPlayerCards()
+	registerRemainingEncounterCards()
 }
 
 // registerRhino registers "The Break-In" (Rhino scenario).

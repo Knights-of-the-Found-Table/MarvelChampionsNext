@@ -233,8 +233,26 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			g.Push(VillainDefeated{VillainID: e.ID})
 		}
 	case *Minion:
+		if b := behavior(e.Code); b.MinionDamageableSrc != nil && !b.MinionDamageableSrc(g, e, n, source) {
+			return
+		}
 		if b := behavior(e.Code); b.MinionDamageable != nil && !b.MinionDamageable(g, e, n) {
 			return
+		}
+		// Biomechanical Upgrades: when the attached minion would be
+		// defeated, heal all damage instead and discard the attachment.
+		if e.HP()-n <= 0 {
+			for _, aid := range append([]EntityID(nil), e.Attachments...) {
+				a := g.Attachments[aid]
+				if a == nil || a.Code != "01185" {
+					continue
+				}
+				e.Damage = 0
+				g.Delete(aid)
+				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
+				g.logMajorf("%s heals all damage instead of being defeated (Biomechanical Upgrades)", e.EDef().Name)
+				return
+			}
 		}
 		if e.Tough {
 			e.Tough = false

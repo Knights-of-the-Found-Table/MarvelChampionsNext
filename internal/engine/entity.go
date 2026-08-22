@@ -98,6 +98,12 @@ type Behavior struct {
 	// minion is engaged, Edison's Giant Robot); may inspect state and
 	// returns whether the damage still applies.
 	MinionDamageable func(g *Game, m *Minion, damage int) bool
+	// Minion: source-aware damage gate (Killmonger ignoring Black Panther
+	// upgrades); consulted before MinionDamageable.
+	MinionDamageableSrc func(g *Game, m *Minion, damage int, src EntityID) bool
+	// Minion: the engaged player must defend this minion's attacks with
+	// an ally if able (Melter).
+	ForceAllyDefense bool
 	// Event in hand: offered when a treachery is about to resolve against
 	// the player (Get Behind Me!); returns the replacement effect, nil =
 	// currently unplayable.

@@ -382,6 +382,29 @@ func (g *Game) handle(msg Message) {
 			return
 		}
 		threat := v.SchemeVal + v.BoostCount
+		// Emergency (01085): the resolving player may reduce the scheme's
+		// threat by 1 by discarding it from hand.
+		var emerg Card
+		hasEmerg := false
+		for _, c := range p.Hand {
+			if c.Code == "01085" {
+				emerg, hasEmerg = c, true
+				break
+			}
+		}
+		if hasEmerg {
+			g.Push(AskQuestion{Player: p.ID, Question: Ask(
+				"Play Emergency? (reduce the scheme's threat by 1)",
+				Choice{ID: "play-emergency", Label: "Play Emergency", Kind: ChoicePlay, CardCode: "01085"}.
+					Msgs(DiscardCards{Player: p.ID, Cards: CardList{emerg}},
+						SchemeThreat{Scheme: g.MainScheme.ID, N: threat - 1, Source: v.ID},
+						ClearBoosts{Enemy: v.ID}),
+				Choice{ID: "skip-emergency", Label: "Continue", Kind: ChoicePass}.
+					Msgs(SchemeThreat{Scheme: g.MainScheme.ID, N: threat, Source: v.ID},
+						ClearBoosts{Enemy: v.ID}),
+			)})
+			return
+		}
 		g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: threat, Source: v.ID})
 		g.Push(ClearBoosts{Enemy: v.ID})
 
@@ -578,13 +601,25 @@ func (g *Game) handle(msg Message) {
 				if m.ATK > 0 {
 					t.PermATK += m.ATK
 				}
+				if m.THW > 0 {
+					t.PermTHW += m.THW
+				}
 				if m.GrantTrait != "" {
 					t.ExtraTraits = append(t.ExtraTraits, m.GrantTrait)
 				}
+			case *Minion:
+				// Enemy attachments (Spider-Tracer...).
+				t.Attachments = append(t.Attachments, m.ID)
 			}
 			if tgt := g.Entity(m.Target); tgt != nil {
 				g.logf("%s attaches to %s", u.EDef().Name, tgt.EDef().Name)
 			}
+		}
+
+	case CostDiscountApply:
+		if p := g.Player(m.Player); p != nil && m.Amount > 0 {
+			p.CostDiscounts = append(p.CostDiscounts, CostDiscount{Amount: m.Amount})
+			g.logf("%s's next card this phase costs %d less", p.Name, m.Amount)
 		}
 
 	case SenseEnterPlay:
@@ -790,6 +825,13 @@ func (g *Game) handle(msg Message) {
 			g.logf("%s gets +%d THW / +%d ATK / +%d DEF until the end of the phase", p.Name, m.THW, m.ATK, m.DEF)
 		}
 
+	case AllyStatBonus:
+		if a := g.Allies[m.Ally]; a != nil {
+			a.BonusTHW += m.THW
+			a.BonusATK += m.ATK
+			g.logf("%s gets +%d THW / +%d ATK until the end of the phase", a.EDef().Name, m.THW, m.ATK)
+		}
+
 	case TakeDeckCard:
 		p := g.Player(m.Player)
 		if p == nil {
@@ -880,10 +922,16 @@ func (g *Game) spawnDroneMinion(card Card) *Minion {
 	return mn
 }
 
-// droneBonus returns +1 while Ultron stage III is in play.
+// droneBonus returns +1 while Ultron stage III is in play or the Upgraded
+// Drones attachment is attached to the Ultron Drones environment.
 func (g *Game) droneBonus() int {
 	for _, v := range g.Villains {
 		if v.Code == "01136" {
+			return 1
+		}
+	}
+	for _, a := range g.Attachments {
+		if a.Code == "01142" {
 			return 1
 		}
 	}
@@ -1736,6 +1784,19 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 		} else {
 			interrupts = append(interrupts, choice.Msgs(final...))
 		}
+	}
+	// In-play ally cancels (Black Widow): exhaust the ally to cancel the
+	// treachery's effects. Approximation: the [mental] payment and the
+	// reveal-another-card rider are skipped.
+	for _, id := range p.Allies {
+		a := g.Allies[id]
+		if a == nil || a.Exhausted || a.Code != "01075" {
+			continue
+		}
+		interrupts = append(interrupts, Choice{
+			ID: "bw-cancel", Label: "Exhaust Black Widow → cancel " + m.Card.Def().Name,
+			Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code,
+		}.Msgs(ExhaustEntity{ID: a.ID}))
 	}
 	if len(interrupts) == 0 {
 		g.Push(TreacheryResolve{Player: m.Player, Card: m.Card})

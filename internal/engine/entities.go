@@ -111,10 +111,12 @@ type Ally struct {
 	AttackVal int      `json:"attack"`
 	ThwartVal int      `json:"thwart"`
 	// BonusATK/BonusTHW are until-end-of-phase modifiers (Avengers
-	// Assemble); PermATK is a persistent attachment bonus (Enraged).
+	// Assemble); PermATK/PermTHW are persistent bonuses (Enraged, Jessica
+	// Jones' per-side-scheme scaling).
 	BonusATK int `json:"bonusAtk,omitempty"`
 	BonusTHW int `json:"bonusThw,omitempty"`
 	PermATK  int `json:"permAtk,omitempty"`
+	PermTHW  int `json:"permThw,omitempty"`
 	// ExtraTraits are dynamically granted traits (Honorary Avenger).
 	ExtraTraits []string `json:"extraTraits,omitempty"`
 	// Counters tracks counters on the ally (Hawkeye's arrows).
@@ -221,6 +223,9 @@ type Attachment struct {
 	ID     EntityID `json:"id"`
 	Code   string   `json:"code"`
 	Target EntityID `json:"target,omitempty"`
+	// Counters tracks tokens stored on the attachment (Armored Rhino
+	// Suit's absorbed damage...).
+	Counters int `json:"counters,omitempty"`
 }
 
 func (t *Attachment) EID() EntityID       { return t.ID }

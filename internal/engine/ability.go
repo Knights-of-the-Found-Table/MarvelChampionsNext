@@ -30,6 +30,10 @@ type Ability struct {
 	// Cost flags
 	Exhaust bool `json:"exhaust,omitempty"` // exhaust the source to activate
 	Cost    int  `json:"cost,omitempty"`    // resource icons to pay
+	// CostIcons constrains the resource types the cost must be paid with,
+	// e.g. "physical:3" or "energy:1 mental:1" (wild resources count as
+	// any type).
+	CostIcons string `json:"costIcons,omitempty"`
 
 	// Form criteria (identity-side abilities).
 	HeroOnly     bool `json:"heroOnly,omitempty"`

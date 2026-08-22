@@ -359,7 +359,14 @@ type (
 		Target     EntityID
 		MaxHP      int    // target max HP bonus
 		ATK        int    // target attack bonus (allies)
+		THW        int    // target thwart bonus (allies)
 		GrantTrait string // trait granted to the target
+	}
+	// CostDiscountApply grants a player a pending one-shot cost reduction
+	// (Helicarrier).
+	CostDiscountApply struct {
+		Player PlayerID
+		Amount int
 	}
 
 	// EventPlayed announces that a player played an event card
@@ -442,6 +449,12 @@ type (
 		Target        PlayerID
 		ATK, THW, DEF int
 	}
+	// AllyStatBonus grants an ally until-end-of-phase stat bonuses
+	// (Vision, Lead from the Front).
+	AllyStatBonus struct {
+		Ally     EntityID
+		ATK, THW int
+	}
 
 	// WindowDefended announces a resolved defense with the damage actually
 	// taken (Unflappable, Under Control). Via names a substitute-defense
@@ -486,6 +499,11 @@ type (
 	AllyAttackWindow struct {
 		Ally   EntityID
 		Target EntityID
+	}
+	// AllyThwartWindow announces an ally thwarting (Daredevil's rider).
+	AllyThwartWindow struct {
+		Ally   EntityID
+		Scheme EntityID
 	}
 
 	// SideDeckDiscardTop discards the top card of a player's side deck
@@ -596,6 +614,7 @@ func (ReturnControlled) msg()         {}
 func (AllyEntersPlayFree) msg()       {}
 func (MinionEntersPlay) msg()         {}
 func (AttachUpgrade) msg()            {}
+func (CostDiscountApply) msg()        {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}
@@ -609,12 +628,14 @@ func (TreacheryResolve) msg()         {}
 func (ConsumeHandCard) msg()          {}
 func (PlayDiscardAlly) msg()          {}
 func (ApplyStatBonus) msg()           {}
+func (AllyStatBonus) msg()            {}
 func (WindowDefended) msg()           {}
 func (SenseEnterPlay) msg()           {}
 func (ShuffleIntoDeck) msg()          {}
 func (GrantTrait) msg()               {}
 func (InvokeSpecial) msg()            {}
 func (AllyAttackWindow) msg()         {}
+func (AllyThwartWindow) msg()         {}
 func (SideDeckDiscardTop) msg()       {}
 func (UpgradeEnterPlay) msg()         {}
 func (SideDeckToHand) msg()           {}
