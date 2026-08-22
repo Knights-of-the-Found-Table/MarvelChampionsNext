@@ -703,6 +703,17 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case BunkerDiscard:
+		if p := g.Player(m.Player); p != nil && len(p.Hand) > 0 {
+			var picks []Choice
+			for _, c := range p.Hand {
+				picks = append(picks, Choice{Label: "Discard " + c.Def().Name, Kind: ChoiceCard, CardCode: c.Code}.
+					Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
+			}
+			q := AskN("Discard 2 cards", min(2, len(p.Hand)), picks...)
+			g.Push(AskQuestion{Player: p.ID, Question: q})
+		}
+
 	case DiscardAttachmentMsg:
 		if a := g.Attachments[m.ID]; a != nil {
 			g.Delete(m.ID)

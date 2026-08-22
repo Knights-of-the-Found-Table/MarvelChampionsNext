@@ -422,6 +422,9 @@ type (
 	// DiscardAttachmentMsg removes an attachment from play into the
 	// encounter discard (Lethal Weapon).
 	DiscardAttachmentMsg struct{ ID EntityID }
+	// BunkerDiscard asks a player to discard 2 cards (Champions Mobile
+	// Bunker).
+	BunkerDiscard struct{ Player PlayerID }
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -680,6 +683,7 @@ func (RapidReturn) msg()              {}
 func (AddVengeance) msg()             {}
 func (ResolveTechnique) msg()         {}
 func (DiscardAttachmentMsg) msg()     {}
+func (BunkerDiscard) msg()            {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}
