@@ -116,6 +116,22 @@ type (
 		Player    PlayerID
 		Remaining []EntityID
 	}
+	// AskAttack builds and asks the defense (and interrupt) prompt for an
+	// enemy attack at resolve time, after boost cards have been revealed
+	// (Trigger "" asks the defense question only, for minion attacks).
+	AskAttack struct {
+		Enemy   EntityID
+		Player  PlayerID
+		Trigger string `json:"trigger,omitempty"`
+	}
+	// OtherDefenders offers the defense of an attack to the remaining
+	// players after the attacked player declined (official: any other
+	// player may defend).
+	OtherDefenders struct {
+		Against   EntityID
+		For       PlayerID
+		Remaining []PlayerID
+	}
 
 	// SchemeThreat adds threat; ThwartScheme removes it.
 	SchemeThreat struct {
@@ -525,6 +541,8 @@ func (VillainActivates) msg()         {}
 func (MinionActivates) msg()          {}
 func (MinionActivations) msg()        {}
 func (AskMinionOrder) msg()           {}
+func (AskAttack) msg()                {}
+func (OtherDefenders) msg()           {}
 func (SchemeThreat) msg()             {}
 func (ThwartScheme) msg()             {}
 func (DamageEntity) msg()             {}

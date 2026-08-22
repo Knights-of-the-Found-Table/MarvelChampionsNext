@@ -28,7 +28,7 @@ func init() {
 		ExhaustEntity{}, DrawCards{}, ShufflePlayerDeck{}, DiscardCards{},
 		ChangeForm{}, PlayCard{}, ResourcePay{}, BasicThwart{}, BasicAttack{},
 		BasicRecover{}, VillainActivates{}, MinionActivates{}, MinionActivations{},
-		AskMinionOrder{}, SchemeThreat{},
+		AskMinionOrder{}, AskAttack{}, OtherDefenders{}, SchemeThreat{},
 		ThwartScheme{}, DamageEntity{}, HealEntity{}, StunEntity{},
 		ConfuseEntity{}, ToughEntity{}, ClearStun{}, ClearConfuse{},
 		Defends{}, DealBoost{}, RevealBoost{}, ClearBoosts{},

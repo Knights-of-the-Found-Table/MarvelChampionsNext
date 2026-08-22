@@ -297,6 +297,12 @@ func (g *Game) handle(msg Message) {
 	case AskMinionOrder:
 		g.handleAskMinionOrder(m)
 
+	case AskAttack:
+		g.handleAskAttack(m)
+
+	case OtherDefenders:
+		g.handleOtherDefenders(m)
+
 	case SchemeThreat:
 		g.addThreat(m.Scheme, m.N, m.Source)
 
@@ -1254,7 +1260,7 @@ func (g *Game) handleVillainActivates(m VillainActivates) {
 		g.logf("%s attacks %s", def.Name, p.Name)
 		g.Push(DealBoost{Enemy: v.ID})
 		g.Push(RevealBoost{Enemy: v.ID})
-		g.Push(AskQuestion{Player: p.ID, Question: g.attackQuestion(v.ID, v.AttackVal, p, TriggerVillainAttacksYou)})
+		g.Push(AskAttack{Enemy: v.ID, Player: p.ID, Trigger: TriggerVillainAttacksYou})
 	} else {
 		// Scheme
 		if v.Confused {
@@ -1291,7 +1297,7 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 			return
 		}
 		g.logf("%s attacks %s", def.Name, p.Name)
-		g.Push(AskQuestion{Player: p.ID, Question: g.defenderQuestion(mn.ID, mn.AttackVal, p)})
+		g.Push(AskAttack{Enemy: mn.ID, Player: p.ID})
 	} else {
 		if mn.Confused {
 			mn.Confused = false
@@ -1370,6 +1376,47 @@ func (g *Game) handleAskMinionOrder(m AskMinionOrder) {
 		))
 	}
 	g.Push(AskQuestion{Player: p.ID, Question: Ask("Choose the next minion to activate", choices...)})
+}
+
+// handleAskAttack builds the attack/defense prompt at resolve time, so the
+// displayed attack value includes the boost icons revealed for this
+// activation. Villain attacks wrap the defense in the interrupt window;
+// minion attacks (Trigger "") ask the defense question directly.
+func (g *Game) handleAskAttack(m AskAttack) {
+	p := g.Player(m.Player)
+	if p == nil || p.KOed {
+		return
+	}
+	atk := g.attackValue(m.Enemy)
+	var q *Question
+	if m.Trigger == "" {
+		q = g.defenderQuestion(m.Enemy, atk, p)
+	} else {
+		q = g.attackQuestion(m.Enemy, atk, p, m.Trigger)
+	}
+	g.Push(AskQuestion{Player: p.ID, Question: q})
+}
+
+// handleOtherDefenders offers the defense to the remaining players after
+// the attacked player declined; once everyone passes, the attack resolves
+// undefended against the attacked player.
+func (g *Game) handleOtherDefenders(m OtherDefenders) {
+	if g.Player(m.For) == nil {
+		return
+	}
+	var live []PlayerID
+	for _, pid := range m.Remaining {
+		if q := g.Player(pid); q != nil && !q.KOed {
+			live = append(live, pid)
+		}
+	}
+	if len(live) == 0 {
+		g.Push(Defends{Defender: m.For, Against: m.Against, Undefended: true})
+		return
+	}
+	next := g.Player(live[0])
+	rest := live[1:]
+	g.Push(AskQuestion{Player: next.ID, Question: g.otherDefenderQuestion(m.Against, g.attackValue(m.Against), next, m.For, rest)})
 }
 
 func (g *Game) handleDefends(m Defends) {

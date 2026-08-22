@@ -539,7 +539,9 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 	return out
 }
 
-// defenderQuestion builds the defense prompt for an enemy attack.
+// defenderQuestion builds the defense prompt for an enemy attack against
+// p. If p declines and other players could defend in their place, the
+// "take" choice hands the defense over to them first.
 func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Question {
 	attacker := g.Entity(attackerID)
 	name := "enemy"
@@ -548,9 +550,46 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 	}
 	prompt := fmt.Sprintf("%s attacks for %d: defend?", name, atk)
 	var choices []Choice
-	choices = append(choices, Choice{
-		ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
-	}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
+	if others := g.otherDefenders(p); len(others) > 0 {
+		choices = append(choices, Choice{
+			ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
+		}.Msgs(OtherDefenders{Against: attackerID, For: p.ID, Remaining: others}))
+	} else {
+		choices = append(choices, Choice{
+			ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
+		}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
+	}
+	choices = append(choices, g.defenseOptions(attackerID, p)...)
+	return Ask(prompt, choices...)
+}
+
+// otherDefenderQuestion builds the defense prompt offered to another
+// player after the attacked player declined: they may defend in the
+// attacked player's place or pass to the next willing player.
+func (g *Game) otherDefenderQuestion(attackerID EntityID, atk int, p *Player, forWhom PlayerID, rest []PlayerID) *Question {
+	attacker := g.Entity(attackerID)
+	name := "enemy"
+	if attacker != nil {
+		name = attacker.EDef().Name
+	}
+	forName := "them"
+	if f := g.Player(forWhom); f != nil {
+		forName = f.Name
+	}
+	prompt := fmt.Sprintf("%s attacks %s for %d: defend?", name, forName, atk)
+	choices := []Choice{
+		Choice{ID: "pass", Label: "Don't defend", Kind: ChoicePass}.Msgs(
+			OtherDefenders{Against: attackerID, For: forWhom, Remaining: rest}),
+	}
+	choices = append(choices, g.defenseOptions(attackerID, p)...)
+	return Ask(prompt, choices...)
+}
+
+// defenseOptions lists the defense choices available to the player being
+// asked: hero basic defense, ally defense, defense events from hand, and
+// substitute defenses (Bamf!).
+func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
+	var choices []Choice
 	if p.IsHero() && !p.Exhausted {
 		choices = append(choices, Choice{
 			ID:    "hero-defend",
@@ -615,7 +654,33 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 		}.Msgs(append([]Message{d}, extra...)...)
 		choices = append(choices, choice)
 	}
-	return Ask(prompt, choices...)
+	return choices
+}
+
+// otherDefenders lists the players who may defend an attack in p's place,
+// in clockwise order after p (eliminated players excluded).
+func (g *Game) otherDefenders(p *Player) []PlayerID {
+	if len(g.Players) < 2 {
+		return nil
+	}
+	idx := -1
+	for i, q := range g.Players {
+		if q.ID == p.ID {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return nil
+	}
+	var out []PlayerID
+	for k := 1; k < len(g.Players); k++ {
+		q := g.Players[(idx+k)%len(g.Players)]
+		if !q.KOed {
+			out = append(out, q.ID)
+		}
+	}
+	return out
 }
 
 // attackQuestion combines optional hero/ally interrupts with the defense

@@ -148,6 +148,19 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 
 // ---------------------------------------------------------------- damage
 
+// attackValue returns an enemy's current attack total for a defense
+// prompt: the villain's modified ATK (boost icons included) or a minion's
+// ATK.
+func (g *Game) attackValue(id EntityID) int {
+	switch e := g.Entity(id).(type) {
+	case *Villain:
+		return e.AttackVal + e.BoostCount
+	case *Minion:
+		return e.AttackVal
+	}
+	return 0
+}
+
 // destroyAlly removes a defeated ally from play and discards its card.
 func (g *Game) destroyAlly(id EntityID) {
 	a := g.Allies[id]
