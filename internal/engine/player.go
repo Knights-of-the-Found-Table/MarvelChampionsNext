@@ -127,6 +127,15 @@ func (p *Player) HandSize(g *Game) int {
 		if b := behavior(p.HeroCode); b.HandSizeBonus != nil {
 			n += b.HandSizeBonus(g, p)
 		}
+		// Upgrades in play can also modify hand size (Star-Lord's
+		// Helmet, The Sorcerer Supreme).
+		for _, id := range p.Upgrades {
+			if u := g.Upgrades[id]; u != nil {
+				if b := behavior(u.Code); b.HandSizeBonus != nil {
+					n += b.HandSizeBonus(g, p)
+				}
+			}
+		}
 	}
 	return n + p.TempHandSize
 }
