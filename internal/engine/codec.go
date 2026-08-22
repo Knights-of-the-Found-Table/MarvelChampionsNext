@@ -40,7 +40,7 @@ func init() {
 		TakeDeckCard{}, FlipVillainPersona{}, MillPlayerDeck{}, DealEncounterToPlayer{}, EngageMinion{}, DiscardEncounterCard{}, AddInfamyMsg{}, BoostEnemyAttack{}, BoostActivation{},
 		ObligationResolve{}, DiscardControlled{}, AddAccelerationToken{}, RevealNextEncounter{},
 		PlayDefenseEvent{}, AddEntityCounter{}, ReturnControlled{},
-		AllyEntersPlayFree{}, MinionEntersPlay{}, AttachUpgrade{}, CostDiscountApply{},
+		AllyEntersPlayFree{}, MinionEntersPlay{}, AttachUpgrade{}, CostDiscountApply{}, SetAntForm{}, ChangeFormAgain{}, TempHandSizeMsg{},
 		EventPlayed{}, SetEventBonus{}, ReturnDiscardCard{}, DiscardToBottom{},
 		AllyDefeated{}, AllyDestroyed{}, SupportStoreCard{}, SupportRetrieveCards{},
 		TreacheryWindow{}, TreacheryResolve{}, ConsumeHandCard{}, PlayDiscardAlly{},

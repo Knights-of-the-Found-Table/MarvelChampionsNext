@@ -390,6 +390,20 @@ type (
 		Player PlayerID
 		Amount int
 	}
+	// SetAntForm grants/removes the giant/tiny identity traits (Ant-Man).
+	SetAntForm struct {
+		Player PlayerID
+		Form   string // "giant" | "tiny" | "" to clear
+	}
+	// ChangeFormAgain flips the identity ignoring the once-per-turn limit
+	// (Resize, Swarm Tactics).
+	ChangeFormAgain struct{ Player PlayerID }
+	// TempHandSizeMsg grants an until-end-of-phase hand-size bonus
+	// (Assess the Situation).
+	TempHandSizeMsg struct {
+		Player PlayerID
+		N      int
+	}
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -641,6 +655,9 @@ func (AllyEntersPlayFree) msg()       {}
 func (MinionEntersPlay) msg()         {}
 func (AttachUpgrade) msg()            {}
 func (CostDiscountApply) msg()        {}
+func (SetAntForm) msg()               {}
+func (ChangeFormAgain) msg()          {}
+func (TempHandSizeMsg) msg()          {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

@@ -10,6 +10,7 @@ import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 	// register all shipped content
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/angel"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ant"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/captainamerica"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/civilwar"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/core"

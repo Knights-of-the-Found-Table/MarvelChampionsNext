@@ -82,8 +82,11 @@ type Player struct {
 	// Until-end-of-phase stat modifiers (Fearless Determination,
 	// Avengers Assemble...); cleared at each phase change.
 	BonusTHW int `json:"bonusThw,omitempty"`
-	BonusATK int `json:"bonusAtk,omitempty"`
-	BonusDEF int `json:"bonusDef,omitempty"`
+	// TempHandSize is a until-end-of-phase hand-size bonus (Assess the
+	// Situation); cleared at each phase change.
+	TempHandSize int `json:"tempHandSize,omitempty"`
+	BonusATK     int `json:"bonusAtk,omitempty"`
+	BonusDEF     int `json:"bonusDef,omitempty"`
 	// ExtraTraits are dynamically granted traits (Honorary Avenger).
 	ExtraTraits []string `json:"extraTraits,omitempty"`
 	// GrowthCounters are identity-level prevention counters (Groot).
@@ -125,7 +128,7 @@ func (p *Player) HandSize(g *Game) int {
 			n += b.HandSizeBonus(g, p)
 		}
 	}
-	return n
+	return n + p.TempHandSize
 }
 
 // Attack/Thwart/Defense/Recover values for the current side; -1 when the

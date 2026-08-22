@@ -665,6 +665,37 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case SetAntForm:
+		if p := g.Player(m.Player); p != nil {
+			var kept []string
+			for _, t := range p.ExtraTraits {
+				if t != "giant" && t != "tiny" {
+					kept = append(kept, t)
+				}
+			}
+			if m.Form != "" {
+				kept = append(kept, m.Form)
+			}
+			p.ExtraTraits = kept
+		}
+
+	case ChangeFormAgain:
+		if p := g.Player(m.Player); p != nil {
+			if p.IsHero() {
+				p.Side = SideAlterEgo
+			} else {
+				p.Side = SideHero
+			}
+			p.FormChanged = true
+			g.Logf("%s changes form", p.Name)
+		}
+
+	case TempHandSizeMsg:
+		if p := g.Player(m.Player); p != nil {
+			p.TempHandSize += m.N
+			g.Logf("%s gets +%d hand size until the end of the phase", p.Name, m.N)
+		}
+
 	case CostDiscountApply:
 		if p := g.Player(m.Player); p != nil && m.Amount > 0 {
 			p.CostDiscounts = append(p.CostDiscounts, CostDiscount{Amount: m.Amount})
@@ -1151,6 +1182,7 @@ func (g *Game) askDiscardToHandSize(pid PlayerID) {
 func (g *Game) expirePhaseEffects() {
 	for _, p := range g.Players {
 		p.CostDiscounts = nil
+		p.TempHandSize = 0
 		// Until-end-of-phase stat modifiers expire.
 		p.BonusTHW, p.BonusATK, p.BonusDEF = 0, 0, 0
 		for _, id := range p.Allies {
