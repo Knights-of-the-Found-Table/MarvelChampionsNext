@@ -410,6 +410,14 @@ type (
 		Player PlayerID
 		Target EntityID
 	}
+	// HoodFoulPlay resolves The Hood's Foul Play against a player.
+	HoodFoulPlay struct {
+		Player PlayerID
+		N      int
+	}
+	// ReplaySideSchemeReveal re-runs a side scheme's When Revealed
+	// (Citywide Crisis).
+	ReplaySideSchemeReveal struct{ Scheme EntityID }
 	// ChangeFormAgain flips the identity ignoring the once-per-turn limit
 	// (Resize, Swarm Tactics).
 	ChangeFormAgain struct{ Player PlayerID }
@@ -707,6 +715,8 @@ func (SetAntForm) msg()               {}
 func (SetMassForm) msg()              {}
 func (SpawnSymbiote) msg()            {}
 func (AllForOneDamage) msg()          {}
+func (HoodFoulPlay) msg()             {}
+func (ReplaySideSchemeReveal) msg()   {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
 func (RapidReturn) msg()              {}

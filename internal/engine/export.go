@@ -85,6 +85,23 @@ func (g *Game) CustomPaymentQuestion(p *Player, cost int, prompt string, ctx map
 	return q
 }
 
+// EOwnerIfPlayer resolves a side scheme's reveal "owner" to a player:
+// the first player by default (reveal-side effects approximate).
+func (s *SideScheme) EOwnerIfPlayer() PlayerID { return "" }
+
+// EOwnerIfPlayer on the game resolves the revealer.
+func (g *Game) EOwnerIfPlayer() PlayerID {
+	for _, p := range g.Players {
+		if p.FirstPlayer {
+			return p.ID
+		}
+	}
+	if len(g.Players) > 0 {
+		return g.Players[0].ID
+	}
+	return ""
+}
+
 // EntityHasTrait reports an entity's traits including dynamically granted
 // ones (Honorary Avenger).
 func (g *Game) EntityHasTrait(id EntityID, trait string) bool {

@@ -665,6 +665,31 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case HoodFoulPlay:
+		// Foul Play: discard N encounter cards, dealing non-Hood cards to
+		// the player facedown.
+		if p := g.Player(m.Player); p != nil {
+			for i := 0; i < m.N; i++ {
+				c, ok := g.DrawEncounter()
+				if !ok {
+					return
+				}
+				if c.Def().CardSet == "the_hood" {
+					g.EncounterDiscard = append(g.EncounterDiscard, c)
+				} else {
+					p.EncounterDown = append(p.EncounterDown, c)
+					g.Logf("Foul Play deals %s to %s facedown", c.Def().Name, p.Name)
+				}
+			}
+		}
+
+	case ReplaySideSchemeReveal:
+		if s := g.SideSchemes[m.Scheme]; s != nil {
+			if b := behavior(s.Code); b.OnPlay != nil {
+				g.Push(b.OnPlay(g, s)...)
+			}
+		}
+
 	case AllForOneDamage:
 		n := 3
 		if p := g.Player(m.Player); p != nil {
