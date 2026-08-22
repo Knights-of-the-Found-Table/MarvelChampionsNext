@@ -42,6 +42,15 @@ func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
 		req.Difficulty = "standard"
 	}
 
+	// 玩家名用用户名（而非牌组名）：日志/HUD/棋盘上指代的是玩家本人。
+	playerName := ""
+	if u, err := s.Store.UserByID(uid); err == nil {
+		playerName = u.Username
+	}
+	if playerName == "" {
+		playerName = fmt.Sprintf("Player %d", uid)
+	}
+
 	specs := make([]engine.PlayerSpec, 0, len(req.DeckIDs))
 	players := make([]store.GamePlayer, 0, len(req.DeckIDs))
 	for i, deckID := range req.DeckIDs {
@@ -56,7 +65,7 @@ func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		specs = append(specs, engine.PlayerSpec{
-			Name:     deck.Name,
+			Name:     playerName,
 			UserID:   fmt.Sprint(uid),
 			HeroBase: heroBase,
 			Deck:     deck.Slots,

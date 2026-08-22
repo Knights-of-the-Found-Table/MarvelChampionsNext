@@ -163,19 +163,24 @@ export function layoutHand(view: GameView): PlacedCard[] {
   if (!owner || !owner.hand) return []
   const n = owner.hand.length
   const playerIndex = view.players.indexOf(owner)
-  const maxW = 920
-  const step = n > 1 ? Math.min(CARD_W + 14, (maxW - CARD_W) / (n - 1)) : 0
-  const startX = SCENE_W / 2 - (CARD_W + (n - 1) * step) / 2
-  // 扇形收着来：总角度与弧度都取小值，边缘牌轻微上抬即可
-  const totalDeg = Math.min(24, n * 4)
-  const perDeg = n > 1 ? totalDeg / (n - 1) : 0
+  // 手牌扇形：所有牌绕下方同一圆心排布（真实持牌的轮辐模型）——牌中心
+  // 落在半径 R 的圆周上、旋转角等于辐条角，顶边自然共圆，边缘牌下垂。
+  // R 是形态主控参数：半径越大弧越平缓。牌距沿圆弧量取（轻微重叠），
+  // 牌多时收窄弧角上限以防过宽。
+  const R = 900
+  const arcStep = CARD_W - 14
+  const maxHalf = (35 * Math.PI) / 180
+  const dTheta = n > 1 ? Math.min(arcStep / R, maxHalf / (n - 1)) : 0
+  const midTop = SCENE_H - CARD_H + 40 // 中间牌（θ=0）顶边
+  const cy = midTop + CARD_H / 2 + R // 圆心 y（手下方远处）
+  const cx = SCENE_W / 2
   return owner.hand.map((c, i) => {
-    const t = n > 1 ? i / (n - 1) - 0.5 : 0 // -0.5..0.5
+    const theta = (i - (n - 1) / 2) * dTheta
     return {
       id: c.id, code: c.code, kind: 'hand' as CardKind,
-      x: startX + i * step,
-      y: SCENE_H - CARD_H + 40 + t * t * 24,
-      rotate: (i - (n - 1) / 2) * perDeg,
+      x: cx + R * Math.sin(theta) - CARD_W / 2,
+      y: cy - R * Math.cos(theta) - CARD_H / 2,
+      rotate: (theta * 180) / Math.PI,
       z: 20 + i, playerIndex, title: c.name,
     }
   })
@@ -404,11 +409,14 @@ export function layoutBoard(view: GameView): PlacedCard[] {
 }
 
 function heroCard(p: PlayerView, x: number, y: number, playerIndex: number): PlacedCard {
+  const isHero = p.side === 'hero'
   return {
     id: p.id,
-    code: p.side === 'hero' ? p.heroCode : p.alterEgoCode,
+    code: isHero ? p.heroCode : p.alterEgoCode,
     kind: 'hero', x, y, playerIndex,
-    title: p.name, hp: p.hp, maxHp: p.maxHp,
+    // 悬浮提示用当前面的卡牌名（与其他卡一致），不用玩家名
+    title: (isHero ? p.heroName : p.alterEgoName) || p.name,
+    hp: p.hp, maxHp: p.maxHp,
     exhausted: p.exhausted, stunned: p.stunned, confused: p.confused, tough: p.tough,
     firstPlayer: p.firstPlayer, koed: p.koed, z: 3,
   }

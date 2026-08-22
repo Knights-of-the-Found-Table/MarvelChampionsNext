@@ -112,6 +112,9 @@ type PlayerView struct {
 	Side      string     `json:"side"`
 	HeroCode  string     `json:"heroCode"`
 	AlterEgo  string     `json:"alterEgoCode"`
+	// 当前面的卡牌名（title 展示用，区别于玩家名）。
+	HeroName     string `json:"heroName,omitempty"`
+	AlterEgoName string `json:"alterEgoName,omitempty"`
 	HP        int        `json:"hp"`
 	MaxHP     int        `json:"maxHp"`
 	Exhausted bool       `json:"exhausted"`
@@ -226,6 +229,8 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 		pv := PlayerView{
 			ID: string(p.ID), Name: p.Name,
 			Side: p.Side, HeroCode: p.HeroCode, AlterEgo: p.AlterEgoCode,
+			HeroName:     engine.DB.MustLookup(p.HeroCode).Name,
+			AlterEgoName: engine.DB.MustLookup(p.AlterEgoCode).Name,
 			HP: max(0, p.HP()), MaxHP: p.MaxHP,
 			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough,
 			FirstPlayer: p.FirstPlayer, KOed: p.KOed, FormChanged: p.FormChanged,

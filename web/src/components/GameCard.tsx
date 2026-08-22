@@ -4,7 +4,7 @@
 // 覆盖在卡面上，数值同时写入 data-* 供 diff 动画层定位飘字。
 import { useEffect, useRef, useState } from 'react'
 import { cardUrl, fallbackDataUrl, useCardZoom } from '../cards'
-import { useLang } from '../i18n'
+import { lname, useLang, useT, useZhMap } from '../i18n'
 import type { CardFx } from '../board/fx'
 import type { PlacedCard } from '../board/layout'
 
@@ -22,6 +22,8 @@ interface Props {
 
 export default function GameCard({ card, onClick, className = '', zoom = true, fx, selOrder }: Props) {
   const lang = useLang()
+  const zh = useZhMap()
+  const displayTitle = lname(zh, card.code, card.title)
   const imgRef = useRef<HTMLDivElement | null>(null)
   const cardZoom = useCardZoom(card.code, imgRef)
   // 挂载时短暂附加入场动画类，之后移除，避免与后续动效在 animation
@@ -66,7 +68,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
       data-threat={card.threat}
       data-counters={card.counters}
       data-sel={selOrder}
-      title={card.title}
+      title={displayTitle}
       onClick={onClick ? () => onClick(card) : undefined}
       onMouseEnter={card.code && zoom ? cardZoom.onEnter : undefined}
       onMouseLeave={card.code && zoom ? cardZoom.hide : undefined}
@@ -155,9 +157,20 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
 function Pile({ card, className = '', onClick }: { card: PlacedCard; className?: string; onClick?: () => void }) {
   const s = card.pileScale ?? 1
   const lang = useLang()
+  const t = useT()
+  const zh = useZhMap()
   const count = card.count ?? 0
   const layers = Math.max(1, Math.min(7, Math.ceil(count / 3)))
   const isEmptyDiscard = card.label === 'discard' && count === 0 && !card.code
+  // 牌库/弃牌堆 title：{玩家名}的牌库 / {玩家名}的弃牌堆
+  const displayTitle =
+    card.label === 'deck'
+      ? t('pile.deckTitle', { name: card.title })
+      : card.label === 'discard'
+        ? t('pile.discardTitle', { name: card.title })
+        : card.label === 'encounter'
+          ? t('pile.encounter')
+          : lname(zh, card.code, card.title)
   return (
     <div
       className={`gcard pile pk-${Math.max(0, card.playerIndex)} k-pile-${card.label ?? 'deck'} ${className}`}
@@ -173,7 +186,7 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
           '--pc': card.playerIndex >= 0 ? PLAYER_COLORS[card.playerIndex % 4] : '#8a2020',
         } as React.CSSProperties
       }
-      title={card.title}
+      title={displayTitle}
       onClick={onClick}
     >
       <div className="gcard-in">

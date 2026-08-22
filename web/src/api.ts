@@ -160,6 +160,8 @@ export interface PlayerView {
   side: string
   heroCode: string
   alterEgoCode: string
+  heroName?: string
+  alterEgoName?: string
   hp: number
   maxHp: number
   exhausted: boolean
