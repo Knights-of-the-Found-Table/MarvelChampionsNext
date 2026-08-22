@@ -174,14 +174,16 @@ type Env struct {
 
 // SourcesFromEnv resolves the source chains from environment variables:
 // IMAGE_MIRROR (default https://marvelcdb.com) and ZH_IMAGE_MIRROR. Both
-// serve marvelcdb's path layout, with extension fallback for mirrors that
-// key images differently (.png/.jpg/.webp).
+// serve the /bundles/cards/ layout; mirrors are expected to follow the
+// {code}.png face convention, with extension fallback (.png/.jpg/.webp)
+// for mirrors that key images differently. A trailing slash on the root is
+// ignored so "https://marvelcdb.com/" still counts as bare marvelcdb.
 func SourcesFromEnv() Env {
 	var env Env
-	root := envOr("IMAGE_MIRROR", defaultMarvelcdb)
+	root := strings.TrimSuffix(envOr("IMAGE_MIRROR", defaultMarvelcdb), "/")
 	env.Default = []Source{TryExtensions(HTTPSource{BaseURL: root})}
 	env.DefaultIsMirror = root != defaultMarvelcdb
-	if v := os.Getenv("ZH_IMAGE_MIRROR"); v != "" {
+	if v := strings.TrimSuffix(os.Getenv("ZH_IMAGE_MIRROR"), "/"); v != "" {
 		env.Zh = []Source{TryExtensions(HTTPSource{BaseURL: v})}
 	}
 	return env

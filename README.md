@@ -37,8 +37,8 @@ docker compose up --build -d   # http://localhost:3000
 | `MC_STATIC_DIR` | `web/dist` | Directory with the built frontend. |
 | `MC_CACHE_DIR` | `cache` | On-demand card image cache. |
 | `MC_PREWARM_IMAGES` | `auto` | Background cache prewarm at startup so every image URL is content-hashed. `auto` = on for every mirror-backed cache, off against bare marvelcdb; `1`/`0` force it. |
-| `IMAGE_MIRROR` | `https://marvelcdb.com` | Default-language (English) image mirror root. Must serve marvelcdb's path layout (`/bundles/cards/{code}.png`). |
-| `ZH_IMAGE_MIRROR` | empty | Chinese image mirror root — a separate language source with the same paths, like marvelcdb's language domains. |
+| `IMAGE_MIRROR` | `https://marvelcdb.com` | Default-language (English) image mirror root, keyed by the face convention (`/bundles/cards/{code}.png`). The marvelcdb.com default is special-cased to its own legacy per-face paths. |
+| `ZH_IMAGE_MIRROR` | empty | Chinese image mirror root — a separate language source keyed by the face convention (`/bundles/cards/{code}.png`, `{base}a`/`{base}b` for double-sided cards). |
 
 A repo-root `.env` file (see `.env.example`) is loaded by the server on
 startup — real environment variables win — and passed into the docker
@@ -46,24 +46,37 @@ container by `deploy/docker-compose.yml` via `env_file`.
 
 ### Image mirrors
 
-Card images are fetched on demand and cached locally. Mirrors are plain
-HTTP site roots serving marvelcdb's path layout. Paths are requested
-exactly as in the card data (a mix of `.png` and `.jpg` — 2734/1067); a
-missing path is retried with the other extensions (`.png`/`.jpg`/`.webp`)
-so mirrors keyed differently still work, and the MIME type is detected
-from content regardless of the URL. Languages are separate sources, like
-marvelcdb's own language domains:
+Card images are fetched on demand and cached locally. The repo standardizes
+on the double-sided face convention — `{base}a.png` is the A face,
+`{base}b.png` the B face — and main schemes are registered by their b-face
+code (the gameplay side, which carries the threat stats). marvelcdb's own
+storage predates and often contradicts that convention (for some schemes
+`{base}.png` holds the B-face image and `{base}b.png` the A-face image), so
+the two language chains resolve paths differently:
 
-- **default (English)**: `IMAGE_MIRROR` (default marvelcdb.com),
-- **Chinese**: `ZH_IMAGE_MIRROR` — the zh cache fetches from it on demand;
-  codes it lacks fall back to the default root. Locally seeded faces in
-  `cache/images/zh` (see `tools/seed_zh_images.py`) always take priority.
+- **default (English)**: `IMAGE_MIRROR` — always requested by convention
+  path `/bundles/cards/{code}.png`, so the mirror must be keyed that way.
+  The marvelcdb.com default (no `IMAGE_MIRROR` configured) is the one
+  special case: it is requested through the per-face paths recorded in the
+  normalized card data (`tools/normalize_faces.py` keeps them correct),
+  because marvelcdb's own layout predates and often contradicts the
+  convention (for some schemes `{base}.png` holds the B-face image and
+  `{base}b.png` the A-face image).
+- **Chinese**: `ZH_IMAGE_MIRROR` — same convention paths, a separate
+  language source. Codes it lacks fall back to the default root. Locally
+  seeded faces in `cache/images/zh` (see `tools/seed_zh_images.py`) always
+  take priority, and `tools/zh/audit_mirror.py` writes a gap report for
+  the mirror maintainer.
 
-With a mirror configured the server prewarms that language's whole card
-set in the background (`MC_PREWARM_IMAGES`), completing the hash manifest
-so image URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and
-cached immutably by browsers; un-hashed URLs and manifests revalidate via
-ETag, and a zh fallback (no Chinese face exists, the default-language
-image is served) caches for a day. The cache persists in `MC_CACHE_DIR`
-(the docker image keeps it on the `/data` volume), so repeat boots only
-fetch what is missing.
+A missing path is retried with the other extensions (`.png`/`.jpg`/`.webp`)
+so mirrors keyed differently still work, and the MIME type is detected from
+content regardless of the URL.
+
+With a mirror configured the server prewarms the whole card set in the
+background (`MC_PREWARM_IMAGES`), completing the hash manifest so image
+URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and cached
+immutably by browsers; un-hashed URLs and manifests revalidate via ETag,
+and a zh fallback (no Chinese face exists, the default-language image is
+served) caches for a day. The cache persists in `MC_CACHE_DIR` (the docker
+image keeps it on the `/data` volume), so repeat boots only fetch what is
+missing.

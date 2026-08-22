@@ -18,7 +18,7 @@ func registerMutagenFormula() {
 		ID:               "02017",
 		Name:             "Green Goblin — The Mutagen Formula",
 		VillainBases:     []string{"02014"},
-		MainSchemeStages: []string{"02017", "02018"},
+		MainSchemeStages: []string{"02017b", "02018b"},
 		ExtraSets:        []string{"goblin_gimmicks", "a_mess_of_things", "standard"},
 		OnMainSchemeMaxed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			if s.Stage == 1 {
@@ -60,7 +60,7 @@ func registerRiskyBusiness() {
 		ID:               "02004",
 		Name:             "Green Goblin — Risky Business",
 		VillainBases:     []string{"02001"},
-		MainSchemeStages: []string{"02004", "02005"},
+		MainSchemeStages: []string{"02004b", "02005b"},
 		ExtraSets:        []string{"power_drain", "running_interference", "standard"},
 		Setup: func(g *engine.Game) []engine.Message {
 			// The villain starts on his Norman Osborn side; Criminal

@@ -47,16 +47,18 @@ func registerScenarios() {
 		ID:               "32063",
 		Name:             "Sabretooth — Stalked by Sabretooth",
 		VillainBases:     []string{"32060"},
-		MainSchemeStages: []string{"32063a", "32064a"},
+		MainSchemeStages: []string{"32063b", "32064b"},
 		ExtraSets:        []string{"sabretooth", "standard"},
 	})
 
 	// Night of the Sentinels (Sentinel I-III, then Master Mold).
 	engine.RegisterScenario(&engine.ScenarioDef{
-		ID:               "32087",
-		Name:             "Sentinels — Night of the Sentinels",
-		VillainBases:     []string{"32084"},
-		MainSchemeStages: []string{"32087a", "32088a"},
+		ID:           "32087",
+		Name:         "Sentinels — Night of the Sentinels",
+		VillainBases: []string{"32084"},
+		// Stage 2 reuses the Mutants at the Mall flip card (32088a, a side
+		// scheme whose b face is an ally), so it keeps its a-side code.
+		MainSchemeStages: []string{"32087b", "32088a"},
 		ExtraSets:        []string{"project_wideawake", "standard"},
 	})
 
@@ -65,7 +67,7 @@ func registerScenarios() {
 		ID:               "32112",
 		Name:             "Master Mold — The Sentinel Factory",
 		VillainBases:     []string{"32109"},
-		MainSchemeStages: []string{"32112a", "32113a"},
+		MainSchemeStages: []string{"32112b", "32113b"},
 		ExtraSets:        []string{"master_mold", "project_wideawake", "standard"},
 	})
 
@@ -75,7 +77,7 @@ func registerScenarios() {
 		ID:               "32125",
 		Name:             "Brotherhood — The Brotherhood Strikes",
 		VillainBases:     []string{"32121", "32122", "32123", "32124"},
-		MainSchemeStages: []string{"32125a", "32126a", "32127a"},
+		MainSchemeStages: []string{"32125b", "32126b", "32127b"},
 		ExtraSets:        []string{"mansion_attack", "standard"},
 	})
 }

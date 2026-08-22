@@ -77,7 +77,7 @@ func registerScenarios() {
 		ID:               "40077",
 		Name:             "Marauders — Mutant Massacre",
 		VillainBases:     []string{"40070", "40071", "40072", "40073", "40074", "40075", "40076"},
-		MainSchemeStages: []string{"40077a", "40078a"},
+		MainSchemeStages: []string{"40077b", "40078b"},
 		ExtraSets:        []string{"marauders", "standard"},
 	})
 
@@ -86,7 +86,7 @@ func registerScenarios() {
 		ID:               "40121",
 		Name:             "Juggernaut — The Unstoppable Juggernaut",
 		VillainBases:     []string{"40118"},
-		MainSchemeStages: []string{"40121a"},
+		MainSchemeStages: []string{"40121b"},
 		ExtraSets:        []string{"juggernaut", "standard"},
 	})
 
@@ -95,7 +95,7 @@ func registerScenarios() {
 		ID:               "40139",
 		Name:             "Mister Sinister — Sinister Intent",
 		VillainBases:     []string{"40136"},
-		MainSchemeStages: []string{"40139a", "40140a", "40141a"},
+		MainSchemeStages: []string{"40139b", "40140b", "40141b"},
 		ExtraSets:        []string{"mister_sinister", "marauders", "standard"},
 	})
 }

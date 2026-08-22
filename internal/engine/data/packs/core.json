@@ -5760,6 +5760,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/01097a",
+    "imagesrc": "\/bundles\/cards\/01097b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "core",
@@ -5846,7 +5847,7 @@
       "escalation_threat_star": false,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/01097b",
-      "imagesrc": "\/bundles\/cards\/01097b.png",
+      "imagesrc": "\/bundles\/cards\/01097.png",
       "spoiler": 1,
       "backimagesrc": null
     }
@@ -6854,6 +6855,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/01116a",
+    "imagesrc": "\/bundles\/cards\/01116b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "core",
@@ -6940,7 +6942,7 @@
       "escalation_threat_star": false,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/01116b",
-      "imagesrc": "\/bundles\/cards\/01116b.png",
+      "imagesrc": "\/bundles\/cards\/01116.png",
       "spoiler": 1,
       "backimagesrc": null
     }
@@ -7046,6 +7048,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/01117a",
+    "imagesrc": "\/bundles\/cards\/01117b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "core",
@@ -7132,7 +7135,7 @@
       "escalation_threat_star": false,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/01117b",
-      "imagesrc": "\/bundles\/cards\/01117b.png",
+      "imagesrc": "\/bundles\/cards\/01117.png",
       "spoiler": 1,
       "backimagesrc": null
     }
@@ -8191,6 +8194,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/01137a",
+    "imagesrc": "\/bundles\/cards\/01137b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "core",
@@ -8277,7 +8281,7 @@
       "escalation_threat_star": false,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/01137b",
-      "imagesrc": "\/bundles\/cards\/01137b.png",
+      "imagesrc": "\/bundles\/cards\/01137.png",
       "spoiler": 1,
       "backimagesrc": null
     }
@@ -8383,6 +8387,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/01138a",
+    "imagesrc": "\/bundles\/cards\/01138b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "core",
@@ -8469,7 +8474,7 @@
       "escalation_threat_star": false,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/01138b",
-      "imagesrc": "\/bundles\/cards\/01138b.png",
+      "imagesrc": "\/bundles\/cards\/01138.png",
       "spoiler": 1,
       "backimagesrc": null
     }
@@ -8575,6 +8580,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/01139a",
+    "imagesrc": "\/bundles\/cards\/01139b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "core",
@@ -8661,7 +8667,7 @@
       "escalation_threat_star": false,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/01139b",
-      "imagesrc": "\/bundles\/cards\/01139b.png",
+      "imagesrc": "\/bundles\/cards\/01139.png",
       "spoiler": 1,
       "backimagesrc": null
     }

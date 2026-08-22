@@ -97,6 +97,7 @@
     "threat_star": false,
     "escalation_threat_star": false,
     "url": "https:\/\/marvelcdb.com\/card\/07001a",
+    "imagesrc": "\/bundles\/cards\/07001b.png",
     "spoiler": 1,
     "linked_card": {
       "pack_code": "twc",
@@ -183,7 +184,7 @@
       "escalation_threat_star": true,
       "errata": null,
       "url": "https:\/\/marvelcdb.com\/card\/07001b",
-      "imagesrc": "\/bundles\/cards\/07001b.png",
+      "imagesrc": "\/bundles\/cards\/07001.png",
       "spoiler": 1,
       "backimagesrc": null
     }

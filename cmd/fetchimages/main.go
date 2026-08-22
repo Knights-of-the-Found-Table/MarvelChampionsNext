@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/dotenv"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
@@ -43,16 +44,16 @@ func main() {
 	// Only rate-limit when hitting marvelcdb directly; a mirror is our own
 	// infrastructure.
 	polite := !sources.DefaultIsMirror
+	// Mirrors follow the face convention; bare marvelcdb needs its legacy
+	// per-face paths.
+	pathFor := api.DefaultImagePathFor(sources.DefaultIsMirror)
 
 	db := data.MustLoad()
 
-	// Target set: one image per card code (front images; back faces are
-	// rendered by the client as the same asset for now).
+	// Target set: every card code, faces included (back faces are rendered
+	// by the client as the same asset for now).
 	codes := make([]string, 0, len(db.All()))
 	for _, def := range db.All() {
-		if def.ImageSrc == "" {
-			continue
-		}
 		if *packs != "" && !contains(strings.Split(*packs, ","), def.PackCode) {
 			continue
 		}
@@ -68,8 +69,8 @@ func main() {
 	manifest := map[string]string{}
 	fetched, skipped, failed := 0, 0, 0
 	for i, code := range codes {
-		def, _ := db.Lookup(code)
-		ext := filepath.Ext(def.ImageSrc)
+		remote := pathFor(code)
+		ext := filepath.Ext(remote)
 		if ext == "" {
 			ext = ".png"
 		}
@@ -79,7 +80,7 @@ func main() {
 			skipped++
 			continue
 		}
-		body, err := chain.Fetch(def.ImageSrc)
+		body, err := chain.Fetch(remote)
 		if err != nil {
 			log.Printf("WARN %s: %v", code, err)
 			failed++

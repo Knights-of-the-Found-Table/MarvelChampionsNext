@@ -10,7 +10,7 @@ func registerUltron() {
 		ID:               "01137",
 		Name:             "Ultron — The Imperative",
 		VillainBases:     []string{"01134"},
-		MainSchemeStages: []string{"01137", "01138", "01139"},
+		MainSchemeStages: []string{"01137b", "01138b", "01139b"},
 		ExtraSets:        []string{"under_attack", "standard"},
 	})
 

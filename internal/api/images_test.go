@@ -332,9 +332,9 @@ func TestPrewarmImages(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cached, failed := PrewarmImages(images, []string{"01001a", "01006a", "01007"}, 2, 0)
-	if cached != 3 || failed != 0 {
-		t.Fatalf("prewarm = %d cached, %d failed", cached, failed)
+	cached, missing, failed := PrewarmImages(images, []string{"01001a", "01006a", "01007"}, 2, 0)
+	if cached != 3 || missing != 0 || failed != 0 {
+		t.Fatalf("prewarm = %d cached, %d missing, %d failed", cached, missing, failed)
 	}
 	for _, code := range []string{"01001a", "01006a", "01007"} {
 		if img, ok := images.peek(code); !ok || string(img.body) != "prewarmed" {
@@ -349,8 +349,48 @@ func TestPrewarmImages(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cached, failed = PrewarmImages(failing, []string{"01001a", "01006a"}, 2, 0)
-	if cached != 0 || failed != 2 {
-		t.Fatalf("failing prewarm = %d cached, %d failed", cached, failed)
+	cached, missing, failed = PrewarmImages(failing, []string{"01001a", "01006a"}, 2, 0)
+	if cached != 0 || missing != 0 || failed != 2 {
+		t.Fatalf("failing prewarm = %d cached, %d missing, %d failed", cached, missing, failed)
+	}
+
+	// 404s at every source count as missing (the zh chain legitimately
+	// lacks faces) instead of failures.
+	notFound, err := NewImageCache(t.TempDir(), &stubSource{err: mirror.ErrNotFound})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cached, missing, failed = PrewarmImages(notFound, []string{"01001a", "01006a"}, 2, 0)
+	if cached != 0 || missing != 2 || failed != 0 {
+		t.Fatalf("missing prewarm = %d cached, %d missing, %d failed", cached, missing, failed)
+	}
+}
+
+func TestImagePathPolicies(t *testing.T) {
+	// The normalized pack data records where marvelcdb truly stores each
+	// face: for case-1 main schemes like 01097 the B-face image lives at
+	// {base}.png and the A-face image at {base}b.png.
+	if got := LegacyImagePath("01097b"); got != "/bundles/cards/01097.png" {
+		t.Errorf("LegacyImagePath(01097b) = %q", got)
+	}
+	if got := LegacyImagePath("01097a"); got != "/bundles/cards/01097b.png" {
+		t.Errorf("LegacyImagePath(01097a) = %q", got)
+	}
+	// Faces without imagesrc (faces-only cards) fall back to the
+	// convention path.
+	if got := LegacyImagePath("56063b"); got != "/bundles/cards/56063b.png" {
+		t.Errorf("LegacyImagePath(56063b) = %q", got)
+	}
+	// The zh chain always requests the face-convention path.
+	if got := ConventionImagePath("01097b"); got != "/bundles/cards/01097b.png" {
+		t.Errorf("ConventionImagePath(01097b) = %q", got)
+	}
+	// The default chain uses convention paths against a mirror and legacy
+	// marvelcdb paths only when fetching marvelcdb.com itself.
+	if got := DefaultImagePathFor(true)("01097b"); got != "/bundles/cards/01097b.png" {
+		t.Errorf("mirror-backed path = %q", got)
+	}
+	if got := DefaultImagePathFor(false)("01097b"); got != "/bundles/cards/01097.png" {
+		t.Errorf("bare-marvelcdb path = %q", got)
 	}
 }

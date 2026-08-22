@@ -24,7 +24,7 @@ func registerRhino() {
 		ID:               "01097",
 		Name:             "Rhino — The Break-In",
 		VillainBases:     []string{"01094"},
-		MainSchemeStages: []string{"01097"},
+		MainSchemeStages: []string{"01097b"},
 		ExtraSets:        []string{"bomb_scare", "standard"},
 	})
 
@@ -53,7 +53,7 @@ func registerKlaw() {
 		ID:               "01116",
 		Name:             "Klaw — Underground Distribution",
 		VillainBases:     []string{"01113"},
-		MainSchemeStages: []string{"01116", "01117"},
+		MainSchemeStages: []string{"01116b", "01117b"},
 		ExtraSets:        []string{"masters_of_evil", "standard"},
 		OnMainSchemeDefeated: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			msgs := []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}

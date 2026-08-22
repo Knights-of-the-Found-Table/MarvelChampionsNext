@@ -78,10 +78,12 @@ func main() {
 	}
 	defer st.Close()
 
-	// Image sources, one chain per language: the default root
-	// (IMAGE_MIRROR or marvelcdb.com) and optionally a Chinese root
-	// (ZH_IMAGE_MIRROR) — separate language sources with marvelcdb's
-	// exact paths, like marvelcdb's own language domains.
+	// Image sources, one chain per language. Mirrors follow the face
+	// convention ({base}a = A face, {base}b = B face, requested as
+	// /bundles/cards/{code}.png), so both a configured IMAGE_MIRROR and the
+	// Chinese root (ZH_IMAGE_MIRROR) resolve by convention; only bare
+	// marvelcdb.com — the default when IMAGE_MIRROR is unset — needs its
+	// legacy per-face paths.
 	imgSources := mirror.SourcesFromEnv()
 	for _, src := range imgSources.Default {
 		log.Printf("image source (default): %s", src.Name())
@@ -90,13 +92,18 @@ func main() {
 		log.Printf("image source (zh): %s", src.Name())
 	}
 
-	images, err := api.NewImageCache(filepath.Join(cacheDir, "images"), imgSources.Default...)
+	images, err := api.NewImageCacheWithPaths(
+		filepath.Join(cacheDir, "images"),
+		api.DefaultImagePathFor(imgSources.DefaultIsMirror),
+		imgSources.Default...,
+	)
 	if err != nil {
 		log.Fatalf("image cache: %v", err)
 	}
 	// The zh cache serves locally seeded faces plus ZH_IMAGE_MIRROR
-	// fetches; codes it cannot resolve fall back to the default chain.
-	zhImages, err := api.NewImageCache(filepath.Join(cacheDir, "images", "zh"), imgSources.Zh...)
+	// fetches by convention path; codes it cannot resolve fall back to the
+	// default chain.
+	zhImages, err := api.NewImageCacheWithPaths(filepath.Join(cacheDir, "images", "zh"), api.ConventionImagePath, imgSources.Zh...)
 	if err != nil {
 		log.Fatalf("zh image cache: %v", err)
 	}
@@ -109,11 +116,12 @@ func main() {
 		prewarmDefault := prewarm == "1" || imgSources.DefaultIsMirror
 		prewarmZh := prewarm == "1" || len(imgSources.Zh) > 0
 		if prewarmDefault || prewarmZh {
-			codes := make([]string, 0)
+			// Every card code, faces included: the manifest then covers
+			// all URLs the frontend can build. Codes a source lacks are
+			// counted as missing (zh falls back to the default chain).
+			codes := make([]string, 0, len(engine.DB.All()))
 			for _, def := range engine.DB.All() {
-				if def.ImageSrc != "" {
-					codes = append(codes, def.Code)
-				}
+				codes = append(codes, def.Code)
 			}
 			if prewarmDefault {
 				log.Printf("images: prewarming %d card images (default) in the background", len(codes))

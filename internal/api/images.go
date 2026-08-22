@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,9 +24,17 @@ import (
 // its content hash in manifest.json, and every later request is served
 // locally. Content-addressed URLs (/img/cards/{code}.{hash}.png) get
 // immutable caching, exactly like the previous build-time pipeline.
+//
+// Each cache resolves a card code to a remote path through its pathFor
+// policy. Mirrors are expected to follow the face convention
+// ({base}a.png = A face, {base}b.png = B face), so both the zh chain and a
+// mirror-backed default (English) chain use ConventionImagePath; only
+// fetches against marvelcdb.com itself fall back to LegacyImagePath, the
+// per-face paths recorded in the normalized pack data.
 type imageCache struct {
-	dir    string
-	source mirror.Source
+	dir     string
+	source  mirror.Source
+	pathFor func(code string) string
 
 	mu       sync.Mutex
 	manifest map[string]string
@@ -33,14 +42,24 @@ type imageCache struct {
 
 // NewImageCache builds an on-demand image cache rooted at dir. Sources are
 // tried in order on a miss; with no sources the cache serves only what is
-// already on disk.
+// already on disk. Paths resolve through LegacyImagePath — the
+// bare-marvelcdb policy; mirror-backed caches should use
+// NewImageCacheWithPaths with ConventionImagePath (see DefaultImagePathFor).
 func NewImageCache(dir string, sources ...mirror.Source) (*imageCache, error) {
+	return NewImageCacheWithPaths(dir, LegacyImagePath, sources...)
+}
+
+// NewImageCacheWithPaths builds a cache with an explicit path policy; the
+// zh cache is created with ConventionImagePath so requests hit a mirror
+// keyed by the {code}.png face convention.
+func NewImageCacheWithPaths(dir string, pathFor func(code string) string, sources ...mirror.Source) (*imageCache, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
 	c := &imageCache{
 		dir:      dir,
 		source:   mirror.Chain(sources...),
+		pathFor:  pathFor,
 		manifest: map[string]string{},
 	}
 	if raw, err := os.ReadFile(filepath.Join(dir, "manifest.json")); err == nil {
@@ -66,7 +85,7 @@ func (c *imageCache) get(code string) (*cachedImage, error) {
 	if ok {
 		return img, nil
 	}
-	remote := c.remotePath(code)
+	remote := c.pathFor(code)
 	body, err := c.source.Fetch(remote)
 	if err != nil {
 		return nil, fmt.Errorf("fetch %s: %w", remote, err)
@@ -108,9 +127,12 @@ func (c *imageCache) peek(code string) (*cachedImage, bool) {
 // PrewarmImages downloads the given card codes into the cache so the
 // manifest — and with it every content-addressed image URL — covers them.
 // Meant for mirror-backed deployments, started in the background at server
-// startup; the on-disk cache keeps repeat runs nearly free. Returns the
-// number of codes resolved from the cache and the number that failed.
-func PrewarmImages(img *imageCache, codes []string, workers int, delay time.Duration) (cached, failed int) {
+// startup; the on-disk cache keeps repeat runs nearly free. Codes the
+// sources simply lack (mirror.ErrNotFound) are counted as missing without
+// error logging — the zh chain legitimately lacks faces the default chain
+// then serves at request time. Returns the number of codes resolved from
+// the cache, missing at every source, and otherwise failed.
+func PrewarmImages(img *imageCache, codes []string, workers int, delay time.Duration) (cached, missing, failed int) {
 	if workers < 1 {
 		workers = 1
 	}
@@ -129,33 +151,62 @@ func PrewarmImages(img *imageCache, codes []string, workers int, delay time.Dura
 			_, err := img.get(code)
 			mu.Lock()
 			defer mu.Unlock()
-			if err != nil {
+			switch {
+			case err == nil:
+				cached++
+			case errors.Is(err, mirror.ErrNotFound):
+				missing++
+			default:
 				failed++
 				log.Printf("images: prewarm %s: %v", code, err)
-			} else {
-				cached++
 			}
-			done := cached + failed
+			done := cached + missing + failed
 			if done%500 == 0 {
-				log.Printf("images: prewarm %d/%d (failed=%d)", done, total, failed)
+				log.Printf("images: prewarm %d/%d (missing=%d failed=%d)", done, total, missing, failed)
 			}
 		}(code)
 		time.Sleep(delay)
 	}
 	wg.Wait()
-	log.Printf("images: prewarm finished: %d/%d resolved, %d failed", cached, total, failed)
-	return cached, failed
+	log.Printf("images: prewarm finished: %d/%d resolved, %d missing, %d failed", cached, total, missing, failed)
+	return cached, missing, failed
 }
 
 func (c *imageCache) imagePath(code string) string {
 	return filepath.Join(c.dir, code+".img")
 }
 
-func (c *imageCache) remotePath(code string) string {
+// LegacyImagePath returns the marvelcdb-accurate remote path for a card
+// code: the normalized imagesrc when the pack data has one (it records
+// where marvelcdb truly stores each face — its layout predates and often
+// contradicts the {base}a/b convention), falling back to the convention
+// path. Used by the default (English) chain.
+func LegacyImagePath(code string) string {
 	if def, ok := engine.DB.Lookup(code); ok && def.ImageSrc != "" {
 		return def.ImageSrc
 	}
+	return ConventionImagePath(code)
+}
+
+// ConventionImagePath always returns the /bundles/cards/{code}.png face
+// convention path: single-sided cards by their plain code, double-sided
+// faces by {base}a / {base}b. Used by the zh chain and by the default
+// (English) chain whenever it points at a mirror — mirrors are expected to
+// follow the convention.
+func ConventionImagePath(code string) string {
 	return "/bundles/cards/" + code + ".png"
+}
+
+// DefaultImagePathFor picks the path policy for the default (English)
+// chain: convention paths against a configured IMAGE_MIRROR, legacy
+// marvelcdb-accurate paths when fetching marvelcdb.com itself (its layout
+// predates and often contradicts the convention; the normalized pack data
+// records where each face really lives there).
+func DefaultImagePathFor(mirrorBacked bool) func(code string) string {
+	if mirrorBacked {
+		return ConventionImagePath
+	}
+	return LegacyImagePath
 }
 
 func (c *imageCache) saveManifest() {
@@ -211,9 +262,10 @@ func (s *Server) ImageHandler() http.Handler {
 
 // ZhImageHandler serves the zh routes (/img/cards/zh/): locally seeded
 // faces first, then on-demand fetches from the Chinese mirror
-// (ZH_IMAGE_MIRROR) — a separate language source with marvelcdb's exact
-// paths, never a path prefix. Codes the zh chain cannot resolve fall back
-// to the default chain, so zh mode always shows an image.
+// (ZH_IMAGE_MIRROR) — a separate language source keyed by the
+// {code}.png face convention ({base}a = A face, {base}b = B face). Codes
+// the zh chain cannot resolve fall back to the default chain, so zh mode
+// always shows an image.
 func (s *Server) ZhImageHandler() http.Handler {
 	return s.imageHandler(func(code string) (*cachedImage, bool, error) {
 		if img, ok := s.ZhImages.peek(code); ok {
@@ -314,7 +366,8 @@ func validCardCode(code string) bool {
 		return false
 	}
 	for _, r := range code {
-		if (r >= '0' && r <= '9') || (r >= 'a' && r <= 'c') {
+		// 01043d is the sole 'd'-suffixed code in the data.
+		if (r >= '0' && r <= '9') || (r >= 'a' && r <= 'd') {
 			continue
 		}
 		return false

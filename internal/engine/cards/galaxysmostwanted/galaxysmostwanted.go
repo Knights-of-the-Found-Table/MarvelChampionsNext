@@ -51,10 +51,12 @@ func registerRocket() {
 func registerScenarios() {
 	// Planetary Invasion (Drang and the Brotherhood of Badoon).
 	engine.RegisterScenario(&engine.ScenarioDef{
-		ID:               "16057",
-		Name:             "Drang — Planetary Invasion",
+		ID:   "16057",
+		Name: "Drang — Planetary Invasion",
+		// 16057 is a treachery in the card data; the scenario's actual
+		// scheme is Terrestrial Invasion / Protect the Planet (16061/16062).
 		VillainBases:     []string{"16058"},
-		MainSchemeStages: []string{"16057"},
+		MainSchemeStages: []string{"16061b", "16062b"},
 		ExtraSets:        []string{"brotherhood_of_badoon", "standard"},
 	})
 
@@ -63,7 +65,7 @@ func registerScenarios() {
 		ID:               "16073",
 		Name:             "Collector — Infiltrate the Museum",
 		VillainBases:     []string{"16070"},
-		MainSchemeStages: []string{"16073a", "16083a", "16084a"},
+		MainSchemeStages: []string{"16073b", "16083b", "16084b"},
 		ExtraSets:        []string{"infiltrate_the_museum", "escape_the_museum", "standard"},
 	})
 
@@ -72,7 +74,7 @@ func registerScenarios() {
 		ID:               "16082",
 		Name:             "Nebula — The Missing Milano",
 		VillainBases:     []string{"16088"},
-		MainSchemeStages: []string{"16082a", "16091a", "16092a"},
+		MainSchemeStages: []string{"16082b", "16091b", "16092b"},
 		ExtraSets:        []string{"nebula", "standard"},
 	})
 }
