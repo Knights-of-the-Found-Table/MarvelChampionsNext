@@ -47,7 +47,7 @@ func newTestGame(t *testing.T, seed int64) *engine.Game {
 // choice kinds over card plays.
 func pickDefault(q *engine.Question) []string {
 	// deterministic: pick by preference
-	prefer := []string{"pass-interrupt", "take", "end-turn"}
+	prefer := []string{"pass-interrupt", "keep", "take", "end-turn"}
 	for _, id := range prefer {
 		for _, c := range q.Choices {
 			if c.ID == id && !c.Disabled {
@@ -171,6 +171,12 @@ func TestSerializationRoundTrip(t *testing.T) {
 
 func TestVillainStageProgressionAndWin(t *testing.T) {
 	g := newTestGame(t, 1)
+	// Keep the opening hand (setup mulligan) so the first turn starts.
+	if pq := g.Pending(); pq != nil {
+		if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+			t.Fatalf("answer mulligan: %v", err)
+		}
+	}
 	// Force Rhino through all three stages via repeated lethal damage.
 	var villainID engine.EntityID
 	for id := range g.Villains {
@@ -181,12 +187,8 @@ func TestVillainStageProgressionAndWin(t *testing.T) {
 		g.Push(engine.DamageEntity{Target: villainID, Damage: 99, Source: engine.EntityID("player-1")})
 	}
 	// The turn menu question is pending; answering it lets the queue drain
-	// (our damage messages sit ahead of the turn-end processing).
-	if pq := g.Pending(); pq != nil {
-		if err := g.Answer(pq.Player, []string{"end-turn"}); err != nil {
-			t.Fatalf("answer: %v", err)
-		}
-	}
+	// (our damage messages resolve after the end-of-player-phase prompts).
+	driveGame(t, g, 50)
 	g.Run()
 	if !g.Over || !g.Won {
 		t.Fatalf("expected win after defeating all stages, over=%v won=%v round=%d", g.Over, g.Won, g.Round)

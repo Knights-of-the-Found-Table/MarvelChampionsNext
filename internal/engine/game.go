@@ -446,6 +446,25 @@ func trimLastSegment(path string) string {
 // answers, converting payment stubs into their real effect messages.
 func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, error) {
 	switch {
+	case strings.HasPrefix(q.Validate, "discardDown:"):
+		// End-of-player-phase discard: at least N selected cards must be
+		// discarded (hand over hand size).
+		var need int
+		fmt.Sscanf(q.Validate, "discardDown:%d", &need)
+		var msgs []Message
+		n := 0
+		for _, c := range choices {
+			msgs = append(msgs, c.msgs...)
+			for _, msg := range c.msgs {
+				if _, ok := msg.(DiscardCards); ok {
+					n++
+				}
+			}
+		}
+		if n < need {
+			return nil, fmt.Errorf("must discard at least %d card(s), selected %d", need, n)
+		}
+		return msgs, nil
 	case strings.HasPrefix(q.Validate, "payment:"):
 		var cost int
 		fmt.Sscanf(q.Validate, "payment:%d", &cost)
@@ -854,8 +873,8 @@ func NewGame(opts NewGameOptions) (*Game, error) {
 		}
 		g.Players = append(g.Players, p)
 	}
-	g.Players[0].FirstPlayer = true
-
+	// First player is picked during StartGame (group decision modelled
+	// with the seeded RNG).
 	g.setupScenario(scen)
 	g.Push(StartGame{})
 	g.Run()

@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
 
@@ -28,7 +26,8 @@ func (g *Game) assignCardIDs(l CardList, owner PlayerID) CardList {
 }
 
 // drawEncounter pops the top card of the encounter deck, reshuffling the
-// discard pile when the deck runs out.
+// discard pile when the deck runs out. Reshuffling places an acceleration
+// token next to the main scheme (official Encounter Deck rule).
 func (g *Game) drawEncounter() (Card, bool) {
 	if len(g.EncounterDeck) == 0 {
 		if len(g.EncounterDiscard) == 0 {
@@ -37,7 +36,12 @@ func (g *Game) drawEncounter() (Card, bool) {
 		g.EncounterDeck = g.EncounterDiscard
 		g.EncounterDiscard = nil
 		g.shuffle(&g.EncounterDeck)
-		g.logf("Encounter deck reshuffled")
+		if g.MainScheme != nil {
+			g.MainScheme.AccelerationTokens++
+			g.logf("Encounter deck reshuffled: %s gains an acceleration token", g.MainScheme.EDef().Name)
+		} else {
+			g.logf("Encounter deck reshuffled")
+		}
 	}
 	card := g.EncounterDeck[0]
 	g.EncounterDeck = g.EncounterDeck[1:]
@@ -309,11 +313,57 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			if g.applyDefeatSave(e) {
 				return
 			}
-			e.KOed = true
-			g.logMajorf("%s is KO'd!", e.Name)
-			g.Push(GameOver{Won: false, Reason: fmt.Sprintf("%s was defeated", e.Name)})
+			g.eliminatePlayer(e)
 		}
 	}
+}
+
+// eliminatePlayer removes a defeated player from the game (official Player
+// Elimination): their permanents are discarded, engaged minions re-engage
+// the next clockwise player, the first player token passes on if held, and
+// the players only lose once everyone is eliminated.
+func (g *Game) eliminatePlayer(p *Player) {
+	p.KOed = true
+	g.logMajorf("%s is eliminated!", p.Name)
+	for _, id := range append([]EntityID(nil), p.Allies...) {
+		g.discardControlled(p.ID, id)
+	}
+	for _, id := range append([]EntityID(nil), p.Supports...) {
+		g.discardControlled(p.ID, id)
+	}
+	for _, id := range append([]EntityID(nil), p.Upgrades...) {
+		g.discardControlled(p.ID, id)
+	}
+	p.Hand = nil
+	p.EncounterDown = nil
+	next := g.nextActivePlayer(p.ID)
+	if next != nil {
+		for _, mn := range g.Minions {
+			if mn.EngagedWith == p.ID {
+				mn.EngagedWith = next.ID
+			}
+		}
+		if p.FirstPlayer {
+			p.FirstPlayer = false
+			next.FirstPlayer = true
+		}
+	}
+	// A pending question addressed to the eliminated player (their turn
+	// menu) is dropped so the game can continue.
+	if g.pending != nil && g.pending.Player == p.ID {
+		g.pending = nil
+		p.EndedTurn = true
+		if g.ActiveTurn == p.ID {
+			g.ActiveTurn = ""
+			g.Push(PlayerTurnEnd{Player: p.ID})
+		}
+	}
+	for _, q := range g.Players {
+		if !q.KOed {
+			return
+		}
+	}
+	g.Push(GameOver{Won: false, Reason: "All players were eliminated"})
 }
 
 // applyDefeatSave lets an upgrade save the identity from defeat (Captain

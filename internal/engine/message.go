@@ -25,6 +25,27 @@ type (
 	BeginPhase struct{ Phase Phase }
 	EndPhase   struct{ Phase Phase }
 
+	// DiscardToHandSize runs the end-of-player-phase step where each player
+	// (in player order) may discard any number of cards and must discard
+	// down to their hand size.
+	DiscardToHandSize struct{ Player PlayerID }
+	// FinishPlayerPhase completes the end-of-player-phase sequence: players
+	// draw up to hand size, ready all of their cards (and exhausted
+	// encounter cards), and until-end-of-player-phase effects expire.
+	FinishPlayerPhase struct{}
+	// PassFirstPlayerToken passes the first player token clockwise at the
+	// end of the round.
+	PassFirstPlayerToken struct{}
+
+	// ResolveMulligan offers the setup mulligan question to a player.
+	ResolveMulligan struct{ Player PlayerID }
+	// MulliganCard discards one mulliganned hand card and draws a
+	// replacement.
+	MulliganCard struct {
+		Player PlayerID
+		CardID string
+	}
+
 	// PlayerTurnStart / PlayerTurnEnd bracket one player's turn in the
 	// player phase.
 	PlayerTurnStart struct{ Player PlayerID }
@@ -471,6 +492,11 @@ func (BeginRound) msg()               {}
 func (EndRound) msg()                 {}
 func (BeginPhase) msg()               {}
 func (EndPhase) msg()                 {}
+func (DiscardToHandSize) msg()        {}
+func (FinishPlayerPhase) msg()        {}
+func (PassFirstPlayerToken) msg()     {}
+func (ResolveMulligan) msg()          {}
+func (MulliganCard) msg()             {}
 func (PlayerTurnStart) msg()          {}
 func (PlayerTurnEnd) msg()            {}
 func (ReadyAll) msg()                 {}

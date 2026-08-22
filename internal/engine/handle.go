@@ -21,39 +21,95 @@ func (g *Game) handle(msg Message) {
 			p.AllyPlayedThisRound = false
 		}
 		g.logMajorf("── Round %d ──", g.Round)
-		g.Push(BeginPhase{Phase: PhaseResource})
+		g.Push(BeginPhase{Phase: PhasePlayer})
 
 	case BeginPhase:
 		g.Phase = m.Phase
 		g.handleBeginPhase(m.Phase)
 
 	case EndPhase:
-		for _, p := range g.Players {
-			p.CostDiscounts = nil
-			// Until-end-of-phase stat modifiers expire.
-			p.BonusTHW, p.BonusATK, p.BonusDEF = 0, 0, 0
-			for _, id := range p.Allies {
-				if a := g.Allies[id]; a != nil {
-					a.BonusTHW, a.BonusATK = 0, 0
-				}
-			}
-		}
-		g.EventDamageBonus = map[PlayerID]int{}
-		g.EventThreatBonus = map[PlayerID]int{}
-		// Blank-text effects expire.
-		for _, mn := range g.Minions {
-			mn.BlankText = false
-		}
 		switch m.Phase {
 		case PhaseResource:
+			// Legacy saves only: games persisted with the old
+			// resource→player→villain round structure.
+			g.expirePhaseEffects()
 			g.Push(BeginPhase{Phase: PhasePlayer})
 		case PhasePlayer:
-			g.Push(BeginPhase{Phase: PhaseVillain})
+			// End of player phase, official steps 1–2: each player in
+			// player order may discard any number of cards (and must
+			// discard down to hand size); then all players draw up and
+			// ready (FinishPlayerPhase) before the phase's effects expire.
+			for _, p := range g.playerOrder() {
+				if !p.KOed {
+					g.Push(DiscardToHandSize{Player: p.ID})
+				}
+			}
+			g.Push(FinishPlayerPhase{})
 		case PhaseVillain:
+			// Official villain phase steps 5–6: the first player token
+			// passes clockwise, then the phase/round's until-end effects
+			// expire (handled when EndRound processes).
+			g.Push(PassFirstPlayerToken{})
 			g.Push(EndRound{})
 		}
 
+	case FinishPlayerPhase:
+		// End of player phase steps 2–4: draw up to hand size, ready all
+		// cards (including exhausted encounter cards), then expire
+		// until-end-of-player-phase effects.
+		for _, p := range g.playerOrder() {
+			if p.KOed {
+				continue
+			}
+			g.Push(DrawCards{Player: p.ID, N: max(0, p.HandSize(g)-len(p.Hand))})
+			g.Push(ReadyAll{Player: p.ID})
+		}
+		for _, id := range sortedIDs(g.Environments) {
+			if e := g.Environments[id]; e != nil {
+				e.Exhausted = false
+			}
+		}
+		g.expirePhaseEffects()
+		g.logf("Player phase ends")
+		g.Push(BeginPhase{Phase: PhaseVillain})
+
+	case PassFirstPlayerToken:
+		if len(g.Players) < 2 {
+			return
+		}
+		for _, p := range g.Players {
+			if !p.FirstPlayer {
+				continue
+			}
+			if next := g.nextActivePlayer(p.ID); next != nil && next.ID != p.ID {
+				p.FirstPlayer = false
+				next.FirstPlayer = true
+				g.logf("First player token passes to %s", next.Name)
+			}
+			return
+		}
+
+	case DiscardToHandSize:
+		g.askDiscardToHandSize(m.Player)
+
+	case ResolveMulligan:
+		g.askMulligan(m.Player)
+
+	case MulliganCard:
+		p := g.Player(m.Player)
+		if p == nil {
+			return
+		}
+		if c, ok := p.Hand.Remove(m.CardID); ok {
+			p.Discard = append(p.Discard, c)
+			g.logf("%s mulligans %s away", p.Name, c.Def().Name)
+			g.Push(DrawCards{Player: p.ID, N: 1})
+		}
+
 	case EndRound:
+		// End-of-round: until-end-of-villain-phase/round effects expire,
+		// then the next round begins.
+		g.expirePhaseEffects()
 		g.Push(BeginRound{})
 
 	case PlayerTurnStart:
@@ -75,7 +131,7 @@ func (g *Game) handle(msg Message) {
 		// next player who hasn't taken a turn this round
 		for i := range g.Players {
 			q := g.Players[(g.TurnIndex+i)%len(g.Players)]
-			if !q.EndedTurn {
+			if !q.EndedTurn && !q.KOed {
 				g.TurnIndex = (g.TurnIndex + i) % len(g.Players)
 				g.Push(PlayerTurnStart{Player: q.ID})
 				return
@@ -120,8 +176,20 @@ func (g *Game) handle(msg Message) {
 		}
 		for i := 0; i < m.N; i++ {
 			if len(p.Deck) == 0 {
-				g.logf("%s's deck is empty; no card drawn", p.Name)
-				break
+				if len(p.Discard) == 0 {
+					g.logf("%s has no cards left to draw", p.Name)
+					break
+				}
+				// Player deck emptied: shuffle the discard pile into a new
+				// deck and deal self one facedown encounter card.
+				p.Deck = p.Discard
+				p.Discard = nil
+				g.shuffle(&p.Deck)
+				g.logMajorf("%s shuffles their discard pile into a new deck", p.Name)
+				if c, ok := g.drawEncounter(); ok {
+					p.EncounterDown = append(p.EncounterDown, c)
+					g.logf("%s deals themself a facedown encounter card", p.Name)
+				}
 			}
 			card := p.Deck[0]
 			p.Deck = p.Deck[1:]
@@ -140,12 +208,13 @@ func (g *Game) handle(msg Message) {
 			return
 		}
 		for _, c := range m.Cards {
+			p.Hand.Remove(c.ID)
 			p.Discard = append(p.Discard, c)
 		}
 
 	case ChangeForm:
 		p := g.Player(m.Player)
-		if p == nil || p.FormChanged || p.Exhausted {
+		if p == nil || p.FormChanged {
 			return
 		}
 		p.FormChanged = true
@@ -864,11 +933,17 @@ func (g *Game) thwartBlockerName(p *Player) string {
 }
 
 func (g *Game) handleStartGame() {
+	// First player is chosen by the group (official setup step 3);
+	// modelled as a random pick with the seeded RNG.
+	first := g.Random(len(g.Players))
+	for i := range g.Players {
+		g.Players[i].FirstPlayer = i == first
+	}
+	g.logf("%s takes the first player token", g.Players[first].Name)
+
 	for _, p := range g.Players {
 		p.Deck = g.assignCardIDs(p.Deck, p.ID)
 		g.shuffle(&p.Deck)
-		p.Hand = append(p.Hand, p.Deck[:min(len(p.Deck), p.HandSize(g))]...)
-		p.Deck = p.Deck[len(p.Hand):]
 	}
 	// Obligations join the encounter deck (official rules); they carry
 	// their owner and resolve for them when revealed.
@@ -883,7 +958,14 @@ func (g *Game) handleStartGame() {
 		g.Push(scen.Setup(g)...)
 	}
 	g.logMajorf("Scenario: %s", scen.Name)
-	// Hero setup hooks run after opening hands are drawn.
+	// Opening hands (official setup step 14), then mulligans (step 15),
+	// then player setup abilities (step 16), then the first round.
+	for _, p := range g.Players {
+		g.Push(DrawCards{Player: p.ID, N: p.HandSize(g)})
+	}
+	for _, p := range g.Players {
+		g.Push(ResolveMulligan{Player: p.ID})
+	}
 	for _, p := range g.Players {
 		if b := behavior(p.HeroCode); b.HeroSetup != nil {
 			g.Push(b.HeroSetup(g, p)...)
@@ -892,9 +974,131 @@ func (g *Game) handleStartGame() {
 	g.Push(BeginRound{})
 }
 
+// askMulligan offers the setup mulligan: keep the hand or discard any number
+// of cards and redraw that many.
+func (g *Game) askMulligan(pid PlayerID) {
+	p := g.Player(pid)
+	if p == nil || len(p.Hand) == 0 {
+		return
+	}
+	pick := &Question{Type: "choose_n", Prompt: "Select cards to mulligan"}
+	for _, c := range p.Hand {
+		def := c.Def()
+		pick.Choices = append(pick.Choices, Choice{
+			Label: def.Name, Kind: ChoiceCard, CardCode: def.Code,
+		}.Msgs(MulliganCard{Player: p.ID, CardID: c.ID}))
+	}
+	q := Ask("Mulligan?",
+		Choice{ID: "keep", Label: "Keep hand", Kind: ChoicePass},
+		Choice{ID: "mulligan", Label: "Discard selected cards and redraw", Kind: ChoiceCard}.WithThen(pick),
+	)
+	g.Push(AskQuestion{Player: p.ID, Question: q})
+}
+
+// askDiscardToHandSize runs the end-of-player-phase discard step: over-hand
+// players must discard down; others may optionally discard any number.
+func (g *Game) askDiscardToHandSize(pid PlayerID) {
+	p := g.Player(pid)
+	if p == nil || p.KOed || len(p.Hand) == 0 {
+		return
+	}
+	over := len(p.Hand) - p.HandSize(g)
+	if over <= 0 {
+		pick := &Question{Type: "choose_n", Prompt: "Discard any number of cards"}
+		for _, c := range p.Hand {
+			def := c.Def()
+			pick.Choices = append(pick.Choices, Choice{
+				Label: def.Name, Kind: ChoiceCard, CardCode: def.Code,
+			}.Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
+		}
+		q := Ask("Discard cards before drawing up?",
+			Choice{ID: "keep", Label: "Keep hand", Kind: ChoicePass},
+			Choice{ID: "discard", Label: "Discard cards", Kind: ChoiceCard}.WithThen(pick),
+		)
+		g.Push(AskQuestion{Player: p.ID, Question: q})
+		return
+	}
+	q := &Question{
+		Type:   "choose_n",
+		Prompt: fmt.Sprintf("Discard down to hand size %d (discard at least %d)", p.HandSize(g), over),
+	}
+	for _, c := range p.Hand {
+		def := c.Def()
+		q.Choices = append(q.Choices, Choice{
+			Label: def.Name, Kind: ChoiceCard, CardCode: def.Code,
+		}.Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
+	}
+	q.N = over
+	q.Validate = fmt.Sprintf("discardDown:%d", over)
+	q.Context = map[string]any{"player": p.ID.String()}
+	q.assignIDs("")
+	g.Push(AskQuestion{Player: p.ID, Question: q})
+}
+
+// expirePhaseEffects clears until-end-of-phase modifiers and discounts.
+func (g *Game) expirePhaseEffects() {
+	for _, p := range g.Players {
+		p.CostDiscounts = nil
+		// Until-end-of-phase stat modifiers expire.
+		p.BonusTHW, p.BonusATK, p.BonusDEF = 0, 0, 0
+		for _, id := range p.Allies {
+			if a := g.Allies[id]; a != nil {
+				a.BonusTHW, a.BonusATK = 0, 0
+			}
+		}
+	}
+	g.EventDamageBonus = map[PlayerID]int{}
+	g.EventThreatBonus = map[PlayerID]int{}
+	// Blank-text effects expire.
+	for _, mn := range g.Minions {
+		mn.BlankText = false
+	}
+}
+
+// playerOrder returns the players in player order, starting with the first
+// player.
+func (g *Game) playerOrder() []*Player {
+	out := make([]*Player, 0, len(g.Players))
+	start := 0
+	for i, p := range g.Players {
+		if p.FirstPlayer {
+			start = i
+			break
+		}
+	}
+	for i := range g.Players {
+		out = append(out, g.Players[(start+i)%len(g.Players)])
+	}
+	return out
+}
+
+// nextActivePlayer returns the next clockwise player after from who has not
+// been eliminated, or nil.
+func (g *Game) nextActivePlayer(from PlayerID) *Player {
+	idx := -1
+	for i, q := range g.Players {
+		if q.ID == from {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return nil
+	}
+	for k := 1; k <= len(g.Players); k++ {
+		q := g.Players[(idx+k)%len(g.Players)]
+		if q.ID != from && !q.KOed {
+			return q
+		}
+	}
+	return nil
+}
+
 func (g *Game) handleBeginPhase(phase Phase) {
 	switch phase {
 	case PhaseResource:
+		// Legacy saves only: the round used to open with a resource phase
+		// (ready + draw + acceleration). New games never enter it.
 		for _, p := range g.Players {
 			g.Push(ReadyAll{Player: p.ID})
 		}
@@ -912,9 +1116,21 @@ func (g *Game) handleBeginPhase(phase Phase) {
 
 	case PhasePlayer:
 		g.UsedThisTurn = map[string]bool{}
-		for i, p := range g.Players {
+		order := g.playerOrder()
+		for i, p := range order {
 			if p.FirstPlayer {
 				g.TurnIndex = i
+				break
+			}
+		}
+		// An eliminated first player cannot hold the token; fall back to
+		// the first active player in order.
+		if g.Players[g.TurnIndex].KOed {
+			for i, p := range order {
+				if !p.KOed {
+					g.TurnIndex = i
+					break
+				}
 			}
 		}
 		g.Push(PlayerTurnStart{Player: g.Players[g.TurnIndex].ID})
@@ -922,27 +1138,57 @@ func (g *Game) handleBeginPhase(phase Phase) {
 	case PhaseVillain:
 		g.UsedThisTurn = map[string]bool{}
 		g.ActiveTurn = ""
-		for i := range g.Players {
-			p := g.Players[(g.TurnIndex+i)%len(g.Players)]
+		order := g.playerOrder()
+		// Step 1: place threat from the main scheme's acceleration field,
+		// acceleration tokens, and acceleration icons in play.
+		if g.MainScheme != nil {
+			if n := g.accelerationThreat(); n > 0 {
+				g.logf("Acceleration places %d threat on %s", n, g.MainScheme.EDef().Name)
+				g.Push(SchemeThreat{
+					Scheme: g.MainScheme.ID,
+					N:      n,
+					Source: NewEntityID(KindMainScheme, 0),
+				})
+			}
+		}
+		// Step 2: the villain activates once per player in player order;
+		// after each activation, minions engaged with that player activate
+		// against them.
+		for _, p := range order {
+			if p.KOed {
+				continue
+			}
 			for _, id := range sortedIDs(g.Villains) {
 				g.Push(VillainActivates{VillainID: id, Player: p.ID})
 			}
-			// Minions activate against the first player once per phase.
-			if i == 0 {
-				first := g.Players[g.TurnIndex]
-				for _, id := range sortedIDs(g.Minions) {
-					g.Push(MinionActivates{MinionID: id, Player: first.ID})
+			for _, id := range sortedIDs(g.Minions) {
+				if mn := g.Minions[id]; mn != nil && mn.EngagedWith == p.ID {
+					g.Push(MinionActivates{MinionID: id, Player: p.ID})
 				}
 			}
 		}
-		for i := range g.Players {
-			p := g.Players[(g.TurnIndex+i)%len(g.Players)]
+		// Step 3: deal one encounter card per player, plus one additional
+		// card per hazard icon in play (extras dealt in player order).
+		var active []*Player
+		for _, p := range order {
+			if !p.KOed {
+				active = append(active, p)
+			}
+		}
+		deal := func(p *Player) {
 			if card, ok := g.drawEncounter(); ok {
 				p.EncounterDown = append(p.EncounterDown, card)
 			}
 		}
-		for i := range g.Players {
-			p := g.Players[(g.TurnIndex+i)%len(g.Players)]
+		for _, p := range active {
+			deal(p)
+		}
+		for h := 0; h < g.hazardIconCount() && len(active) > 0; h++ {
+			deal(active[h%len(active)])
+		}
+		// Step 4: reveal and resolve dealt cards, one at a time, in player
+		// order (first player first).
+		for _, p := range active {
 			for len(p.EncounterDown) > 0 {
 				card := p.EncounterDown[0]
 				p.EncounterDown = p.EncounterDown[1:]
@@ -953,10 +1199,42 @@ func (g *Game) handleBeginPhase(phase Phase) {
 	}
 }
 
+// accelerationThreat totals the threat added at villain phase step one: the
+// main scheme's printed acceleration field, acceleration tokens, and
+// acceleration icons on side schemes in play.
+func (g *Game) accelerationThreat() int {
+	if g.MainScheme == nil {
+		return 0
+	}
+	n := g.MainScheme.AccelerationTokens
+	if d := g.MainScheme.EDef(); d != nil && d.Acceleration > 0 {
+		n += d.Acceleration
+	}
+	for _, id := range sortedIDs(g.SideSchemes) {
+		if d := g.SideSchemes[id].EDef(); d != nil && d.Acceleration > 0 {
+			n += d.Acceleration
+		}
+	}
+	return n
+}
+
+// hazardIconCount totals hazard icons on cards in play (main scheme and side
+// schemes); each icon deals one extra encounter card in the villain phase.
+func (g *Game) hazardIconCount() int {
+	n := 0
+	if g.MainScheme != nil {
+		n += g.MainScheme.Hazard
+	}
+	for _, s := range g.SideSchemes {
+		n += s.Hazard
+	}
+	return n
+}
+
 func (g *Game) handleVillainActivates(m VillainActivates) {
 	v := g.Villains[m.VillainID]
 	p := g.Player(m.Player)
-	if v == nil || p == nil {
+	if v == nil || p == nil || p.KOed {
 		return
 	}
 	def := v.EDef()
@@ -1000,7 +1278,7 @@ func (ApplyVillainScheme) msg() {}
 func (g *Game) handleMinionActivates(m MinionActivates) {
 	mn := g.Minions[m.MinionID]
 	p := g.Player(m.Player)
-	if mn == nil || p == nil {
+	if mn == nil || p == nil || p.KOed {
 		return
 	}
 	def := mn.EDef()
@@ -1482,11 +1760,8 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, s)...)
 		}
-		for i := 0; i < s.Hazard; i++ {
-			if c, ok := g.drawEncounter(); ok {
-				g.Push(RevealEncounterCard{Player: pid, Card: c})
-			}
-		}
+		// Hazard icons on side schemes deal their extra encounter cards
+		// during the villain phase's deal step, not immediately.
 	case "treachery":
 		// The interrupt window (Get Behind Me!) runs before resolution.
 		g.Push(TreacheryWindow{Player: pid, Card: card})

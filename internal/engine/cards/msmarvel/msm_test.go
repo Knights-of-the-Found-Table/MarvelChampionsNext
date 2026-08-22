@@ -32,6 +32,14 @@ func newMsmGame(t *testing.T, scenario string, seed int64) *engine.Game {
 	if err != nil {
 		t.Fatalf("NewGame(%s): %v", scenario, err)
 	}
+
+	// Keep the opening hand: the game opens paused on the mulligan
+	// question, and these tests expect the first player turn pending.
+	if pq := g.Pending(); pq != nil && pq.Question.Prompt == "Mulligan?" {
+		if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+			t.Fatalf("keep mulligan: %v", err)
+		}
+	}
 	return g
 }
 

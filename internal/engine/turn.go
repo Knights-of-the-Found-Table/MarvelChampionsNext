@@ -10,8 +10,9 @@ import (
 func (g *Game) TurnMenu(p *Player) *Question {
 	var choices []Choice
 
-	// Change form (once per turn, not while exhausted).
-	if !p.FormChanged && !p.Exhausted {
+	// Change form (once per turn; the character keeps its ready/exhausted
+	// state per the official rules).
+	if !p.FormChanged {
 		var target string
 		if p.IsHero() {
 			target = p.AlterEgoDef().Name
@@ -347,28 +348,58 @@ func resourceLabels(def *data.CardDef) string {
 	return out
 }
 
-// thwartableSchemes lists schemes that can currently be thwarted.
+// thwartableSchemes lists schemes that can currently be thwarted. The crisis
+// icon on a side scheme blocks threat removal from the main scheme while it
+// is in play; crisis side schemes themselves remain thwartable.
 func (g *Game) thwartableSchemes() []EntityID {
 	var out []EntityID
-	if g.MainScheme != nil && !g.MainScheme.Crisis {
+	if g.MainScheme != nil && !g.crisisInPlay() {
 		out = append(out, g.MainScheme.ID)
 	}
 	for id := range g.SideSchemes {
-		if !g.SideSchemes[id].Crisis {
-			out = append(out, id)
-		}
+		out = append(out, id)
 	}
 	return out
 }
 
+// crisisInPlay reports whether any encounter side scheme with the crisis
+// icon is in play.
+func (g *Game) crisisInPlay() bool {
+	for _, s := range g.SideSchemes {
+		if s.Crisis && !s.PlayerSide {
+			return true
+		}
+	}
+	return false
+}
+
+// guardBlocksVillain reports whether pid cannot attack the given villain:
+// while a guard minion is engaged with them, they cannot attack villains
+// without the guard keyword (official Guard keyword).
+func (g *Game) guardBlocksVillain(pid PlayerID, v *Villain) bool {
+	if v.EDef().HasKeyword("Guard") {
+		return false
+	}
+	for _, mn := range g.Minions {
+		if mn.EngagedWith == pid && mn.Guard {
+			return true
+		}
+	}
+	return false
+}
+
 func (g *Game) enemyChoices(dmg int) []Choice {
 	var out []Choice
+	pid := g.currentPlayerID()
 	for _, id := range sortedIDs(g.Villains) {
 		v := g.Villains[id]
+		if g.guardBlocksVillain(pid, v) {
+			continue // guard minion engaged: villain cannot be attacked
+		}
 		out = append(out, Choice{
 			Label: fmt.Sprintf("%s — %d/%d HP", v.EDef().Name, v.HP(), v.MaxHP),
 			Kind:  ChoiceTarget, SourceID: v.ID, CardCode: v.Code,
-		}.Msgs(BasicAttack{Player: g.currentPlayerID(), N: dmg, Target: v.ID}))
+		}.Msgs(BasicAttack{Player: pid, N: dmg, Target: v.ID}))
 	}
 	for _, id := range sortedIDs(g.Minions) {
 		mn := g.Minions[id]
@@ -407,6 +438,9 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 	needsDiscard := behavior(a.Code).AllyAttackDiscardCost && p != nil && len(p.Hand) > 0
 	for _, id := range sortedIDs(g.Villains) {
 		v := g.Villains[id]
+		if g.guardBlocksVillain(a.Owner, v) {
+			continue // guard minion engaged: villain cannot be attacked
+		}
 		out = append(out, allyAttackChoice(
 			fmt.Sprintf("%s — %d/%d HP", v.EDef().Name, v.HP(), v.MaxHP), v.ID, v.Code,
 			consequential(v.ID), needsDiscard, a, p))
@@ -457,7 +491,7 @@ func (g *Game) attachedConsequential(a *Ally) int {
 func (g *Game) schemeChoices(n int) []Choice {
 	var out []Choice
 	pid := g.currentPlayerID()
-	if g.MainScheme != nil && !g.MainScheme.Crisis {
+	if g.MainScheme != nil && !g.crisisInPlay() {
 		s := g.MainScheme
 		out = append(out, Choice{
 			Label: fmt.Sprintf("%s — %d/%d threat", s.EDef().Name, s.Threat, s.MaxThreat),
@@ -466,9 +500,6 @@ func (g *Game) schemeChoices(n int) []Choice {
 	}
 	for _, id := range sortedIDs(g.SideSchemes) {
 		s := g.SideSchemes[id]
-		if s.Crisis {
-			continue
-		}
 		out = append(out, Choice{
 			Label: fmt.Sprintf("%s — %d threat", s.EDef().Name, s.Threat),
 			Kind:  ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
@@ -491,7 +522,7 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 			DamageEntity{Target: self, Damage: 1, Source: a.ID},
 		}
 	}
-	if g.MainScheme != nil && !g.MainScheme.Crisis {
+	if g.MainScheme != nil && !g.crisisInPlay() {
 		s := g.MainScheme
 		out = append(out, Choice{
 			Label: fmt.Sprintf("%s — %d/%d threat", s.EDef().Name, s.Threat, s.MaxThreat),
@@ -500,9 +531,6 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 	}
 	for _, id := range sortedIDs(g.SideSchemes) {
 		s := g.SideSchemes[id]
-		if s.Crisis {
-			continue
-		}
 		out = append(out, Choice{
 			Label: fmt.Sprintf("%s — %d threat", s.EDef().Name, s.Threat),
 			Kind:  ChoiceTarget, SourceID: s.ID, CardCode: s.Code,

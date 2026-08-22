@@ -233,8 +233,9 @@ func TestFullGameFlow(t *testing.T) {
 	}
 	view := body
 	gameID := int64(view["id"].(float64))
-	if view["round"].(float64) != 1 {
-		t.Fatalf("expected round 1, got %v", view["round"])
+	// The game opens in setup (round 0) paused on the mulligan question.
+	if view["round"].(float64) != 0 {
+		t.Fatalf("expected round 0 during setup, got %v", view["round"])
 	}
 	if q := view["question"]; q == nil {
 		t.Fatal("expected a question for the creating player")

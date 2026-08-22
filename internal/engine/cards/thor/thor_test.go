@@ -31,6 +31,14 @@ func newThorGame(t *testing.T, scenario string, seed int64) *engine.Game {
 	if err != nil {
 		t.Fatalf("NewGame(%s): %v", scenario, err)
 	}
+
+	// Keep the opening hand: the game opens paused on the mulligan
+	// question, and these tests expect the first player turn pending.
+	if pq := g.Pending(); pq != nil && pq.Question.Prompt == "Mulligan?" {
+		if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+			t.Fatalf("keep mulligan: %v", err)
+		}
+	}
 	return g
 }
 
@@ -91,34 +99,28 @@ func playAndAdvance(t *testing.T, g *engine.Game, c engine.Card) {
 	t.Helper()
 	pid := c.Owner
 	g.Push(engine.PlayCard{Player: pid, Card: c, Paid: engine.CostPaid{}})
-	// Clear any existing pending question so the queued PlayCard can
-	// process. The turn menu is the typical pending state from NewGame;
-	// answering "end-turn" advances the turn and lets the queue drain.
-	pq := g.Pending()
-	if pq != nil {
-		if err := g.Answer(pq.Player, []string{"end-turn"}); err != nil {
-			t.Fatalf("answer end-turn: %v", err)
-		}
-	}
+	// The queued PlayCard resolves once the phase drivers queued ahead of
+	// it have run. Answer prompts with defaults until the game reaches a
+	// later round's turn menu — by then the card has resolved.
+	startRound := g.Round
 	for i := 0; i < 80; i++ {
 		pq := g.Pending()
 		if pq == nil {
 			g.Run()
 			pq = g.Pending()
+			if pq == nil {
+				return
+			}
 		}
-		if pq == nil {
+		if pq.Question.Prompt == "Your turn" && g.Round > startRound {
 			return
 		}
-		if err := g.Answer(pq.Player, []string{"end-turn"}); err != nil {
-			// Most prompts during the drain loop aren't turn menus;
-			// fall back to the default answer.
-			ans := pickDefault(pq.Question)
-			if len(ans) == 0 {
-				return
-			}
-			if err2 := g.Answer(pq.Player, ans); err2 != nil {
-				return
-			}
+		ans := pickDefault(pq.Question)
+		if len(ans) == 0 {
+			return
+		}
+		if err := g.Answer(pq.Player, ans); err != nil {
+			return
 		}
 		if g.Over {
 			return
@@ -181,31 +183,47 @@ func TestHaveAtTheeDrawsTwo(t *testing.T) {
 		{ID: g.NextCardID(), Code: "06004", Owner: p.ID},
 		{ID: g.NextCardID(), Code: "06005", Owner: p.ID},
 	}
+	// The pending turn menu was built before the form change above, so
+	// advance to the next turn first: its menu reflects hero form and a
+	// readied identity (the end-of-player-phase readies everything).
+	for i := 0; i < 30; i++ {
+		pq := g.Pending()
+		if pq == nil {
+			g.Run()
+			continue
+		}
+		if pq.Question.Prompt == "Your turn" && i > 0 {
+			break
+		}
+		if err := g.Answer(pq.Player, pickDefault(pq.Question)); err != nil {
+			t.Fatalf("advance: %v", err)
+		}
+		if g.Over {
+			t.Fatal("game over while advancing turns")
+		}
+	}
 	handBefore := len(p.Hand)
-	mn := &engine.Minion{ID: g.NextEntityID("minion"), Code: "01099", MaxHP: 3, EngagedWith: p.ID}
-	g.Minions[mn.ID] = mn
-	// Clear the original pending turn menu so MinionEntersPlay can process.
-	for i := 0; i < 60; i++ {
+	// The turn menu blocks the queue; drilling into the basic-attack
+	// choice (never completing its target question) unblocks the queue so
+	// the pushed MinionEntersPlay processes within this player phase.
+	pushMinion := func(mn *engine.Minion) {
+		t.Helper()
+		g.Minions[mn.ID] = mn
+		g.Push(engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID})
 		pq := g.Pending()
 		if pq == nil {
 			g.Run()
 			pq = g.Pending()
 		}
 		if pq == nil {
-			break
+			t.Fatal("no pending question to unblock the queue")
 		}
-		ans := pickDefault(pq.Question)
-		if len(ans) == 0 {
-			break
-		}
-		if err := g.Answer(pq.Player, ans); err != nil {
-			t.Fatalf("drain: %v", err)
-		}
-		if g.Over {
-			break
+		if err := g.Answer(pq.Player, []string{"basic-attack"}); err != nil {
+			t.Fatalf("answer basic-attack: %v", err)
 		}
 	}
-	g.Push(engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID})
+	mn := &engine.Minion{ID: g.NextEntityID("minion"), Code: "01099", MaxHP: 3, EngagedWith: p.ID}
+	pushMinion(mn)
 	g.Run()
 	if len(p.Hand) != handBefore+2 {
 		t.Fatalf("Thor should have drawn 2 cards from Have at thee!, hand before=%d after=%d",
@@ -215,8 +233,7 @@ func TestHaveAtTheeDrawsTwo(t *testing.T) {
 	// Second minion in the same phase: no further draw (limit).
 	handAfterFirst := len(p.Hand)
 	mn2 := &engine.Minion{ID: g.NextEntityID("minion"), Code: "01099", MaxHP: 3, EngagedWith: p.ID}
-	g.Minions[mn2.ID] = mn2
-	g.Push(engine.MinionEntersPlay{MinionID: mn2.ID, Player: p.ID})
+	pushMinion(mn2)
 	g.Run()
 	if len(p.Hand) != handAfterFirst {
 		t.Fatalf("Have at thee! should be limited to once per phase; hand %d -> %d",

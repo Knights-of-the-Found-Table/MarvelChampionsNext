@@ -33,6 +33,13 @@ func newLegacyTestGame(t *testing.T) *Game {
 func TestAnswerRebuildsLegacyPendingQuestion(t *testing.T) {
 	g := newLegacyTestGame(t)
 	p := g.Players[0]
+	// The game opens paused on the setup mulligan; keep the hand so the
+	// first player phase begins and the turn menu becomes pending.
+	if pq := g.Pending(); pq != nil {
+		if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+			t.Fatalf("answer mulligan: %v", err)
+		}
+	}
 	p.Side = SideHero // basic-attack is hero-side only
 	p.Exhausted = false
 	p.Stunned = false

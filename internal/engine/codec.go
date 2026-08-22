@@ -22,6 +22,8 @@ var messageRegistry = map[string]reflect.Type{}
 func init() {
 	prototypes := []Message{
 		StartGame{}, BeginRound{}, EndRound{}, BeginPhase{}, EndPhase{},
+		DiscardToHandSize{}, FinishPlayerPhase{}, PassFirstPlayerToken{},
+		ResolveMulligan{}, MulliganCard{},
 		PlayerTurnStart{}, PlayerTurnEnd{}, ReadyAll{}, ReadyEntity{},
 		ExhaustEntity{}, DrawCards{}, ShufflePlayerDeck{}, DiscardCards{},
 		ChangeForm{}, PlayCard{}, ResourcePay{}, BasicThwart{}, BasicAttack{},
