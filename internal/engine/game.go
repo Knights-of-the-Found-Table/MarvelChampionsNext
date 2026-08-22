@@ -370,26 +370,32 @@ func (g *Game) Answer(playerID PlayerID, paths []string) error {
 	default:
 		// A choose_n subtree (resource payment) nested under this choose_one
 		// question is answered by submitting all its selections at once
-		// ({"6.0","6.1"} = the payment question under choice "6").
-		if sub, subPaths, ok := nestedChooseN(q, paths); ok {
+		// ({"6.0","6.1"} = the payment question under choice "6"). Choices
+		// along the common prefix (e.g. an interrupt ahead of a paid
+		// defense) contribute their messages as well.
+		if sub, subPaths, prefix, ok := nestedChooseN(q, paths); ok {
 			msgs, err = g.resolveChooseN(sub, subPaths)
 			if err != nil {
 				g.pending = pending
 				return err
 			}
+			prefixMsgs, err := g.chainMsgs(q, prefix)
+			if err != nil {
+				g.pending = pending
+				return err
+			}
+			msgs = append(prefixMsgs, msgs...)
 			break
 		}
 		if len(paths) != 1 {
 			g.pending = pending
 			return fmt.Errorf("expected exactly one answer path")
 		}
-		var leaf *Choice
-		leaf, err = q.Leaf(paths[0])
+		msgs, err = g.chainMsgs(q, paths[0])
 		if err != nil {
 			g.pending = pending
 			return err
 		}
-		msgs = leaf.msgs
 	}
 	// Answers continue the interrupted flow: front-insert.
 	g.queue = append(msgs, g.queue...)
@@ -414,11 +420,36 @@ func (g *Game) resolveChooseN(q *Question, paths []string) ([]Message, error) {
 	return msgs, nil
 }
 
+// chainMsgs collects the messages of every choice along an answer path,
+// root first and leaf last ("interrupt → defend" fires the interrupt's
+// effect before the defense). Questions persisted before WithThen copied
+// subtrees carry duplicate ids across branches; answering those keeps the
+// legacy leaf-only semantics instead of risking another branch's messages.
+func (g *Game) chainMsgs(q *Question, path string) ([]Message, error) {
+	if !q.idsUnique() {
+		leaf, err := q.Leaf(path)
+		if err != nil {
+			return nil, err
+		}
+		return leaf.msgs, nil
+	}
+	chain, err := q.Chain(path)
+	if err != nil {
+		return nil, err
+	}
+	var msgs []Message
+	for _, c := range chain {
+		msgs = append(msgs, c.msgs...)
+	}
+	return msgs, nil
+}
+
 // nestedChooseN detects an answer selecting from a choose_n subtree nested
 // under a choose_one root: the paths' common prefix must resolve to a choice
 // whose Then question is a choose_n ("Pay N resources…"). Returns that
-// subtree and the original paths (sub-choice ids carry the full prefix).
-func nestedChooseN(q *Question, paths []string) (*Question, []string, bool) {
+// subtree, the original paths (sub-choice ids carry the full prefix) and
+// the common prefix (whose chain messages fire alongside the payment).
+func nestedChooseN(q *Question, paths []string) (*Question, []string, string, bool) {
 	prefix := paths[0]
 	for _, p := range paths[1:] {
 		for prefix != "" && p != prefix && !strings.HasPrefix(p, prefix+".") {
@@ -428,11 +459,11 @@ func nestedChooseN(q *Question, paths []string) (*Question, []string, bool) {
 	for prefix != "" {
 		if c, err := q.Leaf(prefix); err == nil && c.Then != nil &&
 			c.Then.Type == "choose_n" && len(c.Then.Choices) > 0 {
-			return c.Then, paths, true
+			return c.Then, paths, prefix, true
 		}
 		prefix = trimLastSegment(prefix)
 	}
-	return nil, nil, false
+	return nil, nil, "", false
 }
 
 func trimLastSegment(path string) string {

@@ -91,15 +91,48 @@ func (c Choice) Msgs(msgs ...Message) Choice {
 	return c
 }
 
-// WithThen attaches a follow-up question under this choice. The subtree's
+// WithThen attaches a follow-up question under this choice. The subtree is
+// deep-copied so each branch owns an independent id namespace: several
+// choices may chain into the same question object (attackQuestion's shared
+// defense prompt) without inheriting each other's prefixes. The subtree's
 // choice ids are cleared so the root question reassigns them with the full
 // answer-path prefix ("2.0"): ids assigned while the subtree was built
 // standalone (its own assignIDs("") call) would collide with root-level ids
 // and answers referencing them would resolve to the wrong root choice.
 func (c Choice) WithThen(q *Question) Choice {
-	clearChoiceIDs(q)
-	c.Then = q
+	c.Then = copyQuestion(q)
+	clearChoiceIDs(c.Then)
 	return c
+}
+
+// copyQuestion deep-copies a question tree. msg payloads are shared
+// read-only (they are immutable data, and Choice.msgs already round-trips
+// through the envelope codec when persisted). A manual copy is used instead
+// of a JSON round-trip because Question.Context may hold non-string values
+// whose types would drift (int → float64) through JSON.
+func copyQuestion(q *Question) *Question {
+	if q == nil {
+		return nil
+	}
+	out := &Question{
+		Type:     q.Type,
+		Prompt:   q.Prompt,
+		Choices:  make([]Choice, len(q.Choices)),
+		N:        q.N,
+		Validate: q.Validate,
+	}
+	if q.Context != nil {
+		out.Context = make(map[string]any, len(q.Context))
+		for k, v := range q.Context {
+			out.Context[k] = v
+		}
+	}
+	for i := range q.Choices {
+		ch := q.Choices[i]
+		ch.Then = copyQuestion(q.Choices[i].Then)
+		out.Choices[i] = ch
+	}
+	return out
 }
 
 func clearChoiceIDs(q *Question) {
@@ -162,6 +195,64 @@ func (q *Question) Leaf(answer string) (*Choice, error) {
 		}
 	}
 	return nil, fmt.Errorf("invalid answer %q for question", answer)
+}
+
+// Chain resolves an answer path to the sequence of choices from the root to
+// the answered choice (the leaf last). Answering "interrupt.defend" must
+// fire both the interrupt choice's messages and the defense leaf's, so
+// callers concatenate the chain's msgs in order.
+func (q *Question) Chain(answer string) ([]*Choice, error) {
+	var chain []*Choice
+	cur := q
+	rest := answer
+	for cur != nil {
+		found := false
+		for i := range cur.Choices {
+			c := &cur.Choices[i]
+			if rest == c.ID {
+				return append(chain, c), nil
+			}
+			if pathHasPrefix(rest, c.ID) {
+				if c.Then == nil {
+					return nil, fmt.Errorf("answer %q descends past a leaf choice", answer)
+				}
+				chain = append(chain, c)
+				cur = c.Then
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("invalid answer %q for question", answer)
+		}
+	}
+	return chain, nil
+}
+
+// idsUnique reports whether every choice id in the tree occurs exactly
+// once. Questions persisted before WithThen copied subtrees carry the same
+// ids under several branches (the shared-subtree defect); answering those
+// falls back to leaf-only semantics instead of risking another branch's
+// messages firing.
+func (q *Question) idsUnique() bool {
+	seen := map[string]bool{}
+	var walk func(q *Question) bool
+	walk = func(q *Question) bool {
+		for i := range q.Choices {
+			c := &q.Choices[i]
+			if c.ID != "" {
+				if seen[c.ID] {
+					return false
+				}
+				seen[c.ID] = true
+			}
+			if c.Then != nil && !walk(c.Then) {
+				return false
+			}
+		}
+		return true
+	}
+	return walk(q)
 }
 
 // Selective returns the choices matching the given answer paths (for

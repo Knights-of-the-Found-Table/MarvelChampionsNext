@@ -828,6 +828,146 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	}
 }
 
+// TestInterruptEffectFiresWithDefense: answering an interrupt branch fires
+// the interrupt's own effect (Spider-Sense draws 1) before the defense
+// resolves, and each branch answers via its own id prefix (the original
+// repro: "pass-interrupt.<leaf>" used to be an invalid answer).
+func TestInterruptEffectFiresWithDefense(t *testing.T) {
+	g := newRulesGame(t, 18)
+	keepHands(t, g)
+	p := g.Players[0]
+	p.Side = engine.SideHero
+
+	pq := g.Pending()
+	if err := g.Answer(pq.Player, []string{"end-turn"}); err != nil {
+		t.Fatalf("end turn: %v", err)
+	}
+	for pq = g.Pending(); pq != nil; {
+		switch {
+		case pq.Question.Prompt == "Discard cards before drawing up?":
+			if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+				t.Fatalf("keep: %v", err)
+			}
+		case strings.Contains(pq.Question.Prompt, "Discard down to hand size"):
+			if err := g.Answer(pq.Player, pickDefault(pq.Question)); err != nil {
+				t.Fatalf("discard down: %v", err)
+			}
+		default:
+			return // attack prompt reached
+		}
+		pq = g.Pending()
+	}
+
+	// Villain attack wrapped in Spider-Sense interrupts.
+	pq = g.Pending()
+	if pq == nil || pq.Question.Prompt != "Interrupts" {
+		t.Fatalf("expected interrupts prompt, got %q", promptOf(pq))
+	}
+	var interruptID, passTakePath string
+	for _, c := range pq.Question.Choices {
+		if c.ID == "interrupt-player-0" && c.Then != nil {
+			interruptID = c.ID
+			for _, d := range c.Then.Choices {
+				if d.Label == "Take the attack" {
+					passTakePath = d.ID // interrupt branch's take leaf
+				}
+			}
+		}
+	}
+	if interruptID == "" || passTakePath == "" {
+		t.Fatal("interrupt branch with a take leaf should exist")
+	}
+	// The pass branch must own its namespace now.
+	passBranchTake := ""
+	for _, c := range pq.Question.Choices {
+		if c.ID == "pass-interrupt" && c.Then != nil {
+			for _, d := range c.Then.Choices {
+				if d.Label == "Take the attack" {
+					passBranchTake = d.ID
+				}
+			}
+		}
+	}
+	if passBranchTake == "" || !strings.HasPrefix(passBranchTake, "pass-interrupt.") {
+		t.Fatalf("pass branch must own its id namespace, got %q", passBranchTake)
+	}
+
+	// Take the attack THROUGH the interrupt: Spider-Sense draws 1 and the
+	// attack still resolves against the player.
+	handBefore := len(p.Hand)
+	damageBefore := p.Damage
+	if err := g.Answer(pq.Player, []string{passTakePath}); err != nil {
+		t.Fatalf("answer interrupt take: %v", err)
+	}
+	if len(p.Hand) != handBefore+1 {
+		t.Fatalf("Spider-Sense should draw 1 when its interrupt is chosen, hand %d -> %d",
+			handBefore, len(p.Hand))
+	}
+	if p.Damage <= damageBefore {
+		t.Fatalf("the attack should still resolve, damage %d -> %d", damageBefore, p.Damage)
+	}
+}
+
+// TestPassInterruptBranchSkipsEffect: answering through the pass branch
+// fires no interrupt effect (hand unchanged) while the attack resolves.
+func TestPassInterruptBranchSkipsEffect(t *testing.T) {
+	g := newRulesGame(t, 18)
+	keepHands(t, g)
+	p := g.Players[0]
+	p.Side = engine.SideHero
+
+	pq := g.Pending()
+	if err := g.Answer(pq.Player, []string{"end-turn"}); err != nil {
+		t.Fatalf("end turn: %v", err)
+	}
+	for pq = g.Pending(); pq != nil; {
+		switch {
+		case pq.Question.Prompt == "Discard cards before drawing up?":
+			if err := g.Answer(pq.Player, []string{"keep"}); err != nil {
+				t.Fatalf("keep: %v", err)
+			}
+		case strings.Contains(pq.Question.Prompt, "Discard down to hand size"):
+			if err := g.Answer(pq.Player, pickDefault(pq.Question)); err != nil {
+				t.Fatalf("discard down: %v", err)
+			}
+		default:
+			return // attack prompt reached
+		}
+		pq = g.Pending()
+	}
+
+	pq = g.Pending()
+	if pq == nil || pq.Question.Prompt != "Interrupts" {
+		t.Fatalf("expected interrupts prompt, got %q", promptOf(pq))
+	}
+	var takePath string
+	for _, c := range pq.Question.Choices {
+		if c.ID != "pass-interrupt" || c.Then == nil {
+			continue
+		}
+		for _, d := range c.Then.Choices {
+			if d.Label == "Take the attack" {
+				takePath = d.ID
+			}
+		}
+	}
+	if takePath == "" {
+		t.Fatal("pass branch take leaf missing")
+	}
+	handBefore := len(p.Hand)
+	damageBefore := p.Damage
+	// The original repro path: this used to be an invalid answer.
+	if err := g.Answer(pq.Player, []string{takePath}); err != nil {
+		t.Fatalf("answer pass-interrupt take: %v", err)
+	}
+	if len(p.Hand) != handBefore {
+		t.Fatalf("passing interrupts must not draw, hand %d -> %d", handBefore, len(p.Hand))
+	}
+	if p.Damage <= damageBefore {
+		t.Fatalf("the attack should resolve, damage %d -> %d", damageBefore, p.Damage)
+	}
+}
+
 // TestChangeFormAllowedWhileExhausted: changing form keeps the character's
 // ready/exhausted state and is allowed while exhausted.
 func TestChangeFormAllowedWhileExhausted(t *testing.T) {
