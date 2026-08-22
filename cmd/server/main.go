@@ -108,29 +108,24 @@ func main() {
 		log.Fatalf("zh image cache: %v", err)
 	}
 
-	// Prewarm mirror-backed caches in the background (MC_PREWARM_IMAGES=1
-	// forces both even against bare marvelcdb, =0 disables): filling the
-	// manifests makes every image URL content-addressed. The caches
-	// persist in MC_CACHE_DIR, so repeat boots only fetch what is missing.
-	if prewarm := envOr("MC_PREWARM_IMAGES", "auto"); prewarm != "0" {
-		prewarmDefault := prewarm == "1" || imgSources.DefaultIsMirror
-		prewarmZh := prewarm == "1" || len(imgSources.Zh) > 0
-		if prewarmDefault || prewarmZh {
-			// Every card code, faces included: the manifest then covers
-			// all URLs the frontend can build. Codes a source lacks are
-			// counted as missing (zh falls back to the default chain).
-			codes := make([]string, 0, len(engine.DB.All()))
-			for _, def := range engine.DB.All() {
-				codes = append(codes, def.Code)
-			}
-			if prewarmDefault {
-				log.Printf("images: prewarming %d card images (default) in the background", len(codes))
-				go api.PrewarmImages(images, codes, 4, 25*time.Millisecond)
-			}
-			if prewarmZh {
-				log.Printf("images: prewarming %d card images (zh) in the background", len(codes))
-				go api.PrewarmImages(zhImages, codes, 4, 25*time.Millisecond)
-			}
+	// Opt-in background cache prewarm at startup (MC_PREWARM_IMAGES=1;
+	// off by default): filling the manifests makes every image URL
+	// content-addressed. The caches persist in MC_CACHE_DIR, so repeat
+	// boots only fetch what is missing.
+	if os.Getenv("MC_PREWARM_IMAGES") == "1" {
+		// Every card code, faces included: the manifest then covers
+		// all URLs the frontend can build. Codes a source lacks are
+		// counted as missing (zh falls back to the default chain).
+		codes := make([]string, 0, len(engine.DB.All()))
+		for _, def := range engine.DB.All() {
+			codes = append(codes, def.Code)
+		}
+		log.Printf("images: prewarming %d card images (default) in the background", len(codes))
+		go api.PrewarmImages(images, codes, 4, 25*time.Millisecond)
+		// An unconfigured zh chain has nothing to fetch from.
+		if len(imgSources.Zh) > 0 {
+			log.Printf("images: prewarming %d card images (zh) in the background", len(codes))
+			go api.PrewarmImages(zhImages, codes, 4, 25*time.Millisecond)
 		}
 	}
 	server := &api.Server{

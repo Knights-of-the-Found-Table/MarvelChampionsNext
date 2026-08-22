@@ -36,7 +36,7 @@ docker compose up --build -d   # http://localhost:3000
 | `MC_DB_PATH` | `marvelchampions.db` | SQLite database file. |
 | `MC_STATIC_DIR` | `web/dist` | Directory with the built frontend. |
 | `MC_CACHE_DIR` | `cache` | On-demand card image cache. |
-| `MC_PREWARM_IMAGES` | `auto` | Background cache prewarm at startup so every image URL is content-hashed. `auto` = on for every mirror-backed cache, off against bare marvelcdb; `1`/`0` force it. |
+| `MC_PREWARM_IMAGES` | off | Background cache prewarm at startup so every image URL is content-hashed. Off by default; set `1` to prewarm the whole card set at boot (the default chain, and the zh chain when a Chinese mirror is configured). |
 | `IMAGE_MIRROR` | `https://marvelcdb.com` | Default-language (English) image mirror root, keyed by the face convention (`/bundles/cards/{code}.png`). The marvelcdb.com default is special-cased to its own legacy per-face paths. |
 | `ZH_IMAGE_MIRROR` | empty | Chinese image mirror root — a separate language source keyed by the face convention (`/bundles/cards/{code}.png`, `{base}a`/`{base}b` for double-sided cards). |
 
@@ -72,8 +72,8 @@ A missing path is retried with the other extensions (`.png`/`.jpg`/`.webp`)
 so mirrors keyed differently still work, and the MIME type is detected from
 content regardless of the URL.
 
-With a mirror configured the server prewarms the whole card set in the
-background (`MC_PREWARM_IMAGES`), completing the hash manifest so image
+Set `MC_PREWARM_IMAGES=1` to prewarm the whole card set in the background
+at startup, completing the hash manifest so image
 URLs are content-addressed (`/img/cards/{code}.{hash}.png`) and cached
 immutably by browsers; un-hashed URLs and manifests revalidate via ETag,
 and a zh fallback (no Chinese face exists, the default-language image is
