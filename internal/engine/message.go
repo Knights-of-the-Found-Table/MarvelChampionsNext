@@ -425,6 +425,18 @@ type (
 	// BunkerDiscard asks a player to discard 2 cards (Champions Mobile
 	// Bunker).
 	BunkerDiscard struct{ Player PlayerID }
+	// MillEncounter discards N cards off the encounter deck (Chaos
+	// Magic).
+	MillEncounter struct{ N int }
+	// TopDeckPick moves one of the deck's top 3 to hand and the rest to
+	// the bottom (Agatha Harkness).
+	TopDeckPick struct {
+		Player PlayerID
+		CardID string
+	}
+	// SlippingSanityMill mills 5 encounter cards, placing 1 main-scheme
+	// threat per star (boost) icon.
+	SlippingSanityMill struct{ Player PlayerID }
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -684,6 +696,9 @@ func (AddVengeance) msg()             {}
 func (ResolveTechnique) msg()         {}
 func (DiscardAttachmentMsg) msg()     {}
 func (BunkerDiscard) msg()            {}
+func (MillEncounter) msg()            {}
+func (TopDeckPick) msg()              {}
+func (SlippingSanityMill) msg()       {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

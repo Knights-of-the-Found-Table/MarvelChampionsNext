@@ -703,6 +703,46 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case MillEncounter:
+		for i := 0; i < m.N; i++ {
+			c, ok := g.DrawEncounter()
+			if !ok {
+				return
+			}
+			g.EncounterDiscard = append(g.EncounterDiscard, c)
+			g.Logf("Chaos Magic mills %s", c.Def().Name)
+		}
+
+	case TopDeckPick:
+		if p := g.Player(m.Player); p != nil {
+			if c, ok := p.Deck.Remove(m.CardID); ok {
+				p.Hand = append(p.Hand, c)
+				// The remaining top 2 go to the bottom.
+				var rest CardList
+				for i := 0; i < 2 && len(p.Deck) > 0; i++ {
+					rest = append(rest, p.Deck[0])
+					p.Deck = p.Deck[1:]
+				}
+				p.Deck = append(p.Deck, rest...)
+			}
+		}
+
+	case SlippingSanityMill:
+		stars := 0
+		for i := 0; i < 5; i++ {
+			c, ok := g.DrawEncounter()
+			if !ok {
+				break
+			}
+			if b := c.Def().Boost; b != nil && *b > 0 {
+				stars++
+			}
+			g.EncounterDiscard = append(g.EncounterDiscard, c)
+		}
+		if stars > 0 && g.MainScheme != nil {
+			g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: stars, Source: EntityID("15023")})
+		}
+
 	case BunkerDiscard:
 		if p := g.Player(m.Player); p != nil && len(p.Hand) > 0 {
 			var picks []Choice
