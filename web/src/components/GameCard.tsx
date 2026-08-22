@@ -32,7 +32,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
     return () => clearTimeout(t)
   }, [])
 
-  if (card.kind === 'pile') return <Pile card={card} className={className} />
+  if (card.kind === 'pile') return <Pile card={card} className={className} onClick={onClick ? () => onClick(card) : undefined} />
 
   const color = card.playerIndex >= 0 ? PLAYER_COLORS[card.playerIndex % 4] : '#8a2020'
   const fxCls = fx
@@ -47,6 +47,8 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
         {
           '--x': `${card.x}px`,
           '--y': `${card.y}px`,
+          '--w': `${card.w ?? 127}px`,
+          '--h': `${card.h ?? 176}px`,
           '--rot': `${card.rotate ?? 0}deg`,
           '--s': card.scale ?? 1,
           '--z': card.z ?? 2,
@@ -148,10 +150,14 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
   )
 }
 
-// 牌堆：背面卡 + 数量徽章 + 底部标签。
-function Pile({ card, className = '' }: { card: PlacedCard; className?: string }) {
+// 牌堆：按数量堆叠的背面层（每约 3 张一层，封顶 7 层）+ 数量徽章。
+// 弃牌堆有顶牌时顶牌朝上盖在层堆上；空弃牌堆显示蓝色空框 + 数字 0。
+function Pile({ card, className = '', onClick }: { card: PlacedCard; className?: string; onClick?: () => void }) {
   const s = card.pileScale ?? 1
   const lang = useLang()
+  const count = card.count ?? 0
+  const layers = Math.max(1, Math.min(7, Math.ceil(count / 3)))
+  const isEmptyDiscard = card.label === 'discard' && count === 0 && !card.code
   return (
     <div
       className={`gcard pile pk-${Math.max(0, card.playerIndex)} k-pile-${card.label ?? 'deck'} ${className}`}
@@ -159,6 +165,8 @@ function Pile({ card, className = '' }: { card: PlacedCard; className?: string }
         {
           '--x': `${card.x}px`,
           '--y': `${card.y}px`,
+          '--w': '127px',
+          '--h': '176px',
           '--rot': '0deg',
           '--s': s,
           '--z': card.z ?? 1,
@@ -166,26 +174,38 @@ function Pile({ card, className = '' }: { card: PlacedCard; className?: string }
         } as React.CSSProperties
       }
       title={card.title}
+      onClick={onClick}
     >
       <div className="gcard-in">
-        {card.code && !card.faceDown ? (
-          <img
-            className="gcard-img"
-            src={cardUrl(card.code, lang)}
-            alt={card.title}
-            draggable={false}
-            onError={(e) => {
-              const img = e.currentTarget
-              if (!img.dataset.fallback) {
-                img.dataset.fallback = '1'
-                img.src = fallbackDataUrl(card.code)
-              }
-            }}
-          />
+        {isEmptyDiscard ? (
+          <div className="gcard-back empty-discard" />
         ) : (
-          <div className={`gcard-back ${card.playerIndex >= 0 ? 'player' : 'encounter'}`} />
+          <>
+            {Array.from({ length: layers }).map((_, i) => (
+              <div
+                key={i}
+                className={`gcard-back pile-layer ${card.playerIndex >= 0 ? 'player' : 'encounter'}`}
+                style={{ translate: `${i * 2}px ${-i * 2.5}px` } as React.CSSProperties}
+              />
+            ))}
+            {card.code && !card.faceDown ? (
+              <img
+                className="gcard-img pile-top"
+                src={cardUrl(card.code, lang)}
+                alt={card.title}
+                draggable={false}
+                onError={(e) => {
+                  const img = e.currentTarget
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = '1'
+                    img.src = fallbackDataUrl(card.code)
+                  }
+                }}
+              />
+            ) : null}
+          </>
         )}
-        {card.count !== undefined && card.count > 0 && <span className="pile-count">{card.count}</span>}
+        {(count > 0 || card.label === 'discard') && <span className="pile-count">{count}</span>}
       </div>
     </div>
   )

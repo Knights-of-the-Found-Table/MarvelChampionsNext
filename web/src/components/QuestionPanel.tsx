@@ -1,6 +1,13 @@
 import type { Choice, Question } from '../api'
 import { CardImage } from '../cards'
-import { useT } from '../i18n'
+import { useLang, useT } from '../i18n'
+import { localizePrompt, useChoiceLabel } from '../i18n/labels'
+
+function usePromptText(prompt: string | undefined): string {
+  const lang = useLang()
+  if (!prompt) return ''
+  return localizePrompt(prompt, lang)
+}
 
 interface Props {
   current: Question
@@ -8,27 +15,48 @@ interface Props {
   onPick: (c: Choice) => void
   onBack?: () => void
   onConfirm: () => void
+  // 默认折叠：棋盘点卡是主交互，本面板作为"全部可选操作"的调试清单。
+  open: boolean
+  onToggle: () => void
 }
 
-// 问题面板（受控组件）：导航/多选状态由 Game.tsx 持有，使棋盘点卡与
-// 面板按钮共享同一条选择路径。choose_one 直接 pick；choose_n 点选切换，
-// 确认后作答。
-export default function QuestionPanel({ current, selected, onPick, onBack, onConfirm }: Props) {
+export default function QuestionPanel({ current, selected, onPick, onBack, onConfirm, open, onToggle }: Props) {
   const t = useT()
+  const promptText = usePromptText(current.prompt)
+  const choiceLabel = useChoiceLabel()
 
   const isMulti = current.type === 'choose_n'
   const need = current.n ?? 1
 
+  // 折叠条：提示 + 选项数，点击展开完整清单
+  if (!open) {
+    return (
+      <div className="question-collapsed" onClick={onToggle}>
+        <span className="q-toggle">▸</span>
+        <span className="q-prompt">{promptText}</span>
+        <span className="muted">
+          {t('q.choiceCount', { n: current.choices.length })}
+        </span>
+        {isMulti && selected.size > 0 && (
+          <span className="q-selected-count">{selected.size}</span>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="question card">
       <div className="row space-between">
-        <strong>{current.prompt || t('q.choose')}</strong>
+        <strong>{promptText}</strong>
         <div className="row">
           {onBack && (
             <button className="linklike" onClick={onBack}>
               {t('q.back')}
             </button>
           )}
+          <button className="linklike" onClick={onToggle}>
+            {t('q.collapse')}
+          </button>
           {isMulti && (
             <span className="muted">
               {t('q.selected', { n: selected.size })}
@@ -48,7 +76,7 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
                 onClick={() => onPick(c)}
               >
                 {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
-                <span>{c.label}</span>
+                <span>{choiceLabel(c)}</span>
               </button>
             ))}
           </div>
@@ -66,7 +94,7 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
               onClick={() => onPick(c)}
             >
               {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
-              <span>{c.label}</span>
+              <span>{choiceLabel(c)}</span>
             </button>
           ))}
         </div>

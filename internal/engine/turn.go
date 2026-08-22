@@ -20,7 +20,7 @@ func (g *Game) TurnMenu(p *Player) *Question {
 		}
 		choices = append(choices, Choice{
 			ID: "form", Label: "Change to " + target, Kind: ChoiceForm,
-			CardCode: otherSideCode(p),
+			CardCode: otherSideCode(p), SourceID: p.ID,
 		}.Msgs(ChangeForm{Player: p.ID}))
 	}
 

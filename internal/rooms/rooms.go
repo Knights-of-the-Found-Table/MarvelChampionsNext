@@ -47,6 +47,9 @@ func (m *Manager) Get(gameID int64) (*Room, error) {
 	if err := g.UnmarshalJSON([]byte(row.State)); err != nil {
 		return nil, fmt.Errorf("decode game state: %w", err)
 	}
+	// Migrate a pending turn menu persisted before nested choice ids carried
+	// path prefixes (answers against the old shape fail with invalid path).
+	g.RebuildTurnMenu()
 	players, err := m.store.GamePlayers(gameID)
 	if err != nil {
 		return nil, err
@@ -118,6 +121,8 @@ func (m *Manager) Undo(gameID int64, userID string) error {
 	if err := g.UnmarshalJSON([]byte(state)); err != nil {
 		return fmt.Errorf("decode snapshot: %w", err)
 	}
+	// Snapshots predate the root-relative choice-id scheme too.
+	g.RebuildTurnMenu()
 	r.game = g
 	m.persist(r)
 	r.broadcast()

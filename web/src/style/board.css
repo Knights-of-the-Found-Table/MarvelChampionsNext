@@ -39,8 +39,8 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 127px;
-  height: 176px;
+  width: var(--w, 127px);
+  height: var(--h, 176px);
   --s: 1;
   --rot: 0deg;
   --z: 2;
@@ -75,9 +75,7 @@
   scale: 1.1;
 }
 
-.gcard:hover .gcard-in.exhausted {
-  rotate: 0deg;
-}
+/* 横置的卡保持 90°：横置本身就是状态展示，hover 只放大不转回 */
 
 .gcard-img {
   display: block;
@@ -117,7 +115,7 @@
   z-index: 6;
 }
 
-/* 卡背 */
+/* 卡背（legacy 漫威网页版 textures：encounter=遭遇 / player=玩家 / villain=boss） */
 .gcard-back {
   width: 100%;
   height: 100%;
@@ -126,18 +124,29 @@
   outline: 2px solid var(--pc, #555);
   outline-offset: -2px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  background-position: center;
+  background-size: cover;
 }
 
 .gcard-back.encounter {
-  background:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 8px, transparent 8px 16px),
-    radial-gradient(circle at 50% 40%, #5c1d1d 0%, #3a0f12 60%, #24090b 100%);
+  background-image: url('/textures/encounter.jpg');
 }
 
 .gcard-back.player {
+  background-image: url('/textures/player.jpg');
+}
+
+.gcard-back.villain {
+  background-image: url('/textures/villain.jpg');
+}
+
+/* 空弃牌堆：蓝色空框（无牌背贴图，示意"空"） */
+.gcard-back.empty-discard {
   background:
     repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 0 8px, transparent 8px 16px),
     radial-gradient(circle at 50% 40%, #1d2f5c 0%, #101b38 60%, #0a1124 100%);
+  opacity: 0.75;
+  border-style: dashed;
 }
 
 /* 牌堆 */
@@ -145,12 +154,17 @@
   cursor: default;
 }
 
-.gcard.pile .gcard-back {
-  box-shadow:
-    2px 2px 0 rgba(0, 0, 0, 0.35),
-    4px 4px 0 rgba(0, 0, 0, 0.28),
-    6px 6px 0 rgba(0, 0, 0, 0.2),
-    0 8px 14px rgba(0, 0, 0, 0.45);
+/* 堆叠层：按牌数堆出的厚度（每层右移 2px 上移 2.5px） */
+.gcard-back.pile-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.gcard-img.pile-top {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .pile-count {
@@ -171,6 +185,178 @@
   font-style: italic;
   text-shadow: 0 1px 2px #000;
   z-index: 4;
+}
+
+/* 高亮时全场暗幕：压暗未选中的卡（高亮卡 z 提到 50 浮出） */
+.scene-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.55);
+  z-index: 40;
+  pointer-events: none;
+  animation: scene-dim-in 220ms ease-out;
+}
+
+@keyframes scene-dim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.gcard.hl-play,
+.gcard.hl-target,
+.gcard.hl-ability,
+.gcard.hl-pay,
+.gcard.hl-selected {
+  z-index: 50;
+}
+
+/* 牌堆可点击查看 */
+.gcard.k-pile-deck,
+.gcard.k-pile-discard {
+  cursor: pointer;
+}
+
+.gcard.k-pile-deck:hover .gcard-in,
+.gcard.k-pile-discard:hover .gcard-in {
+  scale: 1.06;
+}
+
+/* 场景快捷按钮：恢复（英雄牌左侧）/ 结束回合（弃牌堆右侧）。
+   圆角矩形 + 立体浮雕（顶部内高光 + 底部厚边 + 投影），桌游 token 感。 */
+.board-action-btn {
+  position: absolute;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: #f0e8d8;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+    0 4px 0 rgba(0, 0, 0, 0.45),
+    0 7px 14px rgba(0, 0, 0, 0.5);
+  transition: transform 100ms, box-shadow 100ms, filter 100ms;
+}
+
+.board-action-btn .abi-icon {
+  font-size: 17px;
+}
+
+.board-action-btn:hover {
+  filter: brightness(1.15);
+}
+
+.board-action-btn:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.board-action-btn.recover {
+  background: linear-gradient(#4f9d6c, #2c6e45 55%, #1e5032);
+}
+
+.board-action-btn.endturn {
+  background: linear-gradient(#b04b45, #8c312c 55%, #6b2320);
+}
+
+/* 实体多选项菜单（点英雄牌等） */
+.entity-menu {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 310;
+}
+
+.entity-menu-body {
+  width: min(520px, 92vw);
+  max-height: 70vh;
+  overflow: auto;
+  background: rgba(16, 20, 27, 0.97);
+  border: 1px solid #46586c;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.entity-menu-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+}
+
+.entity-menu-choices .choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #22303f;
+  border: 1px solid #3c5064;
+  border-radius: 8px;
+  color: var(--text, #dfe7ef);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.entity-menu-choices .choice:hover {
+  background: #2d4056;
+  border-color: #5b8ab5;
+}
+
+.entity-menu-choices .choice img {
+  border-radius: 3px;
+}
+
+/* 牌堆查看器 */
+.pile-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 300;
+}
+
+.pile-modal-body {
+  width: min(1100px, 94vw);
+  max-height: 82vh;
+  overflow: auto;
+  background: rgba(16, 20, 27, 0.97);
+  border: 1px solid #46586c;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.pile-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+}
+
+.pile-grid img {
+  border-radius: 4px;
 }
 
 /* ---------------------------------------------------------------- 标志物 */
@@ -426,14 +612,55 @@
   font-weight: 700;
 }
 
-/* 问题面板：悬浮于手牌上方 */
+/* 问题面板：默认折叠为一条窄带（棋盘点卡为主交互，面板展开后是
+   "全部可选操作"清单）；位于屏幕左下角 */
+.question-collapsed {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(560px, 60vw);
+  padding: 5px 14px;
+  background: rgba(12, 15, 20, 0.8);
+  border: 1px solid #3a4a5c;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.question-collapsed:hover {
+  border-color: #5b8ab5;
+}
+
+.question-collapsed .q-prompt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 380px;
+}
+
+.question-collapsed .q-selected-count {
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #d94a4a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+}
+
 .board-hud .question {
   position: absolute;
-  left: 50%;
-  bottom: 26vh;
-  transform: translateX(-50%);
-  width: min(720px, 92vw);
-  max-height: 38vh;
+  left: 14px;
+  bottom: 52px;
+  width: min(560px, 92vw);
+  max-height: 46vh;
   overflow: auto;
   background: rgba(12, 15, 20, 0.94);
   border: 1px solid #46586c;
@@ -522,6 +749,34 @@
   color: #8494a7;
 }
 
+/* 错误 toast：独立显示，不挤占顶栏 */
+.error-toast {
+  position: absolute;
+  right: 14px;
+  bottom: 60px;
+  max-width: min(420px, 80vw);
+  padding: 10px 16px;
+  background: rgba(90, 20, 20, 0.95);
+  border: 1px solid #c96060;
+  border-radius: 8px;
+  color: #ffd7d0;
+  font-size: 13px;
+  z-index: 320;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: error-toast-in 200ms ease-out;
+}
+
+@keyframes error-toast-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 /* 撤销按钮 */
 .hud-controls {
   position: absolute;
@@ -545,6 +800,60 @@
 
 .hud-toggle.on {
   border-color: #5b8ab5;
+}
+
+/* 结束回合快捷按钮 */
+.hud-endturn {
+  padding: 5px 14px;
+  background: rgba(90, 40, 40, 0.92);
+  color: #ffd7d0;
+  border: 1px solid #8a4040;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hud-endturn:hover {
+  border-color: #d94a4a;
+  background: rgba(120, 45, 45, 0.95);
+}
+
+/* 多选确认条（棋盘点选支付卡） */
+.confirm-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 32vh;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(12, 15, 20, 0.92);
+  border: 1px solid #46586c;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 210;
+}
+
+.confirm-bar button {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid #3c5064;
+  background: #22303f;
+  color: var(--text, #dfe7ef);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.confirm-bar button.primary {
+  background: #a33c3c;
+  border-color: #c96060;
+  font-weight: 700;
+}
+
+.confirm-bar button:hover {
+  filter: brightness(1.15);
 }
 
 .hud-undo:hover,

@@ -159,7 +159,7 @@ export interface PlayerView {
   userId?: string
   side: string
   heroCode: string
-  alterEgo: string
+  alterEgoCode: string
   hp: number
   maxHp: number
   exhausted: boolean
@@ -172,6 +172,7 @@ export interface PlayerView {
   hand?: CardRef[]
   handSize: number
   deckCount: number
+  discardCount?: number
   discardTop?: CardRef
   allies: AllyView[] | null
   supports: EntityLite[] | null

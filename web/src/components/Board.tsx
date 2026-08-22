@@ -7,9 +7,10 @@
 // 本组件的定时清理状态，渲染进 EffectsLayer 与各卡牌的 fx class。
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { GameView, Question } from '../api'
-import { layoutBoard, SCENE_H, SCENE_W, type PlacedCard } from '../board/layout'
+import { CARD_H, layoutBoard, SCENE_H, SCENE_W, type PlacedCard } from '../board/layout'
 import { diffFloaters, eventsToFx, type Arrow, type CardFx, type Floater, type GameEvt } from '../board/fx'
 import { playSfx } from '../audio/sfx'
+import { useT } from '../i18n'
 import EffectsLayer from './EffectsLayer'
 import GameCard from './GameCard'
 
@@ -41,17 +42,40 @@ export default function Board({
   question,
   selected,
   onCardClick,
+  onEndTurn,
+  onRecover,
 }: {
   view: GameView
   events?: GameEvt[]
   question?: Question | null
   selected?: Set<string>
   onCardClick?: (card: PlacedCard) => void
+  onEndTurn?: () => void
+  onRecover?: () => void
 }) {
+  // 高亮 + 暗幕只在"必须立即操作"的问题上启用：回合主菜单（含 end_turn
+  // 选项）里的出牌/技能随时可做，不高亮不压暗；选目标、支付、防御这类
+  // 强制交互才进入高亮模式。点卡作答本身不受影响（始终接线）。
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const [fit, setFit] = useState({ scale: 1, left: 0, top: 0 })
 
   const cards = layoutBoard(view)
+  const t = useT()
+
+  // 场景快捷按钮：恢复（英雄牌左侧）、结束回合（弃牌堆右侧）。
+  // 位置从布局结果锚定，跟随身份行缩放。
+  const viewerPlayer = view.players[view.players.findIndex((p) => p.hand && p.hand.length > 0) >= 0 ? view.players.findIndex((p) => p.hand && p.hand.length > 0) : 0]
+  const heroCard = cards.find((c) => c.id === viewerPlayer?.id)
+  const discardPile = cards.find((c) => c.id === `pile-discard-${viewerPlayer?.id ?? ''}`)
+  const btnScale = heroCard?.scale ?? 1
+  const endTurnBtn =
+    onEndTurn && discardPile
+      ? { x: discardPile.x + 140 * btnScale + 18, y: discardPile.y + CARD_H * btnScale - 50 }
+      : null
+  const recoverBtn =
+    onRecover && heroCard
+      ? { x: heroCard.x - 160 * btnScale - 14, y: heroCard.y + CARD_H * btnScale - 50 }
+      : null
   const posRef = useRef(new Map(cards.map((c) => [c.id, c])))
   const prevViewRef = useRef<GameView | null>(null)
   const prevLayoutRef = useRef<PlacedCard[]>(cards)
@@ -82,8 +106,11 @@ export default function Board({
     const update = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      const scale = Math.min(w / SCENE_W, h / SCENE_H)
-      setFit({ scale, left: (w - SCENE_W * scale) / 2, top: (h - SCENE_H * scale) / 2 })
+      // 顶部为 hud-top 预留安全区，避免小视口下场景与顶栏重叠
+      const safeTop = 54
+      const availH = Math.max(200, h - safeTop)
+      const scale = Math.min(w / SCENE_W, availH / SCENE_H)
+      setFit({ scale, left: (w - SCENE_W * scale) / 2, top: safeTop + (availH - SCENE_H * scale) / 2 })
     }
     update()
     const ro = new ResizeObserver(update)
@@ -155,9 +182,11 @@ export default function Board({
   }, [events])
 
   // 当前问题的高亮映射：sourceId → {发光类, 选项id}；已选中的另计序号。
+  // 回合主菜单（含 end_turn）不高亮——那些操作随时可做，无需视觉聚焦。
   const highlight = useMemo(() => {
     const m = new Map<string, { cls: string; choiceId: string }>()
     if (!question) return m
+    if (question.choices.some((c) => c.kind === 'end_turn')) return m
     for (const c of question.choices) {
       if (!c.sourceId || c.disabled) continue
       const cls = hlClass(c.kind)
@@ -192,7 +221,7 @@ export default function Board({
             <GameCard
               key={c.id}
               card={c}
-              onClick={highlight.size > 0 ? onCardClick : undefined}
+              onClick={onCardClick}
               fx={cardFx.get(c.id)}
               className={hlFor(c)}
               selOrder={selOrder.get(highlight.get(c.id)?.choiceId ?? '')}
@@ -201,6 +230,21 @@ export default function Board({
           {ghosts.map((c) => (
             <GameCard key={`ghost-${c.id}`} card={c} className="fx-exit" zoom={false} />
           ))}
+          {/* 存在高亮目标时，全场压一层暗幕突出可选项 */}
+          {highlight.size > 0 && <div className="scene-dim" />}
+          {/* 场景快捷按钮（在暗幕之上） */}
+          {recoverBtn && (
+            <button className="board-action-btn recover" style={{ left: recoverBtn.x, top: recoverBtn.y }} onClick={onRecover}>
+              <span className="abi-icon">⟳</span>
+              <span className="abi-text">{t('q.recover')}</span>
+            </button>
+          )}
+          {endTurnBtn && (
+            <button className="board-action-btn endturn" style={{ left: endTurnBtn.x, top: endTurnBtn.y }} onClick={onEndTurn}>
+              <span className="abi-icon">⏭</span>
+              <span className="abi-text">{t('q.endTurn')}</span>
+            </button>
+          )}
           <EffectsLayer floaters={floaters} arrows={arrows} />
         </div>
       </div>

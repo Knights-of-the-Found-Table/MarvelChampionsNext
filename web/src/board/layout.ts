@@ -41,6 +41,10 @@ export interface PlacedCard {
   kind: CardKind
   x: number
   y: number
+  // 槽位尺寸（默认 127×176 竖版）。阴谋卡图源本身是横版，不旋转、
+  // 直接用横版槽位摆放。
+  w?: number
+  h?: number
   rotate?: number
   z?: number
   scale?: number
@@ -112,10 +116,15 @@ function villainCard(v: VillainView, x: number, y: number): PlacedCard {
   }
 }
 
+// 阴谋卡槽位：横版（图源即横置，无需旋转）。
+export const SCHEME_W = 176
+export const SCHEME_H = 126
+
 function schemeCard(s: SchemeView, x: number, y: number, main: boolean): PlacedCard {
   const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
   return {
-    id: s.id, code: s.code, kind: 'scheme', x, y, rotate: 90, playerIndex: -1,
+    id: s.id, code: s.code, kind: 'scheme', x, y, w: SCHEME_W, h: SCHEME_H,
+    playerIndex: -1,
     title: s.name, threat: s.threat, maxThreat: s.maxThreat,
     acceleration: s.acceleration, crisis: s.crisis, hazard: s.hazard,
     stageLabel: main && s.stage ? roman[s.stage - 1] : undefined,
@@ -157,14 +166,15 @@ export function layoutHand(view: GameView): PlacedCard[] {
   const maxW = 920
   const step = n > 1 ? Math.min(CARD_W + 14, (maxW - CARD_W) / (n - 1)) : 0
   const startX = SCENE_W / 2 - (CARD_W + (n - 1) * step) / 2
-  const totalDeg = Math.min(36, n * 5)
+  // 扇形收着来：总角度与弧度都取小值，边缘牌轻微上抬即可
+  const totalDeg = Math.min(24, n * 4)
   const perDeg = n > 1 ? totalDeg / (n - 1) : 0
   return owner.hand.map((c, i) => {
     const t = n > 1 ? i / (n - 1) - 0.5 : 0 // -0.5..0.5
     return {
       id: c.id, code: c.code, kind: 'hand' as CardKind,
       x: startX + i * step,
-      y: SCENE_H - CARD_H + 44 + t * t * 60,
+      y: SCENE_H - CARD_H + 40 + t * t * 24,
       rotate: (i - (n - 1) / 2) * perDeg,
       z: 20 + i, playerIndex, title: c.name,
     }
@@ -177,35 +187,45 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   const cards: PlacedCard[] = []
   const players = view.players ?? []
 
-  // 顶部：遭遇牌库（背面堆）+ 环境区
+  // 顶部一组紧密排列：遭遇牌库 →（环境）→ 主阴谋 → 反派
+  const villains = view.villains ?? []
+  const envs = view.environments ?? []
+  const villainGap = 24
+  const envW = envs.length > 0 ? envs.length * (CARD_W + 16) + 12 : 0
+  const groupW =
+    CARD_W + 16 + envW + SCHEME_W + 20 +
+    villains.length * CARD_W + Math.max(0, villains.length - 1) * villainGap
+  let gx = Math.round(SCENE_W / 2 - groupW / 2)
+
+  // 遭遇牌库（背面堆）
   cards.push({
-    id: 'pile-encounter', code: '', kind: 'pile', x: 36, y: 14, playerIndex: -1,
+    id: 'pile-encounter', code: '', kind: 'pile', x: gx, y: 14, playerIndex: -1,
     faceDown: true, title: 'Encounter', z: 1, count: view.encounterCount, label: 'encounter',
   })
-  const envs = view.environments ?? []
+  gx += CARD_W + 16
+
+  // 环境区
   envs.forEach((e, i) => {
-    cards.push(entityCard('environment', e, 200 + i * (CARD_W + 16), 14, -1))
+    cards.push(entityCard('environment', e, gx + i * (CARD_W + 16), 14, -1))
   })
+  gx += envW
 
-  // 顶部中央：反派行
-  const villains = view.villains ?? []
-  const villainGap = 32
-  const vw = villains.length * CARD_W + Math.max(0, villains.length - 1) * villainGap
-  const vx0 = 1020 - vw / 2
-  villains.forEach((v, i) => cards.push(villainCard(v, vx0 + i * (CARD_W + villainGap), 14)))
+  // 主阴谋（横版，与反派垂直居中对齐）
+  const schemeY = 14 + Math.round((CARD_H - SCHEME_H) / 2)
+  const schemeX = gx
+  if (view.mainScheme) cards.push(schemeCard(view.mainScheme, schemeX, schemeY, true))
+  gx += SCHEME_W + 20
 
-  // 右侧：主阴谋（旋转 90°）+ 支线阴谋竖排
-  if (view.mainScheme) cards.push(schemeCard(view.mainScheme, 1706, 40, true))
+  // 反派行
+  villains.forEach((v, i) => cards.push(villainCard(v, gx + i * (CARD_W + villainGap), 14)))
+
+  // 支线阴谋：顶部成组右侧竖排
   const sides = view.sideSchemes ?? []
-  sides.forEach((s, i) => cards.push(schemeCard(s, 1724, 208 + i * 138, false)))
+  const sideX = Math.min(1876 - SCHEME_W, gx + 24)
+  sides.forEach((s, i) => cards.push(schemeCard(s, sideX, 14 + i * (SCHEME_H + 14), false)))
 
-  // 共享行 y 坐标：爪牙 / 盟友 / 支援 / 英雄
-  const yMinions = 224
-  const yAllies = 428
-  const ySupports = 620
-  const yHeroes = 812
-
-  // 爪牙行：按被交战玩家分组；未交战爪牙作为收尾组
+  // 爪牙行（共享）：按被交战玩家分组；未交战爪牙作为收尾组
+  const yMinions = 216
   const minionItems: Array<{ m: MinionView; group: number }> = []
   players.forEach((p, pi) => {
     for (const m of view.minions ?? []) if (m.engagedWith === p.id) minionItems.push({ m, group: pi })
@@ -216,51 +236,140 @@ export function layoutBoard(view: GameView): PlacedCard[] {
     minionItems.forEach(({ m, group }, i) => cards.push(minionCard(m, xs[i], yMinions, group)))
   }
 
-  // 盟友行
-  const allyItems: Array<{ a: AllyView; group: number }> = []
-  players.forEach((p, pi) => {
-    for (const a of p.allies ?? []) allyItems.push({ a, group: pi })
-  })
-  if (allyItems.length > 0) {
-    const xs = layoutRow(allyItems.map(() => CARD_W), (i) => allyItems[i].group, 20, 56)
-    allyItems.forEach(({ a, group }, i) => cards.push(allyCard(a, xs[i], yAllies, group)))
+  // ---------------------------------------------------------------- 玩家区
+  // 每名玩家一个「带」：场地行（盟友-升级-支援）→ 身份行（身份牌-牌库-
+  // 弃牌堆）；查看者的带在最下方并附带手牌扇形。其他玩家压缩为单行：
+  // 2 人局居中一行，3-4 人局左右两侧竖排，保证任意人数都能容纳。
+  const handCards = layoutHand(view)
+  const viewerIdx = players.findIndex((p) => p.hand && p.hand.length > 0)
+  const viewer = viewerIdx >= 0 ? viewerIdx : 0
+  const N = players.length
+
+  // 横置卡占位：90° 旋转后视觉宽度是 CARD_H，槽位随之加宽并在槽内居中，
+  // 避免与左右卡重叠。
+  const slotW = (exhausted: boolean | undefined, scale: number): number =>
+    (exhausted ? CARD_H : CARD_W) * scale
+  const slotDx = (exhausted: boolean | undefined, scale: number): number =>
+    exhausted ? ((CARD_H - CARD_W) / 2) * scale : 0
+
+  // 场地行：一名玩家的盟友 + 升级 + 支援，以 cx 居中（横置卡占宽位）
+  function fieldRow(p: PlayerView, pi: number, y: number, scale: number, cx: number): void {
+    const gap = 18 * scale
+    const items: PlacedCard[] = []
+    // 场地行内盟友/升级/支援同尺寸、同基线对齐
+    for (const a of p.allies ?? []) items.push({ ...allyCard(a, 0, y, pi), scale })
+    for (const u of p.upgrades ?? []) items.push({ ...entityCard('upgrade', u, 0, y, pi), scale })
+    for (const s of p.supports ?? []) items.push({ ...entityCard('support', s, 0, y, pi), scale })
+    if (items.length === 0) return
+    const widths = items.map((it) => slotW(it.exhausted, it.scale ?? 1))
+    const total = widths.reduce((a, b) => a + b, 0) + (items.length - 1) * gap
+    let x = cx - total / 2
+    items.forEach((it, i) => {
+      cards.push({ ...it, x: x + slotDx(it.exhausted, it.scale ?? 1) })
+      x += widths[i] + gap
+    })
   }
 
-  // 支援行
-  const supportItems: Array<{ s: EntityLite; group: number }> = []
-  players.forEach((p, pi) => {
-    for (const s of p.supports ?? []) supportItems.push({ s, group: pi })
-  })
-  if (supportItems.length > 0) {
-    const xs = layoutRow(supportItems.map(() => CARD_W), (i) => supportItems[i].group, 20, 56)
-    supportItems.forEach(({ s, group }, i) => cards.push(entityCard('support', s, xs[i], ySupports, group)))
-  }
-
-  // 英雄行：每名玩家一个单元（身份卡 + 半宽叠放的升级 + 遭遇背面堆）
-  const heroUnits = players.map((p, pi) => {
-    const upgrades = p.upgrades ?? []
-    const upW = CARD_W * 0.82 + Math.max(0, upgrades.length - 1) * CARD_W * 0.42
-    const encW = p.encounterDown > 0 ? 70 : 0
-    return { p, pi, upgrades, width: CARD_W + (upgrades.length > 0 ? upW + 8 : 0) + encW }
-  })
-  if (heroUnits.length > 0) {
-    const xs = layoutRow(heroUnits.map((u) => u.width), (i) => i, 0, 56)
-    heroUnits.forEach((u, i) => {
-      let x = xs[i]
-      cards.push(heroCard(u.p, x, yHeroes, u.pi))
-      x += CARD_W + 6
-      u.upgrades.forEach((up, j) => {
-        cards.push({ ...entityCard('upgrade', up, x, yHeroes + 26, u.pi, 0.82), z: 2 + j })
-        x += j === u.upgrades.length - 1 ? CARD_W * 0.82 : CARD_W * 0.42
+  // 身份行：身份牌 + 牌库 + 弃牌堆（+ 遭遇背面堆），以 cx 居中
+  function identityRow(p: PlayerView, pi: number, y: number, scale: number, cx: number): void {
+    const w = CARD_W * scale
+    const gap = 22 * scale
+    const heroW = slotW(p.exhausted, scale)
+    const enc = p.encounterDown > 0
+      ? [{ id: `pile-enc-${p.id}`, w: w * 0.8 } as { id: string; w: number }]
+      : []
+    const total = heroW + gap + w + gap + w + enc.length * (w * 0.8 + gap)
+    let x = cx - total / 2
+    cards.push({ ...heroCard(p, x + slotDx(p.exhausted, scale), y, pi), scale })
+    x += heroW + gap
+    cards.push({
+      id: `pile-deck-${p.id}`, code: '', kind: 'pile', x, y, playerIndex: pi,
+      faceDown: true, title: p.name, z: 1, count: p.deckCount, pileScale: scale, label: 'deck',
+    })
+    x += w + gap
+    cards.push({
+      id: `pile-discard-${p.id}`, code: p.discardTop?.code ?? '', kind: 'pile', x, y,
+      playerIndex: pi, faceDown: !p.discardTop, title: p.name, z: 1,
+      count: p.discardCount ?? 0, pileScale: scale, label: 'discard',
+    })
+    x += w + gap
+    if (enc.length > 0) {
+      cards.push({
+        id: `pile-enc-${p.id}`, code: '', kind: 'pile', x, y, playerIndex: pi,
+        faceDown: true, title: '', z: 2, count: p.encounterDown, pileScale: scale * 0.8, label: 'enc',
       })
-      if (u.upgrades.length > 0) x += 8
-      if (u.p.encounterDown > 0) {
-        cards.push({
-          id: `pile-enc-${u.p.id}`, code: '', kind: 'pile', x, y: yHeroes + 26,
-          playerIndex: u.pi, faceDown: true, title: '', z: 2,
-          count: u.p.encounterDown, pileScale: 0.82, label: 'enc',
-        })
-      }
+    }
+  }
+
+  // 紧凑单行带：身份 + 牌库/弃牌堆 + 场地卡混排（其他玩家）
+  function compactBand(p: PlayerView, pi: number, y: number, scale: number, cx: number): void {
+    const w = CARD_W * scale
+    const gap = 18
+    const heroW = slotW(p.exhausted, scale)
+    const fieldItems: Array<{ c: PlacedCard; w: number }> = []
+    for (const a of p.allies ?? []) {
+      const c = { ...allyCard(a, 0, y, pi), scale }
+      fieldItems.push({ c, w: slotW(c.exhausted, scale) })
+    }
+    for (const u of p.upgrades ?? []) {
+      const c = { ...entityCard('upgrade', u, 0, y, pi), scale }
+      fieldItems.push({ c, w: slotW(c.exhausted, scale) })
+    }
+    for (const s of p.supports ?? []) {
+      const c = { ...entityCard('support', s, 0, y, pi), scale }
+      fieldItems.push({ c, w: slotW(c.exhausted, scale) })
+    }
+    const total =
+      heroW + gap + w + gap + w + gap +
+      (p.encounterDown > 0 ? w * 0.8 + gap : 0) +
+      fieldItems.reduce((a, f) => a + f.w + 14, 0)
+    let x = cx - total / 2
+    cards.push({ ...heroCard(p, x + slotDx(p.exhausted, scale), y, pi), scale })
+    x += heroW + gap
+    const pileY = y + (CARD_H - CARD_H * scale) / 2
+    cards.push({
+      id: `pile-deck-${p.id}`, code: '', kind: 'pile', x, y: pileY, playerIndex: pi,
+      faceDown: true, title: p.name, z: 1, count: p.deckCount, pileScale: scale, label: 'deck',
+    })
+    x += w + gap
+    cards.push({
+      id: `pile-discard-${p.id}`, code: p.discardTop?.code ?? '', kind: 'pile', x, y: pileY,
+      playerIndex: pi, faceDown: !p.discardTop, title: p.name, z: 1, count: p.discardCount ?? 0, pileScale: scale, label: 'discard',
+    })
+    x += w + gap
+    if (p.encounterDown > 0) {
+      cards.push({
+        id: `pile-enc-${p.id}`, code: '', kind: 'pile', x, y: pileY, playerIndex: pi,
+        faceDown: true, title: '', z: 2, count: p.encounterDown, pileScale: scale * 0.8, label: 'enc',
+      })
+      x += w * 0.8 + gap
+    }
+    for (const f of fieldItems) {
+      cards.push({ ...f.c, x: x + slotDx(f.c.exhausted, f.c.scale ?? 1) })
+      x += f.w + 14
+    }
+  }
+
+  // 查看者带（底部居中）：场地行 / 身份行 / 手牌扇形
+  const vScale = N >= 3 ? 0.85 : 1
+  const handY = handCards.length > 0 ? handCards[0].y : SCENE_H
+  const vIdY = handY - CARD_H * vScale - 22
+  const vFieldY = vIdY - CARD_H * vScale - 16
+  fieldRow(players[viewer], viewer, vFieldY, vScale, SCENE_W / 2)
+  identityRow(players[viewer], viewer, vIdY, vScale, SCENE_W / 2)
+
+  // 其他玩家带
+  const others = players.map((p, i) => ({ p, i })).filter(({ i }) => i !== viewer)
+  if (others.length === 1) {
+    compactBand(others[0].p, others[0].i, 412, 0.78, SCENE_W / 2)
+  } else if (others.length > 1) {
+    const scale = 0.55
+    const h = CARD_H * scale
+    others.forEach((o, k) => {
+      const left = k % 2 === 0
+      const cx = left ? 330 : SCENE_W - 330
+      const y = 396 + Math.floor(k / 2) * (h + 22)
+      compactBand(o.p, o.i, y, scale, cx)
     })
   }
 
@@ -288,22 +397,8 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   placeAttached(view.attachments, 'attachment')
   placeAttached(view.treacheries, 'treachery')
 
-  // 左列：玩家牌库/弃牌堆（缩小的背面堆 + 数量徽章 + 弃牌堆顶）
-  players.forEach((p, i) => {
-    const py = 248 + i * 148
-    cards.push({
-      id: `pile-deck-${p.id}`, code: '', kind: 'pile', x: 36, y: py, playerIndex: i,
-      faceDown: true, title: p.name, z: 1, count: p.deckCount, pileScale: 0.74, label: 'deck',
-    })
-    cards.push({
-      id: `pile-discard-${p.id}`, code: p.discardTop?.code ?? '', kind: 'pile', x: 140, y: py,
-      playerIndex: i, faceDown: !p.discardTop, title: p.name, z: 1,
-      count: 0, pileScale: 0.74, label: 'discard',
-    })
-  })
-
   // 手牌扇形（仅查看者本人）
-  cards.push(...layoutHand(view))
+  cards.push(...handCards)
 
   return cards
 }
@@ -311,7 +406,7 @@ export function layoutBoard(view: GameView): PlacedCard[] {
 function heroCard(p: PlayerView, x: number, y: number, playerIndex: number): PlacedCard {
   return {
     id: p.id,
-    code: p.side === 'hero' ? p.heroCode : p.alterEgo,
+    code: p.side === 'hero' ? p.heroCode : p.alterEgoCode,
     kind: 'hero', x, y, playerIndex,
     title: p.name, hp: p.hp, maxHp: p.maxHp,
     exhausted: p.exhausted, stunned: p.stunned, confused: p.confused, tough: p.tough,

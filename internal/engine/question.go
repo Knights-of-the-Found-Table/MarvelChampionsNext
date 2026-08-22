@@ -91,10 +91,24 @@ func (c Choice) Msgs(msgs ...Message) Choice {
 	return c
 }
 
-// WithThen attaches a follow-up question under this choice.
+// WithThen attaches a follow-up question under this choice. The subtree's
+// choice ids are cleared so the root question reassigns them with the full
+// answer-path prefix ("2.0"): ids assigned while the subtree was built
+// standalone (its own assignIDs("") call) would collide with root-level ids
+// and answers referencing them would resolve to the wrong root choice.
 func (c Choice) WithThen(q *Question) Choice {
+	clearChoiceIDs(q)
 	c.Then = q
 	return c
+}
+
+func clearChoiceIDs(q *Question) {
+	for i := range q.Choices {
+		q.Choices[i].ID = ""
+		if q.Choices[i].Then != nil {
+			clearChoiceIDs(q.Choices[i].Then)
+		}
+	}
 }
 
 // Ask builds a choose_one question.
@@ -130,7 +144,10 @@ func pathJoin(prefix, leaf string) string {
 	return prefix + "." + leaf
 }
 
-// Leaf resolves an answer path to the innermost chosen choice.
+// Leaf resolves an answer path to the innermost chosen choice. Choice ids
+// are full answer paths ("basic-attack.0"), assigned by the root question's
+// assignIDs, so recursion passes the path down unchanged — subtree ids carry
+// their own prefix.
 func (q *Question) Leaf(answer string) (*Choice, error) {
 	for i := range q.Choices {
 		c := &q.Choices[i]
@@ -141,7 +158,7 @@ func (q *Question) Leaf(answer string) (*Choice, error) {
 			if c.Then == nil {
 				return nil, fmt.Errorf("answer %q descends past a leaf choice", answer)
 			}
-			return c.Then.Leaf(pathSuffix(answer, c.ID))
+			return c.Then.Leaf(answer)
 		}
 	}
 	return nil, fmt.Errorf("invalid answer %q for question", answer)
@@ -168,9 +185,41 @@ func pathHasPrefix(path, prefix string) bool {
 	return path == prefix || len(path) > len(prefix) && path[len(prefix)] == '.' && path[:len(prefix)] == prefix
 }
 
-func pathSuffix(path, prefix string) string {
-	if len(path) > len(prefix) && path[:len(prefix)] == prefix {
-		return path[len(prefix)+1:]
+// legacySubtreeIDs reports whether any nested Then-question carries choice
+// ids without the parent-path prefix ("0" under choice "basic-attack").
+// Questions persisted before ids were assigned root-relative have this shape
+// and cannot be answered by the path protocol anymore.
+func legacySubtreeIDs(q *Question) bool {
+	for i := range q.Choices {
+		c := &q.Choices[i]
+		if c.Then == nil {
+			continue
+		}
+		for j := range c.Then.Choices {
+			sc := &c.Then.Choices[j]
+			if sc.ID != "" && sc.ID != c.ID && !pathHasPrefix(sc.ID, c.ID) {
+				return true
+			}
+		}
+		if legacySubtreeIDs(c.Then) {
+			return true
+		}
 	}
-	return ""
+	return false
+}
+
+// RebuildTurnMenu replaces a pending "Your turn" question whose subtree ids
+// predate the root-relative id scheme. TurnMenu is a pure function of state,
+// so rebuilding is safe and only changes presentation (ids), not semantics.
+func (g *Game) RebuildTurnMenu() bool {
+	pq := g.Pending()
+	if pq == nil || pq.Question.Prompt != "Your turn" || !legacySubtreeIDs(pq.Question) {
+		return false
+	}
+	p := g.Player(pq.Player)
+	if p == nil {
+		return false
+	}
+	g.pending = &PendingQuestion{Player: pq.Player, Question: g.TurnMenu(p)}
+	return true
 }

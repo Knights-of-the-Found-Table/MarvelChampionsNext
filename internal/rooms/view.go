@@ -126,6 +126,7 @@ type PlayerView struct {
 	Hand  []CardRef `json:"hand,omitempty"`
 	HandSize int    `json:"handSize"`
 	DeckCount  int  `json:"deckCount"`
+	DiscardCount int `json:"discardCount"`
 	SenseDeckCount int `json:"senseDeckCount,omitempty"`
 	DiscardTop *CardRef `json:"discardTop,omitempty"`
 
@@ -228,7 +229,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			HP: max(0, p.HP()), MaxHP: p.MaxHP,
 			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough,
 			FirstPlayer: p.FirstPlayer, KOed: p.KOed, FormChanged: p.FormChanged,
-			HandSize: len(p.Hand), DeckCount: len(p.Deck), EncounterDown: len(p.EncounterDown),
+			HandSize: len(p.Hand), DeckCount: len(p.Deck), DiscardCount: len(p.Discard), EncounterDown: len(p.EncounterDown),
 			SenseDeckCount: len(p.SenseDeck),
 			UserID: owners[string(p.ID)],
 		}

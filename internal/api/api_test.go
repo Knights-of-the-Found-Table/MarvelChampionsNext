@@ -271,11 +271,26 @@ func TestFullGameFlow(t *testing.T) {
 				paths = append(paths, c["id"].(string))
 			}
 		} else {
-			c := choices[0].(map[string]any)
-			// A play/ability choice with a choose_n payment subtree: select
-			// enough payment choices (each worth >= 1 icon) and answer with
-			// the full nested paths.
+			// Prefer a choice without a payment subtree (e.g. "Take the
+			// attack" during a defense prompt): an empty hand leaves the
+			// payment subtree unanswerable.
+			var c map[string]any
+			for _, raw := range choices {
+				cc := raw.(map[string]any)
+				then, ok := cc["then"].(map[string]any)
+				if !ok || then["type"] != "choose_n" {
+					c = cc
+					break
+				}
+				if c == nil {
+					c = cc
+				}
+			}
+			var paths2 []string
 			if then, ok := c["then"].(map[string]any); ok && then["type"] == "choose_n" {
+				// A play/ability choice with a choose_n payment subtree:
+				// select enough payment choices (each worth >= 1 icon) and
+				// answer with the full nested paths.
 				subChoices, _ := then["choices"].([]any)
 				need := 1
 				if n2, ok := then["n"].(float64); ok && int(n2) > 0 {
@@ -283,8 +298,11 @@ func TestFullGameFlow(t *testing.T) {
 				}
 				for j := 0; j < need+2 && j < len(subChoices); j++ {
 					sc := subChoices[j].(map[string]any)
-					paths = append(paths, sc["id"].(string))
+					paths2 = append(paths2, sc["id"].(string))
 				}
+			}
+			if len(paths2) > 0 {
+				paths = paths2
 			} else {
 				paths = []string{c["id"].(string)}
 			}

@@ -15,6 +15,10 @@ services:
       # Required: without a stable secret every container restart invalidates
       # all login tokens. Copy .env.example to .env (same directory) to set it.
       MC_JWT_SECRET: ${MC_JWT_SECRET:?MC_JWT_SECRET is required — copy deploy/.env.example to deploy/.env or export it}
+      # The repo-root .env (env_file above) may pin MC_LISTEN to 127.0.0.1
+      # for local dev; the container must bind all interfaces for the port
+      # mapping to work.
+      MC_LISTEN: ":3000"
     volumes:
       - marvel-data:/data
     restart: unless-stopped

@@ -424,6 +424,10 @@ a.button {
 .card-zoom img {
   display: block;
   width: 300px;
+  /* 与 useCardZoom 的 ZOOM_H=420 定位钳制保持一致：任何宽高比的图都
+     装进 300×420 内，避免底部超出窗口。 */
+  max-height: 420px;
+  object-fit: contain;
   border-radius: 12px;
   filter: drop-shadow(2px 4px 12px rgba(0, 0, 0, 0.75));
 }

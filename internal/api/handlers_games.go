@@ -221,8 +221,7 @@ func (s *Server) handleUndo(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view)
 }
 
-func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
+func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request) {	gameID, err := pathID(r)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, "invalid game id")
 		return
@@ -304,4 +303,27 @@ func (s *Server) handleStream(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+// handlePileList serves the contents of a deck or discard pile for the pile
+// viewer. Deck listings are shuffled server-side (see rooms.PileList), so
+// the draw order is never revealed.
+func (s *Server) handlePileList(w http.ResponseWriter, r *http.Request) {
+	gameID, err := pathID(r)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid game id")
+		return
+	}
+	player := r.URL.Query().Get("player")
+	pile := r.URL.Query().Get("pile")
+	cards, err := s.Rooms.PileList(gameID, player, pile)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"pile":   pile,
+		"player": player,
+		"cards":  cards,
+	})
 }

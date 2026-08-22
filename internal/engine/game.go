@@ -347,6 +347,10 @@ func (g *Game) Answer(playerID PlayerID, paths []string) error {
 	if g.pending == nil {
 		return fmt.Errorf("no pending question")
 	}
+	// Pending questions persisted before nested choice ids carried path
+	// prefixes answer incorrectly (paths resolve to the wrong root choice).
+	// Rebuild the turn menu first — no-op for current-format questions.
+	g.RebuildTurnMenu()
 	if g.pending.Player != playerID {
 		return fmt.Errorf("question is for player %s", g.pending.Player)
 	}

@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { get, post, getToken, type Choice, type GameView, type Question } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
+import { useChoiceLabel } from '../i18n/labels'
 import type { GameEvt } from '../board/fx'
 import type { PlacedCard } from '../board/layout'
 import { initSfx, playSfx, setSfxMuted, sfxSettings } from '../audio/sfx'
+import { CardImage } from '../cards'
 import Board from '../components/Board'
 import QuestionPanel from '../components/QuestionPanel'
 import '../style/board.css'
@@ -13,6 +15,7 @@ export default function Game() {
   const { id } = useParams<{ id: string }>()
   const gameId = Number(id)
   const t = useT()
+  const choiceLabel = useChoiceLabel()
   const zh = useZhMap()
   const [view, setView] = useState<GameView | null>(null)
   const [events, setEvents] = useState<GameEvt[]>([])
@@ -94,12 +97,17 @@ export default function Game() {
   const current = stack.length > 0 ? stack[stack.length - 1] : question
   const isMulti = current?.type === 'choose_n'
 
-  // 服务端换了一个新问题（或问题消失）时复位导航状态。每次广播都会
-  // 反序列化出新对象，不能按引用比较——用内容做键。
+  // 面板默认折叠（棋盘点卡为主交互）；仅当问题没有任何实体关联选项
+  // （防御询问、调度等）时自动展开兜底。
+  const [panelOpen, setPanelOpen] = useState(false)
   const questionKey = question ? JSON.stringify(question) : ''
   useEffect(() => {
     setStack([])
     setSelected(new Set())
+    if (question) {
+      const hasEntityChoice = question.choices.some((c) => c.sourceId)
+      setPanelOpen(!hasEntityChoice)
+    }
   }, [questionKey])
 
   // 选项选择：choose_n 多选切换；choose_one 有子层下钻，叶子直接作答。
@@ -134,13 +142,57 @@ export default function Game() {
     void answer(Array.from(selected))
   }
 
-  // 点场上卡牌：命中当前问题中 sourceId 对应的选项即视同点击面板按钮。
-  // 同一实体有多个选项时（如盟友攻击/化解）取第一个可用项。
+  // 结束回合/恢复：场景快捷按钮的可用性（根菜单层）
+  const endTurnChoice = stack.length === 0 ? current?.choices.find((c) => c.kind === 'end_turn' && !c.disabled) : undefined
+  const recoverChoice =
+    stack.length === 0
+      ? current?.choices.find((c) => !c.disabled && (c.id === 'basic-recover' || (c.kind === 'basic_power' && c.label.startsWith('Recover'))))
+      : undefined
+
+  // 点场上卡牌：牌堆 → 打开卡牌列表查看器；实体有多个可用选项（英雄牌的
+  // 翻面/技能等）→ 弹选择菜单；唯一选项直接执行。
+  const [entityMenu, setEntityMenu] = useState<{ card: PlacedCard; choices: Choice[] } | null>(null)
+
   function onCardClick(card: PlacedCard) {
+    if (card.kind === 'pile') {
+      if (card.id === 'pile-encounter') {
+        void openPile('', 'deck', t('pile.encounter'))
+      } else if (card.label === 'deck' || card.label === 'discard') {
+        const pid = card.id.replace(/^pile-(deck|discard)-/, '')
+        const owner = view?.players.find((p) => p.id === pid)
+        void openPile(pid, card.label, `${owner?.name ?? ''} · ${t(card.label === 'deck' ? 'pile.deck' : 'pile.discard')}`)
+      }
+      return
+    }
     if (!current) return
-    const c = current.choices.find((ch) => ch.sourceId === card.id && !ch.disabled)
-    if (!c) return
-    pick(c)
+    // 恢复有专门按钮（英雄牌左侧），不再占用英雄牌点击
+    const matches = current.choices.filter(
+      (ch) => ch.sourceId === card.id && !ch.disabled && !(ch.kind === 'basic_power' && ch.label.startsWith('Recover'))
+    )
+    if (matches.length === 0) return
+    if (matches.length === 1) {
+      pick(matches[0])
+      return
+    }
+    setEntityMenu({ card, choices: matches })
+  }
+
+  // 牌堆查看器：牌库列表服务端已洗牌（不泄露抽牌顺序），弃牌堆顶牌优先。
+  const [pileModal, setPileModal] = useState<{
+    title: string
+    cards: Array<{ code: string; name: string }>
+  } | null>(null)
+
+  async function openPile(player: string, pile: string, title: string) {
+    try {
+      const data = await get<{ cards: Array<{ code: string; name: string }> }>(
+        `/marvel/games/${gameId}/pile?player=${encodeURIComponent(player)}&pile=${pile}`
+      )
+      setPileModal({ title, cards: data.cards })
+    } catch (err) {
+      setError(String((err as Error).message))
+      setTimeout(() => setError(''), 3000)
+    }
   }
 
   async function undo() {
@@ -168,7 +220,15 @@ export default function Game() {
 
   return (
     <div className="board-page">
-      <Board view={view} events={events} question={current} selected={selected} onCardClick={onCardClick} />
+      <Board
+        view={view}
+        events={events}
+        question={current}
+        selected={selected}
+        onCardClick={onCardClick}
+        onEndTurn={endTurnChoice ? () => pick(endTurnChoice) : undefined}
+        onRecover={recoverChoice ? () => pick(recoverChoice) : undefined}
+      />
       <div className="board-hud">
         <div className="hud-top">
           <strong>{lname(zh, view.mainScheme?.code ?? '', view.scenario)}</strong>
@@ -180,8 +240,9 @@ export default function Game() {
           ) : view.waitingFor ? (
             <span className="muted">{t('game.waitingFor', { name: view.waitingFor })}</span>
           ) : null}
-          {error && <span className="error">{error}</span>}
         </div>
+        {/* 错误 toast：独立于顶栏，右下角显示 */}
+        {error && <div className="error-toast">{error}</div>}
         <div className="hud-controls">
           <button
             className={`hud-toggle ${sfxOn ? 'on' : ''}`}
@@ -213,6 +274,69 @@ export default function Game() {
             </div>
           </details>
         </div>
+        {/* 多选确认条：棋盘点选支付卡后出现 */}
+        {isMulti && selected.size > 0 && (
+          <div className="confirm-bar">
+            <span className="muted">{t('q.selected', { n: selected.size })}</span>
+            <button className="primary" onClick={confirmMulti}>
+              {t('q.confirm')}
+            </button>
+            <button onClick={() => setSelected(new Set())}>{t('q.clear')}</button>
+          </div>
+        )}
+        {/* 实体多选项菜单（点英雄牌等出现） */}
+        {entityMenu && (
+          <div className="entity-menu" onClick={() => setEntityMenu(null)}>
+            <div className="entity-menu-body" onClick={(e) => e.stopPropagation()}>
+              <div className="row space-between">
+                <strong>{entityMenu.card.title}</strong>
+                <button className="linklike" onClick={() => setEntityMenu(null)}>
+                  {t('pile.close')}
+                </button>
+              </div>
+              <div className="entity-menu-choices">
+                {entityMenu.choices.map((c) => (
+                  <button
+                    key={c.id}
+                    className="choice"
+                    onClick={() => {
+                      setEntityMenu(null)
+                      pick(c)
+                    }}
+                  >
+                    {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
+                    <span>{choiceLabel(c)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {/* 牌堆查看器 */}
+        {pileModal && (
+          <div className="pile-modal" onClick={() => setPileModal(null)}>
+            <div className="pile-modal-body" onClick={(e) => e.stopPropagation()}>
+              <div className="row space-between">
+                <strong>
+                  {pileModal.title}
+                  <span className="muted"> · {pileModal.cards.length}</span>
+                </strong>
+                <button className="linklike" onClick={() => setPileModal(null)}>
+                  {t('pile.close')}
+                </button>
+              </div>
+              {pileModal.cards.length === 0 ? (
+                <p className="muted">{t('pile.empty')}</p>
+              ) : (
+                <div className="pile-grid">
+                  {pileModal.cards.map((c, i) => (
+                    <CardImage key={`${c.code}-${i}`} code={c.code} size="sm" />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {current ? (
           <QuestionPanel
             current={current}
@@ -220,6 +344,8 @@ export default function Game() {
             onPick={pick}
             onBack={stack.length > 0 ? back : undefined}
             onConfirm={confirmMulti}
+            open={panelOpen}
+            onToggle={() => setPanelOpen((v) => !v)}
           />
         ) : view.over ? (
           <div className="question">
