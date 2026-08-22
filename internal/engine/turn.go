@@ -8,11 +8,19 @@ import (
 
 // TurnMenu builds the main action menu for a player's turn.
 func (g *Game) TurnMenu(p *Player) *Question {
+	return g.turnMenu(p, true)
+}
+
+// turnMenu builds a player's action menu. ownTurn=false builds the menu
+// offered when another player requests an action: no form change (own-turn
+// only), no handing the request on, and "End turn" becomes "Done" — the
+// requester's turn resumes once the asked player's action resolves.
+func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 	var choices []Choice
 
-	// Change form (once per turn; the character keeps its ready/exhausted
-	// state per the official rules).
-	if !p.FormChanged {
+	// Change form (once per turn, own turn only; the character keeps its
+	// ready/exhausted state per the official rules).
+	if ownTurn && !p.FormChanged {
 		var target string
 		if p.IsHero() {
 			target = p.AlterEgoDef().Name
@@ -135,9 +143,38 @@ func (g *Game) TurnMenu(p *Player) *Question {
 		}
 	}
 
-	choices = append(choices, Choice{
-		ID: "end-turn", Label: "End turn", Kind: ChoiceEndTurn,
-	}.Msgs(PlayerTurnEnd{Player: p.ID}))
+	// Ask another player to act (own turn only, multiplayer): pick the
+	// player — they decide what to do from a turn-like menu of their own;
+	// "Never mind" backs out without asking anyone.
+	if ownTurn && len(g.Players) > 1 {
+		who := []Choice{
+			Choice{ID: "never-mind", Label: "Never mind", Kind: ChoicePass},
+		}
+		for _, q := range g.Players {
+			if q.ID == p.ID || q.KOed {
+				continue
+			}
+			who = append(who, Choice{
+				ID: "ask-" + q.ID.String(), Label: q.Name,
+				Kind: ChoiceTarget, SourceID: q.ID,
+			}.Msgs(AskOtherAction{Asked: q.ID, Requester: p.ID}))
+		}
+		if len(who) > 1 {
+			choices = append(choices, Choice{
+				ID: "ask-action", Label: "Ask another player to act", Kind: ChoiceLabel,
+			}.WithThen(Ask("Ask which player?", who...)))
+		}
+	}
+
+	if ownTurn {
+		choices = append(choices, Choice{
+			ID: "end-turn", Label: "End turn", Kind: ChoiceEndTurn,
+		}.Msgs(PlayerTurnEnd{Player: p.ID}))
+	} else {
+		choices = append(choices, Choice{
+			ID: "done", Label: "Done", Kind: ChoicePass,
+		})
+	}
 
 	return Ask("Your turn", choices...)
 }

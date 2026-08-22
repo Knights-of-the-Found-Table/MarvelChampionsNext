@@ -303,6 +303,9 @@ func (g *Game) handle(msg Message) {
 	case OtherDefenders:
 		g.handleOtherDefenders(m)
 
+	case AskOtherAction:
+		g.handleAskOtherAction(m)
+
 	case SchemeThreat:
 		g.addThreat(m.Scheme, m.N, m.Source)
 
@@ -1417,6 +1420,28 @@ func (g *Game) handleOtherDefenders(m OtherDefenders) {
 	next := g.Player(live[0])
 	rest := live[1:]
 	g.Push(AskQuestion{Player: next.ID, Question: g.otherDefenderQuestion(m.Against, g.attackValue(m.Against), next, m.For, rest)})
+}
+
+// handleAskOtherAction hands the asked player a turn-like menu at the
+// requester's behest: they perform one action of their choice (or nothing,
+// via Done), after which the requester's turn resumes automatically —
+// checkContinue re-offers the requester's menu because ActiveTurn never
+// changed.
+func (g *Game) handleAskOtherAction(m AskOtherAction) {
+	q := g.Player(m.Asked)
+	req := g.Player(m.Requester)
+	if q == nil || q.KOed || req == nil {
+		return
+	}
+	// Build the menu as if it were q's turn so choices stamp q as the
+	// actor (attack/thwart targets key off ActiveTurn); ActiveTurn is
+	// restored before any message processing resumes.
+	saved := g.ActiveTurn
+	g.ActiveTurn = q.ID
+	menu := g.turnMenu(q, false)
+	g.ActiveTurn = saved
+	menu.Prompt = fmt.Sprintf("%s asks you to act", req.Name)
+	g.Push(AskQuestion{Player: q.ID, Question: menu})
 }
 
 func (g *Game) handleDefends(m Defends) {

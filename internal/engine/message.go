@@ -133,6 +133,14 @@ type (
 		For       PlayerID
 		Remaining []PlayerID
 	}
+	// AskOtherAction hands the asked player a turn-like menu at the
+	// active (requester) player's request: they perform one action of
+	// their choice — or nothing — after which the requester's turn
+	// continues.
+	AskOtherAction struct {
+		Asked     PlayerID
+		Requester PlayerID
+	}
 
 	// SchemeThreat adds threat; ThwartScheme removes it.
 	SchemeThreat struct {
@@ -544,6 +552,7 @@ func (MinionActivations) msg()        {}
 func (AskMinionOrder) msg()           {}
 func (AskAttack) msg()                {}
 func (OtherDefenders) msg()           {}
+func (AskOtherAction) msg()           {}
 func (SchemeThreat) msg()             {}
 func (ThwartScheme) msg()             {}
 func (DamageEntity) msg()             {}

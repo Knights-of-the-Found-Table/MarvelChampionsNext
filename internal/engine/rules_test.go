@@ -968,6 +968,146 @@ func TestPassInterruptBranchSkipsEffect(t *testing.T) {
 	}
 }
 
+// TestAskAnotherPlayerToAct: the active player may ask another player to
+// act — picking the target only; the asked player gets a turn-like menu
+// (no form change, no end-turn, no re-asking) and performs one action or
+// Done, after which the requester's turn resumes. The requester can back
+// out with "Never mind" before sending.
+func TestAskAnotherPlayerToAct(t *testing.T) {
+	g := newRulesGame(t, 19, "01001", "01001")
+	keepHands(t, g)
+	req := firstPlayer(g)
+	asked := g.Players[0]
+	if asked == req {
+		asked = g.Players[1]
+	}
+	// Aunt May (support, Alter-Ego Action: exhaust → heal 4) in play for
+	// the asked player, who starts wounded and in alter-ego form.
+	may := &engine.Support{ID: g.NextEntityID("support"), Code: "01006", Owner: asked.ID}
+	g.Supports[may.ID] = may
+	asked.Supports = append(asked.Supports, may.ID)
+	asked.Damage = 5
+
+	pq := g.Pending()
+	if pq == nil || pq.Question.Prompt != "Your turn" || pq.Player != req.ID {
+		t.Fatalf("expected requester's turn menu, got %q for %v", promptOf(pq), pq.Player)
+	}
+
+	// 1) Back out before asking: "Never mind" returns to the turn menu.
+	askPath, pickNever := "", ""
+	for _, c := range pq.Question.Choices {
+		if c.ID == "ask-action" {
+			askPath = c.ID
+			for _, d := range c.Then.Choices {
+				if d.Label == "Never mind" {
+					pickNever = d.ID
+				}
+			}
+		}
+	}
+	if askPath == "" || pickNever == "" {
+		t.Fatal("ask branch and its Never mind choice should exist in multiplayer")
+	}
+	if err := g.Answer(pq.Player, []string{pickNever}); err != nil {
+		t.Fatalf("never mind: %v", err)
+	}
+	if pq = g.Pending(); pq == nil || pq.Question.Prompt != "Your turn" || pq.Player != req.ID {
+		t.Fatalf("Never mind should return to the requester's turn, got %q for %v", promptOf(pq), pq.Player)
+	}
+
+	// 2) Send the request: the asked player receives a turn-like menu.
+	var askWho string
+	for _, c := range pq.Question.Choices {
+		if c.ID == "ask-action" {
+			for _, d := range c.Then.Choices {
+				if d.Label == asked.Name {
+					askWho = d.ID
+				}
+			}
+		}
+	}
+	if askWho == "" {
+		t.Fatal("asked player should be selectable")
+	}
+	if err := g.Answer(pq.Player, []string{askWho}); err != nil {
+		t.Fatalf("ask: %v", err)
+	}
+	pq = g.Pending()
+	if pq == nil || pq.Player != asked.ID {
+		t.Fatalf("asked player should hold the prompt, got %q for %v", promptOf(pq), pq.Player)
+	}
+	if !strings.Contains(pq.Question.Prompt, "asks you to act") {
+		t.Fatalf("unexpected asked-menu prompt %q", pq.Question.Prompt)
+	}
+	var mayPath, donePath string
+	for _, c := range pq.Question.Choices {
+		switch {
+		case c.ID == "form" || c.ID == "end-turn" || c.ID == "ask-action":
+			t.Fatalf("asked menu must not offer %q", c.ID)
+		case c.CardCode == "01006":
+			mayPath = c.ID
+		case c.ID == "done":
+			donePath = c.ID
+		}
+	}
+	if mayPath == "" || donePath == "" {
+		t.Fatal("asked menu should list Aunt May's action and Done")
+	}
+
+	// 3) Done: nothing happens, requester's turn resumes.
+	if err := g.Answer(pq.Player, []string{donePath}); err != nil {
+		t.Fatalf("done: %v", err)
+	}
+	if pq = g.Pending(); pq == nil || pq.Player != req.ID || pq.Question.Prompt != "Your turn" {
+		t.Fatalf("Done should return to the requester's turn, got %q for %v", promptOf(pq), pq.Player)
+	}
+	if asked.Damage != 5 || may.Exhausted {
+		t.Fatal("declining to act must change nothing")
+	}
+
+	// 4) Ask again and trigger Aunt May: one action resolves, then the
+	// requester's turn resumes.
+	if err := g.Answer(pq.Player, []string{askWho}); err != nil {
+		t.Fatalf("ask again: %v", err)
+	}
+	if pq = g.Pending(); pq == nil || pq.Player != asked.ID {
+		t.Fatalf("asked player should hold the prompt again, got %q", promptOf(pq))
+	}
+	mayPath = ""
+	for _, c := range pq.Question.Choices {
+		if c.CardCode == "01006" {
+			mayPath = c.ID
+		}
+	}
+	if mayPath == "" {
+		t.Fatal("Aunt May's action should be offered")
+	}
+	if err := g.Answer(pq.Player, []string{mayPath}); err != nil {
+		t.Fatalf("trigger Aunt May: %v", err)
+	}
+	if !may.Exhausted {
+		t.Fatal("Aunt May should be exhausted after her action")
+	}
+	if asked.Damage != 1 {
+		t.Fatalf("Aunt May should heal the asked player 4 (5 -> 1), got %d", asked.Damage)
+	}
+	if pq = g.Pending(); pq == nil || pq.Player != req.ID || pq.Question.Prompt != "Your turn" {
+		t.Fatalf("requester's turn should resume after the action, got %q for %v", promptOf(pq), pq.Player)
+	}
+}
+
+// TestAskBranchAbsentInSolo: solo games offer no ask-another-player branch.
+func TestAskBranchAbsentInSolo(t *testing.T) {
+	g := newRulesGame(t, 20)
+	keepHands(t, g)
+	pq := g.Pending()
+	for _, c := range pq.Question.Choices {
+		if c.ID == "ask-action" {
+			t.Fatal("solo games must not offer the ask branch")
+		}
+	}
+}
+
 // TestChangeFormAllowedWhileExhausted: changing form keeps the character's
 // ready/exhausted state and is allowed while exhausted.
 func TestChangeFormAllowedWhileExhausted(t *testing.T) {
