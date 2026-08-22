@@ -410,6 +410,9 @@ type (
 		Player PlayerID
 		Code   string
 	}
+	// AddVengeance adds a vengeance counter to Drax and raises his ATK
+	// bonus accordingly.
+	AddVengeance struct{ Player PlayerID }
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -665,6 +668,7 @@ func (SetAntForm) msg()               {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
 func (RapidReturn) msg()              {}
+func (AddVengeance) msg()             {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

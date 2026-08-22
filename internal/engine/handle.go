@@ -690,6 +690,13 @@ func (g *Game) handle(msg Message) {
 			g.Logf("%s changes form", p.Name)
 		}
 
+	case AddVengeance:
+		if p := g.Player(m.Player); p != nil && p.GrowthCounters < 3 {
+			p.GrowthCounters++
+			p.BonusATK++
+			g.Logf("%s gains a vengeance counter (+%d ATK)", p.Name, p.GrowthCounters)
+		}
+
 	case RapidReturn:
 		if p := g.Player(m.Player); p != nil {
 			for i, c := range p.Discard {
