@@ -665,6 +665,34 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 
+	case SetMassForm:
+		if p := g.Player(m.Player); p != nil {
+			var kept []string
+			for _, t := range p.ExtraTraits {
+				if t != "dense" && t != "intangible" {
+					kept = append(kept, t)
+				}
+			}
+			form := m.Form
+			if form == "" {
+				// Flip.
+				for _, t := range p.ExtraTraits {
+					if t == "dense" {
+						form = "intangible"
+					} else if t == "intangible" {
+						form = "dense"
+					}
+				}
+			}
+			if form != "" {
+				kept = append(kept, form)
+			}
+			p.ExtraTraits = kept
+			if form != "" {
+				g.Logf("%s takes %s mass form", p.Name, form)
+			}
+		}
+
 	case SetAntForm:
 		if p := g.Player(m.Player); p != nil {
 			var kept []string

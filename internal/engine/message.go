@@ -395,6 +395,12 @@ type (
 		Player PlayerID
 		Form   string // "giant" | "tiny" | "" to clear
 	}
+	// SetMassForm flips or sets Vision's dense/intangible mass form
+	// (empty Form flips).
+	SetMassForm struct {
+		Player PlayerID
+		Form   string `json:"form,omitempty"` // "dense" | "intangible" | "" to flip
+	}
 	// ChangeFormAgain flips the identity ignoring the once-per-turn limit
 	// (Resize, Swarm Tactics).
 	ChangeFormAgain struct{ Player PlayerID }
@@ -689,6 +695,7 @@ func (MinionEntersPlay) msg()         {}
 func (AttachUpgrade) msg()            {}
 func (CostDiscountApply) msg()        {}
 func (SetAntForm) msg()               {}
+func (SetMassForm) msg()              {}
 func (ChangeFormAgain) msg()          {}
 func (TempHandSizeMsg) msg()          {}
 func (RapidReturn) msg()              {}
