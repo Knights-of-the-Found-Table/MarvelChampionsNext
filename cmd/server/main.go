@@ -5,7 +5,7 @@ package main
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,6 +14,7 @@ import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/dotenv"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/logx"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/rooms"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
@@ -39,11 +40,14 @@ import (
 
 func main() {
 	// Optional repo-root .env (KEY=VALUE) with e.g. the image-mirror
-	// credentials; real environment variables take precedence.
-	if n, err := dotenv.Load(".env"); err != nil {
-		log.Printf(".env: %v", err)
-	} else if n > 0 {
-		log.Printf("loaded %d variables from .env", n)
+	// credentials; real environment variables take precedence. Logging is
+	// configured after the load so MC_LOG_LEVEL may come from either.
+	envCount, envErr := dotenv.Load(".env")
+	logx.Init()
+	if envErr != nil {
+		slog.Warn("loading .env", "error", envErr)
+	} else if envCount > 0 {
+		slog.Info("loaded .env variables", "count", envCount)
 	}
 
 	dbPath := envOr("MC_DB_PATH", "marvelchampions.db")
@@ -56,25 +60,25 @@ func main() {
 	if zhDir := os.Getenv("MC_ZH_DIR"); zhDir != "" {
 		n, err := engine.ApplyChinese(engine.DB, zhDir)
 		if err != nil {
-			log.Fatalf("zh translations: %v", err)
+			logx.Fatal("zh translations", "error", err)
 		}
 		engine.RelabelScenarios(engine.DB)
-		log.Printf("zh translations: %d cards overlaid from %s", n, zhDir)
+		slog.Info("zh translations overlaid", "cards", n, "dir", zhDir)
 	}
 
 	secret := os.Getenv("MC_JWT_SECRET")
 	if secret == "" {
 		var buf [32]byte
 		if _, err := rand.Read(buf[:]); err != nil {
-			log.Fatalf("generate secret: %v", err)
+			logx.Fatal("generate secret", "error", err)
 		}
 		secret = hex.EncodeToString(buf[:])
-		log.Println("MC_JWT_SECRET not set; generated an ephemeral secret (tokens invalidate on restart)")
+		slog.Warn("MC_JWT_SECRET not set; generated an ephemeral secret (tokens invalidate on restart)")
 	}
 
 	st, err := store.Open(dbPath)
 	if err != nil {
-		log.Fatalf("open store: %v", err)
+		logx.Fatal("open store", "error", err)
 	}
 	defer st.Close()
 
@@ -86,10 +90,10 @@ func main() {
 	// legacy per-face paths.
 	imgSources := mirror.SourcesFromEnv()
 	for _, src := range imgSources.Default {
-		log.Printf("image source (default): %s", src.Name())
+		slog.Info("image source (default)", "source", src.Name())
 	}
 	for _, src := range imgSources.Zh {
-		log.Printf("image source (zh): %s", src.Name())
+		slog.Info("image source (zh)", "source", src.Name())
 	}
 
 	images, err := api.NewImageCacheWithPaths(
@@ -98,14 +102,14 @@ func main() {
 		imgSources.Default...,
 	)
 	if err != nil {
-		log.Fatalf("image cache: %v", err)
+		logx.Fatal("image cache", "error", err)
 	}
 	// The zh cache serves locally seeded faces plus ZH_IMAGE_MIRROR
 	// fetches by convention path; codes it cannot resolve fall back to the
 	// default chain.
 	zhImages, err := api.NewImageCacheWithPaths(filepath.Join(cacheDir, "images", "zh"), api.ConventionImagePath, imgSources.Zh...)
 	if err != nil {
-		log.Fatalf("zh image cache: %v", err)
+		logx.Fatal("zh image cache", "error", err)
 	}
 
 	// Opt-in background cache prewarm at startup (MC_PREWARM_IMAGES=1;
@@ -120,11 +124,11 @@ func main() {
 		for _, def := range engine.DB.All() {
 			codes = append(codes, def.Code)
 		}
-		log.Printf("images: prewarming %d card images (default) in the background", len(codes))
+		slog.Info("images: prewarming card images in the background (default)", "cards", len(codes))
 		go api.PrewarmImages(images, codes, 4, 25*time.Millisecond)
 		// An unconfigured zh chain has nothing to fetch from.
 		if len(imgSources.Zh) > 0 {
-			log.Printf("images: prewarming %d card images (zh) in the background", len(codes))
+			slog.Info("images: prewarming card images in the background (zh)", "cards", len(codes))
 			go api.PrewarmImages(zhImages, codes, 4, 25*time.Millisecond)
 		}
 	}
@@ -156,9 +160,9 @@ func main() {
 	fs := http.FileServer(http.Dir(staticDir))
 	mux.Handle("/", spaHandler(staticDir, fs))
 
-	log.Printf("listening on %s (db=%s static=%s)", listen, dbPath, staticDir)
+	slog.Info("listening", "addr", listen, "db", dbPath, "static", staticDir)
 	if err := http.ListenAndServe(listen, mux); err != nil {
-		log.Fatal(err)
+		logx.Fatal("server exited", "error", err)
 	}
 }
 

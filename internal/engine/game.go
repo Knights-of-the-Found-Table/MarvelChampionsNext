@@ -68,8 +68,10 @@ type Game struct {
 	Won    bool   `json:"won"`
 	Reason string `json:"reason,omitempty"`
 
-	Log []string `json:"log"`
+	Log LogEntries `json:"log"`
 
+	// Transient: presentation events drained after each answer (events.go).
+	events []Evt
 	// Transient: scenario def hooks (rebuilt from ScenarioID).
 	scenario *ScenarioDef
 }
@@ -85,13 +87,6 @@ func (g *Game) Random(n int) int {
 	r := rand.New(rand.NewPCG(uint64(g.Seed), g.Counter))
 	g.Counter++
 	return r.IntN(n)
-}
-
-func (g *Game) logf(format string, args ...any) {
-	g.Log = append(g.Log, fmt.Sprintf(format, args...))
-	if len(g.Log) > 500 {
-		g.Log = g.Log[len(g.Log)-500:]
-	}
 }
 
 func (g *Game) nextEntityID(kind string) EntityID {
@@ -360,31 +355,32 @@ func (g *Game) Answer(playerID PlayerID, paths []string) error {
 	g.pending = nil
 
 	var msgs []Message
+	var err error
 	switch q.Type {
 	case "choose_n":
-		choices, err := q.Selective(paths)
+		msgs, err = g.resolveChooseN(q, paths)
 		if err != nil {
 			g.pending = pending
 			return err
 		}
-		if q.Validate != "" {
-			validated, err := g.validateSelection(q, choices)
+	default:
+		// A choose_n subtree (resource payment) nested under this choose_one
+		// question is answered by submitting all its selections at once
+		// ({"6.0","6.1"} = the payment question under choice "6").
+		if sub, subPaths, ok := nestedChooseN(q, paths); ok {
+			msgs, err = g.resolveChooseN(sub, subPaths)
 			if err != nil {
 				g.pending = pending
 				return err
 			}
-			msgs = validated
-		} else {
-			for _, c := range choices {
-				msgs = append(msgs, c.msgs...)
-			}
+			break
 		}
-	default:
 		if len(paths) != 1 {
 			g.pending = pending
 			return fmt.Errorf("expected exactly one answer path")
 		}
-		leaf, err := q.Leaf(paths[0])
+		var leaf *Choice
+		leaf, err = q.Leaf(paths[0])
 		if err != nil {
 			g.pending = pending
 			return err
@@ -395,6 +391,51 @@ func (g *Game) Answer(playerID PlayerID, paths []string) error {
 	g.queue = append(msgs, g.queue...)
 	g.Run()
 	return nil
+}
+
+// resolveChooseN turns a choose_n answer into effect messages, applying the
+// question's validation rule (payment:N) when present.
+func (g *Game) resolveChooseN(q *Question, paths []string) ([]Message, error) {
+	choices, err := q.Selective(paths)
+	if err != nil {
+		return nil, err
+	}
+	if q.Validate != "" {
+		return g.validateSelection(q, choices)
+	}
+	var msgs []Message
+	for _, c := range choices {
+		msgs = append(msgs, c.msgs...)
+	}
+	return msgs, nil
+}
+
+// nestedChooseN detects an answer selecting from a choose_n subtree nested
+// under a choose_one root: the paths' common prefix must resolve to a choice
+// whose Then question is a choose_n ("Pay N resources…"). Returns that
+// subtree and the original paths (sub-choice ids carry the full prefix).
+func nestedChooseN(q *Question, paths []string) (*Question, []string, bool) {
+	prefix := paths[0]
+	for _, p := range paths[1:] {
+		for prefix != "" && p != prefix && !strings.HasPrefix(p, prefix+".") {
+			prefix = trimLastSegment(prefix)
+		}
+	}
+	for prefix != "" {
+		if c, err := q.Leaf(prefix); err == nil && c.Then != nil &&
+			c.Then.Type == "choose_n" && len(c.Then.Choices) > 0 {
+			return c.Then, paths, true
+		}
+		prefix = trimLastSegment(prefix)
+	}
+	return nil, nil, false
+}
+
+func trimLastSegment(path string) string {
+	if i := strings.LastIndex(path, "."); i >= 0 {
+		return path[:i]
+	}
+	return ""
 }
 
 // validateSelection applies server-side validation rules to choose_n
@@ -647,7 +688,7 @@ func (g *Game) consumeDiscount(p *Player, def *data.CardDef) {
 	}
 	for i, d := range p.CostDiscounts {
 		if discountMatches(d, def) && d.Amount > 0 {
-			g.logf("%s costs %d less (%s)", def.Name, d.Amount, p.Name)
+			g.logMinorf("%s costs %d less (%s)", def.Name, d.Amount, p.Name)
 			p.CostDiscounts = append(p.CostDiscounts[:i], p.CostDiscounts[i+1:]...)
 			return
 		}
@@ -914,7 +955,7 @@ func (g *Game) spawnVillain(stages []string, stage int) *Villain {
 	}
 	v.stageCodes = stages
 	g.Villains[v.ID] = v
-	g.logf("%s enters play (stage %s)", def.Name, def.StageLabel)
+	g.logMajorf("%s enters play (stage %s)", def.Name, def.StageLabel)
 	return v
 }
 
@@ -935,7 +976,7 @@ func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 		Hazard:     def.Hazards,
 	}
 	g.MainScheme = s
-	g.logf("Main scheme: %s reveals stage %s", def.Name, s.EDef().StageLabel)
+	g.logMajorf("Main scheme: %s reveals stage %s", def.Name, s.EDef().StageLabel)
 	if b := behavior(s.Code); b.MainSchemeRevealed != nil {
 		g.Push(b.MainSchemeRevealed(g, s)...)
 	}

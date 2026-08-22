@@ -10,11 +10,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/logx"
 )
 
 const baseURL = "https://marvelcdb.com/api/public"
@@ -32,48 +34,49 @@ func main() {
 	outDir := flag.String("out", filepath.Join("internal", "engine", "data", "packs"), "output directory for the data snapshot")
 	pause := flag.Duration("pause", 500*time.Millisecond, "pause between API requests to stay polite")
 	flag.Parse()
+	logx.Init()
 
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
-		log.Fatalf("create output dir: %v", err)
+		logx.Fatal("create output dir", "error", err)
 	}
 
 	client := &http.Client{Timeout: 60 * time.Second}
 
 	body, err := getJSON(client, baseURL+"/packs/", *pause)
 	if err != nil {
-		log.Fatalf("fetch pack list: %v", err)
+		logx.Fatal("fetch pack list", "error", err)
 	}
 	var packs []packInfo
 	if err := json.Unmarshal(body, &packs); err != nil {
-		log.Fatalf("decode pack list: %v", err)
+		logx.Fatal("decode pack list", "error", err)
 	}
 
 	if err := writeRaw(filepath.Join(*outDir, "packs.json"), body); err != nil {
-		log.Fatalf("write packs.json: %v", err)
+		logx.Fatal("write packs.json", "error", err)
 	}
-	log.Printf("fetched pack list: %d packs", len(packs))
+	slog.Info("fetched pack list", "packs", len(packs))
 
 	// Keep the snapshot deterministic regardless of API ordering.
 	for _, p := range packs {
 		cardsBody, err := getJSON(client, baseURL+"/cards/"+p.Code, *pause)
 		if err != nil {
-			log.Fatalf("fetch cards for %s: %v", p.Code, err)
+			logx.Fatal("fetch cards", "pack", p.Code, "error", err)
 		}
 		var pretty json.RawMessage
 		if err := json.Unmarshal(cardsBody, &pretty); err != nil {
-			log.Fatalf("decode cards for %s: %v", p.Code, err)
+			logx.Fatal("decode cards", "pack", p.Code, "error", err)
 		}
 		indented, err := json.MarshalIndent(pretty, "", "  ")
 		if err != nil {
-			log.Fatalf("re-encode cards for %s: %v", p.Code, err)
+			logx.Fatal("re-encode cards", "pack", p.Code, "error", err)
 		}
 		if err := writeRaw(filepath.Join(*outDir, p.Code+".json"), indented); err != nil {
-			log.Fatalf("write %s.json: %v", p.Code, err)
+			logx.Fatal("write pack file", "pack", p.Code, "error", err)
 		}
-		log.Printf("fetched %-6s %-30s (%d known cards)", p.Code, p.Name, p.Known)
+		slog.Info("fetched pack", "code", p.Code, "name", p.Name, "known", p.Known)
 	}
 
-	log.Printf("snapshot complete: %d packs written to %s", len(packs), *outDir)
+	slog.Info("snapshot complete", "packs", len(packs), "dir", *outDir)
 }
 
 func getJSON(client *http.Client, url string, pause time.Duration) ([]byte, error) {

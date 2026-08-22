@@ -72,6 +72,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 	}
 	if s := g.SideSchemes[schemeID]; s != nil {
 		s.Threat += n
+		g.emit(Evt{Type: "threat", Src: source, Dst: schemeID, N: n})
 		g.logf("%s gains %d threat (now %d)", s.EDef().Name, n, s.Threat)
 		return
 	}
@@ -94,6 +95,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 			return
 		}
 		s.Threat += n
+		g.emit(Evt{Type: "threat", Src: source, Dst: schemeID, N: n})
 		g.logf("%s gains %d threat (now %d/%d)", s.EDef().Name, n, s.Threat, s.MaxThreat)
 		if s.Threat >= s.MaxThreat {
 			g.Push(MainSchemeMaxed{Scheme: s.ID})
@@ -109,9 +111,13 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 		n = adj
 	}
 	if s := g.SideSchemes[schemeID]; s != nil {
+		before := s.Threat
 		s.Threat -= n
 		if s.Threat < 0 {
 			s.Threat = 0
+		}
+		if d := before - s.Threat; d > 0 {
+			g.emit(Evt{Type: "thwart", Src: source, Dst: schemeID, N: d})
 		}
 		g.logf("%s loses %d threat (now %d)", s.EDef().Name, n, s.Threat)
 		if s.Threat == 0 {
@@ -125,6 +131,9 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 		s.Threat -= n
 		if s.Threat < 0 {
 			s.Threat = 0
+		}
+		if d := before - s.Threat; d > 0 {
+			g.emit(Evt{Type: "thwart", Src: source, Dst: schemeID, N: d})
 		}
 		g.logf("%s loses %d threat (now %d/%d)", s.EDef().Name, before-s.Threat, s.Threat, s.MaxThreat)
 		if before > 0 && s.Threat == 0 {
@@ -147,7 +156,7 @@ func (g *Game) destroyAlly(id EntityID) {
 	if owner != nil {
 		owner.Discard = append(owner.Discard, Card{ID: g.nextCardID(), Code: code, Owner: owner.ID})
 	}
-	g.logf("%s is destroyed", a.EDef().Name)
+	g.logMajorf("%s is destroyed", a.EDef().Name)
 }
 
 // eventBonusFor applies a pending Embiggen!/Shrink bonus to a value
@@ -174,7 +183,7 @@ func (g *Game) eventBonusFor(n int, source EntityID, kind string) (int, bool) {
 	case "threat":
 		delete(g.EventThreatBonus, source)
 	}
-	g.logf("event bonus +%d %s", bonus, kind)
+	g.logMinorf("event bonus +%d %s", bonus, kind)
 	return n + bonus, true
 }
 
@@ -201,6 +210,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			n = adj
 		}
 		e.Damage += n
+		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
 		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(VillainDefeated{VillainID: e.ID})
@@ -218,6 +228,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			n = adj
 		}
 		e.Damage += n
+		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
 		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(MinionDefeated{MinionID: e.ID})
@@ -231,6 +242,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			n = src
 		}
 		e.Damage += n
+		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
 		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(AllyDefeated{AllyID: e.ID})
@@ -291,13 +303,14 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			return
 		}
 		e.Damage += n
+		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
 		g.logf("%s takes %d damage (HP %d/%d)", e.Name, n, e.HP(), e.MaxHP)
 		if e.HP() <= 0 && !e.KOed {
 			if g.applyDefeatSave(e) {
 				return
 			}
 			e.KOed = true
-			g.logf("%s is KO'd!", e.Name)
+			g.logMajorf("%s is KO'd!", e.Name)
 			g.Push(GameOver{Won: false, Reason: fmt.Sprintf("%s was defeated", e.Name)})
 		}
 	}
@@ -331,12 +344,18 @@ func (g *Game) heal(id EntityID, n int) {
 		if e.Damage < 0 {
 			e.Damage = 0
 		}
+		if d := before - e.Damage; d > 0 {
+			g.emit(Evt{Type: "heal", Dst: id, N: d})
+		}
 		g.logf("%s heals %d damage", e.Name, before-e.Damage)
 	case *Ally:
 		before := e.Damage
 		e.Damage -= n
 		if e.Damage < 0 {
 			e.Damage = 0
+		}
+		if d := before - e.Damage; d > 0 {
+			g.emit(Evt{Type: "heal", Dst: id, N: d})
 		}
 		g.logf("%s heals %d damage", e.EDef().Name, before-e.Damage)
 	case *Villain:
@@ -386,6 +405,7 @@ func (g *Game) setStatus(id EntityID, status string, on bool) {
 		}
 	}
 	if on {
+		g.emit(Evt{Type: "status", Dst: id, Status: status, On: true})
 		g.logf("%s gains %s status", id, status)
 	}
 }

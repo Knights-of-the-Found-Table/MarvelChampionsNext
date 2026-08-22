@@ -450,3 +450,12 @@ a.button {
   border-radius: 6px;
   font-size: 0.78rem;
 }
+
+.log-line.log-major {
+  font-weight: 600;
+  color: var(--warn);
+}
+
+.log-line.log-minor {
+  opacity: 0.55;
+}

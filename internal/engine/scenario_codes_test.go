@@ -179,8 +179,8 @@ func TestSchemeAFaceLifecycle(t *testing.T) {
 	}
 	if g.Over {
 		start := max(0, len(g.Log)-20)
-		for _, l := range g.Log[start:] {
-			t.Log(l)
+		for _, e := range g.Log[start:] {
+			t.Log(e.Text)
 		}
 		t.Fatalf("klaw: game over during advance: %s", g.Reason)
 	}

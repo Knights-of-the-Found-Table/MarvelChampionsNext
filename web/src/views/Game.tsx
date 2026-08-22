@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { get, post, getToken, GameView } from '../api'
-import { CardImage } from '../cards'
-import QuestionPanel from '../components/QuestionPanel'
+import { get, post, getToken, type Choice, type GameView, type Question } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
+import type { GameEvt } from '../board/fx'
+import type { PlacedCard } from '../board/layout'
+import { initSfx, playSfx, setSfxMuted, sfxSettings } from '../audio/sfx'
+import Board from '../components/Board'
+import QuestionPanel from '../components/QuestionPanel'
+import '../style/board.css'
 
 export default function Game() {
   const { id } = useParams<{ id: string }>()
@@ -11,8 +15,32 @@ export default function Game() {
   const t = useT()
   const zh = useZhMap()
   const [view, setView] = useState<GameView | null>(null)
+  const [events, setEvents] = useState<GameEvt[]>([])
   const [error, setError] = useState('')
+  const [sfxOn, setSfxOn] = useState(() => !sfxSettings().muted)
+  const [animOn, setAnimOn] = useState(() => localStorage.getItem('mc-anim-off') !== '1')
+  // 问题导航状态提升到这里：棋盘点卡与面板按钮共用同一条路径。
+  const [stack, setStack] = useState<Question[]>([])
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const wsRef = useRef<WebSocket | null>(null)
+  const overRef = useRef(false)
+
+  useEffect(() => {
+    initSfx()
+  }, [])
+
+  useEffect(() => {
+    document.body.classList.toggle('fx-off', !animOn)
+    localStorage.setItem('mc-anim-off', animOn ? '' : '1')
+  }, [animOn])
+
+  // 终局音效（只播一次）
+  useEffect(() => {
+    if (view?.over && !overRef.current) {
+      overRef.current = true
+      playSfx(view.won ? 'victory' : 'defeat')
+    }
+  }, [view])
 
   const connect = useCallback(() => {
     const token = getToken() ?? ''
@@ -22,6 +50,7 @@ export default function Game() {
       try {
         const data = JSON.parse(ev.data)
         if (data.type === 'state') setView(data.view)
+        else if (data.type === 'events') setEvents(data.events ?? [])
       } catch {
         /* ignore */
       }
@@ -48,6 +77,8 @@ export default function Game() {
   }, [gameId, connect])
 
   async function answer(paths: string[]) {
+    setStack([])
+    setSelected(new Set())
     try {
       const v = await post<GameView>(`/marvel/games/${gameId}/answer`, { paths })
       setView(v)
@@ -59,6 +90,59 @@ export default function Game() {
     }
   }
 
+  const question = view?.question ?? null
+  const current = stack.length > 0 ? stack[stack.length - 1] : question
+  const isMulti = current?.type === 'choose_n'
+
+  // 服务端换了一个新问题（或问题消失）时复位导航状态。每次广播都会
+  // 反序列化出新对象，不能按引用比较——用内容做键。
+  const questionKey = question ? JSON.stringify(question) : ''
+  useEffect(() => {
+    setStack([])
+    setSelected(new Set())
+  }, [questionKey])
+
+  // 选项选择：choose_n 多选切换；choose_one 有子层下钻，叶子直接作答。
+  // 棋盘点卡与 QuestionPanel 按钮都走这里。
+  function pick(c: Choice) {
+    if (c.disabled) return
+    playSfx('select')
+    if (isMulti) {
+      setSelected((prev) => {
+        const next = new Set(prev)
+        if (next.has(c.id)) next.delete(c.id)
+        else next.add(c.id)
+        return next
+      })
+      return
+    }
+    if (c.then && c.then.choices.length > 0) {
+      setStack((s) => [...s, c.then!])
+      setSelected(new Set())
+      return
+    }
+    void answer([c.id])
+  }
+
+  function back() {
+    setStack((s) => s.slice(0, -1))
+    setSelected(new Set())
+  }
+
+  function confirmMulti() {
+    if (selected.size === 0) return
+    void answer(Array.from(selected))
+  }
+
+  // 点场上卡牌：命中当前问题中 sourceId 对应的选项即视同点击面板按钮。
+  // 同一实体有多个选项时（如盟友攻击/化解）取第一个可用项。
+  function onCardClick(card: PlacedCard) {
+    if (!current) return
+    const c = current.choices.find((ch) => ch.sourceId === card.id && !ch.disabled)
+    if (!c) return
+    pick(c)
+  }
+
   async function undo() {
     try {
       setView(await post<GameView>(`/marvel/games/${gameId}/undo`))
@@ -68,163 +152,83 @@ export default function Game() {
     }
   }
 
+  function toggleSfx() {
+    const next = !sfxOn
+    setSfxOn(next)
+    setSfxMuted(!next)
+  }
+
   if (error && !view) return <p className="error">{error}</p>
-  if (!view) return <p className="muted">{t('deck.loading')}</p>
+  if (!view)
+    return (
+      <div className="board-page">
+        <div className="board-msg">{t('deck.loading')}</div>
+      </div>
+    )
 
   return (
-    <div className="game">
-      <header className="game-header">
-        <h2>
-          {view.name} <span className="muted">· {t('game.round', { n: view.round })}</span>
-        </h2>
-        <div className="row">
+    <div className="board-page">
+      <Board view={view} events={events} question={current} selected={selected} onCardClick={onCardClick} />
+      <div className="board-hud">
+        <div className="hud-top">
+          <strong>{lname(zh, view.mainScheme?.code ?? '', view.scenario)}</strong>
+          <span className="muted">· {t('game.round', { n: view.round })}</span>
           {view.over ? (
             <span className={view.won ? 'victory' : 'defeat'}>
-              {t(view.won ? 'game.victory' : 'game.defeat')} — {view.reason}
+              {t(view.won ? 'game.victory' : 'game.defeat')}
             </span>
           ) : view.waitingFor ? (
             <span className="muted">{t('game.waitingFor', { name: view.waitingFor })}</span>
           ) : null}
-          <button onClick={undo} disabled={view.over}>
+          {error && <span className="error">{error}</span>}
+        </div>
+        <div className="hud-controls">
+          <button
+            className={`hud-toggle ${sfxOn ? 'on' : ''}`}
+            onClick={toggleSfx}
+            title={t('game.sfx')}
+          >
+            {sfxOn ? '🔊' : '🔇'}
+          </button>
+          <button
+            className={`hud-toggle ${animOn ? 'on' : ''}`}
+            onClick={() => setAnimOn(!animOn)}
+            title={t('game.anim')}
+          >
+            {animOn ? '✨' : '⏹'}
+          </button>
+          <button className="hud-undo" onClick={undo} disabled={view.over}>
             {t('game.undo')}
           </button>
         </div>
-      </header>
-      {error && <p className="error">{error}</p>}
-
-      <section className="encounter-zone">
-        <div className="row wrap">
-          {view.villains?.map((v) => (
-            <div key={v.id} className="entity">
-              <CardImage code={v.code} />
-              <div className="entity-label">
-                <strong>{lname(zh, v.code, v.name)}</strong>{' '}
-                <span className="muted">{t('game.stage', { label: v.stageLabel })}</span>
-                <div className={`hp ${v.hp <= v.maxHp / 3 ? 'low' : ''}`}>
-                  {t('game.hp', { hp: v.hp, max: v.maxHp })}
-                </div>
-                <div className="muted">
-                  {t('game.atkSch', { atk: v.attack, sch: v.scheme })}
-                  {v.stunned ? ` · ${t('status.stunned')}` : ''}
-                  {v.confused ? ` · ${t('status.confused')}` : ''}
-                  {v.tough ? ` · ${t('status.tough')}` : ''}
-                </div>
-              </div>
-            </div>
-          ))}
-          {view.mainScheme && (
-            <div className="entity">
-              <CardImage code={view.mainScheme.code} />
-              <div className="entity-label">
-                <strong>{lname(zh, view.mainScheme.code, view.mainScheme.name)}</strong>
-                <div className={`threat ${view.mainScheme.threat >= view.mainScheme.maxThreat - 2 ? 'high' : ''}`}>
-                  {t('game.threatMax', { n: view.mainScheme.threat, max: view.mainScheme.maxThreat })}
-                </div>
-              </div>
-            </div>
-          )}
-          {view.sideSchemes?.map((s) => (
-            <div key={s.id} className="entity">
-              <CardImage code={s.code} />
-              <div className="entity-label">
-                <strong>{lname(zh, s.code, s.name)}</strong>
-                <div className="threat">{t('game.threat', { n: s.threat })}</div>
-                {s.crisis && <div className="crisis">{t('game.crisis')}</div>}
-              </div>
-            </div>
-          ))}
-          {view.minions?.map((m) => (
-            <div key={m.id} className="entity">
-              <CardImage code={m.code} size="sm" />
-              <div className="entity-label">
-                <strong>{lname(zh, m.code, m.name)}</strong>
-                <div className="hp">{t('game.hp', { hp: m.hp, max: m.maxHp })}</div>
-                <div className="muted">
-                  {t('game.atkSch', { atk: m.attack, sch: m.scheme })}
-                  {m.guard ? ` · ${t('status.guard')}` : ''}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {view.players.map((p) => (
-        <section key={p.id} className={`player-zone ${p.exhausted ? 'exhausted' : ''}`}>
-          <div className="row wrap player-identity">
-            <div className="entity">
-              <CardImage code={p.side === 'hero' ? p.heroCode : p.alterEgo} size="sm" />
-              <div className="entity-label">
-                <strong>{p.name}</strong>
-                {p.firstPlayer && <span className="badge">{t('status.first')}</span>}
-                <div className={`hp ${p.hp <= p.maxHp / 3 ? 'low' : ''}`}>
-                  {t('game.hp', { hp: p.hp, max: p.maxHp })}
-                </div>
-                <div className="muted">
-                  {t('game.deckCount', { n: p.deckCount })}
-                  {p.exhausted ? ` · ${t('status.exhausted')}` : ''}
-                  {p.stunned ? ` · ${t('status.stunned')}` : ''}
-                  {p.confused ? ` · ${t('status.confused')}` : ''}
-                  {p.tough ? ` · ${t('status.tough')}` : ''}
-                  {p.encounterDown ? ` · ${t('game.encounterCards', { n: p.encounterDown })}` : ''}
-                </div>
-              </div>
-            </div>
-            {p.allies?.map((a) => (
-              <div key={a.id} className={`entity ${a.exhausted ? 'exhausted' : ''}`}>
-                <CardImage code={a.code} size="xs" />
-                <div className="entity-label">
-                  {lname(zh, a.code, a.name)}
-                  <div className="hp">{t('game.hp', { hp: a.hp, max: a.maxHp })}</div>
-                </div>
-              </div>
-            ))}
-            {p.supports?.map((s) => (
-              <div key={s.id} className={`entity ${s.exhausted ? 'exhausted' : ''}`}>
-                <CardImage code={s.code} size="xs" />
-                <div className="entity-label">{lname(zh, s.code, s.name)}</div>
-              </div>
-            ))}
-            {p.upgrades?.map((u) => (
-              <div key={u.id} className="entity">
-                <CardImage code={u.code} size="xs" />
-                <div className="entity-label">{lname(zh, u.code, u.name)}</div>
-              </div>
-            ))}
-          </div>
-          {p.hand && (
-            <div className="hand row wrap">
-              {p.hand.map((c) => (
-                <div key={c.id} className="hand-card" title={lname(zh, c.code, c.name)}>
-                  <CardImage code={c.code} size="sm" />
+        <div className="hud-log">
+          <details>
+            <summary>{t('game.logTitle')}</summary>
+            <div className="log-body">
+              {(view.log ?? []).slice().reverse().map((e, i) => (
+                <div key={i} className={`log-line log-${e.level || 'info'}`}>
+                  {e.text}
                 </div>
               ))}
             </div>
-          )}
-          {!p.hand && p.handSize > 0 && (
-            <p className="muted">
-              {t('game.hiddenHand', { name: p.name, n: p.handSize })}
-            </p>
-          )}
-        </section>
-      ))}
-
-      <section className="question-zone">
-        {view.question ? (
-          <QuestionPanel question={view.question} onAnswer={answer} />
+          </details>
+        </div>
+        {current ? (
+          <QuestionPanel
+            current={current}
+            selected={selected}
+            onPick={pick}
+            onBack={stack.length > 0 ? back : undefined}
+            onConfirm={confirmMulti}
+          />
         ) : view.over ? (
-          <p className={view.won ? 'victory' : 'defeat'}>
-            {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {view.reason}
-          </p>
-        ) : (
-          <p className="muted">{view.waitingFor ? t('game.waitingFor', { name: view.waitingFor }) : '…'}</p>
-        )}
-      </section>
-
-      <details className="log">
-        <summary>{t('game.logTitle')}</summary>
-        <pre>{(view.log ?? []).slice().reverse().join('\n')}</pre>
-      </details>
+          <div className="question">
+            <p className={view.won ? 'victory' : 'defeat'}>
+              {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {view.reason}
+            </p>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -158,17 +158,17 @@ func PrewarmImages(img *imageCache, codes []string, workers int, delay time.Dura
 				missing++
 			default:
 				failed++
-				log.Printf("images: prewarm %s: %v", code, err)
+				slog.Warn("images: prewarm failed", "code", code, "error", err)
 			}
 			done := cached + missing + failed
 			if done%500 == 0 {
-				log.Printf("images: prewarm %d/%d (missing=%d failed=%d)", done, total, missing, failed)
+				slog.Info("images: prewarm progress", "done", done, "total", total, "missing", missing, "failed", failed)
 			}
 		}(code)
 		time.Sleep(delay)
 	}
 	wg.Wait()
-	log.Printf("images: prewarm finished: %d/%d resolved, %d missing, %d failed", cached, total, missing, failed)
+	slog.Info("images: prewarm finished", "resolved", cached, "total", total, "missing", missing, "failed", failed)
 	return cached, missing, failed
 }
 

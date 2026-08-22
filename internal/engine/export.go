@@ -21,6 +21,12 @@ func LookupScenarioName(id string) string {
 // behavior packages).
 func (g *Game) Logf(format string, args ...any) { g.logf(format, args...) }
 
+// LogMinorf appends a minor (bookkeeping) line to the game log.
+func (g *Game) LogMinorf(format string, args ...any) { g.logMinorf(format, args...) }
+
+// LogMajorf appends a major (pivotal moment) line to the game log.
+func (g *Game) LogMajorf(format string, args ...any) { g.logMajorf(format, args...) }
+
 // DrawEncounter pops the top encounter card, reshuffling when empty
 // (exported for card behavior packages).
 func (g *Game) DrawEncounter() (Card, bool) { return g.drawEncounter() }

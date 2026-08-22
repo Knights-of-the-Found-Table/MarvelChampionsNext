@@ -40,6 +40,7 @@ func (g *Game) TurnMenu(p *Player) *Question {
 			Label:    fmt.Sprintf("%s (cost %d)", def.Name, cost),
 			Kind:     ChoicePlay,
 			CardCode: def.Code,
+			SourceID: EntityID(c.ID),
 		}
 		if cost > 0 {
 			choice = choice.WithThen(g.paymentQuestion(p, c, cost))
@@ -69,7 +70,6 @@ func (g *Game) TurnMenu(p *Player) *Question {
 			q.Choices = g.resourcePayChoices(p, &c, def)
 			q.Validate = fmt.Sprintf("payment:%d", cost)
 			q.Context = map[string]any{"player": p.ID.String(), "playDiscard": c.ID}
-			q.assignIDs("")
 			choice = choice.WithThen(q)
 		} else {
 			choice = choice.Msgs(PlayDiscardAlly{Player: p.ID, Card: c})
@@ -86,7 +86,7 @@ func (g *Game) TurnMenu(p *Player) *Question {
 			targets := Ask("Choose an enemy", g.enemyChoices(p.AttackStat(g))...)
 			choices = append(choices, Choice{
 				ID: "basic-attack", Label: fmt.Sprintf("Attack (%d)", p.AttackStat(g)),
-				Kind: ChoiceBasicPower,
+				Kind: ChoiceBasicPower, SourceID: p.ID,
 			}.WithThen(targets))
 		}
 	}
@@ -95,14 +95,14 @@ func (g *Game) TurnMenu(p *Player) *Question {
 			targets := Ask("Choose a scheme", g.schemeChoices(p.ThwartStat(g))...)
 			choices = append(choices, Choice{
 				ID: "basic-thwart", Label: fmt.Sprintf("Thwart (%d)", p.ThwartStat(g)),
-				Kind: ChoiceBasicPower,
+				Kind: ChoiceBasicPower, SourceID: p.ID,
 			}.WithThen(targets))
 		}
 	}
 	if !p.IsHero() && !p.Exhausted {
 		choices = append(choices, Choice{
 			ID: "basic-recover", Label: fmt.Sprintf("Recover (%d)", p.RecoverStat(g)),
-			Kind: ChoiceBasicPower,
+			Kind: ChoiceBasicPower, SourceID: p.ID,
 		}.Msgs(BasicRecover{Player: p.ID}))
 	}
 
@@ -289,7 +289,7 @@ func (g *Game) resourcePayChoices(p *Player, self *Card, targetDef *data.CardDef
 			label += " [" + resourceLabels(def) + "]"
 		}
 		out = append(out, Choice{
-			Label: label, Kind: ChoiceResource, CardCode: def.Code,
+			Label: label, Kind: ChoiceResource, CardCode: def.Code, SourceID: EntityID(c.ID),
 		}.Msgs(ResourcePayStub{Card: c}))
 	}
 	for _, src := range g.resourceProducers(p, targetDef) {
@@ -311,7 +311,7 @@ func (g *Game) paymentQuestion(p *Player, card Card, cost int) *Question {
 	q.Choices = g.resourcePayChoices(p, &card, card.Def())
 	q.Validate = fmt.Sprintf("payment:%d", cost)
 	q.Context = map[string]any{"cardId": card.ID, "player": p.ID.String()}
-	q.assignIDs("")
+	// ids 由挂载该子树的根问题统一分配（带 "N." 前缀），避免与根层冲突。
 	return q
 }
 
@@ -333,7 +333,6 @@ func (g *Game) abilityPaymentQuestion(p *Player, src Entity, idx int, ab Ability
 	q.Choices = g.resourcePayChoices(p, nil, nil)
 	q.Validate = fmt.Sprintf("payment:%d", ab.Cost)
 	q.Context = map[string]any{"abilitySource": src.EID().String(), "abilityIndex": idx, "player": p.ID.String()}
-	q.assignIDs("")
 	return q
 }
 

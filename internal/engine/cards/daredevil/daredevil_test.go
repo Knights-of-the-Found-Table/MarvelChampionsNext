@@ -181,7 +181,7 @@ func TestSenseCardsCycle(t *testing.T) {
 	if len(p.SenseDeck) != senseBefore+1 {
 		t.Fatalf("Superior Taste should have returned to the Sense deck, size %d -> %d", senseBefore, len(p.SenseDeck))
 	}
-	if !strings.Contains(strings.Join(g.Log, "\n"), "Superior Taste") {
+	if !strings.Contains(g.LogText(), "Superior Taste") {
 		t.Fatal("Superior Taste never triggered")
 	}
 }

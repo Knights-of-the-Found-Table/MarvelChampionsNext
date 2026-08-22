@@ -111,7 +111,9 @@ export interface MinionView {
   scheme: number
   guard: boolean
   stunned: boolean
-  tough: boolean
+  confused?: boolean
+  tough?: boolean
+  engagedWith?: string
 }
 
 export interface AllyView {
@@ -124,6 +126,9 @@ export interface AllyView {
   thwart: number
   exhausted: boolean
   stunned: boolean
+  confused?: boolean
+  tough?: boolean
+  counters?: number
 }
 
 export interface EntityLite {
@@ -131,6 +136,15 @@ export interface EntityLite {
   code: string
   name: string
   exhausted: boolean
+  counters?: number
+}
+
+// Card attached to (or associated with) a host entity.
+export interface AttachmentView {
+  id: string
+  code: string
+  name: string
+  host?: string
 }
 
 export interface CardRef {
@@ -165,6 +179,12 @@ export interface PlayerView {
   encounterDown: number
 }
 
+// One line of the in-game event journal: level is minor | info | major.
+export interface LogEntry {
+  level: string
+  text: string
+}
+
 export interface GameView {
   id: number
   name: string
@@ -177,10 +197,14 @@ export interface GameView {
   mainScheme: SchemeView | null
   sideSchemes: SchemeView[] | null
   minions: MinionView[] | null
+  attachments?: AttachmentView[] | null
+  treacheries?: AttachmentView[] | null
+  environments?: EntityLite[] | null
   players: PlayerView[]
-  log: string[] | null
+  log: LogEntry[] | null
   question?: Question
   waitingFor?: string
+  encounterCount?: number
 }
 
 export interface Deck {

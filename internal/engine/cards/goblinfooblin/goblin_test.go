@@ -79,7 +79,7 @@ func TestRiskyBusinessRuns(t *testing.T) {
 	if !g.Over {
 		t.Fatalf("game did not end, round=%d", g.Round)
 	}
-	logText := strings.Join(g.Log, "\n")
+	logText := g.LogText()
 	if !strings.Contains(logText, "Criminal Enterprise") {
 		t.Fatal("Criminal Enterprise environment never entered play")
 	}
@@ -127,7 +127,7 @@ func TestNormanDamageConvertsToInfamy(t *testing.T) {
 	if v := g.Villains[villainID]; v.Damage != 0 {
 		t.Fatalf("Norman took real damage (%d), want 0", v.Damage)
 	}
-	if !strings.Contains(strings.Join(g.Log, "\n"), "Damage converted") {
+	if !strings.Contains(g.LogText(), "Damage converted") {
 		t.Fatal("damage should have been converted to infamy removal")
 	}
 	// Drain the counters -> flip to Green Goblin.

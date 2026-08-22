@@ -14,7 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -151,10 +151,11 @@ func (c chain) Fetch(path string) ([]byte, error) {
 		}
 		lastErr = err
 		if errors.Is(err, ErrNotFound) {
-			log.Printf("images: %s missing at %s, trying next source", path, src.Name())
+			// Routine fallback (e.g. the zh mirror lacking a card): debug.
+			slog.Debug("images: missing at source, trying next", "path", path, "source", src.Name())
 			continue
 		}
-		log.Printf("images: %s via %s: %v", path, src.Name(), err)
+		slog.Warn("images: fetch failed", "path", path, "source", src.Name(), "error", err)
 	}
 	return nil, lastErr
 }

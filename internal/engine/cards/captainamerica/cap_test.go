@@ -119,7 +119,7 @@ func TestShieldBlockPreventsAll(t *testing.T) {
 	if p.Damage != before {
 		t.Fatalf("Shield Block should prevent all damage, damage %d -> %d", before, p.Damage)
 	}
-	if !strings.Contains(strings.Join(g.Log, "\n"), "prevents all damage") {
+	if !strings.Contains(g.LogText(), "prevents all damage") {
 		t.Fatal("defense resolution never ran")
 	}
 }
@@ -201,7 +201,7 @@ func TestZemoBlocksThwart(t *testing.T) {
 	if p.Exhausted {
 		t.Fatal("a blocked thwart must not exhaust the identity")
 	}
-	if !strings.Contains(strings.Join(g.Log, "\n"), "cannot thwart") {
+	if !strings.Contains(g.LogText(), "cannot thwart") {
 		t.Fatal("expected the blocked-thwart log line")
 	}
 }

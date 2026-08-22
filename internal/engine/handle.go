@@ -20,7 +20,7 @@ func (g *Game) handle(msg Message) {
 		for _, p := range g.Players {
 			p.AllyPlayedThisRound = false
 		}
-		g.logf("── Round %d ──", g.Round)
+		g.logMajorf("── Round %d ──", g.Round)
 		g.Push(BeginPhase{Phase: PhaseResource})
 
 	case BeginPhase:
@@ -266,7 +266,7 @@ func (g *Game) handle(msg Message) {
 					if boostSpawnsMinion(def) {
 						// "Boost: put this card into play" — spawn it
 						// instead of contributing boost icons.
-						g.logf("Boost card %s enters play!", def.Name)
+						g.logMajorf("Boost card %s enters play!", def.Name)
 						g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(v), Card: c})
 						continue
 					}
@@ -306,7 +306,7 @@ func (g *Game) handle(msg Message) {
 		if v == nil {
 			return
 		}
-		g.logf("%s is defeated!", v.EDef().Name)
+		g.logMajorf("%s is defeated!", v.EDef().Name)
 		g.Push(AdvanceVillainStage{VillainID: v.ID})
 
 	case AdvanceVillainStage:
@@ -314,7 +314,7 @@ func (g *Game) handle(msg Message) {
 
 	case MinionDefeated:
 		if mn := g.Minions[m.MinionID]; mn != nil {
-			g.logf("%s is defeated", mn.EDef().Name)
+			g.logMajorf("%s is defeated", mn.EDef().Name)
 			for _, a := range mn.Attachments {
 				g.Delete(a)
 			}
@@ -348,7 +348,7 @@ func (g *Game) handle(msg Message) {
 		if g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
 			s := g.MainScheme
 			s.Code = s.StageCodes[s.Stage-1]
-			g.logf("Main scheme flips to stage %s (threat %d/%d)",
+			g.logMajorf("Main scheme flips to stage %s (threat %d/%d)",
 				s.EDef().StageLabel, s.Threat, s.MaxThreat)
 		}
 
@@ -359,9 +359,9 @@ func (g *Game) handle(msg Message) {
 		g.pending = nil
 		g.queue = nil
 		if m.Won {
-			g.logf("🏆 Victory: %s", m.Reason)
+			g.logMajorf("🏆 Victory: %s", m.Reason)
 		} else {
-			g.logf("💀 Defeat: %s", m.Reason)
+			g.logMajorf("💀 Defeat: %s", m.Reason)
 		}
 
 	case AskQuestion:
@@ -385,7 +385,7 @@ func (g *Game) handle(msg Message) {
 			def := v.EDef()
 			v.SchemeVal = deref(def.Scheme, 0)
 			v.AttackVal = deref(def.Attack, 0)
-			g.logf("Villain flips to %s", def.Name)
+			g.logMajorf("Villain flips to %s", def.Name)
 		}
 
 	case MillPlayerDeck:
@@ -454,13 +454,13 @@ func (g *Game) handle(msg Message) {
 		switch t := g.Entity(m.ID).(type) {
 		case *Support:
 			t.Counters += m.N
-			g.logf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
 		case *Upgrade:
 			t.Counters += m.N
-			g.logf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
 		case *Ally:
 			t.Counters += m.N
-			g.logf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
 		}
 
 	case ReturnControlled:
@@ -665,7 +665,7 @@ func (g *Game) handle(msg Message) {
 				if c, ok := p.Hand.Remove(m.Card.ID); ok {
 					s.AttachedCards = append(s.AttachedCards, c)
 					s.Counters = len(s.AttachedCards)
-					g.logf("%s tucks a card under %s (%d stored)", p.Name, s.EDef().Name, s.Counters)
+					g.logMinorf("%s tucks a card under %s (%d stored)", p.Name, s.EDef().Name, s.Counters)
 				}
 			}
 		}
@@ -678,7 +678,7 @@ func (g *Game) handle(msg Message) {
 				s.AttachedCards = s.AttachedCards[take:]
 				s.Counters = len(s.AttachedCards)
 				p.Hand = append(p.Hand, taken...)
-				g.logf("%s takes %d stored cards from %s", p.Name, take, s.EDef().Name)
+				g.logMinorf("%s takes %d stored cards from %s", p.Name, take, s.EDef().Name)
 			}
 		}
 
@@ -736,7 +736,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 	if p == nil {
 		return
 	}
-	g.logf("%s reveals their nemesis set!", p.Name)
+	g.logMajorf("%s reveals their nemesis set!", p.Name)
 	var rest CardList
 	for _, c := range p.NemesisDeck {
 		def := c.Def()
@@ -752,7 +752,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 				Guard:     def.HasKeyword("Guard"),
 			}
 			g.Minions[mn.ID] = mn
-			g.logf("%s enters play engaged with %s", def.Name, p.Name)
+			g.logMajorf("%s enters play engaged with %s", def.Name, p.Name)
 			g.Push(MinionEntersPlay{MinionID: mn.ID, Player: p.ID})
 			if def.HasKeyword("Quickstrike") && p.IsHero() {
 				g.Push(DamageEntity{Target: p.ID, Damage: mn.AttackVal, Source: mn.ID})
@@ -770,7 +770,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 				Hazard:    def.Hazards,
 			}
 			g.SideSchemes[s.ID] = s
-			g.logf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
+			g.logMajorf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
 			if b := behavior(def.Code); b.OnPlay != nil {
 				g.Push(b.OnPlay(g, s)...)
 			}
@@ -814,7 +814,7 @@ func (g *Game) handleSpawnDrone(pid PlayerID) {
 	card := p.Deck[0]
 	p.Deck = p.Deck[1:]
 	g.spawnDroneMinion(card)
-	g.logf("A Drone enters play engaged with %s", p.Name)
+	g.logMajorf("A Drone enters play engaged with %s", p.Name)
 }
 
 func (g *Game) discardControlled(pid PlayerID, id EntityID) {
@@ -882,7 +882,7 @@ func (g *Game) handleStartGame() {
 	if scen.Setup != nil {
 		g.Push(scen.Setup(g)...)
 	}
-	g.logf("Scenario: %s", scen.Name)
+	g.logMajorf("Scenario: %s", scen.Name)
 	// Hero setup hooks run after opening hands are drawn.
 	for _, p := range g.Players {
 		if b := behavior(p.HeroCode); b.HeroSetup != nil {
@@ -1478,7 +1478,7 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 			Hazard:    def.Hazards,
 		}
 		g.SideSchemes[s.ID] = s
-		g.logf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
+		g.logMajorf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, s)...)
 		}
@@ -1506,7 +1506,7 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 	case "environment":
 		env := &Environment{ID: g.nextEntityID(KindEnvironment), Code: def.Code}
 		g.Environments[env.ID] = env
-		g.logf("Environment %s enters play", def.Name)
+		g.logMajorf("Environment %s enters play", def.Name)
 
 	default:
 		g.logf("(unhandled encounter type %s for %s)", def.Type, def.Name)
@@ -1565,7 +1565,7 @@ func (g *Game) boostSpawnTarget(v *Villain) PlayerID {
 
 func (g *Game) handleSchemeDefeated(id EntityID) {
 	if s := g.SideSchemes[id]; s != nil {
-		g.logf("Side scheme %s is defeated", s.EDef().Name)
+		g.logMajorf("Side scheme %s is defeated", s.EDef().Name)
 		g.Delete(id)
 		return
 	}
@@ -1574,7 +1574,7 @@ func (g *Game) handleSchemeDefeated(id EntityID) {
 		if scen.OnMainSchemeDefeated != nil {
 			g.Push(scen.OnMainSchemeDefeated(g, g.MainScheme)...)
 		} else {
-			g.logf("Main scheme %s is defeated", g.MainScheme.EDef().Name)
+			g.logMajorf("Main scheme %s is defeated", g.MainScheme.EDef().Name)
 		}
 	}
 }

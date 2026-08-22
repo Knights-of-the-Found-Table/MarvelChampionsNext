@@ -272,7 +272,22 @@ func TestFullGameFlow(t *testing.T) {
 			}
 		} else {
 			c := choices[0].(map[string]any)
-			paths = []string{c["id"].(string)}
+			// A play/ability choice with a choose_n payment subtree: select
+			// enough payment choices (each worth >= 1 icon) and answer with
+			// the full nested paths.
+			if then, ok := c["then"].(map[string]any); ok && then["type"] == "choose_n" {
+				subChoices, _ := then["choices"].([]any)
+				need := 1
+				if n2, ok := then["n"].(float64); ok && int(n2) > 0 {
+					need = int(n2)
+				}
+				for j := 0; j < need+2 && j < len(subChoices); j++ {
+					sc := subChoices[j].(map[string]any)
+					paths = append(paths, sc["id"].(string))
+				}
+			} else {
+				paths = []string{c["id"].(string)}
+			}
 		}
 		resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%d/answer", base, gameID), token, answerRequest{Paths: paths})
 		if resp.StatusCode != http.StatusOK {

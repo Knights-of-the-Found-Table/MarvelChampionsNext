@@ -3,7 +3,7 @@ package rooms
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
@@ -94,7 +94,7 @@ func (m *Manager) Answer(gameID int64, userID string, paths []string) error {
 	}
 	_ = m.store.RecordAction(gameID, playerStr, paths)
 	m.persist(r)
-	r.broadcast()
+	r.broadcastEvents(r.game.DrainEvents())
 	return nil
 }
 
@@ -139,7 +139,7 @@ func (r *Room) isParticipant(userID string) bool {
 func (m *Manager) persist(r *Room) {
 	state, err := r.Snapshot()
 	if err != nil {
-		log.Printf("rooms: snapshot game %d: %v", r.ID, err)
+		slog.Error("rooms: snapshot game", "game", r.ID, "error", err)
 		return
 	}
 	status := "active"
@@ -147,7 +147,7 @@ func (m *Manager) persist(r *Room) {
 		status = "finished"
 	}
 	if err := m.store.SaveGameState(r.ID, state, status); err != nil {
-		log.Printf("rooms: persist game %d: %v", r.ID, err)
+		slog.Error("rooms: persist game", "game", r.ID, "error", err)
 	}
 }
 
@@ -205,4 +205,24 @@ func (r *Room) broadcast() {
 		default: // slow viewer; drop rather than block the game
 		}
 	}
+}
+
+// broadcastEvents sends the semantic event batch produced by the answer that
+// just resolved, then a plain state frame. Events carry only board-public
+// entity ids, so every viewer gets the same list.
+func (r *Room) broadcastEvents(events []engine.Evt) {
+	if len(events) == 0 {
+		r.broadcast()
+		return
+	}
+	b, err := json.Marshal(map[string]any{"type": "events", "events": events})
+	if err == nil {
+		for ch := range r.subs {
+			select {
+			case ch <- b:
+			default:
+			}
+		}
+	}
+	r.broadcast()
 }

@@ -1,65 +1,31 @@
-import { useState } from 'react'
 import type { Choice, Question } from '../api'
 import { CardImage } from '../cards'
 import { useT } from '../i18n'
 
 interface Props {
-  question: Question
-  onAnswer: (paths: string[]) => void
+  current: Question
+  selected: Set<string>
+  onPick: (c: Choice) => void
+  onBack?: () => void
+  onConfirm: () => void
 }
 
-// QuestionPanel renders a question tree. choose_one descends into nested
-// Then-questions; choose_n collects a selection and confirms.
-export default function QuestionPanel({ question, onAnswer }: Props) {
+// 问题面板（受控组件）：导航/多选状态由 Game.tsx 持有，使棋盘点卡与
+// 面板按钮共享同一条选择路径。choose_one 直接 pick；choose_n 点选切换，
+// 确认后作答。
+export default function QuestionPanel({ current, selected, onPick, onBack, onConfirm }: Props) {
   const t = useT()
-  const [stack, setStack] = useState<Question[]>([])
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-
-  const current = stack.length > 0 ? stack[stack.length - 1] : question
 
   const isMulti = current.type === 'choose_n'
   const need = current.n ?? 1
-
-  function reset() {
-    setStack([])
-    setSelected(new Set())
-  }
-
-  function pick(c: Choice) {
-    if (isMulti) {
-      const next = new Set(selected)
-      if (next.has(c.id)) next.delete(c.id)
-      else if (next.size < need + 4) next.add(c.id) // allow over-selection? keep simple cap
-      setSelected(next)
-      return
-    }
-    if (c.then && c.then.choices.length > 0) {
-      setStack([...stack, c.then])
-      return
-    }
-    onAnswer([c.id])
-    reset()
-  }
-
-  function confirmMulti() {
-    const paths = Array.from(selected)
-    if (paths.length === 0) return
-    onAnswer(paths)
-    reset()
-  }
-
-  function back() {
-    setStack(stack.slice(0, -1))
-    setSelected(new Set())
-  }
 
   return (
     <div className="question card">
       <div className="row space-between">
         <strong>{current.prompt || t('q.choose')}</strong>
         <div className="row">
-          {stack.length > 0 && (
-            <button className="linklike" onClick={back}>
+          {onBack && (
+            <button className="linklike" onClick={onBack}>
               {t('q.back')}
             </button>
           )}
@@ -79,14 +45,14 @@ export default function QuestionPanel({ question, onAnswer }: Props) {
                 key={c.id}
                 className={`choice ${selected.has(c.id) ? 'selected' : ''}`}
                 disabled={c.disabled}
-                onClick={() => pick(c)}
+                onClick={() => onPick(c)}
               >
-                {c.cardCode && <CardImage code={c.cardCode} size="xs" />}
+                {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
                 <span>{c.label}</span>
               </button>
             ))}
           </div>
-          <button className="primary" onClick={confirmMulti} disabled={selected.size === 0}>
+          <button className="primary" onClick={onConfirm} disabled={selected.size === 0}>
             {t('q.confirm')}
           </button>
         </>
@@ -97,9 +63,9 @@ export default function QuestionPanel({ question, onAnswer }: Props) {
               key={c.id}
               className={`choice ${kindClass(c.kind)}`}
               disabled={c.disabled}
-              onClick={() => pick(c)}
+              onClick={() => onPick(c)}
             >
-              {c.cardCode && <CardImage code={c.cardCode} size="xs" />}
+              {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
               <span>{c.label}</span>
             </button>
           ))}

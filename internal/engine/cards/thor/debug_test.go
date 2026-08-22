@@ -54,7 +54,7 @@ func TestDebugWorthy(t *testing.T) {
 	g.Push(msgs...)
 	g.Run()
 	for _, line := range g.Log {
-		fmt.Printf("LOG: %s\n", line)
+		fmt.Printf("LOG: %s\n", line.Text)
 	}
 	pq = g.Pending()
 	fmt.Printf("After worthy pending: %v\n", pq)

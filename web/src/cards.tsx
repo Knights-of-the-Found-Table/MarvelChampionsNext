@@ -234,7 +234,7 @@ export function CardImage({
   )
 }
 
-function fallbackDataUrl(code: string): string {
+export function fallbackDataUrl(code: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="210">
     <rect width="100%" height="100%" rx="8" fill="#222"/>
     <text x="50%" y="50%" fill="#888" font-family="monospace" font-size="14" text-anchor="middle">${code}</text>

@@ -23,12 +23,20 @@ type GameView struct {
 	SideSchemes []SchemeView  `json:"sideSchemes"`
 	Minions     []MinionView  `json:"minions"`
 	Players     []PlayerView  `json:"players"`
-	Log         []string      `json:"log"`
+	// Attachments are cards attached to entities (host id resolves the
+	// stacking position on the board); Treacheries are persistent in-play
+	// treacheries; Environments sit in the encounter area.
+	Attachments  []AttachmentView `json:"attachments,omitempty"`
+	Treacheries  []AttachmentView `json:"treacheries,omitempty"`
+	Environments []EntityLite     `json:"environments,omitempty"`
+	Log          []engine.LogEntry `json:"log"`
 
 	// Question is the pending question when it belongs to the viewer.
 	Question *engine.Question `json:"question,omitempty"`
 	// WaitingFor names the player being asked (public info).
 	WaitingFor *string `json:"waitingFor,omitempty"`
+	// EncounterCount is the encounter draw deck size (public info).
+	EncounterCount int `json:"encounterCount,omitempty"`
 }
 
 type VillainView struct {
@@ -70,19 +78,25 @@ type MinionView struct {
 	Scheme   int    `json:"scheme"`
 	Guard    bool   `json:"guard"`
 	Stunned  bool   `json:"stunned"`
-	Tough    bool   `json:"tough"`
+	Confused bool   `json:"confused,omitempty"`
+	Tough    bool   `json:"tough,omitempty"`
+	// EngagedWith is the player the minion is engaged with (board layout).
+	EngagedWith string `json:"engagedWith,omitempty"`
 }
 
 type AllyView struct {
-	ID       string `json:"id"`
-	Code     string `json:"code"`
-	Name     string `json:"name"`
-	HP       int    `json:"hp"`
-	MaxHP    int    `json:"maxHp"`
-	Attack   int    `json:"attack"`
-	Thwart   int    `json:"thwart"`
-	Exhausted bool `json:"exhausted"`
-	Stunned  bool   `json:"stunned"`
+	ID        string `json:"id"`
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	HP        int    `json:"hp"`
+	MaxHP     int    `json:"maxHp"`
+	Attack    int    `json:"attack"`
+	Thwart    int    `json:"thwart"`
+	Exhausted bool   `json:"exhausted"`
+	Stunned   bool   `json:"stunned"`
+	Confused  bool   `json:"confused,omitempty"`
+	Tough     bool   `json:"tough,omitempty"`
+	Counters  int    `json:"counters,omitempty"`
 }
 
 type CardRef struct {
@@ -127,6 +141,16 @@ type EntityLite struct {
 	Name      string `json:"name"`
 	Exhausted bool   `json:"exhausted"`
 	Counters  int    `json:"counters,omitempty"`
+}
+
+// AttachmentView is a card attached to (or in the case of persistent
+// treacheries, associated with) a host entity.
+type AttachmentView struct {
+	ID   string `json:"id"`
+	Code string `json:"code"`
+	Name string `json:"name"`
+	// Host is the entity the card is attached to ("" = unattached).
+	Host string `json:"host,omitempty"`
 }
 
 // BuildView projects the engine state for a viewer. viewerUserID empty =
@@ -177,8 +201,24 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			ID: string(m.ID), Code: m.Code, Name: def.Name,
 			HP: max(0, m.HP()), MaxHP: m.MaxHP,
 			Attack: m.AttackVal, Scheme: m.SchemeVal,
-			Guard: m.Guard, Stunned: m.Stunned, Tough: m.Tough,
+			Guard: m.Guard, Stunned: m.Stunned, Confused: m.Confused, Tough: m.Tough,
+			EngagedWith: string(m.EngagedWith),
 		})
+	}
+	for _, a := range sortedByNum(g.Attachments) {
+		v.Attachments = append(v.Attachments, AttachmentView{
+			ID: string(a.ID), Code: a.Code, Name: a.EDef().Name,
+			Host: string(a.Target),
+		})
+	}
+	for _, t := range sortedByNum(g.Treacheries) {
+		v.Treacheries = append(v.Treacheries, AttachmentView{
+			ID: string(t.ID), Code: t.Code, Name: t.EDef().Name,
+			Host: string(t.Target),
+		})
+	}
+	for _, e := range sortedByNum(g.Environments) {
+		v.Environments = append(v.Environments, EntityLite{ID: string(e.ID), Code: e.Code, Name: e.EDef().Name})
 	}
 
 	for _, p := range g.Players {
@@ -201,16 +241,17 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			top := p.Discard[len(p.Discard)-1]
 			pv.DiscardTop = &CardRef{ID: top.ID, Code: top.Code, Name: top.Def().Name}
 		}
-		for _, id := range p.Allies {
-			if a := g.Allies[id]; a != nil {
-				pv.Allies = append(pv.Allies, AllyView{
-					ID: string(a.ID), Code: a.Code, Name: a.EDef().Name,
-					HP: max(0, a.HP()), MaxHP: a.MaxHP,
-					Attack: a.AttackVal, Thwart: a.ThwartVal,
-					Exhausted: a.Exhausted, Stunned: a.Stunned,
-				})
+			for _, id := range p.Allies {
+				if a := g.Allies[id]; a != nil {
+					pv.Allies = append(pv.Allies, AllyView{
+						ID: string(a.ID), Code: a.Code, Name: a.EDef().Name,
+						HP: max(0, a.HP()), MaxHP: a.MaxHP,
+						Attack: a.AttackVal, Thwart: a.ThwartVal,
+						Exhausted: a.Exhausted, Stunned: a.Stunned,
+						Confused: a.Confused, Tough: a.Tough, Counters: a.Counters,
+					})
+				}
 			}
-		}
 		for _, id := range p.Supports {
 			if s := g.Supports[id]; s != nil {
 				pv.Supports = append(pv.Supports, EntityLite{ID: string(s.ID), Code: s.Code, Name: s.EDef().Name, Exhausted: s.Exhausted, Counters: s.Counters})
@@ -231,6 +272,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			v.Question = pq.Question
 		}
 	}
+	v.EncounterCount = len(g.EncounterDeck)
 	return v
 }
 

@@ -13,7 +13,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -23,6 +23,7 @@ import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/dotenv"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/logx"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/mirror"
 )
 
@@ -32,11 +33,14 @@ func main() {
 	flag.Parse()
 
 	// Optional repo-root .env, e.g. with an HTTP mirror override; real
-	// environment variables take precedence.
-	if n, err := dotenv.Load(".env"); err != nil {
-		log.Printf(".env: %v", err)
-	} else if n > 0 {
-		log.Printf("loaded %d variables from .env", n)
+	// environment variables take precedence. Logging is configured after
+	// the load so MC_LOG_LEVEL may come from either.
+	envCount, envErr := dotenv.Load(".env")
+	logx.Init()
+	if envErr != nil {
+		slog.Warn("loading .env", "error", envErr)
+	} else if envCount > 0 {
+		slog.Info("loaded .env variables", "count", envCount)
 	}
 
 	sources := mirror.SourcesFromEnv()
@@ -60,10 +64,10 @@ func main() {
 		codes = append(codes, def.Code)
 	}
 	sort.Strings(codes)
-	log.Printf("fetching %d card images from %s into %s", len(codes), chain.Name(), *outDir)
+	slog.Info("fetching card images", "cards", len(codes), "chain", chain.Name(), "dir", *outDir)
 
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
-		log.Fatalf("mkdir: %v", err)
+		logx.Fatal("mkdir", "error", err)
 	}
 
 	manifest := map[string]string{}
@@ -82,17 +86,17 @@ func main() {
 		}
 		body, err := chain.Fetch(remote)
 		if err != nil {
-			log.Printf("WARN %s: %v", code, err)
+			slog.Warn("fetch failed", "code", code, "error", err)
 			failed++
 			continue
 		}
 		if err := os.WriteFile(path, body, 0o644); err != nil {
-			log.Fatalf("write %s: %v", path, err)
+			logx.Fatal("write image", "path", path, "error", err)
 		}
 		manifest[code] = hashBytes(body)
 		fetched++
 		if i%200 == 0 {
-			log.Printf("progress: %d/%d", i, len(codes))
+			slog.Info("progress", "fetched", i, "total", len(codes))
 		}
 		if polite {
 			time.Sleep(150 * time.Millisecond) // stay polite with marvelcdb
@@ -102,12 +106,12 @@ func main() {
 	manifestPath := filepath.Join(*outDir, "manifest.json")
 	raw, err := json.MarshalIndent(manifest, "", " ")
 	if err != nil {
-		log.Fatalf("marshal manifest: %v", err)
+		logx.Fatal("marshal manifest", "error", err)
 	}
 	if err := os.WriteFile(manifestPath, raw, 0o644); err != nil {
-		log.Fatalf("write manifest: %v", err)
+		logx.Fatal("write manifest", "error", err)
 	}
-	log.Printf("done: fetched=%d cached=%d failed=%d manifest=%s", fetched, skipped, failed, manifestPath)
+	slog.Info("done", "fetched", fetched, "cached", skipped, "failed", failed, "manifest", manifestPath)
 }
 
 func hashBytes(b []byte) string {

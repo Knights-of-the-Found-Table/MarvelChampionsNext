@@ -36,6 +36,7 @@ docker compose up --build -d   # http://localhost:3000
 | `MC_DB_PATH` | `marvelchampions.db` | SQLite database file. |
 | `MC_STATIC_DIR` | `web/dist` | Directory with the built frontend. |
 | `MC_CACHE_DIR` | `cache` | On-demand card image cache. |
+| `MC_LOG_LEVEL` | `info` | Server log level for the structured (text) stderr log: `debug`, `info`, `warn` or `error`. |
 | `MC_PREWARM_IMAGES` | off | Background cache prewarm at startup so every image URL is content-hashed. Off by default; set `1` to prewarm the whole card set at boot (the default chain, and the zh chain when a Chinese mirror is configured). |
 | `IMAGE_MIRROR` | `https://marvelcdb.com` | Default-language (English) image mirror root, keyed by the face convention (`/bundles/cards/{code}.png`). The marvelcdb.com default is special-cased to its own legacy per-face paths. |
 | `ZH_IMAGE_MIRROR` | empty | Chinese image mirror root — a separate language source keyed by the face convention (`/bundles/cards/{code}.png`, `{base}a`/`{base}b` for double-sided cards). |
