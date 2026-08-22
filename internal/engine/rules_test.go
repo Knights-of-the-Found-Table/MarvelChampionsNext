@@ -303,8 +303,7 @@ prompts:
 	// minion — each asking the targeted player to defend. Villain attacks
 	// may wrap the defense prompt in an interrupts question (the defense
 	// choices live in the first choice's Then subtree); minion attacks ask
-	// directly. When the attacked player declines, the other player is
-	// offered the defense and passes.
+	// directly.
 	answerAttack := func(i int, expect *engine.Player) {
 		t.Helper()
 		pq := g.Pending()
@@ -338,13 +337,6 @@ prompts:
 		}
 		if err := g.Answer(pq.Player, []string{path}); err != nil {
 			t.Fatalf("step %d answer %q: %v", i, path, err)
-		}
-		// The declined attack is then offered to the other player.
-		if pq = g.Pending(); pq != nil && pq.Player != expect.ID &&
-			strings.Contains(pq.Question.Prompt, "defend?") {
-			if err := g.Answer(pq.Player, []string{"pass"}); err != nil {
-				t.Fatalf("step %d pass defense: %v", i, err)
-			}
 		}
 	}
 	for i, expect := range []*engine.Player{p1, p1, p2, p2} {
@@ -677,10 +669,12 @@ func TestMinionActivationOrderChosenByPlayer(t *testing.T) {
 	}
 }
 
-// TestOtherPlayerMayDefend: when the attacked player declines to defend,
-// the other players are offered the defense (in clockwise order). If one
-// defends, they exhaust and take the reduced damage; if all pass, the
-// attack resolves undefended against the attacked player.
+// TestOtherPlayerMayDefend: the attacked player holds the initial decision.
+// "Take the attack" resolves immediately without asking anyone; choosing
+// "Ask another player to defend" offers the defense to the other players in
+// clockwise order — if all decline the attack resolves undefended against
+// the attacked player, and the first player to accept defends in their
+// place (exhausting and taking the reduced damage).
 func TestOtherPlayerMayDefend(t *testing.T) {
 	g := newRulesGame(t, 17, "03001", "03001")
 	keepHands(t, g)
@@ -696,12 +690,12 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 
 	// Run out both turns: end-turn, optional/forced discards, then the
 	// villain attacks P1 (hero form).
-	answerTurnPrompts := func(who *engine.Player) {
+	answerTurnPrompts := func() {
 		t.Helper()
-		for i := 0; i < 6; i++ {
+		for i := 0; i < 12; i++ {
 			pq := g.Pending()
 			if pq == nil {
-				t.Fatalf("no pending question for %s", who.Name)
+				t.Fatal("no pending question while advancing turns")
 			}
 			switch {
 			case pq.Question.Prompt == "Your turn":
@@ -721,38 +715,62 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 			}
 		}
 	}
-	answerTurnPrompts(g.Players[0])
-	answerTurnPrompts(g.Players[1])
+	answerTurnPrompts()
 
-	// First the villain attacks P1; P1 declines via the take path
-	// (Interrupts subtree for heroes with matching abilities).
+	// findLeaf locates a choice by label in the root question or any Then
+	// subtree (the interrupts question nests the defense choices).
+	findLeaf := func(q *engine.Question, label string) string {
+		var walk func(q *engine.Question) string
+		walk = func(q *engine.Question) string {
+			for _, c := range q.Choices {
+				if c.Label == label {
+					return c.ID
+				}
+				if c.Then != nil {
+					if id := walk(c.Then); id != "" {
+						return id
+					}
+				}
+			}
+			return ""
+		}
+		return walk(q)
+	}
+
+	// Attack 1 (villain vs P1): "take" resolves immediately — no other
+	// player is asked.
 	pq := g.Pending()
 	if pq == nil || pq.Player != p1.ID {
 		t.Fatalf("expected villain attack on %s, got %q for %v", p1.Name, promptOf(pq), pq.Player)
 	}
-	takePath := "take"
-	if pq.Question.Prompt == "Interrupts" {
-		takePath = ""
-		for _, c := range pq.Question.Choices {
-			if c.Then == nil {
-				continue
-			}
-			for _, d := range c.Then.Choices {
-				if d.Label == "Take the attack" {
-					takePath = d.ID
-				}
-			}
-		}
-		if takePath == "" {
-			t.Fatal("no take-the-attack path")
-		}
+	takePath := findLeaf(pq.Question, "Take the attack")
+	if takePath == "" {
+		t.Fatal("no take-the-attack choice")
 	}
+	dmgBefore := p1.Damage
 	if err := g.Answer(pq.Player, []string{takePath}); err != nil {
-		t.Fatalf("decline: %v", err)
+		t.Fatalf("take: %v", err)
+	}
+	if p1.Damage <= dmgBefore {
+		t.Fatalf("P1 should take the attack directly, damage %d -> %d", dmgBefore, p1.Damage)
+	}
+	if p2.Damage != 0 {
+		t.Fatal("P2 must not be asked or harmed when P1 simply takes the attack")
 	}
 
-	// P2 is now offered the defense in P1's place: pass, and the attack
-	// resolves undefended against P1.
+	// Attack 2 (P1's minion, ATK 1): P1 asks for a substitute defender, P2
+	// declines, and the attack falls back to P1 undefended.
+	pq = g.Pending()
+	if pq == nil || pq.Player != p1.ID || !strings.Contains(pq.Question.Prompt, "defend?") {
+		t.Fatalf("expected minion attack on %s, got %q for %v", p1.Name, promptOf(pq), pq.Player)
+	}
+	askPath := findLeaf(pq.Question, "Ask another player to defend")
+	if askPath == "" {
+		t.Fatal("attacked player should be offered the ask-another-player option")
+	}
+	if err := g.Answer(pq.Player, []string{askPath}); err != nil {
+		t.Fatalf("ask defend: %v", err)
+	}
 	pq = g.Pending()
 	if pq == nil || pq.Player != p2.ID || !strings.Contains(pq.Question.Prompt, "defend?") {
 		t.Fatalf("expected cross-defense offer to %s, got %q for %v", p2.Name, promptOf(pq), pq.Player)
@@ -760,29 +778,34 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	if !strings.Contains(pq.Question.Prompt, p1.Name) {
 		t.Fatalf("cross-defense prompt should name the attacked player: %q", pq.Question.Prompt)
 	}
-	dmgBefore := p1.Damage
+	afterAttack1 := p1.Damage
 	if err := g.Answer(pq.Player, []string{"pass"}); err != nil {
 		t.Fatalf("pass: %v", err)
 	}
-	if p1.Damage <= dmgBefore {
-		t.Fatalf("P1 should take the undefended attack, damage %d -> %d", dmgBefore, p1.Damage)
+	if p1.Damage != afterAttack1+1 {
+		t.Fatalf("after everyone passes the minion attack (ATK 1) should hit P1 undefended, damage %d -> %d",
+			afterAttack1, p1.Damage)
 	}
 	if p2.Damage != 0 || p2.Exhausted {
-		t.Fatal("P2 should be untouched after passing")
+		t.Fatal("P2 passing must leave them untouched")
 	}
 
-	// Next activation: P1's minion attacks P1. P1 declines; P2 defends
-	// with their hero and takes the reduced damage instead.
+	// Attack 3 (villain vs P2): P2 asks for a substitute defender and P1
+	// accepts with their hero — P2 takes nothing, P1 exhausts.
+	pq = g.Pending()
+	if pq == nil || pq.Player != p2.ID {
+		t.Fatalf("expected villain attack on %s, got %q for %v", p2.Name, promptOf(pq), pq.Player)
+	}
+	askPath = findLeaf(pq.Question, "Ask another player to defend")
+	if askPath == "" {
+		t.Fatal("ask-another-player option missing on P2's defense question")
+	}
+	if err := g.Answer(pq.Player, []string{askPath}); err != nil {
+		t.Fatalf("ask defend: %v", err)
+	}
 	pq = g.Pending()
 	if pq == nil || pq.Player != p1.ID || !strings.Contains(pq.Question.Prompt, "defend?") {
-		t.Fatalf("expected minion attack on %s, got %q for %v", p1.Name, promptOf(pq), pq.Player)
-	}
-	if err := g.Answer(pq.Player, []string{"take"}); err != nil {
-		t.Fatalf("decline: %v", err)
-	}
-	pq = g.Pending()
-	if pq == nil || pq.Player != p2.ID || !strings.Contains(pq.Question.Prompt, "defend?") {
-		t.Fatalf("expected second cross-defense offer, got %q for %v", promptOf(pq), pq.Player)
+		t.Fatalf("expected cross-defense offer to %s, got %q for %v", p1.Name, promptOf(pq), pq.Player)
 	}
 	found := false
 	for _, c := range pq.Question.Choices {
@@ -793,19 +816,15 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	if !found {
 		t.Fatal("cross-defense offer should include the hero defense")
 	}
-	p1Before := p1.Damage
+	p2Before := p2.Damage
 	if err := g.Answer(pq.Player, []string{"hero-defend"}); err != nil {
 		t.Fatalf("hero-defend: %v", err)
 	}
-	if !p2.Exhausted {
+	if !p1.Exhausted {
 		t.Fatal("defending player should be exhausted")
 	}
-	if p1.Damage != p1Before {
-		t.Fatalf("attacked player should take no damage when defended for, %d -> %d", p1Before, p1.Damage)
-	}
-	want := max(0, 1-p2.DefenseStat(g)) // minion ATK 1 minus P2's DEF
-	if p2.Damage != want {
-		t.Fatalf("defender should take %d damage, took %d", want, p2.Damage)
+	if p2.Damage != p2Before {
+		t.Fatalf("attacked player should take no damage when defended for, %d -> %d", p2Before, p2.Damage)
 	}
 }
 

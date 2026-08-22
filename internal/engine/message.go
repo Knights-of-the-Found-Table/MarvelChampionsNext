@@ -125,8 +125,9 @@ type (
 		Trigger string `json:"trigger,omitempty"`
 	}
 	// OtherDefenders offers the defense of an attack to the remaining
-	// players after the attacked player declined (official: any other
-	// player may defend).
+	// players after the attacked player chose to ask for a substitute
+	// defender (first willing player defends; if all decline, the attack
+	// resolves undefended).
 	OtherDefenders struct {
 		Against   EntityID
 		For       PlayerID

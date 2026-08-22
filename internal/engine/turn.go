@@ -540,8 +540,9 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 }
 
 // defenderQuestion builds the defense prompt for an enemy attack against
-// p. If p declines and other players could defend in their place, the
-// "take" choice hands the defense over to them first.
+// p. "Take the attack" resolves immediately; a separate option lets p hand
+// the defense over to the other players (first willing player defends; if
+// all decline, the attack resolves undefended against p).
 func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Question {
 	attacker := g.Entity(attackerID)
 	name := "enemy"
@@ -550,14 +551,13 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 	}
 	prompt := fmt.Sprintf("%s attacks for %d: defend?", name, atk)
 	var choices []Choice
+	choices = append(choices, Choice{
+		ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
+	}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
 	if others := g.otherDefenders(p); len(others) > 0 {
 		choices = append(choices, Choice{
-			ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
+			ID: "ask-defend", Label: "Ask another player to defend", Kind: ChoiceLabel,
 		}.Msgs(OtherDefenders{Against: attackerID, For: p.ID, Remaining: others}))
-	} else {
-		choices = append(choices, Choice{
-			ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
-		}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
 	}
 	choices = append(choices, g.defenseOptions(attackerID, p)...)
 	return Ask(prompt, choices...)
