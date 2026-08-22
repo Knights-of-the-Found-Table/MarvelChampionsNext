@@ -7,6 +7,7 @@ import (
 )
 
 func init() {
+	registerRemainingGob()
 	registerMutagenFormula()
 	registerRiskyBusiness()
 	registerGoblinEncounterCards()

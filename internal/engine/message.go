@@ -289,6 +289,14 @@ type (
 	// DiscardEncounterCard removes a specific card from the encounter deck
 	// and discards it (Heimdall).
 	DiscardEncounterCard struct{ Card Card }
+	// AddInfamyMsg adds infamy counters to the Criminal Enterprise
+	// environment, removing madness counters from State of Madness
+	// instead when Criminal Enterprise is not in play.
+	AddInfamyMsg struct {
+		Env       string
+		N         int
+		OrMadness int
+	}
 
 	// BoostEnemyAttack permanently raises an enemy's attack (attachments
 	// like Goblin Glider).
@@ -613,6 +621,7 @@ func (MillPlayerDeck) msg()           {}
 func (DealEncounterToPlayer) msg()    {}
 func (EngageMinion) msg()             {}
 func (DiscardEncounterCard) msg()     {}
+func (AddInfamyMsg) msg()             {}
 func (BoostEnemyAttack) msg()         {}
 func (ObligationResolve) msg()        {}
 func (DiscardControlled) msg()        {}

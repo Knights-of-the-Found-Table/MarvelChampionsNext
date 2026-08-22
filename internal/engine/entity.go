@@ -55,6 +55,9 @@ type Behavior struct {
 	VillainActivate func(g *Game, v *Villain, p *Player) []Message
 	// Treachery resolution; default discards the treachery with no effect.
 	ResolveTreachery func(g *Game, t *Treachery, p *Player) []Message
+	// Boost: resolves when the card is revealed faceup as a boost card
+	// (the printed "[star] Boost:" ability).
+	Boost func(g *Game, card Card) []Message
 	// Attachment effects on attach/detach.
 	OnAttach func(g *Game, t *Attachment, target EntityID) []Message
 	OnDetach func(g *Game, t *Attachment) []Message

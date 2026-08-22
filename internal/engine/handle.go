@@ -358,6 +358,9 @@ func (g *Game) handle(msg Message) {
 					v.BoostCount += add
 					g.logf("Boost card revealed: %s (+%d)", def.Name, add)
 					v.RevealedBoosts = append(v.RevealedBoosts, c)
+					if b := behavior(def.Code); b.Boost != nil {
+						g.Push(b.Boost(g, c)...)
+					}
 				} else {
 					stillFacedown = append(stillFacedown, c)
 				}
@@ -520,6 +523,22 @@ func (g *Game) handle(msg Message) {
 			mn.EngagedWith = m.Player
 			if p := g.Player(m.Player); p != nil {
 				g.logf("%s engages %s", mn.EDef().Name, p.Name)
+			}
+		}
+
+	case AddInfamyMsg:
+		if env := g.EnvironmentByCode(m.Env); env != nil {
+			env.Counters += m.N
+			g.Logf("%s gains %d infamy counter(s) (%d total)", env.EDef().Name, m.N, env.Counters)
+			return
+		}
+		if m.OrMadness > 0 {
+			if env := g.EnvironmentByCode("02006b"); env != nil {
+				env.Counters -= m.OrMadness
+				if env.Counters < 0 {
+					env.Counters = 0
+				}
+				g.Logf("State of Madness loses %d madness counter(s) (%d left)", m.OrMadness, env.Counters)
 			}
 		}
 
