@@ -1,6 +1,9 @@
 package engine_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
@@ -46,6 +49,41 @@ func TestScenarioSchemeStages(t *testing.T) {
 			if def.Threat == nil && def.BaseThreat == nil && def.EscalationThreat == nil && !statlessSchemeStages[code] {
 				t.Errorf("%s: scheme stage %s carries no threat stats", scen.ID, code)
 			}
+		}
+	}
+}
+
+// TestUnmarshalMigratesSchemeCodes restores pre-convention games: base
+// codes ("01097"), a-face registrations ("56063a") and the old Drang
+// mis-registration (the "16057" treachery) must come back keyed by the
+// current b-face stage codes from the scenario registry.
+func TestUnmarshalMigratesSchemeCodes(t *testing.T) {
+	cases := []struct {
+		scenarioID string
+		oldCode    string
+		oldStages  []string
+		stage      int
+		wantCode   string
+		wantStages []string
+	}{
+		{"01097", "01097", []string{"01097"}, 1, "01097b", []string{"01097b"}},
+		{"56063", "56063a", []string{"56063a"}, 1, "56063b", []string{"56063b"}},
+		{"01116", "01117", []string{"01116", "01117"}, 2, "01117b", []string{"01116b", "01117b"}},
+		{"16057", "16057", []string{"16057"}, 1, "16061b", []string{"16061b", "16062b"}},
+	}
+	for _, tc := range cases {
+		stages, _ := json.Marshal(tc.oldStages)
+		blob := fmt.Sprintf(`{"scenarioId":%q,"mainScheme":{"code":%q,"stageCodes":%s,"stage":%d}}`,
+			tc.scenarioID, tc.oldCode, stages, tc.stage)
+		g := &engine.Game{}
+		if err := g.UnmarshalJSON([]byte(blob)); err != nil {
+			t.Fatalf("%s: unmarshal: %v", tc.scenarioID, err)
+		}
+		if g.MainScheme.Code != tc.wantCode {
+			t.Errorf("%s: code = %q, want %q", tc.scenarioID, g.MainScheme.Code, tc.wantCode)
+		}
+		if !slices.Equal(g.MainScheme.StageCodes, tc.wantStages) {
+			t.Errorf("%s: stageCodes = %v, want %v", tc.scenarioID, g.MainScheme.StageCodes, tc.wantStages)
 		}
 	}
 }

@@ -18,11 +18,11 @@ var DB = data.MustLoad()
 // Counter). Card behaviors live in the registry and are re-derived from
 // card codes.
 type Game struct {
-	Seed      int64  `json:"seed"`
-	Counter   uint64 `json:"counter"` // RNG draws consumed
+	Seed       int64  `json:"seed"`
+	Counter    uint64 `json:"counter"` // RNG draws consumed
 	ScenarioID string `json:"scenarioId"`
 	Difficulty string `json:"difficulty"` // standard | expert
-	Round     int    `json:"round"`
+	Round      int    `json:"round"`
 	// Phase is the current round phase (phase-dependent reactions such as
 	// Change of Fortune).
 	Phase Phase `json:"phase,omitempty"`
@@ -52,7 +52,7 @@ type Game struct {
 
 	// ActiveTurn is the player currently taking their player-phase turn.
 	ActiveTurn PlayerID `json:"activeTurn,omitempty"`
-	TurnIndex  int `json:"turnIndex"` // index into Players for player-phase order
+	TurnIndex  int      `json:"turnIndex"` // index into Players for player-phase order
 
 	UsedThisRound map[string]bool `json:"usedThisRound"`
 	UsedThisTurn  map[string]bool `json:"usedThisTurn"`
@@ -720,7 +720,27 @@ func (g *Game) UnmarshalJSON(b []byte) error {
 	g.queue = queue
 	g.pending = in.Pending
 	g.scenario = nil
+	g.migrateMainSchemeCodes()
 	return nil
+}
+
+// migrateMainSchemeCodes re-derives the main scheme's stage codes from the
+// current scenario registration. Games persisted before the b-face
+// convention switch stored base codes ("01097") or a-face codes ("56063a")
+// — the Drang scenario even pointed at a treachery — while the image layer
+// and zh names now key by the registered b-face codes.
+func (g *Game) migrateMainSchemeCodes() {
+	if g.MainScheme == nil {
+		return
+	}
+	stages := g.Scenario().MainSchemeStages
+	if len(stages) == 0 {
+		return
+	}
+	g.MainScheme.StageCodes = append([]string(nil), stages...)
+	if g.MainScheme.Stage >= 1 && g.MainScheme.Stage <= len(stages) {
+		g.MainScheme.Code = stages[g.MainScheme.Stage-1]
+	}
 }
 
 // NewGameOptions configures game creation.
@@ -747,23 +767,23 @@ func NewGame(opts NewGameOptions) (*Game, error) {
 		return nil, fmt.Errorf("unknown scenario %q", opts.ScenarioID)
 	}
 	g := &Game{
-		Seed:          opts.Seed,
-		ScenarioID:    opts.ScenarioID,
-		Difficulty:    opts.Difficulty,
-		Villains:      map[EntityID]*Villain{},
-		Minions:       map[EntityID]*Minion{},
-		Allies:        map[EntityID]*Ally{},
-		Supports:      map[EntityID]*Support{},
-		Upgrades:      map[EntityID]*Upgrade{},
-		Attachments:   map[EntityID]*Attachment{},
-		Treacheries:   map[EntityID]*Treachery{},
-		SideSchemes:   map[EntityID]*SideScheme{},
-		Environments:  map[EntityID]*Environment{},
-		UsedThisRound: map[string]bool{},
-		UsedThisTurn:  map[string]bool{},
+		Seed:             opts.Seed,
+		ScenarioID:       opts.ScenarioID,
+		Difficulty:       opts.Difficulty,
+		Villains:         map[EntityID]*Villain{},
+		Minions:          map[EntityID]*Minion{},
+		Allies:           map[EntityID]*Ally{},
+		Supports:         map[EntityID]*Support{},
+		Upgrades:         map[EntityID]*Upgrade{},
+		Attachments:      map[EntityID]*Attachment{},
+		Treacheries:      map[EntityID]*Treachery{},
+		SideSchemes:      map[EntityID]*SideScheme{},
+		Environments:     map[EntityID]*Environment{},
+		UsedThisRound:    map[string]bool{},
+		UsedThisTurn:     map[string]bool{},
 		EventDamageBonus: map[PlayerID]int{},
 		EventThreatBonus: map[PlayerID]int{},
-		scenario:      scen,
+		scenario:         scen,
 	}
 	if g.Difficulty == "" {
 		g.Difficulty = "standard"
@@ -790,13 +810,13 @@ func (g *Game) newPlayer(spec PlayerSpec, i int) (*Player, error) {
 		return nil, fmt.Errorf("unknown hero %q", spec.HeroBase)
 	}
 	p := &Player{
-		ID:   NewEntityID(KindPlayer, i+1),
-		Name: spec.Name,
-		UserID: spec.UserID,
-		HeroCode: heroDef.Code,
+		ID:           NewEntityID(KindPlayer, i+1),
+		Name:         spec.Name,
+		UserID:       spec.UserID,
+		HeroCode:     heroDef.Code,
 		AlterEgoCode: data.AlterEgoSideCode(spec.HeroBase),
-		Side: SideAlterEgo,
-		MaxHP: deref(heroDef.HP, 10),
+		Side:         SideAlterEgo,
+		MaxHP:        deref(heroDef.HP, 10),
 	}
 	if p.Name == "" {
 		p.Name = heroDef.Name
