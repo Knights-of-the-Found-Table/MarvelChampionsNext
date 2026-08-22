@@ -220,6 +220,9 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 	}
 	switch e := g.Entity(id).(type) {
 	case *Villain:
+		if e == nil {
+			return // entity left play mid-resolution
+		}
 		scen := g.Scenario()
 		if scen.VillainUndamageable[e.Stage] {
 			g.logf("%s cannot be damaged", e.EDef().Name)
@@ -243,6 +246,9 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			g.Push(VillainDefeated{VillainID: e.ID})
 		}
 	case *Minion:
+		if e == nil {
+			return
+		}
 		if b := behavior(e.Code); b.MinionDamageableSrc != nil && !b.MinionDamageableSrc(g, e, n, source) {
 			return
 		}
@@ -279,6 +285,9 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			g.Push(MinionDefeated{MinionID: e.ID})
 		}
 	case *Ally:
+		if e == nil {
+			return
+		}
 		if e.Tough {
 			e.Tough = false
 			return
@@ -293,6 +302,9 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			g.Push(AllyDefeated{AllyID: e.ID})
 		}
 	case *Player:
+		if e == nil {
+			return
+		}
 		// Identity-level prevention (Groot's growth counters).
 		if hook := behavior(e.HeroCode).IdentityDamagePrevention; hook != nil {
 			if pv := hook(g, e, n); pv > 0 {

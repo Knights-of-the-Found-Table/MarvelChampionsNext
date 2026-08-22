@@ -304,6 +304,12 @@ type (
 		Enemy EntityID
 		N     int
 	}
+	// BoostActivation raises an enemy's boost count for the current
+	// activation only (cleared with ClearBoosts).
+	BoostActivation struct {
+		Enemy EntityID
+		N     int
+	}
 
 	// ObligationResolve moves a resolving obligation to its owner's
 	// discard pile or removes it from the game.
@@ -623,6 +629,7 @@ func (EngageMinion) msg()             {}
 func (DiscardEncounterCard) msg()     {}
 func (AddInfamyMsg) msg()             {}
 func (BoostEnemyAttack) msg()         {}
+func (BoostActivation) msg()          {}
 func (ObligationResolve) msg()        {}
 func (DiscardControlled) msg()        {}
 func (AddAccelerationToken) msg()     {}

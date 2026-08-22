@@ -560,6 +560,18 @@ func (g *Game) handle(msg Message) {
 			e.AttackVal += m.N
 		}
 
+	case BoostActivation:
+		switch e := g.Entity(m.Enemy).(type) {
+		case *Villain:
+			e.BoostCount += m.N
+		case *Minion:
+			// Minions share the boost-count semantics loosely; store on
+			// the attack for the defense prompt.
+			e.AttackVal += m.N
+			// The bump is transient only for villains; minion callers
+			// avoid this message today.
+		}
+
 	case RevealNemesisSet:
 		g.handleRevealNemesisSet(m.Player)
 

@@ -24,7 +24,10 @@ import (
 // snapshot gap).
 var (
 	nonBSchemeStages     = map[string]bool{"32088a": true}
-	statlessSchemeStages = map[string]bool{"40139b": true}
+	statlessSchemeStages = map[string]bool{
+		"40139b": true, // transition stage, no threat target
+		"11008b": true, // Master of Time: variants-arrival transition
+	}
 )
 
 // TestScenarioSchemeStages verifies every registered scenario's main scheme
