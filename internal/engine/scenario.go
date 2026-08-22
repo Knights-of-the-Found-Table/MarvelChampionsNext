@@ -34,6 +34,9 @@ type ScenarioDef struct {
 	// VillainUndamageable marks villain stages that cannot be damaged
 	// (e.g. Rhino stage I); keyed by stage number.
 	VillainUndamageable map[int]bool `json:"villainUndamageable,omitempty"`
+	// OnVillainDefeated overrides the default final-stage win when set
+	// (Wrecking Crew wins only when every villain is defeated).
+	OnVillainDefeated func(g *Game, v *Villain) []Message
 }
 
 var scenarioRegistry = map[string]*ScenarioDef{}

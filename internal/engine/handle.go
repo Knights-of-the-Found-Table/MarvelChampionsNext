@@ -2040,6 +2040,10 @@ func (g *Game) advanceVillainStage(id EntityID) {
 		return
 	}
 	if v.Stage >= len(v.stageCodes) {
+		if scen := g.Scenario(); scen.OnVillainDefeated != nil {
+			g.Push(scen.OnVillainDefeated(g, v)...)
+			return
+		}
 		g.Push(GameOver{Won: true, Reason: "The villain was defeated"})
 		return
 	}

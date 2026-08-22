@@ -52,6 +52,9 @@ type Game struct {
 
 	// ActiveTurn is the player currently taking their player-phase turn.
 	ActiveTurn PlayerID `json:"activeTurn,omitempty"`
+	// ActiveVillain holds the active-counter villain in multi-villain
+	// scenarios (Wrecking Crew); empty otherwise.
+	ActiveVillain EntityID `json:"activeVillain,omitempty"`
 	TurnIndex  int      `json:"turnIndex"` // index into Players for player-phase order
 
 	UsedThisRound map[string]bool `json:"usedThisRound"`
