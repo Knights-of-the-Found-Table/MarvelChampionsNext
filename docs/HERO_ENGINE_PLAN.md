@@ -33,7 +33,7 @@
 | W4 | 22001a | 星云 Nebula | nebu | 技巧升级结算体系 | ⬜ |
 | W5 | 25001a | 女武神 Valkyrie | valk | 死亡之光 | ⬜ |
 | W5 | 26001a | 幻视 Vision | vision | 质量形态（致密/无形） | ⬜ |
-| W5 | 27001a | 幽灵蜘蛛 Ghost-Spider | sm | 多元宇宙门票 | ⬜ |
+| W5 | 27001a | 幽灵蜘蛛 Ghost-Spider | sm | 多元宇宙门票 | ✅ zhuque |
 | W5 | 27030a | 蜘蛛侠 Spider-Man | sm | 蛛网发射器体系 | ⬜ |
 | W5 | 29001a-29003a | 钢铁之心 Ironheart | ironheart | 三身份+进度标记升级 | ⬜ |
 | W5 | 30001a | 蜘蛛侠汉姆 Spider-Ham | spiderham | 卡通标记 | ⬜ |
