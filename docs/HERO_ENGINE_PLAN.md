@@ -20,8 +20,8 @@
 | W2 | 15001a | 绯红女巫 Scarlet Witch | scw | 混沌控制 | ⬜ |
 | W2 | 23001a | 战争机器 War Machine | warm | 弹药标记管理 | ⬜ |
 | W2 | 28001a | 新星 Nova | nova | 超新星头盔形态切换 | ⬜ |
-| W3 | 50001a | 玛丽亚·希尔 Maria Hill | aos | 战衣形态升级（suit form）体系 | ⬜ |
-| W3 | 50034a | 尼克·弗瑞 Nick Fury | aos | 战衣形态（突击/潜行切换） | ⬜ |
+| W3 | 50001a | 玛丽亚·希尔 Maria Hill | aos | 战衣形态升级（suit form）体系 | ✅ morgan |
+| W3 | 50034a | 尼克·弗瑞 Nick Fury | aos | 战衣形态（突击/潜行切换） | ✅ morgan |
 | W3 | 12001a/c | 蚁人 Ant-Man | ant | 多形态（巨人/巨化） | ⬜ |
 | W3 | 13001a/c | 黄蜂女 Wasp | wsp | 多形态 | ⬜ |
 | W4 | 17001a | 星爵 Star-Lord | stld | 元素枪 | ⬜ |
