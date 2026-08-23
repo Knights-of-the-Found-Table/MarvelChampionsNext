@@ -1,4 +1,4 @@
-# 英雄引擎实现计划 / Hero Engine Implementation Plan
+﻿# 英雄引擎实现计划 / Hero Engine Implementation Plan
 
 > 状态：2026-08-21。引擎已实现 21 个英雄面，未实现 51 个（约 46 个独立英雄）。
 > 本文档协调骑士团内的实现分工，动手前先认领、动手后打勾，避免撞车。
@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | W1 | 06001a | 索尔 Thor | thor | 妙尔尼尔检索，简单数值 | ✅ kaguya+shantu |
 | W1 | 10001a | 浩克 Hulk | hlk | 变身增伤，简单数值 | 🔨 kaguya |
-| W1 | 04001a | 鹰眼 Hawkeye | trors | 弓/箭矢体系（箭矢=attack/thwart 事件） | 🔨 shantu |
+| W1 | 04001a | 鹰眼 Hawkeye | trors | 弓/箭矢体系（箭矢=attack/thwart 事件） | ✅ zhuque |
 | W1 | 04031a | 蜘蛛女侠 Spider-Woman | trors | 双派系构筑（构筑期规则，引擎内可简化） | ⬜ |
 | W2 | 08001a | 黑寡妇 Black Widow | bkw | Preparation 准备异能体系 | ⬜ |
 | W2 | 14001a | 快银 Quicksilver | qsv | 抽牌/弃牌循环 | ⬜ |
@@ -52,7 +52,7 @@
 | W8 | 46001a | 冰人 Iceman | iceman | 冻伤升级 | ⬜ |
 | W8 | 47001a | 千欢 Jubilee | jubilee | 购物密谋 | ⬜ |
 | W8 | 49001a | 万磁王 Magneto | magneto | 磁力体系 | ⬜ |
-| W8 | 51001a | 黑豹 Black Panther | bp | 发明家检索 | ⬜ |
+| W8 | 51001a | 黑豹 Black Panther | bp | 发明家检索 | ✅ zhuque |
 | W8 | 52001a | 丝 Silk | silk | 塞卡机制 | ⬜ |
 | W8 | 53001a | 猎鹰 Falcon | falcon | 鸟卡体系 | ⬜ |
 | W8 | 54001a | 冬日战士 Winter Soldier | winter | 机械臂 | ⬜ |
