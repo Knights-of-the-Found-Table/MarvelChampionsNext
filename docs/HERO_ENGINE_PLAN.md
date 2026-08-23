@@ -47,11 +47,11 @@
 | W7 | 41001a | 灵蝶 Psylocke | psylocke | 灵能双升级翻转 | ⬜ |
 | W7 | 43001a | X-23 | x23 | 爪+洗回循环 | ⬜ |
 | W7 | 44001a | 死侍 Deadpool | deadpool | 第四面墙检索 | ⬜ |
-| W7 | 45001a | 毕肖普 Bishop | aoa | 时间牌堆 | ⬜ |
-| W7 | 45030a | 秘客 Magik | aoa | 法术牌堆 | ⬜ |
-| W8 | 46001a | 冰人 Iceman | iceman | 冻伤升级 | ⬜ |
-| W8 | 47001a | 千欢 Jubilee | jubilee | 购物密谋 | ⬜ |
-| W8 | 49001a | 万磁王 Magneto | magneto | 磁力体系 | ⬜ |
+| W7 | 45001a | 毕肖普 Bishop | aoa | 时间牌堆 | ✅ morgan |
+| W7 | 45030a | 秘客 Magik | aoa | 法术牌堆 | ✅ morgan |
+| W8 | 46001a | 冰人 Iceman | iceman | 冻伤升级 | ✅ morgan |
+| W8 | 47001a | 千欢 Jubilee | jubilee | 购物密谋 | ✅ morgan |
+| W8 | 49001a | 万磁王 Magneto | magneto | 磁力体系 | ✅ morgan |
 | W8 | 51001a | 黑豹 Black Panther | bp | 发明家检索 | ✅ zhuque |
 | W8 | 52001a | 丝 Silk | silk | 塞卡机制 | ⬜ |
 | W8 | 53001a | 猎鹰 Falcon | falcon | 鸟卡体系 | ⬜ |
