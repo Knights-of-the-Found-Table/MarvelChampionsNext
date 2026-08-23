@@ -36,6 +36,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/drax"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/echo"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/extras"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/falcon"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/galaxysmostwanted"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/gambit"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/gamora"
