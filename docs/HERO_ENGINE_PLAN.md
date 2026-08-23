@@ -56,7 +56,7 @@
 | W8 | 52001a | 丝 Silk | silk | 塞卡机制 | ✅ morgan |
 | W8 | 53001a | 猎鹰 Falcon | falcon | 鸟卡体系 | ✅ morgan |
 | W8 | 54001a | 冬日战士 Winter Soldier | winter | 机械臂 | ✅ morgan |
-| W8 | 58001a | 奇迹人 Wonder Man | wonder_man | 离子生理 | ⬜ |
+| W8 | 58001a | 奇迹人 Wonder Man | wonder_man | 离子生理 | ✅ morgan |
 | W8 | 59001a | 赫拉克勒斯 Hercules | hercules | 试炼/礼物双牌堆 | ⬜ |
 
 ## 实现规范（每个英雄）

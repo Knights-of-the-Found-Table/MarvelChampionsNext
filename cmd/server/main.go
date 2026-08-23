@@ -70,6 +70,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/warmachine"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/winter"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wolv"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wonderman"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wasp"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wreckingcrew"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/x23"
