@@ -22,6 +22,7 @@ import (
 	// register game content
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/angel"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ant"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/blackpanther"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/blackwidow"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/captainamerica"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/civilwar"
@@ -34,6 +35,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/galaxysmostwanted"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/gamora"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/goblinfooblin"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hawkeye"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hood"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hulk"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ironheart"
