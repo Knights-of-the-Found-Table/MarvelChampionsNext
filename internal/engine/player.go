@@ -91,6 +91,9 @@ type Player struct {
 	ExtraTraits []string `json:"extraTraits,omitempty"`
 	// GrowthCounters are identity-level prevention counters (Groot).
 	GrowthCounters int `json:"growthCounters,omitempty"`
+	// Counters are generic counters placed on the identity card itself
+	// (Gambit's charge counters); adjusted via AddEntityCounter.
+	Counters int `json:"counters,omitempty"`
 
 	// UsedAbilityRounds tracks once-per-round ability usage for abilities
 	// owned by this identity.
@@ -175,14 +178,24 @@ func (p *Player) upgradeStats(g *Game) (b StatBonus) {
 	}
 	for _, id := range p.Upgrades {
 		if u := g.Upgrades[id]; u != nil {
-			if hook := behavior(u.Code).IdentityStats; hook != nil {
-				s := hook(p)
-				b.ATK += s.ATK
-				b.THW += s.THW
-				b.DEF += s.DEF
-				b.REC += s.REC
-				b.Retaliate += s.Retaliate
+			bh := behavior(u.Code)
+			var s StatBonus
+			if hook := bh.IdentityStats; hook != nil {
+				s = hook(p)
 			}
+			if hook := bh.IdentityStatsG; hook != nil {
+				sg := hook(g, p, u)
+				s.ATK += sg.ATK
+				s.THW += sg.THW
+				s.DEF += sg.DEF
+				s.REC += sg.REC
+				s.Retaliate += sg.Retaliate
+			}
+			b.ATK += s.ATK
+			b.THW += s.THW
+			b.DEF += s.DEF
+			b.REC += s.REC
+			b.Retaliate += s.Retaliate
 		}
 	}
 	return b

@@ -608,6 +608,9 @@ func (g *Game) handle(msg Message) {
 
 	case AddEntityCounter:
 		switch t := g.Entity(m.ID).(type) {
+		case *Player:
+			t.Counters += m.N
+			g.logMinorf("%s counters: %d", t.Name, t.Counters)
 		case *Support:
 			t.Counters += m.N
 			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
@@ -658,6 +661,10 @@ func (g *Game) handle(msg Message) {
 				}
 			case *Minion:
 				// Enemy attachments (Spider-Tracer...).
+				t.Attachments = append(t.Attachments, m.ID)
+			case *Villain:
+				// Upgrades attached to the villain (Rogue's Touched, X-23's
+				// Puncture Wound).
 				t.Attachments = append(t.Attachments, m.ID)
 			}
 			if tgt := g.Entity(m.Target); tgt != nil {

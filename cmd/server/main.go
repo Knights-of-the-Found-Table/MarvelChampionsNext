@@ -30,11 +30,13 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/civilwar"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/core"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/daredevil"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/deadpool"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/doctorstrange"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/drax"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/echo"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/extras"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/galaxysmostwanted"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/gambit"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/gamora"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/goblinfooblin"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hawkeye"
@@ -51,7 +53,9 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nightcrawler"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nova"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/onceandfuturekang"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/psylocke"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/quicksilver"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/rogue"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spiderwoman"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/starlord"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/thor"
@@ -62,6 +66,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wolv"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wasp"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wreckingcrew"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/x23"
 )
 
 func main() {

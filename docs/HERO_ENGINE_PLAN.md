@@ -42,11 +42,11 @@
 | W6 | 34001a | 凤凰 Phoenix | phoenix | 凤凰之力力量标记 | ⬜ |
 | W6 | 35001a | 金刚狼 Wolverine | wolv | 爪+自愈 | ⬜ |
 | W6 | 36001a | 暴风女 Storm | storm | 天气牌堆 | ⬜ |
-| W6 | 37001a | 牌皇 Gambit | gambit | 盗贼检视 | ⬜ |
-| W6 | 38001a | 罗刹女 Rogue | rogue | 触碰升级 | ⬜ |
-| W7 | 41001a | 灵蝶 Psylocke | psylocke | 灵能双升级翻转 | ⬜ |
-| W7 | 43001a | X-23 | x23 | 爪+洗回循环 | ⬜ |
-| W7 | 44001a | 死侍 Deadpool | deadpool | 第四面墙检索 | ⬜ |
+| W6 | 37001a | 牌皇 Gambit | gambit | 盗贼检视 | ✅ zhuque |
+| W6 | 38001a | 罗刹女 Rogue | rogue | 触碰升级 | ✅ zhuque |
+| W7 | 41001a | 灵蝶 Psylocke | psylocke | 灵能双升级翻转 | ✅ zhuque |
+| W7 | 43001a | X-23 | x23 | 爪+洗回循环 | ✅ zhuque |
+| W7 | 44001a | 死侍 Deadpool | deadpool | 第四面墙检索 | ✅ zhuque |
 | W7 | 45001a | 毕肖普 Bishop | aoa | 时间牌堆 | ✅ morgan |
 | W7 | 45030a | 秘客 Magik | aoa | 法术牌堆 | ✅ morgan |
 | W8 | 46001a | 冰人 Iceman | iceman | 冻伤升级 | ✅ morgan |
