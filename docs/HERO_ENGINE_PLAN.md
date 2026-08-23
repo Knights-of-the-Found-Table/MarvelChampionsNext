@@ -37,7 +37,7 @@
 | W5 | 27030a | 蜘蛛侠 Spider-Man | sm | 毒液攻击+隐形双 Special | ✅ zhuque |
 | W5 | 29001a-29003a | 钢铁之心 Ironheart | ironheart | 三身份+进度标记升级 | ⬜ |
 | W5 | 30001a | 蜘蛛侠汉姆 Spider-Ham | spiderham | 卡通标记（引擎层身份资源钩子） | ✅ zhuque |
-| W5 | 31001a | SP//dr战甲 | spdr | 佩妮分离/合体 | ⬜ |
+| W5 | 31001a | SP//dr战甲 | spdr | 佩妮分离/合体（数据层缺 Peni 卡，近似） | ✅ zhuque |
 | W6 | 33001a | 镭射眼 Cyclops | cyclops | 战术升级+跨派系盟友 | ✅ kaguya |
 | W6 | 34001a | 凤凰 Phoenix | phoenix | 凤凰之力力量标记 | ✅ kaguya |
 | W6 | 35001a | 金刚狼 Wolverine | wolv | 爪+自愈 | ✅ kaguya |
