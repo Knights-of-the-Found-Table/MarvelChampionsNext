@@ -662,6 +662,10 @@ func (g *Game) handle(msg Message) {
 			case *Minion:
 				// Enemy attachments (Spider-Tracer...).
 				t.Attachments = append(t.Attachments, m.ID)
+			case *Villain:
+				// Upgrades attached to the villain (Rogue's Touched, X-23's
+				// Puncture Wound).
+				t.Attachments = append(t.Attachments, m.ID)
 			}
 			if tgt := g.Entity(m.Target); tgt != nil {
 				g.logf("%s attaches to %s", u.EDef().Name, tgt.EDef().Name)

@@ -88,6 +88,10 @@ type Behavior struct {
 	// Upgrade: persistent identity stat bonuses while in play (Captain
 	// America's Shield: +1 DEF, retaliate 1).
 	IdentityStats func(p *Player) StatBonus
+	// IdentityStatsG is the game-state-aware variant of IdentityStats
+	// (Rogue's Touched / Rogue's Jacket, keyed off the upgrade's
+	// AttachTo target). Both hooks stack when present.
+	IdentityStatsG func(g *Game, p *Player, u *Upgrade) StatBonus
 	// Ally: attacking requires discarding a card from hand as an
 	// additional cost (Wonder Man).
 	AllyAttackDiscardCost bool
