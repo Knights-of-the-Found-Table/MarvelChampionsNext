@@ -449,6 +449,13 @@ func (g *Game) applyDefeatSave(p *Player) bool {
 			}
 		}
 	}
+	// Identity-level defeat saves (Deadpool's Regeneratin' Degenerate)
+	// are consulted last, with a nil upgrade.
+	if hook := behavior(p.HeroCode).DefeatSave; hook != nil {
+		if hook(g, p, nil) {
+			return true
+		}
+	}
 	return false
 }
 

@@ -46,7 +46,7 @@
 | W6 | 38001a | 罗刹女 Rogue | rogue | 触碰升级 | ⬜ |
 | W7 | 41001a | 灵蝶 Psylocke | psylocke | 灵能双升级翻转 | ⬜ |
 | W7 | 43001a | X-23 | x23 | 爪+洗回循环 | ⬜ |
-| W7 | 44001a | 死侍 Deadpool | deadpool | 第四面墙检索 | ⬜ |
+| W7 | 44001a | 死侍 Deadpool | deadpool | 第四面墙检索 | ✅ zhuque |
 | W7 | 45001a | 毕肖普 Bishop | aoa | 时间牌堆 | ⬜ |
 | W7 | 45030a | 秘客 Magik | aoa | 法术牌堆 | ⬜ |
 | W8 | 46001a | 冰人 Iceman | iceman | 冻伤升级 | ⬜ |

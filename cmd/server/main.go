@@ -29,6 +29,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/civilwar"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/core"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/daredevil"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/deadpool"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/doctorstrange"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/drax"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/echo"
