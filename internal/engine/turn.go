@@ -319,6 +319,17 @@ func (g *Game) resourceProducers(p *Player, targetDef *data.CardDef) []Entity {
 	for _, id := range p.Upgrades {
 		add(id)
 	}
+	// Identity-level resource abilities (Spider-Ham's toon counters): the
+	// hero behavior may declare a Resource hook paid with identity
+	// counters; it never exhausts the identity.
+	if b := behavior(p.HeroCode); b.Resource != nil {
+		ra := b.Resource
+		if (!ra.HeroOnly || p.IsHero()) &&
+			(!ra.EventOnly || (targetDef != nil && targetDef.Type == "event")) &&
+			(!ra.UsesCounters || p.Counters > 0) {
+			out = append(out, p)
+		}
+	}
 	return out
 }
 
@@ -347,6 +358,13 @@ func (g *Game) resourcePayChoices(p *Player, self *Card, targetDef *data.CardDef
 		}.Msgs(AbilityPayStub{Source: src.EID(), Icon: ra.Icon}))
 	}
 	return out
+}
+
+// PaymentChoicesFor exposes the resource-payment choices for a card; used
+// by contract tests to verify resource producers (Spider-Ham's toon
+// counters).
+func (g *Game) PaymentChoicesFor(p *Player, card Card) []Choice {
+	return g.resourcePayChoices(p, &card, card.Def())
 }
 
 // paymentQuestion builds the resource-payment tree for playing a card.

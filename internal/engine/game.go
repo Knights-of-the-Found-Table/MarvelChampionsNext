@@ -539,10 +539,16 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 					seenAbility[st.Source] = true
 					total++
 					icons = append(icons, st.Icon)
-					exhausts = append(exhausts, ExhaustEntity{ID: st.Source})
 					src := g.Entity(st.Source)
-					if src != nil && behavior(src.ECode()).Resource.UsesCounters {
-						exhausts = append(exhausts, AddEntityCounter{ID: st.Source, N: -1})
+					if src != nil {
+						if ra := behavior(src.ECode()).Resource; ra != nil {
+							if !ra.NoExhaust {
+								exhausts = append(exhausts, ExhaustEntity{ID: st.Source})
+							}
+							if ra.UsesCounters {
+								exhausts = append(exhausts, AddEntityCounter{ID: st.Source, N: -1})
+							}
+						}
 					}
 				}
 			}
