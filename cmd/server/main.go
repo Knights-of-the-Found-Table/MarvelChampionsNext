@@ -1,4 +1,4 @@
-// Command server runs the Marvel Champions web service: REST API,
+﻿// Command server runs the Marvel Champions web service: REST API,
 // WebSocket game streaming and static frontend hosting.
 package main
 
@@ -55,6 +55,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/venom"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/vision"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/warmachine"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wolv"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wasp"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wreckingcrew"
 )
@@ -107,7 +108,7 @@ func main() {
 	// convention ({base}a = A face, {base}b = B face, requested as
 	// /bundles/cards/{code}.png), so both a configured IMAGE_MIRROR and the
 	// Chinese root (ZH_IMAGE_MIRROR) resolve by convention; only bare
-	// marvelcdb.com — the default when IMAGE_MIRROR is unset — needs its
+	// marvelcdb.com 鈥?the default when IMAGE_MIRROR is unset 鈥?needs its
 	// legacy per-face paths.
 	imgSources := mirror.SourcesFromEnv()
 	for _, src := range imgSources.Default {
