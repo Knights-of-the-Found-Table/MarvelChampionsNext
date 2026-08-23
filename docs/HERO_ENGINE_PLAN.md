@@ -28,7 +28,7 @@
 | W4 | 18001a | 卡魔拉 Gamora | gam | 攻击/化解事件计数 | ⬜ |
 | W4 | 19001a | 德拉克斯 Drax | drax | 复仇标记 | ⬜ |
 | W4 | 20001a | 毒液 Venom | vnm | 武器限制数+1 | ⬜ |
-| W4 | 21001a | 光谱 Spectrum | mts | 能量形态三卡翻转 | ⬜ |
+| W4 | 21001a | 光谱 Spectrum | mts | 能量形态三卡翻转 | ✅ morgan |
 | W4 | 21031a | 亚当术士 Adam Warlock | mts | 构筑限制（四派系均等） | ⬜ |
 | W4 | 22001a | 星云 Nebula | nebu | 技巧升级结算体系 | ⬜ |
 | W5 | 25001a | 女武神 Valkyrie | valk | 死亡之光 | ⬜ |
