@@ -91,6 +91,9 @@ type Player struct {
 	ExtraTraits []string `json:"extraTraits,omitempty"`
 	// GrowthCounters are identity-level prevention counters (Groot).
 	GrowthCounters int `json:"growthCounters,omitempty"`
+	// Counters are generic counters placed on the identity card itself
+	// (Gambit's charge counters); adjusted via AddEntityCounter.
+	Counters int `json:"counters,omitempty"`
 
 	// UsedAbilityRounds tracks once-per-round ability usage for abilities
 	// owned by this identity.

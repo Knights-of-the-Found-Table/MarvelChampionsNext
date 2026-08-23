@@ -608,6 +608,9 @@ func (g *Game) handle(msg Message) {
 
 	case AddEntityCounter:
 		switch t := g.Entity(m.ID).(type) {
+		case *Player:
+			t.Counters += m.N
+			g.logMinorf("%s counters: %d", t.Name, t.Counters)
 		case *Support:
 			t.Counters += m.N
 			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
