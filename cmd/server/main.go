@@ -20,6 +20,7 @@ import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
 
 	// register game content
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/adamwarlock"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/angel"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ant"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/aoa"
