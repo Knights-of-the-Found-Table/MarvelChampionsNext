@@ -38,10 +38,10 @@
 | W5 | 29001a-29003a | 钢铁之心 Ironheart | ironheart | 三身份+进度标记升级 | ⬜ |
 | W5 | 30001a | 蜘蛛侠汉姆 Spider-Ham | spiderham | 卡通标记 | ⬜ |
 | W5 | 31001a | SP//dr战甲 | spdr | 佩妮分离/合体 | ⬜ |
-| W6 | 33001a | 镭射眼 Cyclops | cyclops | 战术升级+跨派系盟友 | ⬜ |
-| W6 | 34001a | 凤凰 Phoenix | phoenix | 凤凰之力力量标记 | ⬜ |
-| W6 | 35001a | 金刚狼 Wolverine | wolv | 爪+自愈 | ⬜ |
-| W6 | 36001a | 暴风女 Storm | storm | 天气牌堆 | ⬜ |
+| W6 | 33001a | 镭射眼 Cyclops | cyclops | 战术升级+跨派系盟友 | ✅ kaguya |
+| W6 | 34001a | 凤凰 Phoenix | phoenix | 凤凰之力力量标记 | ✅ kaguya |
+| W6 | 35001a | 金刚狼 Wolverine | wolv | 爪+自愈 | ✅ kaguya |
+| W6 | 36001a | 暴风女 Storm | storm | 天气牌堆 | ✅ morgan |
 | W6 | 37001a | 牌皇 Gambit | gambit | 盗贼检视 | ⬜ |
 | W6 | 38001a | 罗刹女 Rogue | rogue | 触碰升级 | ⬜ |
 | W7 | 41001a | 灵蝶 Psylocke | psylocke | 灵能双升级翻转 | ⬜ |
