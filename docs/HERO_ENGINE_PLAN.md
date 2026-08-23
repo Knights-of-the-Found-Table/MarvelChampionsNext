@@ -14,7 +14,7 @@
 | W1 | 06001a | 索尔 Thor | thor | 妙尔尼尔检索，简单数值 | ✅ kaguya+shantu |
 | W1 | 10001a | 浩克 Hulk | hlk | 变身增伤，简单数值 | 🔨 kaguya |
 | W1 | 04001a | 鹰眼 Hawkeye | trors | 弓/箭矢体系（箭矢=attack/thwart 事件） | ✅ zhuque |
-| W1 | 04031a | 蜘蛛女侠 Spider-Woman | trors | 双派系构筑（构筑期规则，引擎内可简化） | ⬜ |
+| W1 | 04031a | 蜘蛛女侠 Spider-Woman | trors | 双派系构筑（构筑期规则，引擎内可简化） | ✅ zhuque |
 | W2 | 08001a | 黑寡妇 Black Widow | bkw | Preparation 准备异能体系 | ⬜ |
 | W2 | 14001a | 快银 Quicksilver | qsv | 抽牌/弃牌循环 | ⬜ |
 | W2 | 15001a | 绯红女巫 Scarlet Witch | scw | 混沌控制 | ⬜ |
@@ -33,11 +33,11 @@
 | W4 | 22001a | 星云 Nebula | nebu | 技巧升级结算体系 | ⬜ |
 | W5 | 25001a | 女武神 Valkyrie | valk | 死亡之光 | ⬜ |
 | W5 | 26001a | 幻视 Vision | vision | 质量形态（致密/无形） | ⬜ |
-| W5 | 27001a | 幽灵蜘蛛 Ghost-Spider | sm | 多元宇宙门票 | ⬜ |
-| W5 | 27030a | 蜘蛛侠 Spider-Man | sm | 蛛网发射器体系 | ⬜ |
+| W5 | 27001a | 幽灵蜘蛛 Ghost-Spider | sm | 多元宇宙门票 | ✅ zhuque |
+| W5 | 27030a | 蜘蛛侠 Spider-Man | sm | 毒液攻击+隐形双 Special | ✅ zhuque |
 | W5 | 29001a-29003a | 钢铁之心 Ironheart | ironheart | 三身份+进度标记升级 | ⬜ |
-| W5 | 30001a | 蜘蛛侠汉姆 Spider-Ham | spiderham | 卡通标记 | ⬜ |
-| W5 | 31001a | SP//dr战甲 | spdr | 佩妮分离/合体 | ⬜ |
+| W5 | 30001a | 蜘蛛侠汉姆 Spider-Ham | spiderham | 卡通标记（引擎层身份资源钩子） | ✅ zhuque |
+| W5 | 31001a | SP//dr战甲 | spdr | 佩妮分离/合体（数据层缺 Peni 卡，近似） | ✅ zhuque |
 | W6 | 33001a | 镭射眼 Cyclops | cyclops | 战术升级+跨派系盟友 | ✅ kaguya |
 | W6 | 34001a | 凤凰 Phoenix | phoenix | 凤凰之力力量标记 | ✅ kaguya |
 | W6 | 35001a | 金刚狼 Wolverine | wolv | 爪+自愈 | ✅ kaguya |

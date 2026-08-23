@@ -140,7 +140,11 @@ type ResourceAbility struct {
 	Icon         string // generated icon: energy | physical | mental | wild
 	HeroOnly     bool   // "Hero Resource": hero form required
 	EventOnly    bool   // only usable when paying for an event
-	UsesCounters bool   // consumes one counter from the source per use
+	// UsesCounters consumes one counter from the source per use.
+	UsesCounters bool
+	// NoExhaust skips the source exhaustion (identity counter resources,
+	// e.g. Spider-Ham's toon counters spent as wild).
+	NoExhaust bool
 }
 
 // StatBonus is a persistent stat adjustment applied to an identity.
