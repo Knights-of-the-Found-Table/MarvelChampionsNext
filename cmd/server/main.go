@@ -43,6 +43,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ghostspider"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/goblinfooblin"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hawkeye"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hercules"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hood"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hulk"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/iceman"
