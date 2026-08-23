@@ -57,6 +57,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/psylocke"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/quicksilver"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/rogue"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/silk"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spiderwoman"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spectrum"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/starlord"
