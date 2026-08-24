@@ -857,7 +857,7 @@ func powerOfBonus(paying, target *data.CardDef) int {
 }
 
 // costFor returns the payable cost for a card after the identity's passive
-// discounts and one pending CostDiscount.
+// discounts and all pending CostDiscounts (matching discounts stack).
 func (g *Game) costFor(p *Player, def *data.CardDef) int {
 	cost := deref(def.Cost, 0)
 	if cost <= 0 {
@@ -883,9 +883,8 @@ func (g *Game) costFor(p *Player, def *data.CardDef) int {
 		}
 	}
 	for _, d := range p.CostDiscounts {
-		if discountMatches(d, def) && d.Amount > 0 {
+		if discountMatches(d, def) && d.Amount != 0 {
 			cost -= d.Amount
-			break
 		}
 	}
 	// Psionic Amnesia (40172 attached to you): allies and supports cost +2.
@@ -915,19 +914,26 @@ func attachmentsOnPlayer(g *Game, pid PlayerID) []EntityID {
 	return out
 }
 
-// consumeDiscount removes the pending discount that applied to a card
-// being played.
+// consumeDiscount removes every pending discount that applied to a card
+// being played (each "next card costs N less/more" effect is spent by that
+// play).
 func (g *Game) consumeDiscount(p *Player, def *data.CardDef) {
 	if deref(def.Cost, 0) <= 0 {
 		return
 	}
-	for i, d := range p.CostDiscounts {
-		if discountMatches(d, def) && d.Amount > 0 {
-			g.logMinorf("%s costs %d less (%s)", def.Name, d.Amount, p.Name)
-			p.CostDiscounts = append(p.CostDiscounts[:i], p.CostDiscounts[i+1:]...)
-			return
+	var kept []CostDiscount
+	for _, d := range p.CostDiscounts {
+		if discountMatches(d, def) && d.Amount != 0 {
+			if d.Amount > 0 {
+				g.logMinorf("%s costs %d less (%s)", def.Name, d.Amount, p.Name)
+			} else {
+				g.logMinorf("%s costs %d more (%s)", def.Name, -d.Amount, p.Name)
+			}
+			continue
 		}
+		kept = append(kept, d)
 	}
+	p.CostDiscounts = kept
 }
 
 func discountMatches(d CostDiscount, def *data.CardDef) bool {

@@ -53,9 +53,10 @@ type Player struct {
 	// SideDiscard is the side deck's discard pile (resolved Invocations).
 	SideDiscard CardList `json:"sideDiscard,omitempty"`
 
-	// CostDiscounts are pending one-shot cost reductions (Nakia Bahadir,
-	// Avengers Tower); the next matching payment consumes one, and they
-	// are cleared at each phase change.
+	// CostDiscounts are pending one-shot cost modifiers (Nakia Bahadir,
+	// Avengers Tower; negative amounts are cost increases such as Physical
+	// Toll). Matching discounts stack, the next matching payment consumes
+	// them all, and they are cleared at each phase change.
 	CostDiscounts []CostDiscount `json:"costDiscounts,omitempty"`
 	// AllyPlayedThisRound marks whether an ally has been played this round
 	// (Living Legend discount).
