@@ -137,6 +137,11 @@ func (g *Game) SpawnVillainFromCard(base string) *Villain {
 	return g.spawnVillain(stages, 1)
 }
 
+// SetVillainStages overrides a villain's stage progression with explicit
+// card codes. Used by scenarios whose stages are separate cards instead of
+// same-base variants (Black Widow I–III).
+func (v *Villain) SetVillainStages(codes []string) { v.stageCodes = codes }
+
 // SpawnAttachment brings an encounter attachment into play targeting the
 // given entity (running its OnAttach preference when target is empty).
 func (g *Game) SpawnAttachment(code string, target EntityID) *Attachment {

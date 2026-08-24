@@ -2041,6 +2041,21 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 		}
 		g.logf("%s schemes against %s", def.Name, p.Name)
 		if g.MainScheme != nil {
+			// Informant (50050): the preparation may be discarded to
+			// invert the scheme — it removes threat instead.
+			for _, uid := range p.Upgrades {
+				if u := g.Upgrades[uid]; u != nil && u.Code == "50050" {
+					g.Push(AskQuestion{Player: p.ID, Question: Ask(
+						fmt.Sprintf("%s: discard Informant? %s's scheme removes threat instead", p.Name, def.Name),
+						Choice{ID: "informant-use", Label: "Discard Informant — remove threat instead", Kind: ChoicePlay, CardCode: u.Code}.
+							Msgs(DiscardControlled{Player: p.ID, ID: u.ID},
+								ThwartScheme{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: u.ID}),
+						Choice{ID: "informant-pass", Label: "Pass", Kind: ChoicePass}.
+							Msgs(SchemeThreat{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: mn.ID}),
+					)})
+					return
+				}
+			}
 			g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: mn.ID})
 		}
 	}

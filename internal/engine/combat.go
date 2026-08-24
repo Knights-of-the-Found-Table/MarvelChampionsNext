@@ -788,6 +788,8 @@ func retaliateOf(g *Game, e Entity) int {
 			n += 2
 		case "40159":
 			n++
+		case "50068": // Black Widow's Gauntlet
+			n++
 		}
 	}
 	return n

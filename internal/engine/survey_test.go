@@ -78,7 +78,7 @@ import (
 )
 
 // TestSurvey prints the implementation gap for cards with base codes <=
-// 49999. Textless cards are fully served by the generic behavior; the gap
+// 59999. Textless cards are fully served by the generic behavior; the gap
 // is cards with ability text and no registered behavior.
 func TestSurvey(t *testing.T) {
 	type row struct {
@@ -90,7 +90,7 @@ func TestSurvey(t *testing.T) {
 	for _, def := range engine.DB.All() {
 		code := def.Code
 		base := data.BaseCode(code)
-		if base > "49999" || len(base) != 5 {
+		if base > "59999" || len(base) != 5 {
 			continue
 		}
 		hasText := strings.TrimSpace(def.Text) != ""
@@ -124,6 +124,9 @@ func TestSurvey(t *testing.T) {
 	}
 	for _, r := range gapText {
 		fmt.Printf("GAP %-10s %s %-18s %-16s %s\n", r.pack, r.code, r.name, r.typ, r.text)
+	}
+	for _, r := range gapNoText {
+		fmt.Printf("GAPNOTEXT %-10s %s %-18s %s\n", r.pack, r.code, r.name, r.typ)
 	}
 }
 
