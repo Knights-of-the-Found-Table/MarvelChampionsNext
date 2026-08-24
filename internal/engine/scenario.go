@@ -77,7 +77,7 @@ func VillainStageCodes(base string) []string {
 	}
 	var stages []*data.CardDef
 	for _, c := range DB.InSet(primary.CardSet) {
-		if c.Type != "villain" || c.CardSet != primary.CardSet {
+		if (c.Type != "villain" && c.Type != "leader") || c.CardSet != primary.CardSet {
 			continue
 		}
 		if data.BaseCode(c.Code) != data.BaseCode(base) {
