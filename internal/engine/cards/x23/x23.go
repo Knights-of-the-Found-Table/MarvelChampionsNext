@@ -14,6 +14,7 @@ func init() {
 	registerSignatures()
 	registerNemesis()
 	registerObligation()
+	registerX23Extras()
 }
 
 // honeyBadger returns the owner's in-play Honey Badger ally, if any.

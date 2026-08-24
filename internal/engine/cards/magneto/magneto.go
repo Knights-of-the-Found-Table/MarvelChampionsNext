@@ -13,6 +13,8 @@ func init() {
 	registerMagnetoSignatures()
 	registerMagnetoObligation()
 	registerMagnetoNemesis()
+	registerMagnetoExtras()
+	registerHellfire()
 }
 
 func ownedUpgrade(g *engine.Game, p *engine.Player, code string) *engine.Upgrade {

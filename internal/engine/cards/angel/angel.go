@@ -13,6 +13,7 @@ func init() {
 	registerSignatures()
 	registerNemesis()
 	registerObligation()
+	registerAngelExtras()
 }
 
 // registerAngel installs the identity (42001a/b/c). Archangel-form

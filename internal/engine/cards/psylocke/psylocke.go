@@ -20,6 +20,7 @@ func init() {
 	registerSignatures()
 	registerNemesis()
 	registerObligation()
+	registerPsylockeExtras()
 }
 
 // psiUpgrades lists the player's in-play Psi-Energy upgrades

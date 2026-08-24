@@ -19,6 +19,9 @@ func init() {
 	registerSignatures()
 	registerObligation()
 	registerNemesis()
+	registerCorpsCards()
+	registerDreadpool()
+	registerCorpsNeutrals()
 }
 
 // accelerationTokens reports the acceleration tokens on the main scheme.

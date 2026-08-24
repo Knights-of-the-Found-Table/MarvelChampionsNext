@@ -14,6 +14,7 @@ func init() {
 	registerJubileeSignatures()
 	registerJubileeObligation()
 	registerJubileeNemesis()
+	registerJubileeExtras()
 }
 
 func distinctIcons(icons []string) int {

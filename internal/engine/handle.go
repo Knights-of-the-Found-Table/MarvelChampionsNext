@@ -329,6 +329,31 @@ func (g *Game) handle(msg Message) {
 				m.N -= h
 			}
 		}
+		// Not my Responsibility (44022): a player holding the event may
+		// redirect the threat to themselves or an ally as damage.
+		if m.N > 0 {
+			if p, card, ok := g.handCardHolding("44022"); ok {
+				var nmrChoices []Choice
+				nmrChoices = append(nmrChoices,
+					Choice{ID: "nmr-self", Label: fmt.Sprintf("Play Not my Responsibility — %s takes %d damage", p.Name, m.N), Kind: ChoicePlay, CardCode: card.Code}.
+						Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+							DamageEntity{Target: p.ID, Damage: m.N, Source: p.ID}))
+				for _, aid := range p.Allies {
+					if a := g.Allies[aid]; a != nil && a.HP() > m.N {
+						nmrChoices = append(nmrChoices,
+							Choice{ID: "nmr-ally-" + aid.String(), Label: fmt.Sprintf("%s takes the %d damage instead", a.EDef().Name, m.N), Kind: ChoicePlay, CardCode: card.Code}.
+								Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+									DamageEntity{Target: aid, Damage: m.N, Source: p.ID}))
+					}
+				}
+				nmrChoices = append(nmrChoices,
+					Choice{ID: "nmr-pass", Label: "Pass", Kind: ChoicePass}.
+						Msgs(ApplySchemeThreat{Scheme: m.Scheme, N: m.N, Source: m.Source}))
+				g.Push(AskQuestion{Player: p.ID, Question: Ask(
+					fmt.Sprintf("%s: play Not my Responsibility? Redirect %d threat as damage", p.Name, m.N), nmrChoices...)})
+				return
+			}
+		}
 		// Great Responsibility interrupt window (01061/30015): a player
 		// holding the event may take the threat as damage instead.
 		if m.N > 0 {
@@ -1985,6 +2010,13 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 	if mn == nil || p == nil || p.KOed {
 		return
 	}
+	// Distraction (44054): the attached minion cannot activate.
+	for _, aid := range mn.Attachments {
+		if a := g.Attachments[aid]; a != nil && a.Code == "44054" {
+			g.logf("%s cannot activate (Distraction)", mn.EDef().Name)
+			return
+		}
+	}
 	def := mn.EDef()
 	if b := behavior(mn.Code); b.MinionActivate != nil {
 		g.Push(b.MinionActivate(g, mn, p)...)
@@ -2553,6 +2585,22 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 				Kind: ChoiceAbility, SourceID: u.ID, CardCode: u.Code,
 			}.Msgs(repl...))
 		}
+	}
+	// Negasonic Teenage Warhead (44044): 2 damage to her cancels the
+	// treachery's effects.
+	for _, id := range p.Allies {
+		a := g.Allies[id]
+		if a == nil || data.BaseCode(a.Code) != "44044" {
+			continue
+		}
+		interrupts = append(interrupts, Choice{
+			ID: "ntw-cancel", Label: "Damage Negasonic Teenage Warhead (2) → cancel " + m.Card.Def().Name,
+			Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code,
+		}.Msgs(
+			DamageEntity{Target: a.ID, Damage: 2, Source: p.ID},
+			DiscardEncounterCard{Card: m.Card},
+			RevealNextEncounter{Player: m.Player},
+		))
 	}
 	// Stepford Cuckoos (45049): exhaust + a psi counter cancels the
 	// treachery; the revealer draws a replacement encounter card.

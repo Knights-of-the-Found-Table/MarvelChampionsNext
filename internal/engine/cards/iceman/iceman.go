@@ -11,6 +11,7 @@ func init() {
 	registerIcemanSignatures()
 	registerIcemanObligation()
 	registerIcemanNemesis()
+	registerIcemanExtras()
 }
 
 func ownedUpgrade(g *engine.Game, p *engine.Player, code string) *engine.Upgrade {

@@ -143,6 +143,13 @@ func (p *Player) HandSize(g *Game) int {
 		if g.MainScheme != nil && data.BaseCode(g.MainScheme.Code) == "40167" {
 			n += 2
 		}
+		// Live Dangerously (44024): each identity gets +2 hand size
+		// while the scheme is in play.
+		for _, s := range g.SideSchemes {
+			if s != nil && s.Code == "44024" {
+				n += 2
+			}
+		}
 		// Tempo (40181): +1 hand size while engaged with you.
 		for _, mn := range g.Minions {
 			if mn != nil && mn.Code == "40181" && mn.EngagedWith == p.ID {

@@ -827,8 +827,19 @@ func powerOfBonus(paying, target *data.CardDef) int {
 	if target == nil || !strings.HasPrefix(paying.Name, "The Power of ") {
 		return 0
 	}
-	if paying.Name == "The Power of the Mind" {
+	switch paying.Name {
+	case "The Power of the Mind":
 		if target.HasTrait("Psionic") {
+			return 1
+		}
+		return 0
+	case "The Power of Flight":
+		if target.HasTrait("Aerial") {
+			return 1
+		}
+		return 0
+	case "The Power in All of Us":
+		if target.Aspect == "basic" {
 			return 1
 		}
 		return 0

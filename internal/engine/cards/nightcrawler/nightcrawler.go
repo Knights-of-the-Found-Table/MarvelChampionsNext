@@ -14,6 +14,7 @@ func init() {
 	registerSignatures()
 	registerNemesis()
 	registerObligation()
+	registerNightcrawlerExtras()
 }
 
 // registerNightcrawler installs the identity (48001a/b).
