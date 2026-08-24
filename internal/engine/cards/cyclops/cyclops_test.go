@@ -294,3 +294,16 @@ func mustNewCyclopsGame(t *testing.T) *engine.Game {
 	}
 	return g
 }
+
+// TestRemainingCyclopsRegistered sweeps the pack's shared pool.
+func TestRemainingCyclopsRegistered(t *testing.T) {
+	for _, code := range []string{
+		"33011", "33012", "33013", "33014", "33015", "33016", "33017",
+		"33018", "33019", "33020", "33021", "33022", "33023", "33024",
+		"33025", "33026", "33032", "33033", "33034", "33035",
+	} {
+		if !engine.Implemented(code) {
+			t.Errorf("card %s has no registered behavior", code)
+		}
+	}
+}

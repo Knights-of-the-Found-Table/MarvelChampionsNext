@@ -296,3 +296,18 @@ func mustNewWolvGame(t *testing.T) *engine.Game {
 	}
 	return g
 }
+
+// TestRemainingwolvRegistered sweeps the pack's remaining cards.
+func TestRemainingwolvSweep(t *testing.T) {
+	for _, def := range engine.DB.All() {
+		if def.PackCode != "wolv" {
+			continue
+		}
+		if def.Text == "" {
+			continue
+		}
+		if !engine.Implemented(def.Code) {
+			t.Errorf("card %s (%s) has no registered behavior", def.Code, def.Name)
+		}
+	}
+}

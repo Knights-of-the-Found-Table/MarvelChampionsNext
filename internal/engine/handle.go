@@ -409,6 +409,25 @@ func (g *Game) handle(msg Message) {
 		}
 		g.logf("Encounter deck shuffled")
 
+	case ConvertMinionToAlly:
+		mn := g.Minions[m.MinionID]
+		p := g.Player(m.Owner)
+		if mn == nil || p == nil {
+			return
+		}
+		code, sch, atk := mn.Code, mn.SchemeVal, mn.AttackVal
+		hp := mn.MaxHP - mn.Damage
+		g.Delete(mn.ID)
+		a := &Ally{
+			ID: g.nextEntityID(KindAlly), Code: code, Owner: p.ID,
+			MaxHP: hp + m.Consequential, Damage: m.Consequential,
+			ThwartVal: sch, AttackVal: atk,
+		}
+		g.Allies[a.ID] = a
+		p.Allies = append(p.Allies, a.ID)
+		g.logMajorf("%s takes control of %s (blank text)", p.Name, a.EDef().Name)
+		g.Push(AllyEnteredPlay{Ally: a.ID, Player: p.ID})
+
 	case AddMagnetCounter:
 		if s := g.MainScheme; s != nil && s.ID == m.Scheme {
 			s.Counters++
@@ -531,7 +550,8 @@ func (g *Game) handle(msg Message) {
 				// pending ApplyVillainScheme in the queue marks this as a
 				// scheme activation (attack activations queue AskAttack
 				// instead).
-				if add > 0 && g.schemeActivationPending(v.ID) {
+				scheme := g.schemeActivationPending(v.ID)
+				if add > 0 && scheme {
 					if p, card, ok := g.handCardHolding("09038"); ok {
 						g.Push(AskQuestion{Player: p.ID, Question: Ask(
 							fmt.Sprintf("%s: play Foiled!? Cancel the +%d boost icons", p.Name, add),
@@ -539,6 +559,21 @@ func (g *Game) handle(msg Message) {
 								Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
 									CancelBoostIcons{Enemy: v.ID, N: add}),
 							Choice{ID: "foiled-pass", Label: "Pass", Kind: ChoicePass},
+						)})
+					}
+				}
+				// Preemptive Strike (38015): during villain attacks, cancel
+				// all boost icons on this card and deal the villain 1
+				// damage per icon.
+				if add > 0 && !scheme && g.attackActivationPending(v.ID) {
+					if p, card, ok := g.handCardHolding("38015"); ok {
+						g.Push(AskQuestion{Player: p.ID, Question: Ask(
+							fmt.Sprintf("%s: play Preemptive Strike? Cancel +%d boost icons and deal %d damage", p.Name, add, add),
+							Choice{ID: "preemptive-play", Label: fmt.Sprintf("Play Preemptive Strike — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
+								Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+									CancelBoostIcons{Enemy: v.ID, N: add},
+									DamageEntity{Target: v.ID, Damage: add, Source: p.ID}),
+							Choice{ID: "preemptive-pass", Label: "Pass", Kind: ChoicePass},
 						)})
 					}
 				}
@@ -2172,6 +2207,7 @@ func (g *Game) handlePlayCard(m PlayCard) {
 	// per-event).
 	delete(g.EventDamageBonus, p.ID)
 	delete(g.EventThreatBonus, p.ID)
+	leadershipBoost := map[PlayerID]bool{}
 	// Pay resources: discard chosen cards.
 	for _, id := range m.Paid.CardIDs {
 		rc, ok := p.Hand.Remove(id)
@@ -2182,15 +2218,28 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		// Mutant Genesis resource riders: Aggressive Energy (+1 damage for
 		// Attack events) and Defensive Energy (draw 1 for Defense events).
 		switch data.BaseCode(rc.Code) {
-		case "32047":
+		case "32047", "35020":
 			if def.Type == "event" && def.HasTrait("attack") {
 				g.EventDamageBonus[p.ID] += 1
 				g.logf("Aggressive Energy — %s deals 1 additional damage", def.Name)
 			}
-		case "32018":
+		case "32018", "38017":
 			if def.Type == "event" && def.HasTrait("defense") {
 				g.Push(DrawCards{Player: p.ID, N: 1})
 				g.logf("Defensive Energy — draw 1 card")
+			}
+		case "33018", "36021":
+			// Effective Leadership: the played ally gets +1 THW / +1 ATK
+			// this phase (applied in the ally case below via a flag).
+			if def.Type == "ally" {
+				leadershipBoost[p.ID] = true
+				g.logf("Effective Leadership — %s gets +1 THW / +1 ATK", def.Name)
+			}
+		case "34020", "37016":
+			// Passion for Justice: Thwart events remove 1 extra threat.
+			if def.Type == "event" && def.HasTrait("thwart") {
+				g.EventThreatBonus[p.ID] += 1
+				g.logf("Passion for Justice — %s removes 1 additional threat", def.Name)
 			}
 		}
 	}
@@ -2210,9 +2259,14 @@ func (g *Game) handlePlayCard(m PlayCard) {
 			ThwartVal: deref(def.Thwart, 0),
 			Tough:     def.HasKeyword("Toughness"),
 		}
+		if leadershipBoost[p.ID] {
+			a.BonusTHW++
+			a.BonusATK++
+		}
 		g.Allies[a.ID] = a
 		p.Allies = append(p.Allies, a.ID)
 		g.logf("%s plays %s", p.Name, def.Name)
+		g.Push(AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, a)...)
 		}
@@ -2342,6 +2396,7 @@ func (g *Game) handleAllyEntersPlayFree(m AllyEntersPlayFree) {
 	p.Allies = append(p.Allies, a.ID)
 	p.AllyPlayedThisRound = true
 	g.logf("%s puts %s into play", p.Name, def.Name)
+	g.Push(AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 	if b := behavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, a)...)
 	}
@@ -2708,6 +2763,17 @@ func (g *Game) handCardHolding(codes ...string) (*Player, Card, bool) {
 		}
 	}
 	return nil, Card{}, false
+}
+
+// attackActivationPending reports whether a villain's attack question is
+// still queued (Preemptive Strike window).
+func (g *Game) attackActivationPending(villain EntityID) bool {
+	for _, msg := range g.queue {
+		if m, ok := msg.(AskAttack); ok && m.Enemy == villain {
+			return true
+		}
+	}
+	return false
 }
 
 // schemeActivationPending reports whether a villain's scheme resolution is

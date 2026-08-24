@@ -133,3 +133,18 @@ func TestDeadlyTouchObligation(t *testing.T) {
 		t.Fatalf("Deadly Touch second message = %#v, want ObligationResolve", msgs[1])
 	}
 }
+
+// TestRemainingrogueRegistered sweeps the pack's remaining cards.
+func TestRemainingrogueSweep(t *testing.T) {
+	for _, def := range engine.DB.All() {
+		if def.PackCode != "rogue" {
+			continue
+		}
+		if def.Text == "" {
+			continue
+		}
+		if !engine.Implemented(def.Code) {
+			t.Errorf("card %s (%s) has no registered behavior", def.Code, def.Name)
+		}
+	}
+}

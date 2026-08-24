@@ -127,3 +127,18 @@ func TestKnifeFightTargetsHighestAttackEnemy(t *testing.T) {
 		}
 	}
 }
+
+// TestRemainingstormRegistered sweeps the pack's remaining cards.
+func TestRemainingstormSweep(t *testing.T) {
+	for _, def := range engine.DB.All() {
+		if def.PackCode != "storm" {
+			continue
+		}
+		if def.Text == "" {
+			continue
+		}
+		if !engine.Implemented(def.Code) {
+			t.Errorf("card %s (%s) has no registered behavior", def.Code, def.Name)
+		}
+	}
+}

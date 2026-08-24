@@ -160,3 +160,7 @@ func (g *Game) AddSideScheme(s *SideScheme) {
 // QueueLen returns the number of pending messages in the engine queue
 // (exported for tests).
 func (g *Game) QueueLen() int { return len(g.queue) }
+
+// AttackValueOf returns an enemy's current attack value (including boost
+// icons).
+func (g *Game) AttackValueOf(id EntityID) int { return g.attackValue(id) }

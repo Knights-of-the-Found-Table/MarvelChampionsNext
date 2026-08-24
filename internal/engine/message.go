@@ -535,6 +535,20 @@ type (
 	// AddMagnetCounter places a magnet counter on the main scheme and
 	// resolves the 3-counter Magnetic reveal (Magneto).
 	AddMagnetCounter struct{ Scheme EntityID }
+	// AllyEnteredPlay announces any ally entering play under a player's
+	// control (Utopia / Danger Room responses).
+	AllyEnteredPlay struct {
+		Ally   EntityID
+		Player PlayerID
+	}
+	// ConvertMinionToAlly removes a minion and returns it to play as a
+	// controlled ally (Mind Control, Karma): THW = printed SCH, blank
+	// text, extra consequential damage.
+	ConvertMinionToAlly struct {
+		MinionID      EntityID
+		Owner         PlayerID
+		Consequential int
+	}
 
 
 	// EventPlayed announces that a player played an event card
@@ -819,6 +833,8 @@ func (AttachHandCard) msg()        {}
 func (ShuffleMinionIntoDeck) msg() {}
 func (TuckCardUnderOZT) msg()   {}
 func (AddMagnetCounter) msg()  {}
+func (AllyEnteredPlay) msg() {}
+func (ConvertMinionToAlly) msg() {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

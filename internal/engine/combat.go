@@ -273,6 +273,14 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		if e == nil {
 			return
 		}
+		// Cybernetic Enhancements (38035): the attached minion cannot
+		// take damage.
+		for _, aid := range e.Attachments {
+			if a := g.Attachments[aid]; a != nil && a.Code == "38035" {
+				g.logf("%s cannot take damage (Cybernetic Enhancements)", e.EDef().Name)
+				return
+			}
+		}
 		if b := behavior(e.Code); b.MinionDamageableSrc != nil && !b.MinionDamageableSrc(g, e, n, source) {
 			return
 		}

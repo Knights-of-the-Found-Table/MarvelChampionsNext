@@ -378,3 +378,18 @@ func mustNewPhoenixGame(t *testing.T) *engine.Game {
 	}
 	return g
 }
+
+// TestRemainingphoenixRegistered sweeps the pack's remaining cards.
+func TestRemainingphoenixSweep(t *testing.T) {
+	for _, def := range engine.DB.All() {
+		if def.PackCode != "phoenix" {
+			continue
+		}
+		if def.Text == "" {
+			continue
+		}
+		if !engine.Implemented(def.Code) {
+			t.Errorf("card %s (%s) has no registered behavior", def.Code, def.Name)
+		}
+	}
+}

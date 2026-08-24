@@ -143,3 +143,18 @@ func TestMolecularAccelerationRider(t *testing.T) {
 		t.Fatalf("rider without Molecular Acceleration returned %d messages, want 0", len(msgs))
 	}
 }
+
+// TestRemaininggambitRegistered sweeps the pack's remaining cards.
+func TestRemaininggambitSweep(t *testing.T) {
+	for _, def := range engine.DB.All() {
+		if def.PackCode != "gambit" {
+			continue
+		}
+		if def.Text == "" {
+			continue
+		}
+		if !engine.Implemented(def.Code) {
+			t.Errorf("card %s (%s) has no registered behavior", def.Code, def.Name)
+		}
+	}
+}
