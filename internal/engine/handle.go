@@ -425,6 +425,9 @@ func (g *Game) handle(msg Message) {
 	case MinionDefeated:
 		if mn := g.Minions[m.MinionID]; mn != nil {
 			g.logMajorf("%s is defeated", mn.EDef().Name)
+			if strings.Contains(mn.EDef().Text, "Victory") {
+				g.VictoryDisplay = append(g.VictoryDisplay, Card{ID: g.nextCardID(), Code: mn.Code})
+			}
 			for _, a := range mn.Attachments {
 				g.Delete(a)
 			}
@@ -2458,6 +2461,9 @@ func (g *Game) handleSchemeDefeated(id EntityID) {
 		g.logMajorf("Side scheme %s is defeated", s.EDef().Name)
 		if b := behavior(s.Code); b.SideSchemeDefeated != nil {
 			g.Push(b.SideSchemeDefeated(g, s)...)
+		}
+		if strings.Contains(s.EDef().Text, "Victory") {
+			g.VictoryDisplay = append(g.VictoryDisplay, Card{ID: g.nextCardID(), Code: s.Code})
 		}
 		g.Delete(id)
 		return

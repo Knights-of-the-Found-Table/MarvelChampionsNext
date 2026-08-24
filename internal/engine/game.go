@@ -54,6 +54,9 @@ type Game struct {
 	// GliderCounter marks which scheme currently holds the Venom
 	// Goblin's glider (approximation of the three-Manhattan board).
 	GliderCounter EntityID `json:"gliderCounter,omitempty"`
+	// VictoryDisplay holds defeated cards with printed victory points;
+	// several mts villains scale off it.
+	VictoryDisplay CardList `json:"victoryDisplay,omitempty"`
 
 	// queue holds pending messages.
 	queue []Message

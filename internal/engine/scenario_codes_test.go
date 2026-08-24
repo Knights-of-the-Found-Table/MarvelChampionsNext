@@ -26,6 +26,9 @@ var (
 	nonBSchemeStages = map[string]bool{"32088a": true,
 		// the sm snapshot codes its gameplay faces without the b suffix
 		"27064": true, "27087": true, "27088": true, "27100": true,
+		// the mts snapshot follows the same unsuffixed convention
+		"21074": true, "21075": true, "21098": true, "21114": true,
+		"21115": true, "21138": true, "21165": true,
 		"27076a": true, "27116a": true, "27101a": true,
 	}
 	statlessSchemeStages = map[string]bool{
