@@ -137,6 +137,16 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 			}
 		}
 	}
+	// Spiral: while she is in play, threat cannot be removed from the
+	// main scheme.
+	if g.MainScheme != nil && schemeID == g.MainScheme.ID {
+		for _, v := range g.Villains {
+			if v != nil && data.BaseCode(v.Code) == "39012" {
+				g.logf("threat cannot be removed while Spiral is in play")
+				return
+			}
+		}
+	}
 	// Grand Larceny: threat cannot be removed while a Criminal minion is
 	// in play.
 	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "31030" {

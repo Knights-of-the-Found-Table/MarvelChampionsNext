@@ -684,6 +684,12 @@ func registerRemainingPlayerCards() {
 		},
 	})
 
+	// Textless core stragglers: Energy Absorption, Vibranium
+	// (resources) and the Usurp the Throne side scheme shell.
+	for _, code := range []string{"01014", "01044", "01156"} {
+		engine.RegisterBehavior(code, &engine.Behavior{})
+	}
+
 	// 01061 Great Responsibility: Hero Interrupt — when any amount of
 	// threat would be placed on a scheme, you take it as damage instead.
 	// Resolved by the interrupt window in handle(SchemeThreat) whenever a

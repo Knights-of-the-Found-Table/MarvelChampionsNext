@@ -9,6 +9,8 @@ import (
 )
 
 func init() {
+	// 28022 "Bring the War!": textless side scheme shell.
+	engine.RegisterBehavior("28022", &engine.Behavior{})
 	registerNova()
 	registerNemesis()
 }

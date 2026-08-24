@@ -44,6 +44,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/magneto"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/msmarvel"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mutantgenesis"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mojo"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nebula"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nextevolution"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nightcrawler"

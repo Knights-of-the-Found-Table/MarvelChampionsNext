@@ -5,11 +5,14 @@ import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
 
-// registerModularSets installs the modular encounter sets: Band of Badoon
+// registerModularSets installs the modular encounter sets (plus the
+// textless Vendetta side scheme shell, 16054).: Band of Badoon
 // (16117–16121), Galactic Artifacts (16122–16130), Kree Militant
 // (16131–16134), Menagerie Medley (16135–16137), Space Pirates (16138–
 // 16141), Ship Command (16142–16148) and the Power Stone (16149).
 func registerModularSets() {
+	// 16054 Vendetta: textless side scheme shell.
+	engine.RegisterBehavior("16054", &engine.Behavior{})
 	registerBandOfBadoon()
 	registerGalacticArtifacts()
 	registerKreeMilitant()

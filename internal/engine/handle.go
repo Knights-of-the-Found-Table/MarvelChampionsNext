@@ -1470,6 +1470,23 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 			if b := behavior(def.Code); b.OnPlay != nil {
 				g.Push(b.OnPlay(g, mn)...)
 			}
+		case "ally":
+			// Encounter-side allies (Longshot) join the revealing player
+			// and surge.
+			pid := p.ID
+			a := &Ally{
+				ID:        g.nextEntityID(KindAlly),
+				Code:      def.Code,
+				Owner:     pid,
+				MaxHP:     deref(def.HP, 1),
+				AttackVal: deref(def.Attack, 0),
+				ThwartVal: deref(def.Thwart, 0),
+			}
+			g.Allies[a.ID] = a
+			p.Allies = append(p.Allies, a.ID)
+			g.logMajorf("%s joins %s!", def.Name, p.Name)
+			g.Push(AllyEnteredPlay{Ally: a.ID, Player: pid})
+			g.Push(RevealNextEncounter{Player: pid})
 		case "side_scheme":
 			s := &SideScheme{
 				ID:        g.nextEntityID(KindSideScheme),
