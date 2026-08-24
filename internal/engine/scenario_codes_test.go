@@ -25,11 +25,6 @@ import (
 // snapshot gap).
 var (
 	nonBSchemeStages = map[string]bool{"32088a": true,
-		// the aos snapshot ships single-face main schemes without
-		// threat stats (targets default to 10)
-		"50067a": true, "50087a": true, "50088a": true, "50089a": true,
-		"50104a": true, "50130a": true, "50167a": true, "50168a": true,
-		"50169a": true,
 		// the sm snapshot codes its gameplay faces without the b suffix
 		"27064": true, "27087": true, "27088": true, "27100": true,
 		// the mts snapshot follows the same unsuffixed convention
@@ -54,6 +49,7 @@ var (
 		"40139b": true, // transition stage, no threat target
 		"45103": true,  // The Age of Apocalypse: X is villain HP based
 		"11008b": true, // Master of Time: variants-arrival transition
+		"50168b": true, // The Accusation: guess-the-traitor transition
 		// sm snapshot gaps: single-face schemes with no threat stats
 		"27076a": true, "27116a": true, "27101a": true,
 	}

@@ -24,7 +24,7 @@ func registerAOSScenarios() {
 		ID:               "50067a",
 		Name:             "Black Widow — The Widow's Web",
 		VillainBases:     []string{"50064"},
-		MainSchemeStages: []string{"50067a"},
+		MainSchemeStages: []string{"50067b"},
 		ExtraSets:        []string{"a.i.m._abduction", "a.i.m._science", "standard"},
 		Setup: func(g *engine.Game) []engine.Message {
 			for _, v := range g.Villains {
@@ -57,8 +57,8 @@ func registerAOSScenarios() {
 	engine.RegisterScenario(&engine.ScenarioDef{
 		ID:               "50087a",
 		Name:             "Batroc — Infiltrate A.I.M. Island Embassy",
-		VillainBases:     []string{"50086a"},
-		MainSchemeStages: []string{"50087a", "50088a", "50089a"},
+		VillainBases:     []string{"50086"},
+		MainSchemeStages: []string{"50087b", "50088b", "50089b"},
 		ExtraSets:        []string{"a.i.m._science", "batrocs_brigade", "standard"},
 		Setup: func(g *engine.Game) []engine.Message {
 			// Alert Level environment, Low side up.
@@ -85,8 +85,8 @@ func registerAOSScenarios() {
 	engine.RegisterScenario(&engine.ScenarioDef{
 		ID:               "50104a",
 		Name:             "M.O.D.O.K. — Upgrading Adaptoids",
-		VillainBases:     []string{"50103a"},
-		MainSchemeStages: []string{"50104a"},
+		VillainBases:     []string{"50103"},
+		MainSchemeStages: []string{"50104b"},
 		ExtraSets:        []string{"scientist_supreme", "standard"},
 		Setup: func(g *engine.Game) []engine.Message {
 			// The four Holding Cells enter play with lock counters.
@@ -132,8 +132,8 @@ func registerAOSScenarios() {
 	engine.RegisterScenario(&engine.ScenarioDef{
 		ID:               "50130a",
 		Name:             "Citizen V — Apprehending Rogue Agents",
-		VillainBases:     []string{"50129a"},
-		MainSchemeStages: []string{"50130a"},
+		VillainBases:     []string{"50129"},
+		MainSchemeStages: []string{"50130b"},
 		ExtraSets: []string{
 			"gravitational_pull", "hard_sound", "pale_little_spider",
 			"power_of_the_atom", "supersonic", "the_leaper", "standard",
@@ -163,8 +163,8 @@ func registerAOSScenarios() {
 	engine.RegisterScenario(&engine.ScenarioDef{
 		ID:               "50167a",
 		Name:             "Baron Zemo — Zemo's Manipulations",
-		VillainBases:     []string{"50165a"},
-		MainSchemeStages: []string{"50167a", "50168a", "50169a"},
+		VillainBases:     []string{"50165"},
+		MainSchemeStages: []string{"50167b", "50168b", "50169b"},
 		ExtraSets:        []string{"s.h.i.e.l.d.", "scientist_supreme", "s.h.i.e.l.d._executive_board", "standard"},
 		Setup: func(g *engine.Game) []engine.Message {
 			// The executive board convenes with 2 secret counters each.
@@ -204,7 +204,7 @@ func registerAOSScenarios() {
 				if v == nil || data.BaseCode(v.Code) != "50165" {
 					continue
 				}
-				v.Code = "50166a"
+				v.Code = "50165b"
 				v.MaxHP = 16
 				v.Damage = 0
 				g.LogMajorf("Baron Zemo is unmasked!")

@@ -72,9 +72,33 @@ func registerMODOK() {
 					Label: "Holding Cell — spend 3 resources to remove 1 lock counter", Type: engine.AbilityAction,
 					HeroOnly: true, Cost: 3,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
-						if env := g.Environments[self]; env != nil && env.Counters > 0 {
-							env.Counters--
-							g.Logf("A lock counter is removed (%d left)", env.Counters)
+						env := g.Environments[self]
+						if env == nil || env.Counters <= 0 {
+							return nil
+						}
+						env.Counters--
+						g.Logf("A lock counter is removed (%d left)", env.Counters)
+						if env.Counters == 0 {
+							// The cell bursts open and its prisoner
+							// (the linked b-side ally) joins a player.
+							p := g.Players[0]
+							if p == nil {
+								return nil
+							}
+							allyCode := env.Code[:len(env.Code)-1] + "b"
+							card := engine.Card{Code: allyCode}
+							def := card.Def()
+							if def.Type != "ally" {
+								return nil
+							}
+							a := &engine.Ally{
+								ID: g.NextEntityID(engine.KindAlly), Code: allyCode,
+								Owner: p.ID, MaxHP: intValue(def.HP, 3),
+								AttackVal: intValue(def.Attack, 1), ThwartVal: intValue(def.Thwart, 1),
+							}
+							g.AddAlly(a, p.ID)
+							g.Logf("%s bursts free from the Holding Cell!", def.Name)
+							return []engine.Message{engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID}}
 						}
 						return nil
 					},
