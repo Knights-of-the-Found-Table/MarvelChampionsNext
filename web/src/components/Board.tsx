@@ -106,11 +106,8 @@ export default function Board({
     const update = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      // 顶部为 hud-top 预留安全区，避免小视口下场景与顶栏重叠
-      const safeTop = 54
-      const availH = Math.max(200, h - safeTop)
-      const scale = Math.min(w / SCENE_W, availH / SCENE_H)
-      setFit({ scale, left: (w - SCENE_W * scale) / 2, top: safeTop + (availH - SCENE_H * scale) / 2 })
+      const scale = Math.min(w / SCENE_W, h / SCENE_H)
+      setFit({ scale, left: (w - SCENE_W * scale) / 2, top: (h - SCENE_H * scale) / 2 })
     }
     update()
     const ro = new ResizeObserver(update)
@@ -217,6 +214,14 @@ export default function Board({
         style={{ transform: `scale(${fit.scale})`, left: fit.left, top: fit.top }}
       >
         <div className="board-scene">
+          <div className="table-ornament table-ornament-nw" aria-hidden="true" />
+          <div className="table-ornament table-ornament-ne" aria-hidden="true" />
+          <div className="table-ornament table-ornament-sw" aria-hidden="true" />
+          <div className="table-ornament table-ornament-se" aria-hidden="true" />
+          <div className="enemy-command-rail" aria-hidden="true" />
+          <div className="battle-divider battle-divider-upper" aria-hidden="true" />
+          <div className="battle-divider battle-divider-lower" aria-hidden="true" />
+          <div className="player-command-rail" aria-hidden="true" />
           {cards.map((c) => (
             <GameCard
               key={c.id}

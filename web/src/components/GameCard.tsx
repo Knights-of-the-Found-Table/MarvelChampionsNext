@@ -23,9 +23,10 @@ interface Props {
 export default function GameCard({ card, onClick, className = '', zoom = true, fx, selOrder }: Props) {
   const lang = useLang()
   const zh = useZhMap()
-  const displayTitle = lname(zh, card.code, card.title)
+  const safeCode = card.code && card.code !== 'undefined' && card.code !== 'null' ? card.code : ''
+  const displayTitle = lname(zh, safeCode, card.title)
   const imgRef = useRef<HTMLDivElement | null>(null)
-  const cardZoom = useCardZoom(card.code, imgRef)
+  const cardZoom = useCardZoom(safeCode, imgRef)
   // 挂载时短暂附加入场动画类，之后移除，避免与后续动效在 animation
   // 属性上冲突（class 移除后 animation 恢复 none，不会重播）。
   const [entering, setEntering] = useState(true)
@@ -44,7 +45,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
   return (
     <div
       ref={imgRef}
-      className={`gcard pk-${Math.max(0, card.playerIndex)} k-${card.kind} ${entering ? 'fx-entering' : ''} ${card.koed ? 'koed' : ''} ${fxCls} ${className}`}
+      className={`gcard pk-${Math.max(0, card.playerIndex)} k-${card.kind} ${card.mainScheme ? 'is-main-scheme' : ''} ${card.active ? 'is-active-player' : ''} ${entering ? 'fx-entering' : ''} ${card.koed ? 'koed' : ''} ${fxCls} ${className}`}
       style={
         {
           '--x': `${card.x}px`,
@@ -55,6 +56,8 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
           '--s': card.scale ?? 1,
           '--z': card.z ?? 2,
           '--pc': color,
+          '--hp-progress': card.maxHp ? `${Math.max(0, Math.min(1, (card.hp ?? 0) / card.maxHp)) * 360}deg` : '0deg',
+          '--threat-progress': card.maxThreat ? `${Math.max(0, Math.min(1, (card.threat ?? 0) / card.maxThreat)) * 100}%` : '0%',
           ...(fx?.lunge
             ? {
                 '--lx': `${fx.lunge.dx}px`,
@@ -64,32 +67,40 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
             : {}),
         } as React.CSSProperties
       }
+      data-card-id={card.id}
+      data-card-kind={card.kind}
       data-hp={card.hp}
       data-threat={card.threat}
       data-counters={card.counters}
       data-sel={selOrder}
       title={displayTitle}
       onClick={onClick ? () => onClick(card) : undefined}
-      onMouseEnter={card.code && zoom ? cardZoom.onEnter : undefined}
-      onMouseLeave={card.code && zoom ? cardZoom.hide : undefined}
+      onMouseEnter={safeCode && zoom ? cardZoom.onEnter : undefined}
+      onMouseLeave={safeCode && zoom ? cardZoom.hide : undefined}
     >
       <div className={`gcard-in ${card.exhausted ? 'exhausted' : ''}`}>
-        {card.code ? (
+        {safeCode ? (
           <img
             className="gcard-img"
-            src={cardUrl(card.code, lang)}
+            src={cardUrl(safeCode, lang)}
             alt={card.title}
             draggable={false}
             onError={(e) => {
               const img = e.currentTarget
               if (!img.dataset.fallback) {
                 img.dataset.fallback = '1'
-                img.src = fallbackDataUrl(card.code)
+                img.src = fallbackDataUrl(safeCode)
               }
             }}
           />
         ) : (
-          <div className="gcard-back encounter" />
+          <div className={`gcard-back placeholder ${card.playerIndex >= 0 ? 'player' : 'encounter'}`}>
+            <span aria-hidden="true">★</span>
+          </div>
+        )}
+
+        {(card.kind === 'hero' || card.kind === 'villain') && (
+          <div className="portrait-name">{displayTitle}</div>
         )}
 
         {/* 状态芯片 */}
@@ -118,24 +129,26 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
         {/* 血量徽章 */}
         {card.hp !== undefined && card.maxHp ? (
           <span className={`hp-badge ${card.hp <= card.maxHp / 3 ? 'low' : ''}`}>
-            {card.hp}
+            <span className="badge-icon">✚</span>
+            <span>{card.hp}</span>
           </span>
         ) : null}
 
         {/* 威胁条 */}
         {card.threat !== undefined && (
           <span className={`threat-bar ${card.maxThreat && card.threat >= card.maxThreat - 2 ? 'high' : ''}`}>
-            {card.threat}
-            {card.maxThreat ? `/${card.maxThreat}` : ''}
+            <span className="badge-icon">◆</span>
+            <strong>{card.threat}</strong>
+            {card.maxThreat ? <small>/{card.maxThreat}</small> : null}
           </span>
         )}
 
         {/* 攻击/密谋/化解数值 */}
         {(card.attack !== undefined || card.thwart !== undefined) && (
           <div className="gcard-stats">
-            {card.attack !== undefined && <span className="stat stat-atk">⚔{card.attack}</span>}
-            {card.thwart !== undefined && <span className="stat stat-thw">⊘{card.thwart}</span>}
-            {card.scheme !== undefined && <span className="stat stat-sch">☤{card.scheme}</span>}
+            {card.attack !== undefined && <span className="stat stat-atk"><span className="stat-icon">⚔</span>{card.attack}</span>}
+            {card.thwart !== undefined && <span className="stat stat-thw"><span className="stat-icon">◎</span>{card.thwart}</span>}
+            {card.scheme !== undefined && <span className="stat stat-sch"><span className="stat-icon">◆</span>{card.scheme}</span>}
           </div>
         )}
 
@@ -147,7 +160,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
           </div>
         )}
       </div>
-      {card.code && zoom ? cardZoom.overlay : null}
+      {safeCode && zoom ? cardZoom.overlay : null}
     </div>
   )
 }
@@ -161,7 +174,8 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
   const zh = useZhMap()
   const count = card.count ?? 0
   const layers = Math.max(1, Math.min(7, Math.ceil(count / 3)))
-  const isEmptyDiscard = card.label === 'discard' && count === 0 && !card.code
+  const safeCode = card.code && card.code !== 'undefined' && card.code !== 'null' ? card.code : ''
+  const isEmptyDiscard = card.label === 'discard' && count === 0 && !safeCode
   // 牌库/弃牌堆 title：{玩家名}的牌库 / {玩家名}的弃牌堆
   const displayTitle =
     card.label === 'deck'
@@ -201,17 +215,17 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
                 style={{ translate: `${i * 2}px ${-i * 2.5}px` } as React.CSSProperties}
               />
             ))}
-            {card.code && !card.faceDown ? (
+            {safeCode && !card.faceDown ? (
               <img
                 className="gcard-img pile-top"
-                src={cardUrl(card.code, lang)}
+                src={cardUrl(safeCode, lang)}
                 alt={card.title}
                 draggable={false}
                 onError={(e) => {
                   const img = e.currentTarget
                   if (!img.dataset.fallback) {
                     img.dataset.fallback = '1'
-                    img.src = fallbackDataUrl(card.code)
+                    img.src = fallbackDataUrl(safeCode)
                   }
                 }}
               />

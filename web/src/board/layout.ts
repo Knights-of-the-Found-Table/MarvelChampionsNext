@@ -75,6 +75,8 @@ export interface PlacedCard {
   count?: number // 牌堆数量
   label?: string // 牌堆标签
   pileScale?: number
+  mainScheme?: boolean
+  active?: boolean
 }
 
 const ROW_MIN_X = 310
@@ -109,7 +111,7 @@ function layoutRow(unitWidths: number[], groupOf: (i: number) => number, innerGa
 
 function villainCard(v: VillainView, x: number, y: number): PlacedCard {
   return {
-    id: v.id, code: v.code, kind: 'villain', x, y, playerIndex: -1,
+    id: v.id, code: v.code, kind: 'villain', x, y, w: 164, h: 164, playerIndex: -1,
     title: v.name, hp: v.hp, maxHp: v.maxHp, attack: v.attack, scheme: v.scheme,
     stunned: v.stunned, confused: v.confused, tough: v.tough,
     boosts: v.boosts, stageLabel: v.stageLabel, z: 2,
@@ -117,18 +119,19 @@ function villainCard(v: VillainView, x: number, y: number): PlacedCard {
 }
 
 // 阴谋卡槽位：横版（图源即横置，无需旋转）。
-export const SCHEME_W = 176
-export const SCHEME_H = 126
+export const SCHEME_W = 228
+export const SCHEME_H = 108
 
 function schemeCard(s: SchemeView, x: number, y: number, main: boolean): PlacedCard {
   const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
   return {
-    id: s.id, code: s.code, kind: 'scheme', x, y, w: SCHEME_W, h: SCHEME_H,
+    id: s.id, code: s.code, kind: 'scheme', x, y, w: main ? 320 : SCHEME_W, h: SCHEME_H,
     playerIndex: -1,
     title: s.name, threat: s.threat, maxThreat: s.maxThreat,
     acceleration: s.acceleration, crisis: s.crisis, hazard: s.hazard,
     stageLabel: main && s.stage ? roman[s.stage - 1] : undefined,
-    z: 2,
+    mainScheme: main,
+    z: main ? 4 : 2,
   }
 }
 
@@ -167,11 +170,11 @@ export function layoutHand(view: GameView): PlacedCard[] {
   // 落在半径 R 的圆周上、旋转角等于辐条角，顶边自然共圆，边缘牌下垂。
   // R 是形态主控参数：半径越大弧越平缓。牌距沿圆弧量取（轻微重叠），
   // 牌多时收窄弧角上限以防过宽。
-  const R = 900
-  const arcStep = CARD_W - 14
-  const maxHalf = (35 * Math.PI) / 180
+  const R = 1100
+  const arcStep = CARD_W - 8
+  const maxHalf = (28 * Math.PI) / 180
   const dTheta = n > 1 ? Math.min(arcStep / R, maxHalf / (n - 1)) : 0
-  const midTop = SCENE_H - CARD_H + 40 // 中间牌（θ=0）顶边
+  const midTop = SCENE_H - CARD_H - 8 // 中间牌（θ=0）顶边
   const cy = midTop + CARD_H / 2 + R // 圆心 y（手下方远处）
   const cx = SCENE_W / 2
   return owner.hand.map((c, i) => {
@@ -192,54 +195,52 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   const cards: PlacedCard[] = []
   const players = view.players ?? []
 
-  // 顶部一组紧密排列：遭遇牌库 →（环境）→ 主阴谋 → 反派
+  // 敌方指挥区：反派肖像与主线密谋构成视觉中轴，牌库留在左翼。
   const villains = view.villains ?? []
   const envs = view.environments ?? []
-  const villainGap = 24
-  const envW = envs.length > 0 ? envs.length * (CARD_W + 16) + 12 : 0
-  const groupW =
-    CARD_W + 16 + envW + SCHEME_W + 20 +
-    villains.length * CARD_W + Math.max(0, villains.length - 1) * villainGap
-  let gx = Math.round(SCENE_W / 2 - groupW / 2)
+  const villainGap = 28
+  const villainVisualW = 164
+  const villainGroupW = villains.length * villainVisualW + Math.max(0, villains.length - 1) * villainGap
+  const commandGap = 42
+  const mainSchemeW = 320
+  const commandW = villainGroupW + (villains.length > 0 && view.mainScheme ? commandGap : 0) + (view.mainScheme ? mainSchemeW : 0)
+  let commandX = SCENE_W / 2 - commandW / 2
 
-  // 遭遇牌库（背面堆）
   cards.push({
-    id: 'pile-encounter', code: '', kind: 'pile', x: gx, y: 14, playerIndex: -1,
+    id: 'pile-encounter', code: '', kind: 'pile', x: 236, y: 82, playerIndex: -1,
     faceDown: true, title: 'Encounter', z: 1, count: view.encounterCount, label: 'encounter',
   })
-  gx += CARD_W + 16
 
-  // 环境区
-  envs.forEach((e, i) => {
-    cards.push(entityCard('environment', e, gx + i * (CARD_W + 16), 14, -1))
-  })
-  gx += envW
+  villains.forEach((v, i) => cards.push(villainCard(v, commandX + i * (villainVisualW + villainGap), 62)))
+  commandX += villainGroupW + (villains.length > 0 && view.mainScheme ? commandGap : 0)
+  if (view.mainScheme) cards.push(schemeCard(view.mainScheme, commandX, 88, true))
 
-  // 主阴谋（横版，与反派垂直居中对齐）
-  const schemeY = 14 + Math.round((CARD_H - SCHEME_H) / 2)
-  const schemeX = gx
-  if (view.mainScheme) cards.push(schemeCard(view.mainScheme, schemeX, schemeY, true))
-  gx += SCHEME_W + 20
-
-  // 反派行
-  villains.forEach((v, i) => cards.push(villainCard(v, gx + i * (CARD_W + villainGap), 14)))
-
-  // 支线阴谋：顶部成组右侧竖排
-  const sides = view.sideSchemes ?? []
-  const sideX = Math.min(1876 - SCHEME_W, gx + 24)
-  sides.forEach((s, i) => cards.push(schemeCard(s, sideX, 14 + i * (SCHEME_H + 14), false)))
-
-  // 爪牙行（共享）：按被交战玩家分组；未交战爪牙作为收尾组
-  const yMinions = 216
+  // 爪牙在敌方阵线横排，按交战玩家分组。
+  const yMinions = 276
   const minionItems: Array<{ m: MinionView; group: number }> = []
   players.forEach((p, pi) => {
     for (const m of view.minions ?? []) if (m.engagedWith === p.id) minionItems.push({ m, group: pi })
   })
   for (const m of view.minions ?? []) if (!m.engagedWith) minionItems.push({ m, group: -1 })
   if (minionItems.length > 0) {
-    const xs = layoutRow(minionItems.map(() => CARD_W), (i) => minionItems[i].group, 24, 56)
+    const xs = layoutRow(minionItems.map(() => CARD_W), (i) => minionItems[i].group, 26, 62)
     minionItems.forEach(({ m, group }, i) => cards.push(minionCard(m, xs[i], yMinions, group)))
   }
+
+  // 共享区：环境与支线密谋位于牌桌中线，不再挤在反派指挥区。
+  const sides = view.sideSchemes ?? []
+  const sharedWidths = [...envs.map(() => CARD_W), ...sides.map(() => SCHEME_W)]
+  const sharedGap = 28
+  const sharedTotal = sharedWidths.reduce((sum, width) => sum + width, 0) + Math.max(0, sharedWidths.length - 1) * sharedGap
+  let sharedX = SCENE_W / 2 - sharedTotal / 2
+  envs.forEach((e) => {
+    cards.push(entityCard('environment', e, sharedX, 428, -1))
+    sharedX += CARD_W + sharedGap
+  })
+  sides.forEach((s) => {
+    cards.push(schemeCard(s, sharedX, 452, false))
+    sharedX += SCHEME_W + sharedGap
+  })
 
   // ---------------------------------------------------------------- 玩家区
   // 每名玩家一个「带」：场地行（盟友-升级-支援）→ 身份行（身份牌-牌库-
@@ -248,6 +249,8 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   const handCards = layoutHand(view)
   const viewerIdx = players.findIndex((p) => p.hand && p.hand.length > 0)
   const viewer = viewerIdx >= 0 ? viewerIdx : 0
+  const waitingIdx = view.waitingFor ? players.findIndex((p) => p.name === view.waitingFor) : -1
+  const activePlayer = waitingIdx >= 0 ? waitingIdx : view.question ? viewer : -1
   const N = players.length
 
   // 横置卡占位：90° 旋转后视觉宽度是 CARD_H，槽位随之加宽并在槽内居中，
@@ -279,13 +282,13 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   function identityRow(p: PlayerView, pi: number, y: number, scale: number, cx: number): void {
     const w = CARD_W * scale
     const gap = 22 * scale
-    const heroW = slotW(p.exhausted, scale)
+    const heroW = 164 * scale
     const enc = p.encounterDown > 0
       ? [{ id: `pile-enc-${p.id}`, w: w * 0.8 } as { id: string; w: number }]
       : []
     const total = heroW + gap + w + gap + w + enc.length * (w * 0.8 + gap)
     let x = cx - total / 2
-    cards.push({ ...heroCard(p, x + slotDx(p.exhausted, scale), y, pi), scale })
+    cards.push({ ...heroCard(p, x, y, pi, pi === activePlayer), scale })
     x += heroW + gap
     cards.push({
       id: `pile-deck-${p.id}`, code: '', kind: 'pile', x, y, playerIndex: pi,
@@ -310,7 +313,7 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   function compactBand(p: PlayerView, pi: number, y: number, scale: number, cx: number): void {
     const w = CARD_W * scale
     const gap = 18
-    const heroW = slotW(p.exhausted, scale)
+    const heroW = 164 * scale
     const fieldItems: Array<{ c: PlacedCard; w: number }> = []
     for (const a of p.allies ?? []) {
       const c = { ...allyCard(a, 0, y, pi), scale }
@@ -329,7 +332,7 @@ export function layoutBoard(view: GameView): PlacedCard[] {
       (p.encounterDown > 0 ? w * 0.8 + gap : 0) +
       fieldItems.reduce((a, f) => a + f.w + 14, 0)
     let x = cx - total / 2
-    cards.push({ ...heroCard(p, x + slotDx(p.exhausted, scale), y, pi), scale })
+    cards.push({ ...heroCard(p, x, y, pi, pi === activePlayer), scale })
     x += heroW + gap
     const pileY = y + (CARD_H - CARD_H * scale) / 2
     cards.push({
@@ -355,25 +358,22 @@ export function layoutBoard(view: GameView): PlacedCard[] {
     }
   }
 
-  // 查看者带（底部居中）：场地行 / 身份行 / 手牌扇形
-  const vScale = N >= 3 ? 0.85 : 1
-  const handY = handCards.length > 0 ? handCards[0].y : SCENE_H
-  const vIdY = handY - CARD_H * vScale - 22
-  const vFieldY = vIdY - CARD_H * vScale - 16
-  fieldRow(players[viewer], viewer, vFieldY, vScale, SCENE_W / 2)
-  identityRow(players[viewer], viewer, vIdY, vScale, SCENE_W / 2)
+  // 查看者带：英雄与牌堆固定在左下指挥位，场上资产横向铺在其右侧。
+  const vScale = N >= 3 ? 0.82 : 0.94
+  fieldRow(players[viewer], viewer, 610, vScale, 1120)
+  identityRow(players[viewer], viewer, 720, vScale, 420)
 
-  // 其他玩家带
+  // 其他玩家压缩到共享区两翼，保留多人局识别但不争夺主视线。
   const others = players.map((p, i) => ({ p, i })).filter(({ i }) => i !== viewer)
   if (others.length === 1) {
-    compactBand(others[0].p, others[0].i, 412, 0.78, SCENE_W / 2)
+    compactBand(others[0].p, others[0].i, 432, 0.68, 360)
   } else if (others.length > 1) {
-    const scale = 0.55
+    const scale = 0.5
     const h = CARD_H * scale
     others.forEach((o, k) => {
       const left = k % 2 === 0
-      const cx = left ? 330 : SCENE_W - 330
-      const y = 396 + Math.floor(k / 2) * (h + 22)
+      const cx = left ? 300 : SCENE_W - 300
+      const y = 416 + Math.floor(k / 2) * (h + 18)
       compactBand(o.p, o.i, y, scale, cx)
     })
   }
@@ -408,16 +408,16 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   return cards
 }
 
-function heroCard(p: PlayerView, x: number, y: number, playerIndex: number): PlacedCard {
+function heroCard(p: PlayerView, x: number, y: number, playerIndex: number, active = false): PlacedCard {
   const isHero = p.side === 'hero'
   return {
     id: p.id,
     code: isHero ? p.heroCode : p.alterEgoCode,
-    kind: 'hero', x, y, playerIndex,
+    kind: 'hero', x, y, w: 164, h: 164, playerIndex,
     // 悬浮提示用当前面的卡牌名（与其他卡一致），不用玩家名
     title: (isHero ? p.heroName : p.alterEgoName) || p.name,
     hp: p.hp, maxHp: p.maxHp,
     exhausted: p.exhausted, stunned: p.stunned, confused: p.confused, tough: p.tough,
-    firstPlayer: p.firstPlayer, koed: p.koed, z: 3,
+    firstPlayer: p.firstPlayer, koed: p.koed, active, z: 3,
   }
 }
