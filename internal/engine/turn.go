@@ -485,6 +485,14 @@ func (g *Game) guardBlocksVillain(pid PlayerID, v *Villain) bool {
 		if mn.EDef().HasTrait("inheritor") && g.minionInPlay("30034") {
 			return true
 		}
+		// The Sentinel Factory (32112) grants every Sentinel minion
+		// guard; The Acolytes (32165) grants every Acolyte guard.
+		if mn.EDef().HasTrait("sentinel") && g.sideSchemeInPlay("32112") {
+			return true
+		}
+		if mn.EDef().HasTrait("acolyte") && g.sideSchemeInPlay("32165") {
+			return true
+		}
 	}
 	return false
 }

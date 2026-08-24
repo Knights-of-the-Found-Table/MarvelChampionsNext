@@ -526,6 +526,15 @@ type (
 		CardID string
 		Enemy  EntityID
 	}
+	// ShuffleMinionIntoDeck removes a minion from play and shuffles its
+	// card into the encounter deck (Magik).
+	ShuffleMinionIntoDeck struct{ MinionID EntityID }
+	// TuckCardUnderOZT mills the player's top card facedown under
+	// Operation Zero Tolerance (Mutant Detected).
+	TuckCardUnderOZT struct{ Player PlayerID }
+	// AddMagnetCounter places a magnet counter on the main scheme and
+	// resolves the 3-counter Magnetic reveal (Magneto).
+	AddMagnetCounter struct{ Scheme EntityID }
 
 
 	// EventPlayed announces that a player played an event card
@@ -807,6 +816,9 @@ func (GuessCheck) msg()            {}
 func (EncounterTakeCard) msg()     {}
 func (ShuffleEncounterDeck) msg()  {}
 func (AttachHandCard) msg()        {}
+func (ShuffleMinionIntoDeck) msg() {}
+func (TuckCardUnderOZT) msg()   {}
+func (AddMagnetCounter) msg()  {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

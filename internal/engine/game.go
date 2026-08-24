@@ -66,6 +66,9 @@ type Game struct {
 
 	// ActiveTurn is the player currently taking their player-phase turn.
 	ActiveTurn PlayerID `json:"activeTurn,omitempty"`
+	// MutantBombCounters tracks Boom Bang bomb counters in play (shared
+	// pool approximation).
+	MutantBombCounters int `json:"mutantBombs,omitempty"`
 	// ActiveVillain holds the active-counter villain in multi-villain
 	// scenarios (Wrecking Crew); empty otherwise.
 	ActiveVillain EntityID `json:"activeVillain,omitempty"`

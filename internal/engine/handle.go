@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"strconv"
+	"regexp"
 	"fmt"
 	"strings"
 
@@ -307,6 +309,18 @@ func (g *Game) handle(msg Message) {
 		g.handleAskOtherAction(m)
 
 	case SchemeThreat:
+		// Hinder keyword: while side schemes with Hinder X are in play, X
+		// fewer threat is placed on the main scheme (each placement).
+		if m.N > 0 && g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
+			if h := g.hinderTotal(); h > 0 {
+				if h >= m.N {
+					g.logf("Hinder prevents all %d threat on %s", m.N, g.MainScheme.EDef().Name)
+					return
+				}
+				g.logf("Hinder prevents %d threat on %s", h, g.MainScheme.EDef().Name)
+				m.N -= h
+			}
+		}
 		// Great Responsibility interrupt window (01061/30015): a player
 		// holding the event may take the threat as damage instead.
 		if m.N > 0 {
@@ -394,6 +408,62 @@ func (g *Game) handle(msg Message) {
 			g.EncounterDeck[i], g.EncounterDeck[j] = g.EncounterDeck[j], g.EncounterDeck[i]
 		}
 		g.logf("Encounter deck shuffled")
+
+	case AddMagnetCounter:
+		if s := g.MainScheme; s != nil && s.ID == m.Scheme {
+			s.Counters++
+			g.Logf("A magnet counter is placed on %s (%d)", s.EDef().Name, s.Counters)
+			if s.Counters >= 3 {
+				s.Counters -= 3
+				for guards := 0; guards < 40; guards++ {
+					if len(g.EncounterDeck) == 0 {
+						if len(g.EncounterDiscard) == 0 {
+							return
+						}
+						g.EncounterDeck = g.EncounterDiscard
+						g.EncounterDiscard = nil
+						for i := len(g.EncounterDeck) - 1; i > 0; i-- {
+							j := g.Random(i + 1)
+							g.EncounterDeck[i], g.EncounterDeck[j] = g.EncounterDeck[j], g.EncounterDeck[i]
+						}
+					}
+					top := g.EncounterDeck[0]
+					g.EncounterDeck = g.EncounterDeck[1:]
+					if top.Def().HasTrait("magnetic") {
+						g.Push(RevealEncounterCard{Player: PlayerID(g.playerOrder()[0].ID), Card: top})
+						return
+					}
+					g.EncounterDiscard = append(g.EncounterDiscard, top)
+				}
+			}
+		}
+
+	case TuckCardUnderOZT:
+		// Mill the player's top deck card facedown under the Operation
+		// Zero Tolerance side scheme (32104).
+		for _, s := range g.SideSchemes {
+			if s == nil || s.Code != "32104" {
+				continue
+			}
+			if p := g.Player(m.Player); p != nil && len(p.Deck) > 0 {
+				top := p.Deck[0]
+				p.Deck = p.Deck[1:]
+				s.StoredCards = append(s.StoredCards, top)
+				g.Logf("%s's %s is placed facedown under Operation Zero Tolerance", p.Name, top.Def().Name)
+			}
+		}
+
+	case ShuffleMinionIntoDeck:
+		if mn := g.Minions[m.MinionID]; mn != nil {
+			code := mn.Code
+			g.Delete(mn.ID)
+			g.EncounterDeck = append(g.EncounterDeck, Card{ID: g.nextCardID(), Code: code})
+			for i := len(g.EncounterDeck) - 1; i > 0; i-- {
+				j := g.Random(i + 1)
+				g.EncounterDeck[i], g.EncounterDeck[j] = g.EncounterDeck[j], g.EncounterDeck[i]
+			}
+			g.logf("%s is shuffled into the encounter deck", DB.MustLookup(code).Name)
+		}
 
 	case AttachHandCard:
 		if p := g.Player(m.Player); p != nil {
@@ -2104,8 +2174,24 @@ func (g *Game) handlePlayCard(m PlayCard) {
 	delete(g.EventThreatBonus, p.ID)
 	// Pay resources: discard chosen cards.
 	for _, id := range m.Paid.CardIDs {
-		if rc, ok := p.Hand.Remove(id); ok {
-			p.Discard = append(p.Discard, rc)
+		rc, ok := p.Hand.Remove(id)
+		if !ok {
+			continue
+		}
+		p.Discard = append(p.Discard, rc)
+		// Mutant Genesis resource riders: Aggressive Energy (+1 damage for
+		// Attack events) and Defensive Energy (draw 1 for Defense events).
+		switch data.BaseCode(rc.Code) {
+		case "32047":
+			if def.Type == "event" && def.HasTrait("attack") {
+				g.EventDamageBonus[p.ID] += 1
+				g.logf("Aggressive Energy — %s deals 1 additional damage", def.Name)
+			}
+		case "32018":
+			if def.Type == "event" && def.HasTrait("defense") {
+				g.Push(DrawCards{Player: p.ID, N: 1})
+				g.logf("Defensive Energy — draw 1 card")
+			}
 		}
 	}
 	_, stillInHand := p.Hand.Find(card.ID)
@@ -2587,6 +2673,25 @@ func boostSpawnsMinion(def *data.CardDef) bool {
 	return strings.Contains(def.Text, "Boost: Put") || strings.Contains(def.Text, "Boost: put")
 }
 
+// hinderTotal sums the printed Hinder values of side schemes in play
+// (per hero; parsed from the text — Hinder is not in the keyword
+// whitelist).
+func (g *Game) hinderTotal() int {
+	total := 0
+	for _, s := range g.SideSchemes {
+		if s == nil || s.PlayerSide {
+			continue
+		}
+		if m := hinderRE.FindStringSubmatch(s.EDef().Text); m != nil {
+			v, _ := strconv.Atoi(m[1])
+			total += v * len(g.Players)
+		}
+	}
+	return total
+}
+
+var hinderRE = regexp.MustCompile(`Hinder (\d+)`)
+
 // handCardHolding finds the first player holding a card with one of the
 // given base codes in hand (interrupt-event windows).
 func (g *Game) handCardHolding(codes ...string) (*Player, Card, bool) {
@@ -2611,6 +2716,17 @@ func (g *Game) handCardHolding(codes ...string) (*Player, Card, bool) {
 func (g *Game) schemeActivationPending(villain EntityID) bool {
 	for _, msg := range g.queue {
 		if m, ok := msg.(ApplyVillainScheme); ok && m.VillainID == villain {
+			return true
+		}
+	}
+	return false
+}
+
+// sideSchemeInPlay reports whether a side scheme with the given code is
+// in play (guard auras).
+func (g *Game) sideSchemeInPlay(code string) bool {
+	for _, s := range g.SideSchemes {
+		if s != nil && s.Code == code {
 			return true
 		}
 	}
