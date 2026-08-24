@@ -1949,6 +1949,21 @@ func (g *Game) handleVillainActivates(m VillainActivates) {
 			g.logf("%s is confused; scheme canceled", def.Name)
 			return
 		}
+		// Tempus (45042): discard her to cancel the scheme activation.
+		for _, id := range p.Allies {
+			a := g.Allies[id]
+			if a == nil || a.Exhausted || data.BaseCode(a.Code) != "45042" {
+				continue
+			}
+			g.Push(AskQuestion{Player: p.ID, Question: Ask(
+				fmt.Sprintf("Discard Tempus to cancel %s's scheme? (you take a facedown encounter card)", def.Name),
+				Choice{ID: "tempus-cancel", Label: "Discard Tempus → cancel the scheme", Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code}.
+					Msgs(AllyDestroyed{AllyID: a.ID}, DealEncounterToPlayer{Player: p.ID}),
+				Choice{ID: "tempus-pass", Label: "Let the scheme resolve", Kind: ChoicePass}.
+					Msgs(DealBoost{Enemy: v.ID}, RevealBoost{Enemy: v.ID}, ApplyVillainScheme{VillainID: v.ID, Player: p.ID}),
+			)})
+			return
+		}
 		g.logf("%s schemes against %s", def.Name, p.Name)
 		g.Push(DealBoost{Enemy: v.ID})
 		g.Push(RevealBoost{Enemy: v.ID})
@@ -2259,6 +2274,10 @@ func (g *Game) handlePlayCard(m PlayCard) {
 	if def.Type == "ally" {
 		p.AllyPlayedThisRound = true
 	}
+	// Clobber (45046): the round's first played card returns to hand
+	// after resolving.
+	firstOfRound := !g.UsedThisRound["card-played"]
+	g.UsedThisRound["card-played"] = true
 	// A fresh play resets pending event bonuses (Embiggen!/Shrink are
 	// per-event).
 	delete(g.EventDamageBonus, p.ID)
@@ -2375,6 +2394,10 @@ func (g *Game) handlePlayCard(m PlayCard) {
 			g.Push(b.OnPlay(g, ec)...)
 		}
 		p.Discard = append(p.Discard, card)
+		if firstOfRound && data.BaseCode(def.Code) == "45046" {
+			g.logf("Clobber is the first card played this round — it returns to hand")
+			g.PushFront(ReturnDiscardCard{Player: p.ID, CardID: card.ID})
+		}
 	}
 }
 
@@ -2530,6 +2553,26 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 				Kind: ChoiceAbility, SourceID: u.ID, CardCode: u.Code,
 			}.Msgs(repl...))
 		}
+	}
+	// Stepford Cuckoos (45049): exhaust + a psi counter cancels the
+	// treachery; the revealer draws a replacement encounter card.
+	for _, id := range sortedIDs(g.Supports) {
+		s2 := g.Supports[id]
+		if s2 == nil || s2.Owner != m.Player || s2.Exhausted || s2.Counters <= 0 {
+			continue
+		}
+		if data.BaseCode(s2.Code) != "45049" {
+			continue
+		}
+		interrupts = append(interrupts, Choice{
+			ID: "cuckoos-cancel", Label: "Exhaust Stepford Cuckoos (psi counter) → cancel " + m.Card.Def().Name,
+			Kind: ChoiceAbility, SourceID: s2.ID, CardCode: s2.Code,
+		}.Msgs(
+			ExhaustEntity{ID: s2.ID},
+			AddEntityCounter{ID: s2.ID, N: -1},
+			DiscardEncounterCard{Card: m.Card},
+			RevealNextEncounter{Player: m.Player},
+		))
 	}
 	if len(interrupts) == 0 {
 		g.Push(TreacheryResolve{Player: m.Player, Card: m.Card})

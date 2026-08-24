@@ -40,10 +40,14 @@ var (
 		"40077": true, "40078": true, "40103": true, "40104": true,
 		"40121": true, "40139": true, "40140": true, "40141": true,
 		"40142": true, "40143": true, "40166": true, "40167": true,
+		// the aoa snapshot follows the same convention
+		"45062": true, "45085": true, "45103": true, "45121": true,
+		"45147": true, "45148": true,
 	}
 	statlessSchemeStages = map[string]bool{
 		"40139": true,  // transition stage, no threat target
 		"40139b": true, // transition stage, no threat target
+		"45103": true,  // The Age of Apocalypse: X is villain HP based
 		"11008b": true, // Master of Time: variants-arrival transition
 		// sm snapshot gaps: single-face schemes with no threat stats
 		"27076a": true, "27116a": true, "27101a": true,

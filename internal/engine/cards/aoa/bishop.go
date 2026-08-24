@@ -13,6 +13,20 @@ func init() {
 	registerBishopSignatures()
 	registerBishopObligation()
 	registerBishopNemesis()
+	registerAoaPlayerCards()
+	registerUnus()
+	registerDystopianNightmare()
+	registerStandardIII()
+	registerHorsemen()
+	registerHounds()
+	registerApocalypse()
+	registerEnSabahNur()
+	registerCelestialTech()
+	registerClanAkkaba()
+	registerDarkRiders()
+	registerDarkBeast()
+	registerAoaCampaign()
+	registerAoaScenarios()
 }
 
 func resourceCards(cards engine.CardList) engine.CardList {
