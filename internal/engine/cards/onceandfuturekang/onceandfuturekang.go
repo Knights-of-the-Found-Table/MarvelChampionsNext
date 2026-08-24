@@ -31,6 +31,7 @@ func init() {
 	registerTreacheries()
 	registerObligations()
 	registerAttachments()
+	registerConquerorFinal()
 }
 
 func registerScenario() {
@@ -783,4 +784,32 @@ func deref(p *int, def int) int {
 		return def
 	}
 	return *p
+}
+
+// registerConquerorFinal installs Kang the Conqueror's final stage
+// (11006): the extortion choice on each attack (defeat = default win).
+func registerConquerorFinal() {
+	engine.RegisterBehavior("11006", &engine.Behavior{
+		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
+			m, ok := msg.(engine.VillainActivates)
+			if !ok || m.VillainID != e.EID() {
+				return nil
+			}
+			p := g.Player(m.Player)
+			if p == nil || !p.IsHero() {
+				return nil
+			}
+			var opts []engine.Choice
+			if g.MainScheme != nil {
+				opts = append(opts, engine.Choice{
+					ID: "threat", Label: "Place 1 threat on the main scheme", Kind: engine.ChoiceLabel,
+				}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: e.EID()}))
+			}
+			opts = append(opts, engine.Choice{
+				ID: "atk", Label: "Kang gets +2 ATK for this attack", Kind: engine.ChoiceLabel,
+			}.Msgs(engine.BoostActivation{Enemy: e.EID(), N: 2}))
+			return []engine.Message{engine.AskQuestion{Player: p.ID,
+				Question: engine.Ask("Kang demands tribute: choose one", opts...)}}
+		},
+	})
 }

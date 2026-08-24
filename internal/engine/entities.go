@@ -264,6 +264,9 @@ type MainScheme struct {
 	// Crisis blocks thwarting; Hazard adds encounter cards.
 	Crisis bool `json:"crisis,omitempty"`
 	Hazard int  `json:"hazard,omitempty"`
+	// Counters tracks scheme-side counters (Absorbing Man's delay
+	// markers, Zola's test counters).
+	Counters int `json:"counters,omitempty"`
 }
 
 func (s *MainScheme) EID() EntityID       { return s.ID }

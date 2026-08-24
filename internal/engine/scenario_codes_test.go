@@ -29,6 +29,10 @@ var (
 		// the mts snapshot follows the same unsuffixed convention
 		"21074": true, "21075": true, "21098": true, "21114": true,
 		"21115": true, "21138": true, "21165": true,
+		// the trors snapshot follows the same convention
+		"04061": true, "04062": true, "04063": true, "04079": true,
+		"04096": true, "04112": true, "04113": true, "04128": true,
+		"04129": true,
 		"27076a": true, "27116a": true, "27101a": true,
 	}
 	statlessSchemeStages = map[string]bool{
