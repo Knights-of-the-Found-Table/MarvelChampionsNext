@@ -85,6 +85,9 @@ type Minion struct {
 	// BlankText marks the text box as blank until the end of the phase
 	// (Edison's Giant Robot).
 	BlankText bool `json:"blankText,omitempty"`
+	// TuckedCards stores facedown cards attached to the minion (Electro's
+	// drained resources).
+	TuckedCards CardList `json:"tuckedCards,omitempty"`
 
 	Attachments []EntityID `json:"attachments"`
 }

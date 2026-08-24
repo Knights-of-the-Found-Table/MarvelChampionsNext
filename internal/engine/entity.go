@@ -53,6 +53,9 @@ type Behavior struct {
 	// Villain forced behavior on activation; default scheme/attack applies
 	// when nil.
 	VillainActivate func(g *Game, v *Villain, p *Player) []Message
+	// Minion forced behavior on activation (Hobgoblin discarding boost
+	// cards instead of attacking); default attack/scheme applies when nil.
+	MinionActivate func(g *Game, mn *Minion, p *Player) []Message
 	// Treachery resolution; default discards the treachery with no effect.
 	ResolveTreachery func(g *Game, t *Treachery, p *Player) []Message
 	// Boost: resolves when the card is revealed faceup as a boost card
@@ -154,6 +157,9 @@ type ResourceAbility struct {
 	// NoExhaust skips the source exhaustion (identity counter resources,
 	// e.g. Spider-Ham's toon counters spent as wild).
 	NoExhaust bool
+	// DamageAttached deals N damage to the upgrade's attached character
+	// per use (Clarity of Purpose).
+	DamageAttached int
 }
 
 // StatBonus is a persistent stat adjustment applied to an identity.

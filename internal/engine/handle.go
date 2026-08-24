@@ -395,6 +395,23 @@ func (g *Game) handle(msg Message) {
 		}
 		g.logf("Encounter deck shuffled")
 
+	case AttachHandCard:
+		if p := g.Player(m.Player); p != nil {
+			if c, ok := p.Hand.Remove(m.CardID); ok {
+				if mn := g.Minions[m.Enemy]; mn != nil {
+					n := 0
+					for _, icon := range c.Def().Resources {
+						if icon == "energy" {
+							n++
+						}
+					}
+					mn.MaxHP += n
+					mn.TuckedCards = append(mn.TuckedCards, c)
+					g.logf("%s attaches %s facedown (+%d max HP)", mn.EDef().Name, c.Def().Name, n)
+				}
+			}
+		}
+
 	case HealEntity:
 		g.heal(m.Target, m.N)
 
@@ -1811,6 +1828,10 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 		return
 	}
 	def := mn.EDef()
+	if b := behavior(mn.Code); b.MinionActivate != nil {
+		g.Push(b.MinionActivate(g, mn, p)...)
+		return
+	}
 	if p.IsHero() {
 		if mn.Stunned {
 			mn.Stunned = false
@@ -2294,6 +2315,24 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 			ID: "bw-cancel", Label: "Exhaust Black Widow → cancel " + m.Card.Def().Name,
 			Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code,
 		}.Msgs(ExhaustEntity{ID: a.ID}))
+	}
+	// In-play upgrades with a treachery interrupt (Spider-Tingle): the
+	// hook returns the full replacement including its own discard.
+	for _, id := range sortedIDs(g.Upgrades) {
+		u := g.Upgrades[id]
+		if u == nil || u.Owner != m.Player {
+			continue
+		}
+		hb := behavior(u.Code)
+		if hb.TreacheryInterrupt == nil {
+			continue
+		}
+		if repl := hb.TreacheryInterrupt(g, p, m.Card); repl != nil {
+			interrupts = append(interrupts, Choice{
+				ID: "upgrade-interrupt-" + u.ID.String(), Label: "Use " + u.EDef().Name,
+				Kind: ChoiceAbility, SourceID: u.ID, CardCode: u.Code,
+			}.Msgs(repl...))
+		}
 	}
 	if len(interrupts) == 0 {
 		g.Push(TreacheryResolve{Player: m.Player, Card: m.Card})

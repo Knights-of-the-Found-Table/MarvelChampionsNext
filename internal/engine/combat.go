@@ -137,6 +137,16 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 			}
 		}
 	}
+	// Grand Larceny: threat cannot be removed while a Criminal minion is
+	// in play.
+	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "31030" {
+		for _, mn := range g.Minions {
+			if mn != nil && mn.EDef().HasTrait("criminal") {
+				g.logf("threat cannot be removed from Grand Larceny while a Criminal is in play")
+				return
+			}
+		}
+	}
 	if adj, ok := g.eventBonusFor(n, source, "threat"); ok {
 		n = adj
 	}

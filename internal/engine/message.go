@@ -519,6 +519,13 @@ type (
 	EncounterTakeCard struct{ CardID string }
 	// ShuffleEncounterDeck shuffles the encounter deck.
 	ShuffleEncounterDeck struct{}
+	// AttachHandCard removes a card from a player's hand and attaches it
+	// to a minion (Electro: +1 max HP per [energy] resource attached).
+	AttachHandCard struct {
+		Player PlayerID
+		CardID string
+		Enemy  EntityID
+	}
 
 
 	// EventPlayed announces that a player played an event card
@@ -799,6 +806,7 @@ func (CancelBoostIcons) msg()      {}
 func (GuessCheck) msg()            {}
 func (EncounterTakeCard) msg()     {}
 func (ShuffleEncounterDeck) msg()  {}
+func (AttachHandCard) msg()        {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

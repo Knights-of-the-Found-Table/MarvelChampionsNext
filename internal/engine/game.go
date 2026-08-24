@@ -635,6 +635,13 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 							if ra.UsesCounters {
 								exhausts = append(exhausts, AddEntityCounter{ID: st.Source, N: -1})
 							}
+							// Clarity of Purpose: the resource costs 1
+							// damage on the attached character.
+							if ra.DamageAttached > 0 {
+								if u, ok := src.(*Upgrade); ok && u.AttachTo != "" {
+									exhausts = append(exhausts, DamageEntity{Target: u.AttachTo, Damage: ra.DamageAttached, Source: u.Owner})
+								}
+							}
 						}
 					}
 				}
