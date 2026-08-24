@@ -956,6 +956,28 @@ func (g *Game) handle(msg Message) {
 		g.Collection = append(g.Collection, m.Card)
 		g.Logf("%s is placed into The Collection", m.Card.Def().Name)
 
+	case SummonSix:
+		for _, base := range m.Cards {
+			var kept CardList
+			found := false
+			for _, c := range g.SetAside {
+				if BaseCodeOf(c.Code) == base && !found {
+					found = true
+					continue
+				}
+				kept = append(kept, c)
+			}
+			if !found {
+				continue
+			}
+			g.SetAside = kept
+			v := g.spawnVillain(VillainStageCodes(base), 1)
+			if v != nil {
+				g.ActiveVillain = v.ID
+				g.logMajorf("Ambush! %s joins the fight", v.EDef().Name)
+			}
+		}
+
 	case CostDiscountApply:
 		if p := g.Player(m.Player); p != nil && m.Amount > 0 {
 			p.CostDiscounts = append(p.CostDiscounts, CostDiscount{Amount: m.Amount})

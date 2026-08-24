@@ -292,6 +292,8 @@ type SideScheme struct {
 	// StoredCards holds cards tucked under the scheme (Open the Dark
 	// Dimension).
 	StoredCards CardList `json:"storedCards,omitempty"`
+	// Counters tracks scheme-side counters (Off the Rails speed).
+	Counters int `json:"counters,omitempty"`
 }
 
 func (s *SideScheme) EID() EntityID       { return s.ID }

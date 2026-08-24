@@ -48,8 +48,12 @@ type Game struct {
 	// from the game faceup instead of reaching their discard piles.
 	Collection CardList `json:"collection,omitempty"`
 	// SetAside holds cards removed from the encounter deck by scenario
-	// setup (The Missing Milano stashes Ship Command).
+	// setup (The Missing Milano stashes Ship Command, the Sinister Six's
+	// bench).
 	SetAside CardList `json:"setAside,omitempty"`
+	// GliderCounter marks which scheme currently holds the Venom
+	// Goblin's glider (approximation of the three-Manhattan board).
+	GliderCounter EntityID `json:"gliderCounter,omitempty"`
 
 	// queue holds pending messages.
 	queue []Message
@@ -115,6 +119,16 @@ func (g *Game) SpawnSupport(code string, owner PlayerID) *Support {
 	g.Supports[s.ID] = s
 	g.logMajorf("%s enters play under %s's control", s.EDef().Name, g.Player(owner).Name)
 	return s
+}
+
+// SpawnVillainFromCard brings a villain into play from its base card
+// code (Sinister Six ambushes from the set-aside area).
+func (g *Game) SpawnVillainFromCard(base string) *Villain {
+	stages := VillainStageCodes(base)
+	if len(stages) == 0 {
+		return nil
+	}
+	return g.spawnVillain(stages, 1)
 }
 
 // SpawnAttachment brings an encounter attachment into play targeting the

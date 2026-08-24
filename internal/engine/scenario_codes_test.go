@@ -23,10 +23,16 @@ import (
 // the whole 40139 family is statless in the pack data (a known next_evol
 // snapshot gap).
 var (
-	nonBSchemeStages     = map[string]bool{"32088a": true}
+	nonBSchemeStages = map[string]bool{"32088a": true,
+		// the sm snapshot codes its gameplay faces without the b suffix
+		"27064": true, "27087": true, "27088": true, "27100": true,
+		"27076a": true, "27116a": true, "27101a": true,
+	}
 	statlessSchemeStages = map[string]bool{
 		"40139b": true, // transition stage, no threat target
 		"11008b": true, // Master of Time: variants-arrival transition
+		// sm snapshot gaps: single-face schemes with no threat stats
+		"27076a": true, "27116a": true, "27101a": true,
 	}
 )
 

@@ -255,6 +255,14 @@ func (g *Game) abilityChoices(p *Player) []Choice {
 			}
 		}
 	}
+	// Minions with player-usable actions (Common Criminal's buy-off).
+	for _, id := range sortedIDs(g.Minions) {
+		if m := g.Minions[id]; m != nil {
+			if hb := behavior(m.Code); hb.Abilities != nil {
+				appendAbilities(m, hb.Abilities(g, m))
+			}
+		}
+	}
 	// Side schemes and environments with first-player actions (Milano
 	// removal abilities, Library Labyrinth).
 	for _, id := range sortedIDs(g.SideSchemes) {

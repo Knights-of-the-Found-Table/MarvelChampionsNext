@@ -483,6 +483,8 @@ type (
 	// CollectCard moves a card faceup into The Collection (the
 	// Collector's game area).
 	CollectCard struct{ Card Card }
+	// SummonSix pulls set-aside Sinister Six members into play.
+	SummonSix struct{ Cards []string }
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -755,6 +757,7 @@ func (SlippingSanityMill) msg()       {}
 func (IndirectDamage) msg()        {}
 func (BarrageCharge) msg()         {}
 func (CollectCard) msg()           {}
+func (SummonSix) msg()             {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}
