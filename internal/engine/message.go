@@ -722,6 +722,14 @@ type (
 		Player PlayerID
 		CardID string
 	}
+
+	// DeckTopDiscarded announces a card that left the top of a player
+	// deck for the discard pile (Domino's luck riders: Jackpot!, White
+	// Fox, Digging Deep, The Painted Lady).
+	DeckTopDiscarded struct {
+		Player PlayerID
+		Card   Card
+	}
 )
 
 func (StartGame) msg()                {}
@@ -864,3 +872,4 @@ func (UpgradeEnterPlay) msg()         {}
 func (SideDeckToHand) msg()           {}
 func (RecycleFromDiscard) msg()       {}
 func (SwapHandWithDeckTop) msg()      {}
+func (DeckTopDiscarded) msg()         {}

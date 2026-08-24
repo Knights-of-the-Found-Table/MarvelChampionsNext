@@ -528,6 +528,11 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 	p := g.Player(a.Owner)
 	atk := a.AttackVal + a.BonusATK + a.PermATK
 	consq := 1 + g.attachedConsequential(a)
+	// Mission Planning (40017): allies skip consequential damage this
+	// round (approximation of "until the end of the phase").
+	if g.UsedThisRound["mission-planning"] {
+		consq = 0
+	}
 	consequential := func(target EntityID) []Message {
 		// Elektra-style allies redirect consequential damage to the
 		// owner.
@@ -620,6 +625,10 @@ func (g *Game) schemeChoices(n int) []Choice {
 func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 	var out []Choice
 	thw := a.ThwartVal + a.BonusTHW + a.PermTHW
+	consq := 1
+	if g.UsedThisRound["mission-planning"] {
+		consq = 0
+	}
 	consequential := func(target EntityID) []Message {
 		self := a.ID
 		if behavior(a.Code).ConsequentialToOwner {
@@ -629,7 +638,7 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 			ExhaustEntity{ID: a.ID},
 			ThwartScheme{Scheme: target, N: thw, Source: a.Owner},
 			AllyThwartWindow{Ally: a.ID, Scheme: target},
-			DamageEntity{Target: self, Damage: 1, Source: a.ID},
+			DamageEntity{Target: self, Damage: consq, Source: a.ID},
 		}
 	}
 	if g.MainScheme != nil && !g.crisisInPlay() {

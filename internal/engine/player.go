@@ -139,6 +139,16 @@ func (p *Player) HandSize(g *Game) int {
 				}
 			}
 		}
+		// Left to Your Fate (40167): each identity gets +2 hand size.
+		if g.MainScheme != nil && data.BaseCode(g.MainScheme.Code) == "40167" {
+			n += 2
+		}
+		// Tempo (40181): +1 hand size while engaged with you.
+		for _, mn := range g.Minions {
+			if mn != nil && mn.Code == "40181" && mn.EngagedWith == p.ID {
+				n++
+			}
+		}
 	}
 	return n + p.TempHandSize
 }

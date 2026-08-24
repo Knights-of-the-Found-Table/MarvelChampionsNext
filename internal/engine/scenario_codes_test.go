@@ -35,8 +35,14 @@ var (
 		"04096": true, "04112": true, "04113": true, "04128": true,
 		"04129": true,
 		"27076a": true, "27116a": true, "27101a": true,
+		// the next_evol snapshot codes its gameplay faces without the b
+		// suffix (the a side is the setup face)
+		"40077": true, "40078": true, "40103": true, "40104": true,
+		"40121": true, "40139": true, "40140": true, "40141": true,
+		"40142": true, "40143": true, "40166": true, "40167": true,
 	}
 	statlessSchemeStages = map[string]bool{
+		"40139": true,  // transition stage, no threat target
 		"40139b": true, // transition stage, no threat target
 		"11008b": true, // Master of Time: variants-arrival transition
 		// sm snapshot gaps: single-face schemes with no threat stats

@@ -164,3 +164,13 @@ func (g *Game) QueueLen() int { return len(g.queue) }
 // AttackValueOf returns an enemy's current attack value (including boost
 // icons).
 func (g *Game) AttackValueOf(id EntityID) int { return g.attackValue(id) }
+
+// SideSchemeInPlay reports whether a side scheme with the exact code is
+// in play (exported for card behaviors).
+func (g *Game) SideSchemeInPlay(code string) bool { return g.sideSchemeInPlay(code) }
+
+// AttackActivationPending reports whether a villain's attack question is
+// queued (boost-reaction windows, exported for card behaviors).
+func AttackActivationPending(g *Game, villain EntityID) bool {
+	return g.attackActivationPending(villain)
+}

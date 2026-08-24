@@ -145,6 +145,10 @@ type Behavior struct {
 	// Side scheme: runs when the scheme is defeated, before it leaves
 	// play (victory rewards; the engine handles the removal).
 	SideSchemeDefeated func(g *Game, s *SideScheme) []Message
+	// Villain/Minion: dynamic attack & scheme bonuses (Juggernaut's
+	// momentum counters, Stryfe's hand-type scaling); consulted by
+	// attackValue and the scheme placement paths.
+	EnemyStatBonus func(g *Game, e Entity) (atk, sch int)
 }
 
 // ResourceAbility describes an exhaust-to-generate-resources ability.

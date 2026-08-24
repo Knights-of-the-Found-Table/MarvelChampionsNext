@@ -50,7 +50,7 @@ func init() {
 		ShuffleIntoDeck{}, GrantTrait{}, InvokeSpecial{}, AllyAttackWindow{},
 		AllyThwartWindow{},
 		SideDeckDiscardTop{}, UpgradeEnterPlay{}, SideDeckToHand{}, RecycleFromDiscard{},
-		SwapHandWithDeckTop{},
+		SwapHandWithDeckTop{}, DeckTopDiscarded{},
 		ResourcePayStub{}, AbilityPayStub{},
 	}
 	for _, p := range prototypes {

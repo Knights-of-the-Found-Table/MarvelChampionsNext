@@ -32,6 +32,8 @@ type Villain struct {
 	Attachments []EntityID `json:"attachments"`
 	// Undamageable marks special stages (e.g. Rhino I).
 	Undamageable bool `json:"undamageable,omitempty"`
+	// Counters tracks villain-side counters (Juggernaut's momentum).
+	Counters int `json:"counters,omitempty"`
 }
 
 func (v *Villain) EID() EntityID       { return v.ID }
@@ -88,6 +90,9 @@ type Minion struct {
 	// TuckedCards stores facedown cards attached to the minion (Electro's
 	// drained resources).
 	TuckedCards CardList `json:"tuckedCards,omitempty"`
+	// Counters tracks minion-side counters (Slab's growth, Prototype's
+	// luck, Samurai's charges).
+	Counters int `json:"counters,omitempty"`
 
 	Attachments []EntityID `json:"attachments"`
 }
@@ -323,6 +328,9 @@ type Environment struct {
 	Exhausted bool     `json:"exhausted"`
 	// Counters tracks scenario counters (infamy/madness...).
 	Counters int `json:"counters,omitempty"`
+	// StoredCards holds cards banked under the environment (the Marauders'
+	// Routed board tucks defeated villains here).
+	StoredCards CardList `json:"storedCards,omitempty"`
 }
 
 func (e *Environment) EID() EntityID       { return e.ID }

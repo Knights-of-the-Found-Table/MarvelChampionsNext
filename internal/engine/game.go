@@ -248,6 +248,11 @@ func (g *Game) Entity(id EntityID) Entity {
 // Delete removes an entity from play.
 func (g *Game) Delete(id EntityID) {
 	switch id.Kind() {
+	case KindVillain:
+		delete(g.Villains, id)
+		if g.ActiveVillain == id {
+			g.ActiveVillain = ""
+		}
 	case KindMinion:
 		delete(g.Minions, id)
 	case KindAlly:
@@ -816,9 +821,16 @@ func iconCount(def *data.CardDef) int {
 
 // powerOfBonus returns the extra icon a "The Power of <Aspect>" resource
 // card contributes when paying for a card of that aspect (data-driven:
-// parsed from the card name).
+// parsed from the card name). "The Power of the Mind" (40028) instead
+// doubles while paying for a PSIONIC card.
 func powerOfBonus(paying, target *data.CardDef) int {
 	if target == nil || !strings.HasPrefix(paying.Name, "The Power of ") {
+		return 0
+	}
+	if paying.Name == "The Power of the Mind" {
+		if target.HasTrait("Psionic") {
+			return 1
+		}
 		return 0
 	}
 	aspect := strings.ToLower(strings.TrimPrefix(paying.Name, "The Power of "))
@@ -860,7 +872,31 @@ func (g *Game) costFor(p *Player, def *data.CardDef) int {
 			break
 		}
 	}
+	// Psionic Amnesia (40172 attached to you): allies and supports cost +2.
+	for _, aid := range attachmentsOnPlayer(g, p.ID) {
+		if a := g.Attachments[aid]; a != nil && a.Code == "40172" {
+			if def.Type == "ally" || def.Type == "support" {
+				cost += 2
+			}
+		}
+	}
+	// Left to Your Fate (40167): each player card costs +1.
+	if g.MainScheme != nil && data.BaseCode(g.MainScheme.Code) == "40167" {
+		cost++
+	}
 	return max(0, cost)
+}
+
+// attachmentsOnPlayer lists attachments currently attached to a player
+// identity.
+func attachmentsOnPlayer(g *Game, pid PlayerID) []EntityID {
+	var out []EntityID
+	for _, a := range g.Attachments {
+		if a != nil && a.Target == pid {
+			out = append(out, a.ID)
+		}
+	}
+	return out
 }
 
 // consumeDiscount removes the pending discount that applied to a card

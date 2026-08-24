@@ -149,6 +149,10 @@ func (g *Game) handle(msg Message) {
 		p.Exhausted = false
 		for _, id := range p.Allies {
 			if a := g.Allies[id]; a != nil {
+				// Captive Hope (40131): Hope Summers cannot ready.
+				if engineHopeLocked(g, a) {
+					continue
+				}
 				a.Exhausted = false
 			}
 		}
@@ -164,6 +168,10 @@ func (g *Game) handle(msg Message) {
 		}
 
 	case ReadyEntity:
+		if a, ok := g.Allies[m.ID]; ok && engineHopeLocked(g, a) {
+			g.logf("Hope Summers cannot ready (Captive Hope)")
+			return
+		}
 		if e := g.Entity(m.ID); e != nil {
 			g.setExhausted(m.ID, false)
 		}
@@ -605,7 +613,7 @@ func (g *Game) handle(msg Message) {
 		if v == nil || p == nil || g.MainScheme == nil {
 			return
 		}
-		threat := v.SchemeVal + v.BoostCount
+		threat := g.schemeValueOf(v.ID)
 		// Emergency (01085): the resolving player may reduce the scheme's
 		// threat by 1 by discarding it from hand.
 		var emerg Card
@@ -732,6 +740,11 @@ func (g *Game) handle(msg Message) {
 			}
 			if len(discarded) > 0 {
 				g.Push(DiscardCards{Player: p.ID, Cards: discarded})
+				// Luck riders react to cards leaving the deck top
+				// (Jackpot!, White Fox, The Painted Lady...).
+				for _, c := range discarded {
+					g.Push(DeckTopDiscarded{Player: p.ID, Card: c})
+				}
 			}
 		}
 
@@ -842,6 +855,12 @@ func (g *Game) handle(msg Message) {
 			t.Counters += m.N
 			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
 		case *Ally:
+			t.Counters += m.N
+			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+		case *Villain:
+			t.Counters += m.N
+			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+		case *Minion:
 			t.Counters += m.N
 			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
 		}
@@ -1975,7 +1994,7 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 		}
 		g.logf("%s schemes against %s", def.Name, p.Name)
 		if g.MainScheme != nil {
-			g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: mn.SchemeVal, Source: mn.ID})
+			g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: mn.ID})
 		}
 	}
 }
@@ -2078,6 +2097,24 @@ func (g *Game) handleAskAttack(m AskAttack) {
 	p := g.Player(m.Player)
 	if p == nil || p.KOed {
 		return
+	}
+	// Morlock allies (40079): a minion attacking their controller is
+	// redirected to a Morlock instead (approximation: the first ready
+	// Morlock takes the full attack; villain attacks still run their
+	// interrupt window and are not redirected).
+	if m.Trigger == "" {
+		for _, id := range p.Allies {
+			a := g.Allies[id]
+			if a == nil || !a.EDef().HasTrait("morlock") {
+				continue
+			}
+			g.logf("%s redirects the attack to %s", p.Name, a.EDef().Name)
+			g.Push(DamageEntity{Target: a.ID, Damage: g.attackValue(m.Enemy), Source: m.Enemy})
+			if v := g.Villains[m.Enemy]; v != nil {
+				g.Push(ClearBoosts{Enemy: v.ID})
+			}
+			return
+		}
 	}
 	atk := g.attackValue(m.Enemy)
 	var q *Question
@@ -2816,6 +2853,22 @@ func (g *Game) sideSchemeInPlay(code string) bool {
 		}
 	}
 	return false
+}
+
+// engineHopeLocked reports whether the ally is Hope Summers held by
+// Captive Hope (40131).
+func engineHopeLocked(g *Game, a *Ally) bool {
+	if a == nil || data.BaseCode(a.Code) != "40130" {
+		return false
+	}
+	return g.sideSchemeInPlay("40131")
+}
+
+// heroIs reports whether the entity is a player whose identity's base
+// code matches (threat/damage locks keyed to a specific hero).
+func (g *Game) heroIs(id EntityID, base string) bool {
+	p := g.Player(PlayerID(id))
+	return p != nil && data.BaseCode(p.HeroCode) == base
 }
 
 // minionInPlay reports whether a minion with the given base code is in

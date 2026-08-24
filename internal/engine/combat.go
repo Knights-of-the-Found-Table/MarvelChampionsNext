@@ -157,6 +157,18 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 			}
 		}
 	}
+	// Back to the Future (40033): only the Cable player can remove threat
+	// from it, and only from it (approximation: keyed on the Cable hero's
+	// presence; the damage locks are not modeled).
+	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "40033" {
+		if !source.Is(KindPlayer) || !g.heroIs(source, "40001") {
+			g.logf("only the Cable player can remove threat from Back to the Future")
+			return
+		}
+	} else if source.Is(KindPlayer) && g.heroIs(source, "40001") && g.sideSchemeInPlay("40033") {
+		g.logf("Cable can only remove threat from Back to the Future while it is in play")
+		return
+	}
 	if adj, ok := g.eventBonusFor(n, source, "threat"); ok {
 		n = adj
 	}
@@ -200,9 +212,127 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 func (g *Game) attackValue(id EntityID) int {
 	switch e := g.Entity(id).(type) {
 	case *Villain:
-		return e.AttackVal + e.BoostCount
+		n := e.AttackVal + e.BoostCount
+		if b := behavior(e.Code); b.EnemyStatBonus != nil {
+			if atk, _ := b.EnemyStatBonus(g, e); atk != 0 {
+				n += atk
+			}
+		}
+		n += g.attachmentAttackBonus(e.Attachments)
+		return n
 	case *Minion:
-		return e.AttackVal
+		n := e.AttackVal
+		if b := behavior(e.Code); b.EnemyStatBonus != nil {
+			if atk, _ := b.EnemyStatBonus(g, e); atk != 0 {
+				n += atk
+			}
+		}
+		n += g.attachmentAttackBonus(e.Attachments)
+		// Get Nasty (40117): each minion gets +1 ATK.
+		if g.sideSchemeInPlay("40117") {
+			n++
+		}
+		return n
+	}
+	return 0
+}
+
+// attachmentDamageMods applies attachment damage modifiers: Titanium
+// Exoskeleton caps single-source damage at 2; Impervious reduces each hit
+// by 1; Hidden in the Clutter banks the damage on the attachment and
+// prevents it (payoff handled by the card's behavior). Returns the damage
+// still to apply (0 = fully prevented).
+func (g *Game) attachmentDamageMods(list []EntityID, n int, source EntityID) int {
+	for _, aid := range list {
+		a := g.Attachments[aid]
+		if a == nil {
+			continue
+		}
+		switch a.Code {
+		case "40091": // Titanium Exoskeleton
+			if n > 2 {
+				g.logf("Titanium Exoskeleton caps the damage at 2")
+				n = 2
+			}
+		case "40156": // Impervious
+			n--
+			g.logf("Impervious reduces the damage by 1")
+		case "40106": // Hidden in the Clutter
+			a.Counters += n
+			g.logf("Hidden in the Clutter banks %d damage (%d stored)", n, a.Counters)
+			if a.Counters >= 3 {
+				g.Delete(aid)
+				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
+				g.logf("Hidden in the Clutter bursts — the attached enemy attacks!")
+				if source.Is(KindPlayer) && a.Target != "" {
+					g.Push(AskAttack{Enemy: a.Target, Player: PlayerID(source)})
+				}
+			}
+			return 0
+		}
+	}
+	return n
+}
+
+// sourceIsTiny reports whether the damage source has the Tiny trait
+// (Thumbelina's damage reduction).
+func (g *Game) sourceIsTiny(src EntityID) bool {
+	e := g.Entity(src)
+	return e != nil && e.EDef() != nil && e.EDef().HasTrait("Tiny")
+}
+
+// attachmentAttackBonus sums attachment-sourced attack bonuses
+// (Bolstered by Wrath scaling with villains under Routed, Aerial
+// Bombardment, Thrown Object).
+func (g *Game) attachmentAttackBonus(list []EntityID) int {
+	n := 0
+	for _, aid := range list {
+		a := g.Attachments[aid]
+		if a == nil {
+			continue
+		}
+		switch a.Code {
+		case "40082": // Bolstered by Wrath
+			if env := routedEnvOf(g); env != nil {
+				n += len(env.StoredCards)
+			}
+		case "40152", "40157": // Aerial Bombardment; Thrown Object stat
+			n++
+		}
+	}
+	return n
+}
+
+// routedEnvOf finds the Routed environment (Marauders).
+func routedEnvOf(g *Game) *Environment {
+	for _, env := range g.Environments {
+		if env != nil && data.BaseCode(env.Code) == "40081" {
+			return env
+		}
+	}
+	return nil
+}
+
+// schemeValueOf returns an enemy's scheme value including dynamic bonuses
+// (momentum counters, hand-type scaling).
+func (g *Game) schemeValueOf(id EntityID) int {
+	switch e := g.Entity(id).(type) {
+	case *Villain:
+		n := e.SchemeVal + e.BoostCount
+		if b := behavior(e.Code); b.EnemyStatBonus != nil {
+			if _, sch := b.EnemyStatBonus(g, e); sch != 0 {
+				n += sch
+			}
+		}
+		return n
+	case *Minion:
+		n := e.SchemeVal
+		if b := behavior(e.Code); b.EnemyStatBonus != nil {
+			if _, sch := b.EnemyStatBonus(g, e); sch != 0 {
+				n += sch
+			}
+		}
+		return n
 	}
 	return 0
 }
@@ -265,6 +395,25 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		if b := behavior(e.Code); b.VillainDamageable != nil && !b.VillainDamageable(g, e, n) {
 			return
 		}
+		n = g.attachmentDamageMods(e.Attachments, n, source)
+		if n <= 0 {
+			return
+		}
+		// Telekinetic Force Field (40034): attached character takes no
+		// damage; absorbing 2+ in one hit burns the attachment out.
+		for _, aid := range append([]EntityID(nil), e.Attachments...) {
+			a := g.Attachments[aid]
+			if a == nil || a.Code != "40034" {
+				continue
+			}
+			g.logf("%s takes no damage (Telekinetic Force Field)", e.EDef().Name)
+			if n >= 2 {
+				g.Delete(aid)
+				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
+				g.logf("Telekinetic Force Field is discarded")
+			}
+			return
+		}
 		if e.Tough {
 			e.Tough = false
 			g.logf("%s's tough status card prevents the damage", e.EDef().Name)
@@ -291,10 +440,36 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 				return
 			}
 		}
+		// Telekinetic Force Field (40034): same absorption as on villains.
+		for _, aid := range append([]EntityID(nil), e.Attachments...) {
+			a := g.Attachments[aid]
+			if a == nil || a.Code != "40034" {
+				continue
+			}
+			g.logf("%s takes no damage (Telekinetic Force Field)", e.EDef().Name)
+			if n >= 2 {
+				g.Delete(aid)
+				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
+				g.logf("Telekinetic Force Field is discarded")
+			}
+			return
+		}
 		if b := behavior(e.Code); b.MinionDamageableSrc != nil && !b.MinionDamageableSrc(g, e, n, source) {
 			return
 		}
 		if b := behavior(e.Code); b.MinionDamageable != nil && !b.MinionDamageable(g, e, n) {
+			return
+		}
+		// Thumbelina (40182): damage from each source reduced by 1 unless
+		// the attacker has TINY.
+		if e.Code == "40182" && !g.sourceIsTiny(source) {
+			n--
+			if n <= 0 {
+				return
+			}
+		}
+		n = g.attachmentDamageMods(e.Attachments, n, source)
+		if n <= 0 {
 			return
 		}
 		// Biomechanical Upgrades: when the attached minion would be
@@ -587,6 +762,33 @@ func retaliateOf(g *Game, e Entity) int {
 	// Verna (30038) grants every Inheritor minion retaliate 1.
 	if mn, ok := e.(*Minion); ok && mn.EDef().HasTrait("inheritor") && g.minionInPlay("30038") {
 		n++
+	}
+	// Attachments granting retaliate: Head of Steam (X = Juggernaut's
+	// momentum), Heavy Armament (+2), Telepathy (+1).
+	var ids []EntityID
+	switch t := e.(type) {
+	case *Villain:
+		ids = t.Attachments
+	case *Minion:
+		ids = t.Attachments
+	}
+	for _, aid := range ids {
+		a := g.Attachments[aid]
+		if a == nil {
+			continue
+		}
+		switch a.Code {
+		case "40123":
+			for _, v := range g.Villains {
+				if v != nil && data.BaseCode(v.Code) == "40118" {
+					n += v.Counters
+				}
+			}
+		case "40090":
+			n += 2
+		case "40159":
+			n++
+		}
 	}
 	return n
 }
