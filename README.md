@@ -7,6 +7,7 @@ A full-stack web implementation of [Marvel Champions: The Card Game](https://fan
 - Twenty playable heroes: Core Set five, Captain America, Ms. Marvel, Daredevil (Sense deck), Doctor Strange (Invocation deck), Angel, Nightcrawler (Bamf!), Echo, Groot, Rocket Raccoon, Colossus, Shadowcat, Cable, Domino, Tigra and Hulkling
 - Sixteen playable scenarios: Rhino, Klaw, Ultron, Green Goblin ×2, Drang, Collector, Nebula, Sabretooth, Sentinels, Master Mold, Brotherhood, Marauders, Juggernaut, Mister Sinister and the Superhero Registration Act; cards without hand-written logic fall back to generic behavior
 - Up to 4 players, spectating, undo and replay
+- Full-viewport, Marvel Duel-inspired battle table with large card previews, responsive enemy/player zones, payment drawer, and reduced-motion support
 
 ## Quick Start
 
@@ -26,6 +27,15 @@ cd deploy
 cp .env.example .env   # then edit MC_JWT_SECRET
 docker compose up --build -d   # http://localhost:3000
 ```
+
+## Battle UI
+
+The game board uses a full-viewport table layout with dedicated villain, shared,
+player-asset, hero, and hand zones. Hovered cards open a pointer-transparent
+preview up to `72vh`; heroes and villains receive restrained character effects
+that respect reduced-motion settings. See [docs/BATTLE_UI.md](docs/BATTLE_UI.md)
+for the design, interaction guarantees, implementation map, and validation
+checklist.
 
 ## Configuration (environment variables)
 
