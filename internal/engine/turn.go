@@ -255,6 +255,22 @@ func (g *Game) abilityChoices(p *Player) []Choice {
 			}
 		}
 	}
+	// Side schemes and environments with first-player actions (Milano
+	// removal abilities, Library Labyrinth).
+	for _, id := range sortedIDs(g.SideSchemes) {
+		if s := g.SideSchemes[id]; s != nil {
+			if hb := behavior(s.Code); hb.Abilities != nil {
+				appendAbilities(s, hb.Abilities(g, s))
+			}
+		}
+	}
+	for _, id := range sortedIDs(g.Environments) {
+		if env := g.Environments[id]; env != nil {
+			if hb := behavior(env.Code); hb.Abilities != nil {
+				appendAbilities(env, hb.Abilities(g, env))
+			}
+		}
+	}
 	return out
 }
 

@@ -196,9 +196,7 @@ func (g *Game) destroyAlly(id EntityID) {
 	owner := g.Player(a.Owner)
 	code := a.Code
 	g.Delete(id)
-	if owner != nil {
-		owner.Discard = append(owner.Discard, Card{ID: g.nextCardID(), Code: code, Owner: owner.ID})
-	}
+	g.cardLeavesPlay(owner, code, a.EDef().Name)
 	g.logMajorf("%s is destroyed", a.EDef().Name)
 }
 

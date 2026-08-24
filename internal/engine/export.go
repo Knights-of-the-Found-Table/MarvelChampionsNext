@@ -138,6 +138,25 @@ func (g *Game) HandCard(pid PlayerID, cardID string) (Card, bool) {
 	return Card{}, false
 }
 
+// AddAlly registers an ally under the owner (exported for tests).
+func (g *Game) AddAlly(a *Ally, owner PlayerID) {
+	g.Allies[a.ID] = a
+	if p := g.Player(owner); p != nil {
+		p.Allies = append(p.Allies, a.ID)
+	}
+}
+
+// AddMinion registers a minion (exported for tests).
+func (g *Game) AddMinion(m *Minion, engaged PlayerID) {
+	g.Minions[m.ID] = m
+	m.EngagedWith = engaged
+}
+
+// AddSideScheme registers a side scheme (exported for tests).
+func (g *Game) AddSideScheme(s *SideScheme) {
+	g.SideSchemes[s.ID] = s
+}
+
 // QueueLen returns the number of pending messages in the engine queue
 // (exported for tests).
 func (g *Game) QueueLen() int { return len(g.queue) }

@@ -471,6 +471,18 @@ type (
 	// SlippingSanityMill mills 5 encounter cards, placing 1 main-scheme
 	// threat per star (boost) icon.
 	SlippingSanityMill struct{ Player PlayerID }
+	// IndirectDamage deals N damage that the player distributes among
+	// their own characters, one point at a time (GMW box).
+	IndirectDamage struct {
+		Player PlayerID
+		N      int
+	}
+	// BarrageCharge resolves the Badoon Ship's "Charge Up" special: one
+	// barrage counter, then the 4-counter payoff (GMW).
+	BarrageCharge struct{}
+	// CollectCard moves a card faceup into The Collection (the
+	// Collector's game area).
+	CollectCard struct{ Card Card }
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -740,6 +752,9 @@ func (BunkerDiscard) msg()            {}
 func (MillEncounter) msg()            {}
 func (TopDeckPick) msg()              {}
 func (SlippingSanityMill) msg()       {}
+func (IndirectDamage) msg()        {}
+func (BarrageCharge) msg()         {}
+func (CollectCard) msg()           {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

@@ -11,6 +11,15 @@ import (
 func init() {
 	registerGroot()
 	registerRocket()
+	registerGrootCards()
+	registerRocketCards()
+	registerDrangScenario()
+	registerCollectorScenario()
+	registerNebulaScenario()
+	registerRonanScenario()
+	registerModularSets()
+	registerMarket()
+	registerChallenge()
 	registerScenarios()
 }
 
@@ -47,7 +56,7 @@ func registerRocket() {
 	engine.RegisterBehavior("16029", &engine.Behavior{})
 }
 
-// registerScenarios registers the box's three scenarios.
+// registerScenarios registers the box's four scenarios.
 func registerScenarios() {
 	// Planetary Invasion (Drang and the Brotherhood of Badoon).
 	engine.RegisterScenario(&engine.ScenarioDef{
@@ -65,16 +74,34 @@ func registerScenarios() {
 		ID:               "16073",
 		Name:             "Collector — Infiltrate the Museum",
 		VillainBases:     []string{"16070"},
-		MainSchemeStages: []string{"16073b", "16083b", "16084b"},
-		ExtraSets:        []string{"infiltrate_the_museum", "escape_the_museum", "standard"},
+		MainSchemeStages: []string{"16073b"},
+		ExtraSets:        []string{"infiltrate_the_museum", "standard"},
 	})
 
-	// The Missing Milano (Nebula's three-stage chase).
+	// The Missing Milano (Collector A1/B1's museum escape).
 	engine.RegisterScenario(&engine.ScenarioDef{
 		ID:               "16082",
-		Name:             "Nebula — The Missing Milano",
+		Name:             "Collector — The Missing Milano",
+		VillainBases:     []string{"16080a"},
+		MainSchemeStages: []string{"16082b", "16083b", "16084b"},
+		ExtraSets:        []string{"escape_the_museum", "galactic_artifacts", "ship_command", "standard"},
+	})
+
+	// The Art of Evasion (Nebula's Technique-driven chase).
+	engine.RegisterScenario(&engine.ScenarioDef{
+		ID:               "16091",
+		Name:             "Nebula — The Art of Evasion",
 		VillainBases:     []string{"16088"},
-		MainSchemeStages: []string{"16082b", "16091b", "16092b"},
-		ExtraSets:        []string{"nebula", "standard"},
+		MainSchemeStages: []string{"16091b", "16092b"},
+		ExtraSets:        []string{"nebula", "power_stone", "ship_command", "standard"},
+	})
+
+	// Ronan the Accuser (the Kree interrogation).
+	engine.RegisterScenario(&engine.ScenarioDef{
+		ID:               "16106",
+		Name:             "Ronan the Accuser — Under Accusation",
+		VillainBases:     []string{"16103"},
+		MainSchemeStages: []string{"16106b", "16107b"},
+		ExtraSets:        []string{"ronan", "power_stone", "ship_command", "standard"},
 	})
 }

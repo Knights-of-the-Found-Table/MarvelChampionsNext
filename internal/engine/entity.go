@@ -133,6 +133,9 @@ type Behavior struct {
 	AttachedEnemyAttackMod int
 	// Ally: consequential damage hits the owner instead (Elektra).
 	ConsequentialToOwner bool
+	// Side scheme: runs when the scheme is defeated, before it leaves
+	// play (victory rewards; the engine handles the removal).
+	SideSchemeDefeated func(g *Game, s *SideScheme) []Message
 }
 
 // ResourceAbility describes an exhaust-to-generate-resources ability.

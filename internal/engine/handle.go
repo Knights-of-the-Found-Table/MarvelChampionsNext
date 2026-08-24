@@ -910,6 +910,52 @@ func (g *Game) handle(msg Message) {
 			g.Logf("%s gets +%d hand size until the end of the phase", p.Name, m.N)
 		}
 
+	case IndirectDamage:
+		if p := g.Player(m.Player); p != nil && m.N > 0 {
+			chars := []EntityID{p.ID}
+			for _, id := range p.Allies {
+				if g.Allies[id] != nil {
+					chars = append(chars, id)
+				}
+			}
+			if len(chars) == 1 {
+				g.Push(DamageEntity{Target: p.ID, Damage: m.N})
+				return
+			}
+			g.Push(AskQuestion{Player: p.ID, Question: g.indirectQuestion(p, m.N, chars)})
+		}
+
+	case BarrageCharge:
+		var ship *Environment
+		for _, env := range g.Environments {
+			if env != nil && data.BaseCode(env.Code) == "16063" {
+				ship = env
+				break
+			}
+		}
+		if ship == nil {
+			return
+		}
+		ship.Counters++
+		g.Logf("Badoon Ship charges up (%d barrage counters)", ship.Counters)
+		if ship.Counters >= 4 {
+			ship.Counters = 0
+			var msgs []Message
+			for _, p := range g.Players {
+				msgs = append(msgs, IndirectDamage{Player: p.ID, N: 2})
+			}
+			g.Push(msgs...)
+		}
+
+	case CollectCard:
+		// If the card still sits in a player's deck (deck-top feeds),
+		// remove it there.
+		for _, p := range g.Players {
+			p.Deck.Remove(m.Card.ID)
+		}
+		g.Collection = append(g.Collection, m.Card)
+		g.Logf("%s is placed into The Collection", m.Card.Def().Name)
+
 	case CostDiscountApply:
 		if p := g.Player(m.Player); p != nil && m.Amount > 0 {
 			p.CostDiscounts = append(p.CostDiscounts, CostDiscount{Amount: m.Amount})
@@ -1268,7 +1314,7 @@ func (g *Game) discardControlled(pid PlayerID, id EntityID) {
 		g.logf("%s returns to the bottom of the Sense deck", def.Name)
 		return
 	}
-	p.Discard = append(p.Discard, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
+	g.cardLeavesPlay(p, code, e.EDef().Name)
 	g.logf("%s is discarded", e.EDef().Name)
 }
 
@@ -1643,6 +1689,9 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 			return
 		}
 		g.logf("%s attacks %s", def.Name, p.Name)
+		if def.HasKeyword("Villainous") {
+			g.dealMinionBoost(mn)
+		}
 		g.Push(AskAttack{Enemy: mn.ID, Player: p.ID})
 	} else {
 		if mn.Confused {
@@ -1653,6 +1702,28 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 		if g.MainScheme != nil {
 			g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: mn.SchemeVal, Source: mn.ID})
 		}
+	}
+}
+
+// dealMinionBoost resolves the Villainous keyword: the minion's
+// activation reveals one boost card, adding its icons to the attack.
+func (g *Game) dealMinionBoost(mn *Minion) {
+	c, ok := g.drawEncounter()
+	if !ok {
+		return
+	}
+	def := c.Def()
+	if boostSpawnsMinion(def) {
+		g.logMajorf("Boost card %s enters play!", def.Name)
+		g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(nil), Card: c})
+		return
+	}
+	add := deref(def.Boost, 0)
+	mn.BoostCount += add
+	g.EncounterDiscard = append(g.EncounterDiscard, c)
+	g.logf("%s gets a boost card: %s (+%d)", mn.EDef().Name, def.Name, add)
+	if b := behavior(def.Code); b.Boost != nil {
+		g.Push(b.Boost(g, c)...)
 	}
 }
 
@@ -1797,7 +1868,8 @@ func (g *Game) handleDefends(m Defends) {
 	case *Villain:
 		attack = e.AttackVal + e.BoostCount
 	case *Minion:
-		attack = e.AttackVal
+		attack = e.AttackVal + e.BoostCount
+		e.BoostCount = 0
 	default:
 		return
 	}
@@ -2103,6 +2175,25 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 	g.Push(AskQuestion{Player: p.ID, Question: Ask(m.Card.Def().Name+" — interrupts?", interrupts...)})
 }
 
+// indirectQuestion builds the one-point distribution prompt for indirect
+// damage: each pick deals 1 damage and queues the remaining points.
+func (g *Game) indirectQuestion(p *Player, n int, chars []EntityID) *Question {
+	var picks []Choice
+	for _, id := range chars {
+		label := p.Name
+		if a := g.Allies[id]; a != nil {
+			label = a.EDef().Name
+		}
+		msgs := []Message{DamageEntity{Target: id, Damage: 1}}
+		if n > 1 {
+			msgs = append(msgs, IndirectDamage{Player: p.ID, N: n - 1})
+		}
+		picks = append(picks, Choice{Label: fmt.Sprintf("1 damage to %s", label), Kind: ChoiceTarget, SourceID: id}.
+			Msgs(msgs...))
+	}
+	return Ask(fmt.Sprintf("%s: assign %d indirect damage", p.Name, n), picks...)
+}
+
 // handleTreacheryResolve performs the treachery resolution, or the
 // cancellation replacement.
 func (g *Game) handleTreacheryResolve(m TreacheryResolve) {
@@ -2343,6 +2434,9 @@ func (g *Game) boostSpawnTarget(v *Villain) PlayerID {
 func (g *Game) handleSchemeDefeated(id EntityID) {
 	if s := g.SideSchemes[id]; s != nil {
 		g.logMajorf("Side scheme %s is defeated", s.EDef().Name)
+		if b := behavior(s.Code); b.SideSchemeDefeated != nil {
+			g.Push(b.SideSchemeDefeated(g, s)...)
+		}
 		g.Delete(id)
 		return
 	}

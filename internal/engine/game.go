@@ -44,6 +44,13 @@ type Game struct {
 	EncounterDeck    CardList `json:"encounterDeck"`
 	EncounterDiscard CardList `json:"encounterDiscard"`
 
+	// Collection is the Collector scenario's game area: cards removed
+	// from the game faceup instead of reaching their discard piles.
+	Collection CardList `json:"collection,omitempty"`
+	// SetAside holds cards removed from the encounter deck by scenario
+	// setup (The Missing Milano stashes Ship Command).
+	SetAside CardList `json:"setAside,omitempty"`
+
 	// queue holds pending messages.
 	queue []Message
 
@@ -100,6 +107,69 @@ func (g *Game) nextEntityID(kind string) EntityID {
 func (g *Game) nextCardID() string {
 	g.nextID++
 	return fmt.Sprintf("card-%d", g.nextID)
+}
+
+// SpawnSupport puts a support into play under owner (scenario setup).
+func (g *Game) SpawnSupport(code string, owner PlayerID) *Support {
+	s := &Support{ID: g.nextEntityID(KindSupport), Code: code, Owner: owner}
+	g.Supports[s.ID] = s
+	g.logMajorf("%s enters play under %s's control", s.EDef().Name, g.Player(owner).Name)
+	return s
+}
+
+// SpawnAttachment brings an encounter attachment into play targeting the
+// given entity (running its OnAttach preference when target is empty).
+func (g *Game) SpawnAttachment(code string, target EntityID) *Attachment {
+	t := &Attachment{ID: g.nextEntityID(KindAttachment), Code: code}
+	g.Attachments[t.ID] = t
+	if target != "" {
+		t.Target = target
+		g.Logf("%s attaches to %s", t.EDef().Name, g.Entity(target).EDef().Name)
+		if b := behavior(code); b.OnAttach != nil {
+			g.Push(b.OnAttach(g, t, target)...)
+		}
+		return t
+	}
+	if b := behavior(code); b.OnAttach != nil {
+		g.Push(b.OnAttach(g, t, EntityID(""))...)
+	} else {
+		for id := range g.Villains {
+			t.Target = id
+			break
+		}
+	}
+	return t
+}
+
+// SpawnEnvironment brings a scenario environment into play.
+func (g *Game) SpawnEnvironment(code string) *Environment {
+	e := &Environment{ID: g.nextEntityID(KindEnvironment), Code: code}
+	g.Environments[e.ID] = e
+	g.logMajorf("Environment %s enters play", e.EDef().Name)
+	return e
+}
+
+// cardLeavesPlay routes a card leaving play to its owner's discard pile —
+// or into The Collection while the Collector's forced interrupt is active
+// (stage III additionally places 1 threat on the main scheme).
+func (g *Game) cardLeavesPlay(p *Player, code, name string) {
+	for _, v := range g.Villains {
+		if v == nil {
+			continue
+		}
+		switch data.BaseCode(v.Code) {
+		case "16070", "16071", "16072":
+			g.Collection = append(g.Collection, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
+			g.Logf("%s is placed into The Collection instead of the discard", name)
+			if data.BaseCode(v.Code) == "16072" && g.MainScheme != nil {
+				g.Push(SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: v.ID})
+			}
+			return
+		}
+	}
+	if p != nil {
+		p.Discard = append(p.Discard, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
+	}
 }
 
 // Scenario returns the scenario def (with hooks) for this game.

@@ -77,6 +77,9 @@ type Minion struct {
 	// IsDrone marks facedown player-deck drones (Ultron scenario).
 	IsDrone bool  `json:"isDrone,omitempty"`
 	Source  *Card `json:"source,omitempty"` // the facedown card, if any
+	// BoostCount raises the attack for the current activation only
+	// (Villainous keyword: the boost card's icons).
+	BoostCount int `json:"boostCount,omitempty"`
 	// EngagedWith records which player the minion is engaged with.
 	EngagedWith PlayerID `json:"engagedWith,omitempty"`
 	// BlankText marks the text box as blank until the end of the phase
@@ -226,6 +229,9 @@ type Attachment struct {
 	// Counters tracks tokens stored on the attachment (Armored Rhino
 	// Suit's absorbed damage...).
 	Counters int `json:"counters,omitempty"`
+	// Locked forbids re-attachment (Superior Tactics pins the Power
+	// Stone to Ronan).
+	Locked bool `json:"locked,omitempty"`
 }
 
 func (t *Attachment) EID() EntityID       { return t.ID }
