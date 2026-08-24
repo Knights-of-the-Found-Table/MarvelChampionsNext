@@ -91,13 +91,9 @@ export async function preloadManifest(lang: Lang): Promise<void> {
 }
 
 // ---- hover zoom preview -----------------------------------------------------
-// Modeled on arkhamhorror.app's CardOverlay: hovering a card shows a large,
-// pointer-transparent copy fixed beside it. Placed right of the card, flipped
-// to the left when it would overflow the viewport, and clamped vertically.
-const ZOOM_W = 300
-const ZOOM_H = 420 // 5:7 card aspect
-const ZOOM_GAP = 10
-const ZOOM_PAD = 10
+// Hovering a card shows a large, pointer-transparent copy in a body portal.
+// The preview owns the half of the viewport opposite the anchor, so it cannot
+// be clipped by the scaled board or feed back into the card's hover hitbox.
 const ZOOM_DELAY_MS = 100
 const coarsePointer =
   typeof window.matchMedia === 'function' &&
@@ -106,16 +102,13 @@ const coarsePointer =
 export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement | null>) {
   const lang = useLang()
   const [visible, setVisible] = useState(false)
-  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const [side, setSide] = useState<'left' | 'right'>('right')
   const timer = useRef<number | null>(null)
 
   function position() {
-    const rect = anchorRef.current!.getBoundingClientRect()
-    let left = rect.right + ZOOM_GAP
-    if (left + ZOOM_W > window.innerWidth - ZOOM_PAD) left = rect.left - ZOOM_W - ZOOM_GAP
-    left = Math.max(ZOOM_PAD, Math.min(left, window.innerWidth - ZOOM_W - ZOOM_PAD))
-    const top = Math.max(ZOOM_PAD, Math.min(rect.top - 40, window.innerHeight - ZOOM_H - ZOOM_PAD))
-    return { top, left }
+    const rect = anchorRef.current?.getBoundingClientRect()
+    if (!rect) return 'right' as const
+    return rect.left + rect.width / 2 > window.innerWidth / 2 ? 'left' as const : 'right' as const
   }
 
   function clearTimer() {
@@ -129,7 +122,7 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
     if (coarsePointer) return
     clearTimer()
     timer.current = window.setTimeout(() => {
-      setPos(position())
+      setSide(position())
       setVisible(true)
     }, ZOOM_DELAY_MS)
   }
@@ -139,10 +132,10 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
     setVisible(false)
   }
 
-  // Keep the preview glued to the card while the page scrolls or resizes.
+  // Keep the preview on the side opposite the card while the page moves.
   useEffect(() => {
     if (!visible) return
-    const track = () => setPos(position())
+    const track = () => setSide(position())
     window.addEventListener('scroll', track, true)
     window.addEventListener('resize', track)
     return () => {
@@ -155,7 +148,7 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
 
   const overlay = visible
     ? createPortal(
-        <div className="card-zoom" style={pos}>
+        <div className={`card-zoom card-zoom-${side}`} aria-hidden="true">
           <img
             src={cardUrl(code, lang)}
             alt=""

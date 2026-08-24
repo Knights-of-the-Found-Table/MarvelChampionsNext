@@ -416,17 +416,32 @@ a.button {
 
 .card-zoom {
   position: fixed;
-  z-index: 1000;
+  top: 14vh;
+  bottom: 14vh;
+  width: calc(50vw - 24px);
+  display: flex;
+  align-items: center;
+  z-index: 10000;
   pointer-events: none;
   animation: cardZoomFadeIn 0.15s ease-out;
 }
 
+.card-zoom-left {
+  left: 12px;
+  justify-content: flex-start;
+}
+
+.card-zoom-right {
+  right: 12px;
+  justify-content: flex-end;
+}
+
 .card-zoom img {
   display: block;
-  width: 300px;
-  /* 与 useCardZoom 的 ZOOM_H=420 定位钳制保持一致：任何宽高比的图都
-     装进 300×420 内，避免底部超出窗口。 */
-  max-height: 420px;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 72vh;
   object-fit: contain;
   border-radius: 12px;
   filter: drop-shadow(2px 4px 12px rgba(0, 0, 0, 0.75));

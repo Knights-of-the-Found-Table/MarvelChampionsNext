@@ -78,7 +78,9 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
       onMouseEnter={safeCode && zoom ? cardZoom.onEnter : undefined}
       onMouseLeave={safeCode && zoom ? cardZoom.hide : undefined}
     >
-      <div className={`gcard-in ${card.exhausted ? 'exhausted' : ''}`}>
+      <div className="gcard-motion">
+        {(card.kind === 'hero' || card.kind === 'villain') && <span className="character-fx" aria-hidden="true" />}
+        <div className={`gcard-in ${card.exhausted ? 'exhausted' : ''}`}>
         {safeCode ? (
           <img
             className="gcard-img"
@@ -159,6 +161,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
             {(card.hazard ?? 0) > 0 && <span className="tag tag-hazard">☠{card.hazard}</span>}
           </div>
         )}
+        </div>
       </div>
       {safeCode && zoom ? cardZoom.overlay : null}
     </div>
