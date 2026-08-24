@@ -61,7 +61,7 @@ func registerScenarios() {
 		MainSchemeStages: []string{"56063b"},
 		ExtraSets:        []string{"registration", "cape_killer", "standard"},
 		OnMainSchemeDefeated: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
-			return []engine.Message{engine.GameOver{Won: true, Reason: "The Superhero Registration Act was defeated"}}
+			return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.registrationActDefeated")}}
 		},
 	})
 }

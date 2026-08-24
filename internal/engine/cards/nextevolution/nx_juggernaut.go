@@ -241,7 +241,7 @@ func registerJuggernaut() {
 	// are set by the scenario setups.
 	engine.RegisterBehavior("40130", &engine.Behavior{
 		AllyDefeatInterrupt: func(g *engine.Game, a *engine.Ally, destroy func()) []engine.Message {
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Hope Summers left play"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.hopeLeftPlay")}}
 		},
 	})
 

@@ -72,6 +72,21 @@ func (g *Game) logMajorf(format string, args ...any) {
 	g.addLog(LogMajor, fmt.Sprintf(format, args...))
 }
 
+// tlogf/tlogMinorf/tlogMajorf log a message-catalog entry (i18n): the key
+// is resolved and formatted by Tf in the current UI language. Plain logf
+// remains for ad-hoc strings (card-package text not yet migrated).
+func (g *Game) tlogf(key string, args ...any) {
+	g.addLog(LogInfo, Tf(key, args...))
+}
+
+func (g *Game) tlogMinorf(key string, args ...any) {
+	g.addLog(LogMinor, Tf(key, args...))
+}
+
+func (g *Game) tlogMajorf(key string, args ...any) {
+	g.addLog(LogMajor, Tf(key, args...))
+}
+
 // LogText joins the journal's text lines (tests, debugging).
 func (g *Game) LogText() string {
 	lines := make([]string, len(g.Log))

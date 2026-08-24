@@ -5,7 +5,9 @@ import (
 )
 
 func init() {
-	registerCWSchemes(); registerCWLeaderScenarios() }
+	registerCWSchemes()
+	registerCWLeaderScenarios()
+}
 
 // registerCWSchemes registers the registration/resistance main-scheme
 // families (single-face in the snapshot; the b faces carry threat stats).
@@ -49,7 +51,7 @@ func registerCWLeaderScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Registration Act completed"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.registrationAct")}}
 		},
 	})
 
@@ -73,7 +75,7 @@ func registerCWLeaderScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Registration Act completed"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.registrationAct")}}
 		},
 	})
 
@@ -88,7 +90,7 @@ func registerCWLeaderScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Resistance was crushed"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.resistanceCrushed")}}
 		},
 	})
 
@@ -103,7 +105,7 @@ func registerCWLeaderScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Resistance was crushed"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.resistanceCrushed")}}
 		},
 	})
 }

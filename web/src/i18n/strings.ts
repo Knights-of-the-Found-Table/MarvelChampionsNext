@@ -117,10 +117,7 @@ export const en = {
   'pile.discardTitle': "{name}'s discard pile",
   'pile.close': 'close',
   'pile.empty': '(empty)',
-  'prompt.yourTurn': 'Your turn',
-  'prompt.chooseEnemy': 'Choose an enemy',
-  'prompt.chooseScheme': 'Choose a scheme',
-  'q.recover': 'Recover',
+        'q.recover': 'Recover',
 } as const
 
 export type MsgKey = keyof typeof en
@@ -239,8 +236,5 @@ export const zh: Record<MsgKey, string> = {
   'pile.discardTitle': '{name}的弃牌堆',
   'pile.close': '关闭',
   'pile.empty': '（空）',
-  'prompt.yourTurn': '你的回合',
-  'prompt.chooseEnemy': '选择一个敌人',
-  'prompt.chooseScheme': '选择一个阴谋',
-  'q.recover': '恢复',
+        'q.recover': '恢复',
 }

@@ -350,7 +350,7 @@ func registerZeroTolerance() {
 				g.Logf("%s is placed under Operation Zero Tolerance", a.EDef().Name)
 			}
 			if len(s.StoredCards) >= len(g.Players)+3 {
-				return []engine.Message{engine.GameOver{Won: false, Reason: "Operation Zero Tolerance captured too many allies"}}
+				return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.oztCaptured")}}
 			}
 			return nil
 		},

@@ -130,7 +130,7 @@ func registerScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Enchantress claimed her prime real estate"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.enchantressEstate")}}
 		},
 	})
 
@@ -166,7 +166,7 @@ func registerScenarios() {
 		},
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
 			// A shattered avatar or the revealed god falling ends it.
-			return []engine.Message{engine.GameOver{Won: true, Reason: "Loki's illusions are shattered"}}
+			return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.lokiIllusions")}}
 		},
 	})
 }

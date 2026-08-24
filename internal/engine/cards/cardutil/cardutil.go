@@ -4,8 +4,6 @@
 package cardutil
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
@@ -39,9 +37,9 @@ func SortedEnemyIDs(g *engine.Game) []engine.EntityID {
 func EnemyLabel(e engine.Entity) string {
 	switch t := e.(type) {
 	case *engine.Villain:
-		return fmt.Sprintf("%s — %d/%d HP", t.EDef().Name, t.HP(), t.MaxHP)
+		return engine.Tf("m.hp", t.EDef().Name, t.HP(), t.MaxHP)
 	case *engine.Minion:
-		return fmt.Sprintf("%s — %d/%d HP", t.EDef().Name, t.HP(), t.MaxHP)
+		return engine.Tf("m.hp", t.EDef().Name, t.HP(), t.MaxHP)
 	}
 	return e.EDef().Name
 }

@@ -22,7 +22,7 @@ func (g *Game) handle(msg Message) {
 		for _, p := range g.Players {
 			p.AllyPlayedThisRound = false
 		}
-		g.logMajorf("── Round %d ──", g.Round)
+		g.tlogMajorf("log.round", g.Round)
 		g.Push(BeginPhase{Phase: PhasePlayer})
 
 	case BeginPhase:
@@ -72,7 +72,7 @@ func (g *Game) handle(msg Message) {
 			}
 		}
 		g.expirePhaseEffects()
-		g.logf("Player phase ends")
+		g.tlogf("log.playerPhaseEnds")
 		g.Push(BeginPhase{Phase: PhaseVillain})
 
 	case PassFirstPlayerToken:
@@ -86,7 +86,7 @@ func (g *Game) handle(msg Message) {
 			if next := g.nextActivePlayer(p.ID); next != nil && next.ID != p.ID {
 				p.FirstPlayer = false
 				next.FirstPlayer = true
-				g.logf("First player token passes to %s", next.Name)
+				g.tlogf("log.firstPlayerPasses", next.Name)
 			}
 			return
 		}
@@ -104,7 +104,7 @@ func (g *Game) handle(msg Message) {
 		}
 		if c, ok := p.Hand.Remove(m.CardID); ok {
 			p.Discard = append(p.Discard, c)
-			g.logf("%s mulligans %s away", p.Name, c.Def().Name)
+			g.tlogf("log.mulligansAway", p.Name, c.Def().Name)
 			g.Push(DrawCards{Player: p.ID, N: 1})
 		}
 
@@ -122,7 +122,7 @@ func (g *Game) handle(msg Message) {
 		p.FormChanged = false
 		p.EndedTurn = false
 		g.ActiveTurn = p.ID
-		g.logf("%s's turn begins", p.Name)
+		g.tlogf("log.turnBegins", p.Name)
 
 	case PlayerTurnEnd:
 		p := g.Player(m.Player)
@@ -169,7 +169,7 @@ func (g *Game) handle(msg Message) {
 
 	case ReadyEntity:
 		if a, ok := g.Allies[m.ID]; ok && engineHopeLocked(g, a) {
-			g.logf("Hope Summers cannot ready (Captive Hope)")
+			g.tlogf("log.hopeCannotReady")
 			return
 		}
 		if e := g.Entity(m.ID); e != nil {
@@ -187,7 +187,7 @@ func (g *Game) handle(msg Message) {
 		for i := 0; i < m.N; i++ {
 			if len(p.Deck) == 0 {
 				if len(p.Discard) == 0 {
-					g.logf("%s has no cards left to draw", p.Name)
+					g.tlogf("log.noCardsToDraw", p.Name)
 					break
 				}
 				// Player deck emptied: shuffle the discard pile into a new
@@ -195,10 +195,10 @@ func (g *Game) handle(msg Message) {
 				p.Deck = p.Discard
 				p.Discard = nil
 				g.shuffle(&p.Deck)
-				g.logMajorf("%s shuffles their discard pile into a new deck", p.Name)
+				g.tlogMajorf("log.shufflesNewDeck", p.Name)
 				if c, ok := g.drawEncounter(); ok {
 					p.EncounterDown = append(p.EncounterDown, c)
-					g.logf("%s deals themself a facedown encounter card", p.Name)
+					g.tlogf("log.dealsFacedown", p.Name)
 				}
 			}
 			card := p.Deck[0]
@@ -209,7 +209,7 @@ func (g *Game) handle(msg Message) {
 	case ShufflePlayerDeck:
 		if p := g.Player(m.Player); p != nil {
 			g.shuffle(&p.Deck)
-			g.logf("%s shuffles their deck", p.Name)
+			g.tlogf("log.shufflesDeck", p.Name)
 		}
 
 	case DiscardCards:
@@ -230,10 +230,10 @@ func (g *Game) handle(msg Message) {
 		p.FormChanged = true
 		if p.IsHero() {
 			p.Side = SideAlterEgo
-			g.logf("%s changes to %s", p.Name, p.AlterEgoDef().Name)
+			g.tlogf("log.changesTo", p.Name, p.AlterEgoDef().Name)
 		} else {
 			p.Side = SideHero
-			g.logf("%s changes to %s", p.Name, p.HeroDef().Name)
+			g.tlogf("log.changesTo", p.Name, p.HeroDef().Name)
 		}
 
 	case PlayCard:
@@ -257,11 +257,11 @@ func (g *Game) handle(msg Message) {
 		}
 		if p.Confused {
 			p.Confused = false
-			g.logf("%s is confused and cannot thwart", p.Name)
+			g.tlogf("log.confusedCannotThwart", p.Name)
 			return
 		}
 		if g.thwartBlocked(p) {
-			g.logf("%s cannot thwart while engaged with %s", p.Name, g.thwartBlockerName(p))
+			g.tlogf("log.cannotThwartEngaged", p.Name, g.thwartBlockerName(p))
 			return
 		}
 		p.Exhausted = true
@@ -275,7 +275,7 @@ func (g *Game) handle(msg Message) {
 		}
 		if p.Stunned {
 			p.Stunned = false
-			g.logf("%s is stunned and cannot attack", p.Name)
+			g.tlogf("log.stunnedCannotAttack", p.Name)
 			return
 		}
 		p.Exhausted = true
@@ -322,10 +322,10 @@ func (g *Game) handle(msg Message) {
 		if m.N > 0 && g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
 			if h := g.hinderTotal(); h > 0 {
 				if h >= m.N {
-					g.logf("Hinder prevents all %d threat on %s", m.N, g.MainScheme.EDef().Name)
+					g.tlogf("log.hinderPreventsAll", m.N, g.MainScheme.EDef().Name)
 					return
 				}
-				g.logf("Hinder prevents %d threat on %s", h, g.MainScheme.EDef().Name)
+				g.tlogf("log.hinderPrevents", h, g.MainScheme.EDef().Name)
 				m.N -= h
 			}
 		}
@@ -347,10 +347,10 @@ func (g *Game) handle(msg Message) {
 					}
 				}
 				nmrChoices = append(nmrChoices,
-					Choice{ID: "nmr-pass", Label: "Pass", Kind: ChoicePass}.
+					Choice{ID: "nmr-pass", Label: Tf("m.pass"), Kind: ChoicePass}.
 						Msgs(ApplySchemeThreat{Scheme: m.Scheme, N: m.N, Source: m.Source}))
 				g.Push(AskQuestion{Player: p.ID, Question: Ask(
-					fmt.Sprintf("%s: play Not my Responsibility? Redirect %d threat as damage", p.Name, m.N), nmrChoices...)})
+					Tf("q.nmrPrompt", p.Name, m.N), nmrChoices...)})
 				return
 			}
 		}
@@ -359,11 +359,11 @@ func (g *Game) handle(msg Message) {
 		if m.N > 0 {
 			if p, card, ok := g.handCardHolding("01061", "30015"); ok {
 				g.Push(AskQuestion{Player: p.ID, Question: Ask(
-					fmt.Sprintf("%s: play Great Responsibility? Take %d damage instead of the threat", p.Name, m.N),
-					Choice{ID: "gr-play", Label: fmt.Sprintf("Play Great Responsibility — take %d damage", m.N), Kind: ChoicePlay, CardCode: card.Code}.
+					Tf("q.grPrompt", p.Name, m.N),
+					Choice{ID: "gr-play", Label: Tf("m.playGR", m.N), Kind: ChoicePlay, CardCode: card.Code}.
 						Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
 							DamageEntity{Target: p.ID, Damage: m.N, Source: p.ID}),
-					Choice{ID: "gr-pass", Label: "Pass", Kind: ChoicePass}.
+					Choice{ID: "gr-pass", Label: Tf("m.pass"), Kind: ChoicePass}.
 						Msgs(ApplySchemeThreat{Scheme: m.Scheme, N: m.N, Source: m.Source}),
 				)})
 				return
@@ -395,11 +395,11 @@ func (g *Game) handle(msg Message) {
 				if found {
 					card := warn
 					g.Push(AskQuestion{Player: p.ID, Question: Ask(
-						fmt.Sprintf("%s: play Warning? Reduce the %d damage to %d", p.Name, m.Damage, m.Damage-1),
-						Choice{ID: "warn-play", Label: "Play Warning — reduce damage by 1", Kind: ChoicePlay, CardCode: card.Code}.
+						Tf("q.warningPrompt", p.Name, m.Damage, m.Damage-1),
+						Choice{ID: "warn-play", Label: Tf("m.playWarning"), Kind: ChoicePlay, CardCode: card.Code}.
 							Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
 								ApplyDamage{Target: m.Target, Damage: m.Damage - 1, Source: m.Source}),
-						Choice{ID: "warn-pass", Label: "Pass", Kind: ChoicePass}.
+						Choice{ID: "warn-pass", Label: Tf("m.pass"), Kind: ChoicePass}.
 							Msgs(ApplyDamage{Target: m.Target, Damage: m.Damage, Source: m.Source}),
 					)})
 					return
@@ -417,7 +417,7 @@ func (g *Game) handle(msg Message) {
 			if v.BoostCount < 0 {
 				v.BoostCount = 0
 			}
-			g.logf("Boost icons cancelled (-%d, activation now +%d)", m.N, v.BoostCount)
+			g.tlogf("log.boostCancelled", m.N, v.BoostCount)
 		}
 
 	case GuessCheck:
@@ -440,7 +440,7 @@ func (g *Game) handle(msg Message) {
 			j := g.Random(i + 1)
 			g.EncounterDeck[i], g.EncounterDeck[j] = g.EncounterDeck[j], g.EncounterDeck[i]
 		}
-		g.logf("Encounter deck shuffled")
+		g.tlogf("log.encounterShuffled")
 
 	case ConvertMinionToAlly:
 		mn := g.Minions[m.MinionID]
@@ -458,7 +458,7 @@ func (g *Game) handle(msg Message) {
 		}
 		g.Allies[a.ID] = a
 		p.Allies = append(p.Allies, a.ID)
-		g.logMajorf("%s takes control of %s (blank text)", p.Name, a.EDef().Name)
+		g.tlogMajorf("log.takesControlBlank", p.Name, a.EDef().Name)
 		g.Push(AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 
 	case AddMagnetCounter:
@@ -514,7 +514,7 @@ func (g *Game) handle(msg Message) {
 				j := g.Random(i + 1)
 				g.EncounterDeck[i], g.EncounterDeck[j] = g.EncounterDeck[j], g.EncounterDeck[i]
 			}
-			g.logf("%s is shuffled into the encounter deck", DB.MustLookup(code).Name)
+			g.tlogf("log.shuffledIntoEncounter", DB.MustLookup(code).Name)
 		}
 
 	case AttachHandCard:
@@ -529,7 +529,7 @@ func (g *Game) handle(msg Message) {
 					}
 					mn.MaxHP += n
 					mn.TuckedCards = append(mn.TuckedCards, c)
-					g.logf("%s attaches %s facedown (+%d max HP)", mn.EDef().Name, c.Def().Name, n)
+					g.tlogf("log.attachesFacedown", mn.EDef().Name, c.Def().Name, n)
 				}
 			}
 		}
@@ -571,13 +571,13 @@ func (g *Game) handle(msg Message) {
 					if boostSpawnsMinion(def) {
 						// "Boost: put this card into play" — spawn it
 						// instead of contributing boost icons.
-						g.logMajorf("Boost card %s enters play!", def.Name)
+						g.tlogMajorf("log.boostEnters", def.Name)
 						g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(v), Card: c})
 						continue
 					}
 					add := deref(def.Boost, 0)
 					v.BoostCount += add
-					g.logf("Boost card revealed: %s (+%d)", def.Name, add)
+					g.tlogf("log.boostRevealed", def.Name, add)
 					v.RevealedBoosts = append(v.RevealedBoosts, c)
 					// Foiled! interrupt window (09038): when the boost card
 					// is turned faceup during a scheme activation, a player
@@ -589,11 +589,11 @@ func (g *Game) handle(msg Message) {
 					if add > 0 && scheme {
 						if p, card, ok := g.handCardHolding("09038"); ok {
 							g.Push(AskQuestion{Player: p.ID, Question: Ask(
-								fmt.Sprintf("%s: play Foiled!? Cancel the +%d boost icons", p.Name, add),
-								Choice{ID: "foiled-play", Label: fmt.Sprintf("Play Foiled! — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
+								Tf("q.foiledPrompt", p.Name, add),
+								Choice{ID: "foiled-play", Label: Tf("m.playFoiled", add), Kind: ChoicePlay, CardCode: card.Code}.
 									Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
 										CancelBoostIcons{Enemy: v.ID, N: add}),
-								Choice{ID: "foiled-pass", Label: "Pass", Kind: ChoicePass},
+								Choice{ID: "foiled-pass", Label: Tf("m.pass"), Kind: ChoicePass},
 							)})
 						}
 					}
@@ -603,12 +603,12 @@ func (g *Game) handle(msg Message) {
 					if add > 0 && !scheme && g.attackActivationPending(v.ID) {
 						if p, card, ok := g.handCardHolding("38015"); ok {
 							g.Push(AskQuestion{Player: p.ID, Question: Ask(
-								fmt.Sprintf("%s: play Preemptive Strike? Cancel +%d boost icons and deal %d damage", p.Name, add, add),
-								Choice{ID: "preemptive-play", Label: fmt.Sprintf("Play Preemptive Strike — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
+								Tf("q.preemptivePrompt", p.Name, add, add),
+								Choice{ID: "preemptive-play", Label: Tf("m.playPreemptive", add), Kind: ChoicePlay, CardCode: card.Code}.
 									Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
 										CancelBoostIcons{Enemy: v.ID, N: add},
 										DamageEntity{Target: v.ID, Damage: add, Source: p.ID}),
-								Choice{ID: "preemptive-pass", Label: "Pass", Kind: ChoicePass},
+								Choice{ID: "preemptive-pass", Label: Tf("m.pass"), Kind: ChoicePass},
 							)})
 						}
 					}
@@ -651,12 +651,12 @@ func (g *Game) handle(msg Message) {
 		}
 		if hasEmerg {
 			g.Push(AskQuestion{Player: p.ID, Question: Ask(
-				"Play Emergency? (reduce the scheme's threat by 1)",
-				Choice{ID: "play-emergency", Label: "Play Emergency", Kind: ChoicePlay, CardCode: "01085"}.
+				Tf("q.emergencyPrompt"),
+				Choice{ID: "play-emergency", Label: Tf("m.playEmergency"), Kind: ChoicePlay, CardCode: "01085"}.
 					Msgs(DiscardCards{Player: p.ID, Cards: CardList{emerg}},
 						SchemeThreat{Scheme: g.MainScheme.ID, N: threat - 1, Source: v.ID},
 						ClearBoosts{Enemy: v.ID}),
-				Choice{ID: "skip-emergency", Label: "Continue", Kind: ChoicePass}.
+				Choice{ID: "skip-emergency", Label: Tf("m.continue"), Kind: ChoicePass}.
 					Msgs(SchemeThreat{Scheme: g.MainScheme.ID, N: threat, Source: v.ID},
 						ClearBoosts{Enemy: v.ID}),
 			)})
@@ -670,7 +670,7 @@ func (g *Game) handle(msg Message) {
 		if v == nil {
 			return
 		}
-		g.logMajorf("%s is defeated!", v.EDef().Name)
+		g.tlogMajorf("log.defeatedBang", v.EDef().Name)
 		g.Push(AdvanceVillainStage{VillainID: v.ID})
 
 	case AdvanceVillainStage:
@@ -678,7 +678,7 @@ func (g *Game) handle(msg Message) {
 
 	case MinionDefeated:
 		if mn := g.Minions[m.MinionID]; mn != nil {
-			g.logMajorf("%s is defeated", mn.EDef().Name)
+			g.tlogMajorf("log.defeated", mn.EDef().Name)
 			if strings.Contains(mn.EDef().Text, "Victory") {
 				g.VictoryDisplay = append(g.VictoryDisplay, Card{ID: g.nextCardID(), Code: mn.Code})
 			}
@@ -694,7 +694,7 @@ func (g *Game) handle(msg Message) {
 			if scen.OnMainSchemeMaxed != nil {
 				g.Push(scen.OnMainSchemeMaxed(g, g.MainScheme)...)
 			} else {
-				g.Push(GameOver{Won: false, Reason: "The main scheme completed"})
+				g.Push(GameOver{Won: false, Reason: Tf("reason.mainSchemeCompleted")})
 			}
 		}
 
@@ -715,7 +715,7 @@ func (g *Game) handle(msg Message) {
 		if g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
 			s := g.MainScheme
 			s.Code = s.StageCodes[s.Stage-1]
-			g.logMajorf("Main scheme flips to stage %s (threat %d/%d)",
+			g.tlogMajorf("log.mainSchemeFlips",
 				s.EDef().StageLabel, s.Threat, s.MaxThreat)
 		}
 
@@ -726,9 +726,9 @@ func (g *Game) handle(msg Message) {
 		g.pending = nil
 		g.queue = nil
 		if m.Won {
-			g.logMajorf("🏆 Victory: %s", m.Reason)
+			g.tlogMajorf("log.victory", m.Reason)
 		} else {
-			g.logMajorf("💀 Defeat: %s", m.Reason)
+			g.tlogMajorf("log.defeat", m.Reason)
 		}
 
 	case AskQuestion:
@@ -752,7 +752,7 @@ func (g *Game) handle(msg Message) {
 			def := v.EDef()
 			v.SchemeVal = deref(def.Scheme, 0)
 			v.AttackVal = deref(def.Attack, 0)
-			g.logMajorf("Villain flips to %s", def.Name)
+			g.tlogMajorf("log.villainFlips", def.Name)
 		}
 
 	case MillPlayerDeck:
@@ -784,7 +784,7 @@ func (g *Game) handle(msg Message) {
 		if mn := g.Minions[m.MinionID]; mn != nil {
 			mn.EngagedWith = m.Player
 			if p := g.Player(m.Player); p != nil {
-				g.logf("%s engages %s", mn.EDef().Name, p.Name)
+				g.tlogf("log.engages", mn.EDef().Name, p.Name)
 			}
 		}
 
@@ -844,10 +844,10 @@ func (g *Game) handle(msg Message) {
 		if p := g.Player(m.Player); p != nil {
 			if m.Remove {
 				p.ObligationRemoved = append(p.ObligationRemoved, m.Card)
-				g.logf("%s is removed from the game", m.Card.Def().Name)
+				g.tlogf("log.removedFromGame", m.Card.Def().Name)
 			} else {
 				p.ObligationDiscard = append(p.ObligationDiscard, m.Card)
-				g.logf("%s is discarded", m.Card.Def().Name)
+				g.tlogf("log.discarded", m.Card.Def().Name)
 			}
 		}
 
@@ -857,7 +857,7 @@ func (g *Game) handle(msg Message) {
 	case AddAccelerationToken:
 		if g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
 			g.MainScheme.AccelerationTokens++
-			g.logf("%s gains an acceleration token", g.MainScheme.EDef().Name)
+			g.tlogf("log.gainsAccel", g.MainScheme.EDef().Name)
 		}
 
 	case RevealNextEncounter:
@@ -872,22 +872,22 @@ func (g *Game) handle(msg Message) {
 		switch t := g.Entity(m.ID).(type) {
 		case *Player:
 			t.Counters += m.N
-			g.logMinorf("%s counters: %d", t.Name, t.Counters)
+			g.tlogMinorf("log.counters", t.Name, t.Counters)
 		case *Support:
 			t.Counters += m.N
-			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.tlogMinorf("log.counters", t.EDef().Name, t.Counters)
 		case *Upgrade:
 			t.Counters += m.N
-			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.tlogMinorf("log.counters", t.EDef().Name, t.Counters)
 		case *Ally:
 			t.Counters += m.N
-			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.tlogMinorf("log.counters", t.EDef().Name, t.Counters)
 		case *Villain:
 			t.Counters += m.N
-			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.tlogMinorf("log.counters", t.EDef().Name, t.Counters)
 		case *Minion:
 			t.Counters += m.N
-			g.logMinorf("%s counters: %d", t.EDef().Name, t.Counters)
+			g.tlogMinorf("log.counters", t.EDef().Name, t.Counters)
 		}
 
 	case ReturnControlled:
@@ -896,7 +896,7 @@ func (g *Game) handle(msg Message) {
 				code := e.ECode()
 				g.Delete(m.ID)
 				p.Hand = append(p.Hand, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
-				g.logf("%s returns %s to their hand", p.Name, e.EDef().Name)
+				g.tlogf("log.returnsToHand", p.Name, e.EDef().Name)
 			}
 		}
 
@@ -936,7 +936,7 @@ func (g *Game) handle(msg Message) {
 				t.Attachments = append(t.Attachments, m.ID)
 			}
 			if tgt := g.Entity(m.Target); tgt != nil {
-				g.logf("%s attaches to %s", u.EDef().Name, tgt.EDef().Name)
+				g.tlogf("log.attachesTo", u.EDef().Name, tgt.EDef().Name)
 			}
 		}
 
@@ -1017,7 +1017,7 @@ func (g *Game) handle(msg Message) {
 			EngagedWith: fp.ID,
 		}
 		g.Minions[mn.ID] = mn
-		g.logMajorf("Enraged Symbiote enters play engaged with %s", fp.Name)
+		g.tlogMajorf("log.enragedSymbiote", fp.Name)
 
 	case SetMassForm:
 		if p := g.Player(m.Player); p != nil {
@@ -1129,10 +1129,10 @@ func (g *Game) handle(msg Message) {
 		if p := g.Player(m.Player); p != nil && len(p.Hand) > 0 {
 			var picks []Choice
 			for _, c := range p.Hand {
-				picks = append(picks, Choice{Label: "Discard " + c.Def().Name, Kind: ChoiceCard, CardCode: c.Code}.
+				picks = append(picks, Choice{Label: Tf("m.discardCard", c.Def().Name), Kind: ChoiceCard, CardCode: c.Code}.
 					Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
 			}
-			q := AskN("Discard 2 cards", min(2, len(p.Hand)), picks...)
+			q := AskN(Tf("q.discardTwoCards"), min(2, len(p.Hand)), picks...)
 			g.Push(AskQuestion{Player: p.ID, Question: q})
 		}
 
@@ -1166,7 +1166,7 @@ func (g *Game) handle(msg Message) {
 					}
 					g.Allies[a.ID] = a
 					p.Allies = append(p.Allies, a.ID)
-					g.logf("%s returns to play with 1 damage (Rapid Response)", a.EDef().Name)
+					g.tlogf("log.returnsRapidResponse", a.EDef().Name)
 					return
 				}
 			}
@@ -1242,14 +1242,14 @@ func (g *Game) handle(msg Message) {
 			v := g.spawnVillain(VillainStageCodes(base), 1)
 			if v != nil {
 				g.ActiveVillain = v.ID
-				g.logMajorf("Ambush! %s joins the fight", v.EDef().Name)
+				g.tlogMajorf("log.ambush", v.EDef().Name)
 			}
 		}
 
 	case CostDiscountApply:
 		if p := g.Player(m.Player); p != nil && m.Amount > 0 {
 			p.CostDiscounts = append(p.CostDiscounts, CostDiscount{Amount: m.Amount})
-			g.logf("%s's next card this phase costs %d less", p.Name, m.Amount)
+			g.tlogf("log.nextCardCostsLess", p.Name, m.Amount)
 		}
 
 	case SenseEnterPlay:
@@ -1260,7 +1260,7 @@ func (g *Game) handle(msg Message) {
 			if c, ok := p.Discard.Remove(m.CardID); ok {
 				p.Deck = append(p.Deck, c)
 				g.shuffle(&p.Deck)
-				g.logf("%s shuffles %s into their deck", p.Name, c.Def().Name)
+				g.tlogf("log.shufflesIntoDeck", p.Name, c.Def().Name)
 			}
 		}
 
@@ -1268,10 +1268,10 @@ func (g *Game) handle(msg Message) {
 		switch t := g.Entity(m.Target).(type) {
 		case *Player:
 			t.ExtraTraits = append(t.ExtraTraits, m.Trait)
-			g.logf("%s gains the %s trait", t.Name, m.Trait)
+			g.tlogf("log.gainsTrait", t.Name, m.Trait)
 		case *Ally:
 			t.ExtraTraits = append(t.ExtraTraits, m.Trait)
-			g.logf("%s gains the %s trait", t.EDef().Name, m.Trait)
+			g.tlogf("log.gainsTrait", t.EDef().Name, m.Trait)
 		}
 
 	case InvokeSpecial:
@@ -1283,10 +1283,10 @@ func (g *Game) handle(msg Message) {
 			def := card.Def()
 			if m.ReturnToTop {
 				p.SenseDeck = append(CardList{card}, p.SenseDeck...)
-				g.logf("%s resolves %s (back on top)", p.Name, def.Name)
+				g.tlogf("log.resolvesTop", p.Name, def.Name)
 			} else {
 				p.SideDiscard = append(p.SideDiscard, card)
-				g.logf("%s resolves %s", p.Name, def.Name)
+				g.tlogf("log.resolves", p.Name, def.Name)
 			}
 			if b := behavior(def.Code); b.OnPlay != nil {
 				ec := &EventCard{Code: def.Code, Owner: p.ID}
@@ -1299,7 +1299,7 @@ func (g *Game) handle(msg Message) {
 			card := p.SenseDeck[0]
 			p.SenseDeck = p.SenseDeck[1:]
 			p.SideDiscard = append(p.SideDiscard, card)
-			g.logf("%s discards %s from the side deck", p.Name, card.Def().Name)
+			g.tlogf("log.discardsSideDeck", p.Name, card.Def().Name)
 		}
 
 	case UpgradeEnterPlay:
@@ -1312,7 +1312,7 @@ func (g *Game) handle(msg Message) {
 				card, ok = p.Discard.Find(m.Card.ID)
 			}
 			if !ok {
-				g.logf("cannot find %s to put into play", m.Card.Code)
+				g.tlogf("log.cannotFindPut", m.Card.Code)
 				return
 			}
 			p.Hand.Remove(card.ID)
@@ -1322,7 +1322,7 @@ func (g *Game) handle(msg Message) {
 			u := &Upgrade{ID: g.nextEntityID(KindUpgrade), Code: def.Code, Owner: p.ID}
 			g.Upgrades[u.ID] = u
 			p.Upgrades = append(p.Upgrades, u.ID)
-			g.logf("%s puts %s into play", p.Name, def.Name)
+			g.tlogf("log.putsIntoPlay", p.Name, def.Name)
 			if b := behavior(def.Code); b.OnPlay != nil {
 				g.Push(b.OnPlay(g, u)...)
 			}
@@ -1334,7 +1334,7 @@ func (g *Game) handle(msg Message) {
 				if c.ID == m.CardID {
 					p.SenseDeck = append(p.SenseDeck[:i], p.SenseDeck[i+1:]...)
 					p.Hand = append(p.Hand, c)
-					g.logf("%s takes %s from under Echo", p.Name, c.Def().Name)
+					g.tlogf("log.takesUnderEcho", p.Name, c.Def().Name)
 					return
 				}
 			}
@@ -1345,7 +1345,7 @@ func (g *Game) handle(msg Message) {
 			if src := g.Player(m.From); src != nil {
 				if c, ok := src.Discard.Remove(m.CardID); ok {
 					p.Hand = append(p.Hand, c)
-					g.logf("%s takes %s from %s's discard pile", p.Name, c.Def().Name, src.Name)
+					g.tlogf("log.takesFromDiscard", p.Name, c.Def().Name, src.Name)
 				}
 			}
 		}
@@ -1356,7 +1356,7 @@ func (g *Game) handle(msg Message) {
 				top := p.Deck[0]
 				p.Deck[0] = c
 				p.Hand = append(p.Hand, top)
-				g.logf("%s swaps %s with the top of their deck", p.Name, c.Def().Name)
+				g.tlogf("log.swapsTop", p.Name, c.Def().Name)
 			}
 		}
 
@@ -1381,7 +1381,7 @@ func (g *Game) handle(msg Message) {
 		if p := g.Player(m.Player); p != nil {
 			if c, ok := p.Discard.Remove(m.CardID); ok {
 				p.Hand = append(p.Hand, c)
-				g.logf("%s takes %s back to hand", p.Name, c.Def().Name)
+				g.tlogf("log.takesBack", p.Name, c.Def().Name)
 			}
 		}
 
@@ -1389,7 +1389,7 @@ func (g *Game) handle(msg Message) {
 		if p := g.Player(m.Player); p != nil {
 			if c, ok := p.Discard.Remove(m.CardID); ok {
 				p.Deck = append(p.Deck, c)
-				g.logf("%s puts %s on the bottom of their deck", p.Name, c.Def().Name)
+				g.tlogf("log.putsBottom", p.Name, c.Def().Name)
 			}
 		}
 
@@ -1414,7 +1414,7 @@ func (g *Game) handle(msg Message) {
 				if c, ok := p.Hand.Remove(m.Card.ID); ok {
 					s.AttachedCards = append(s.AttachedCards, c)
 					s.Counters = len(s.AttachedCards)
-					g.logMinorf("%s tucks a card under %s (%d stored)", p.Name, s.EDef().Name, s.Counters)
+					g.tlogMinorf("log.tucksUnder", p.Name, s.EDef().Name, s.Counters)
 				}
 			}
 		}
@@ -1427,7 +1427,7 @@ func (g *Game) handle(msg Message) {
 				s.AttachedCards = s.AttachedCards[take:]
 				s.Counters = len(s.AttachedCards)
 				p.Hand = append(p.Hand, taken...)
-				g.logMinorf("%s takes %d stored cards from %s", p.Name, take, s.EDef().Name)
+				g.tlogMinorf("log.takesStored", p.Name, take, s.EDef().Name)
 			}
 		}
 
@@ -1452,14 +1452,14 @@ func (g *Game) handle(msg Message) {
 			p.BonusATK += m.ATK
 			p.BonusTHW += m.THW
 			p.BonusDEF += m.DEF
-			g.logf("%s gets +%d THW / +%d ATK / +%d DEF until the end of the phase", p.Name, m.THW, m.ATK, m.DEF)
+			g.tlogf("log.getsStats3", p.Name, m.THW, m.ATK, m.DEF)
 		}
 
 	case AllyStatBonus:
 		if a := g.Allies[m.Ally]; a != nil {
 			a.BonusTHW += m.THW
 			a.BonusATK += m.ATK
-			g.logf("%s gets +%d THW / +%d ATK until the end of the phase", a.EDef().Name, m.THW, m.ATK)
+			g.tlogf("log.getsStats2", a.EDef().Name, m.THW, m.ATK)
 		}
 
 	case TakeDeckCard:
@@ -1469,7 +1469,7 @@ func (g *Game) handle(msg Message) {
 		}
 		if card, ok := p.Deck.Remove(m.CardID); ok {
 			p.Hand = append(p.Hand, card)
-			g.logf("%s takes %s from their deck", p.Name, card.Def().Name)
+			g.tlogf("log.takesFromDeck", p.Name, card.Def().Name)
 			if m.FromTop > 0 {
 				// Futurist: discard the remaining looked cards.
 				n := min(m.FromTop-1, len(p.Deck))
@@ -1492,7 +1492,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 	if p == nil {
 		return
 	}
-	g.logMajorf("%s reveals their nemesis set!", p.Name)
+	g.tlogMajorf("log.revealsNemesis", p.Name)
 	var rest CardList
 	for _, c := range p.NemesisDeck {
 		def := c.Def()
@@ -1508,7 +1508,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 				Guard:     def.HasKeyword("Guard"),
 			}
 			g.Minions[mn.ID] = mn
-			g.logMajorf("%s enters play engaged with %s", def.Name, p.Name)
+			g.tlogMajorf("log.entersEngaged", def.Name, p.Name)
 			g.Push(MinionEntersPlay{MinionID: mn.ID, Player: p.ID})
 			if def.HasKeyword("Quickstrike") && p.IsHero() {
 				g.Push(DamageEntity{Target: p.ID, Damage: mn.AttackVal, Source: mn.ID})
@@ -1530,7 +1530,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 			}
 			g.Allies[a.ID] = a
 			p.Allies = append(p.Allies, a.ID)
-			g.logMajorf("%s joins %s!", def.Name, p.Name)
+			g.tlogMajorf("log.joins", def.Name, p.Name)
 			g.Push(AllyEnteredPlay{Ally: a.ID, Player: pid})
 			g.Push(RevealNextEncounter{Player: pid})
 		case "side_scheme":
@@ -1543,7 +1543,7 @@ func (g *Game) handleRevealNemesisSet(pid PlayerID) {
 				Hazard:    def.Hazards,
 			}
 			g.SideSchemes[s.ID] = s
-			g.logMajorf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
+			g.tlogMajorf("log.sideSchemeEnters", def.Name, s.Threat)
 			if b := behavior(def.Code); b.OnPlay != nil {
 				g.Push(b.OnPlay(g, s)...)
 			}
@@ -1593,7 +1593,7 @@ func (g *Game) handleSpawnDrone(pid PlayerID) {
 	card := p.Deck[0]
 	p.Deck = p.Deck[1:]
 	g.spawnDroneMinion(card)
-	g.logMajorf("A Drone enters play engaged with %s", p.Name)
+	g.tlogMajorf("log.droneEnters", p.Name)
 }
 
 func (g *Game) discardControlled(pid PlayerID, id EntityID) {
@@ -1618,11 +1618,11 @@ func (g *Game) discardControlled(pid PlayerID, id EntityID) {
 	// Murdock's forced interrupt).
 	if def, ok := DB.Lookup(code); ok && def.HasTrait("sense") {
 		p.SenseDeck = append(p.SenseDeck, Card{ID: g.nextCardID(), Code: code, Owner: p.ID})
-		g.logf("%s returns to the bottom of the Sense deck", def.Name)
+		g.tlogf("log.returnsSenseBottom", def.Name)
 		return
 	}
 	g.cardLeavesPlay(p, code, e.EDef().Name)
-	g.logf("%s is discarded", e.EDef().Name)
+	g.tlogf("log.discarded", e.EDef().Name)
 }
 
 // thwartBlocked reports whether a minion engaged with the player blocks
@@ -1656,7 +1656,7 @@ func (g *Game) handleStartGame() {
 	for i := range g.Players {
 		g.Players[i].FirstPlayer = i == first
 	}
-	g.logf("%s takes the first player token", g.Players[first].Name)
+	g.tlogf("log.takesFirstPlayer", g.Players[first].Name)
 
 	for _, p := range g.Players {
 		p.Deck = g.assignCardIDs(p.Deck, p.ID)
@@ -1674,7 +1674,7 @@ func (g *Game) handleStartGame() {
 	if scen.Setup != nil {
 		g.Push(scen.Setup(g)...)
 	}
-	g.logMajorf("Scenario: %s", scen.Name)
+	g.tlogMajorf("log.scenario", scen.Name)
 	// Opening hands (official setup step 14), then mulligans (step 15),
 	// then player setup abilities (step 16), then the first round.
 	for _, p := range g.Players {
@@ -1698,16 +1698,16 @@ func (g *Game) askMulligan(pid PlayerID) {
 	if p == nil || len(p.Hand) == 0 {
 		return
 	}
-	pick := &Question{Type: "choose_n", Prompt: "Select cards to mulligan"}
+	pick := &Question{Type: "choose_n", Prompt: Tf("q.selectMulligan")}
 	for _, c := range p.Hand {
 		def := c.Def()
 		pick.Choices = append(pick.Choices, Choice{
 			Label: def.Name, Kind: ChoiceCard, CardCode: def.Code,
 		}.Msgs(MulliganCard{Player: p.ID, CardID: c.ID}))
 	}
-	q := Ask("Mulligan?",
-		Choice{ID: "keep", Label: "Keep hand", Kind: ChoicePass},
-		Choice{ID: "mulligan", Label: "Discard selected cards and redraw", Kind: ChoiceCard}.WithThen(pick),
+	q := Ask(Tf("q.mulligan"),
+		Choice{ID: "keep", Label: Tf("m.keepHand"), Kind: ChoicePass},
+		Choice{ID: "mulligan", Label: Tf("m.mulliganRedraw"), Kind: ChoiceCard}.WithThen(pick),
 	)
 	g.Push(AskQuestion{Player: p.ID, Question: q})
 }
@@ -1721,23 +1721,23 @@ func (g *Game) askDiscardToHandSize(pid PlayerID) {
 	}
 	over := len(p.Hand) - p.HandSize(g)
 	if over <= 0 {
-		pick := &Question{Type: "choose_n", Prompt: "Discard any number of cards"}
+		pick := &Question{Type: "choose_n", Prompt: Tf("q.discardAnyNumber")}
 		for _, c := range p.Hand {
 			def := c.Def()
 			pick.Choices = append(pick.Choices, Choice{
 				Label: def.Name, Kind: ChoiceCard, CardCode: def.Code,
 			}.Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
 		}
-		q := Ask("Discard cards before drawing up?",
-			Choice{ID: "keep", Label: "Keep hand", Kind: ChoicePass},
-			Choice{ID: "discard", Label: "Discard cards", Kind: ChoiceCard}.WithThen(pick),
+		q := Ask(Tf("q.discardBeforeDraw"),
+			Choice{ID: "keep", Label: Tf("m.keepHand"), Kind: ChoicePass},
+			Choice{ID: "discard", Label: Tf("m.discardCards"), Kind: ChoiceCard}.WithThen(pick),
 		)
 		g.Push(AskQuestion{Player: p.ID, Question: q})
 		return
 	}
 	q := &Question{
 		Type:   "choose_n",
-		Prompt: fmt.Sprintf("Discard down to hand size %d (discard at least %d)", p.HandSize(g), over),
+		Prompt: Tf("q.discardToHandSize", p.HandSize(g), over),
 	}
 	for _, c := range p.Hand {
 		def := c.Def()
@@ -1861,7 +1861,7 @@ func (g *Game) handleBeginPhase(phase Phase) {
 		// acceleration tokens, and acceleration icons in play.
 		if g.MainScheme != nil {
 			if n := g.accelerationThreat(); n > 0 {
-				g.logf("Acceleration places %d threat on %s", n, g.MainScheme.EDef().Name)
+				g.tlogf("log.accelPlaces", n, g.MainScheme.EDef().Name)
 				g.Push(SchemeThreat{
 					Scheme: g.MainScheme.ID,
 					N:      n,
@@ -1960,10 +1960,10 @@ func (g *Game) handleVillainActivates(m VillainActivates) {
 		// Attack
 		if v.Stunned {
 			v.Stunned = false
-			g.logf("%s is stunned; attack canceled", def.Name)
+			g.tlogf("log.stunnedCanceled", def.Name)
 			return
 		}
-		g.logf("%s attacks %s", def.Name, p.Name)
+		g.tlogf("log.attacks", def.Name, p.Name)
 		g.Push(DealBoost{Enemy: v.ID})
 		g.Push(RevealBoost{Enemy: v.ID})
 		g.Push(AskAttack{Enemy: v.ID, Player: p.ID, Trigger: TriggerVillainAttacksYou})
@@ -1971,7 +1971,7 @@ func (g *Game) handleVillainActivates(m VillainActivates) {
 		// Scheme
 		if v.Confused {
 			v.Confused = false
-			g.logf("%s is confused; scheme canceled", def.Name)
+			g.tlogf("log.confusedCanceled", def.Name)
 			return
 		}
 		// Tempus (45042): discard her to cancel the scheme activation.
@@ -1981,15 +1981,15 @@ func (g *Game) handleVillainActivates(m VillainActivates) {
 				continue
 			}
 			g.Push(AskQuestion{Player: p.ID, Question: Ask(
-				fmt.Sprintf("Discard Tempus to cancel %s's scheme? (you take a facedown encounter card)", def.Name),
-				Choice{ID: "tempus-cancel", Label: "Discard Tempus → cancel the scheme", Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code}.
+				Tf("q.tempusPrompt", def.Name),
+				Choice{ID: "tempus-cancel", Label: Tf("m.discardTempus"), Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code}.
 					Msgs(AllyDestroyed{AllyID: a.ID}, DealEncounterToPlayer{Player: p.ID}),
-				Choice{ID: "tempus-pass", Label: "Let the scheme resolve", Kind: ChoicePass}.
+				Choice{ID: "tempus-pass", Label: Tf("m.letSchemeResolve"), Kind: ChoicePass}.
 					Msgs(DealBoost{Enemy: v.ID}, RevealBoost{Enemy: v.ID}, ApplyVillainScheme{VillainID: v.ID, Player: p.ID}),
 			)})
 			return
 		}
-		g.logf("%s schemes against %s", def.Name, p.Name)
+		g.tlogf("log.schemesAgainst", def.Name, p.Name)
 		g.Push(DealBoost{Enemy: v.ID})
 		g.Push(RevealBoost{Enemy: v.ID})
 		g.Push(ApplyVillainScheme{VillainID: v.ID, Player: p.ID})
@@ -2013,7 +2013,7 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 	// Distraction (44054): the attached minion cannot activate.
 	for _, aid := range mn.Attachments {
 		if a := g.Attachments[aid]; a != nil && a.Code == "44054" {
-			g.logf("%s cannot activate (Distraction)", mn.EDef().Name)
+			g.tlogf("log.cannotActivateDistraction", mn.EDef().Name)
 			return
 		}
 	}
@@ -2025,10 +2025,10 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 	if p.IsHero() {
 		if mn.Stunned {
 			mn.Stunned = false
-			g.logf("%s is stunned; attack canceled", def.Name)
+			g.tlogf("log.stunnedCanceled", def.Name)
 			return
 		}
-		g.logf("%s attacks %s", def.Name, p.Name)
+		g.tlogf("log.attacks", def.Name, p.Name)
 		// Solus (30037) grants every Inheritor minion villainous.
 		if def.HasKeyword("Villainous") || (def.HasTrait("inheritor") && g.minionInPlay("30037")) {
 			g.dealMinionBoost(mn)
@@ -2039,18 +2039,18 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 			mn.Confused = false
 			return
 		}
-		g.logf("%s schemes against %s", def.Name, p.Name)
+		g.tlogf("log.schemesAgainst", def.Name, p.Name)
 		if g.MainScheme != nil {
 			// Informant (50050): the preparation may be discarded to
 			// invert the scheme — it removes threat instead.
 			for _, uid := range p.Upgrades {
 				if u := g.Upgrades[uid]; u != nil && u.Code == "50050" {
 					g.Push(AskQuestion{Player: p.ID, Question: Ask(
-						fmt.Sprintf("%s: discard Informant? %s's scheme removes threat instead", p.Name, def.Name),
-						Choice{ID: "informant-use", Label: "Discard Informant — remove threat instead", Kind: ChoicePlay, CardCode: u.Code}.
+						Tf("q.informantPrompt", p.Name, def.Name),
+						Choice{ID: "informant-use", Label: Tf("m.discardInformant"), Kind: ChoicePlay, CardCode: u.Code}.
 							Msgs(DiscardControlled{Player: p.ID, ID: u.ID},
 								ThwartScheme{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: u.ID}),
-						Choice{ID: "informant-pass", Label: "Pass", Kind: ChoicePass}.
+						Choice{ID: "informant-pass", Label: Tf("m.pass"), Kind: ChoicePass}.
 							Msgs(SchemeThreat{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: mn.ID}),
 					)})
 					return
@@ -2070,14 +2070,14 @@ func (g *Game) dealMinionBoost(mn *Minion) {
 	}
 	def := c.Def()
 	if boostSpawnsMinion(def) {
-		g.logMajorf("Boost card %s enters play!", def.Name)
+		g.tlogMajorf("log.boostEnters", def.Name)
 		g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(nil), Card: c})
 		return
 	}
 	add := deref(def.Boost, 0)
 	mn.BoostCount += add
 	g.EncounterDiscard = append(g.EncounterDiscard, c)
-	g.logf("%s gets a boost card: %s (+%d)", mn.EDef().Name, def.Name, add)
+	g.tlogf("log.boostCard", mn.EDef().Name, def.Name, add)
 	if b := behavior(def.Code); b.Boost != nil {
 		g.Push(b.Boost(g, c)...)
 	}
@@ -2148,7 +2148,7 @@ func (g *Game) handleAskMinionOrder(m AskMinionOrder) {
 			AskMinionOrder{Player: p.ID, Remaining: rest},
 		))
 	}
-	g.Push(AskQuestion{Player: p.ID, Question: Ask("Choose the next minion to activate", choices...)})
+	g.Push(AskQuestion{Player: p.ID, Question: Ask(Tf("q.nextMinionActivate"), choices...)})
 }
 
 // handleAskAttack builds the attack/defense prompt at resolve time, so the
@@ -2170,7 +2170,7 @@ func (g *Game) handleAskAttack(m AskAttack) {
 			if a == nil || !a.EDef().HasTrait("morlock") {
 				continue
 			}
-			g.logf("%s redirects the attack to %s", p.Name, a.EDef().Name)
+			g.tlogf("log.redirectsAttack", p.Name, a.EDef().Name)
 			g.Push(DamageEntity{Target: a.ID, Damage: g.attackValue(m.Enemy), Source: m.Enemy})
 			if v := g.Villains[m.Enemy]; v != nil {
 				g.Push(ClearBoosts{Enemy: v.ID})
@@ -2273,14 +2273,14 @@ func (g *Game) handleDefends(m Defends) {
 			}
 			prevented := def.DefenseStat(g) + m.DefBonus
 			damage -= prevented
-			g.logf("%s defends (%d damage prevented)", def.Name, prevented)
+			g.tlogf("log.defendsPrevented", def.Name, prevented)
 		}
 		if m.ExtraPrevent > 0 {
 			damage -= m.ExtraPrevent
-			g.logf("%s prevents %d additional damage", def.Name, m.ExtraPrevent)
+			g.tlogf("log.preventsAdditionalDamage", def.Name, m.ExtraPrevent)
 		}
 		if m.PreventAll {
-			g.logf("%s prevents all damage", def.Name)
+			g.tlogf("log.preventsAllDamage", def.Name)
 			damage = 0
 		}
 		g.Push(DamageEntity{Target: def.ID, Damage: max(0, damage), Source: m.Against})
@@ -2313,7 +2313,7 @@ func (g *Game) handlePlayCard(m PlayCard) {
 	}
 	card, ok := p.Hand.Find(m.Card.ID)
 	if !ok {
-		g.logf("cannot play missing card %s", m.Card.Code)
+		g.tlogf("log.cannotPlayMissing", m.Card.Code)
 		return
 	}
 	def := card.Def()
@@ -2343,25 +2343,25 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		case "32047", "35020":
 			if def.Type == "event" && def.HasTrait("attack") {
 				g.EventDamageBonus[p.ID] += 1
-				g.logf("Aggressive Energy — %s deals 1 additional damage", def.Name)
+				g.tlogf("log.aggressiveEnergy", def.Name)
 			}
 		case "32018", "38017":
 			if def.Type == "event" && def.HasTrait("defense") {
 				g.Push(DrawCards{Player: p.ID, N: 1})
-				g.logf("Defensive Energy — draw 1 card")
+				g.tlogf("log.defensiveEnergy")
 			}
 		case "33018", "36021":
 			// Effective Leadership: the played ally gets +1 THW / +1 ATK
 			// this phase (applied in the ally case below via a flag).
 			if def.Type == "ally" {
 				leadershipBoost[p.ID] = true
-				g.logf("Effective Leadership — %s gets +1 THW / +1 ATK", def.Name)
+				g.tlogf("log.effectiveLeadership", def.Name)
 			}
 		case "34020", "37016":
 			// Passion for Justice: Thwart events remove 1 extra threat.
 			if def.Type == "event" && def.HasTrait("thwart") {
 				g.EventThreatBonus[p.ID] += 1
-				g.logf("Passion for Justice — %s removes 1 additional threat", def.Name)
+				g.tlogf("log.passionForJustice", def.Name)
 			}
 		}
 	}
@@ -2387,7 +2387,7 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		}
 		g.Allies[a.ID] = a
 		p.Allies = append(p.Allies, a.ID)
-		g.logf("%s plays %s", p.Name, def.Name)
+		g.tlogf("log.plays", p.Name, def.Name)
 		g.Push(AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, a)...)
@@ -2396,7 +2396,7 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		s := &Support{ID: g.nextEntityID(KindSupport), Code: def.Code, Owner: p.ID}
 		g.Supports[s.ID] = s
 		p.Supports = append(p.Supports, s.ID)
-		g.logf("%s plays %s", p.Name, def.Name)
+		g.tlogf("log.plays", p.Name, def.Name)
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, s)...)
 		}
@@ -2404,7 +2404,7 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		u := &Upgrade{ID: g.nextEntityID(KindUpgrade), Code: def.Code, Owner: p.ID}
 		g.Upgrades[u.ID] = u
 		p.Upgrades = append(p.Upgrades, u.ID)
-		g.logf("%s plays %s", p.Name, def.Name)
+		g.tlogf("log.plays", p.Name, def.Name)
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, u)...)
 		}
@@ -2423,13 +2423,13 @@ func (g *Game) handlePlayCard(m PlayCard) {
 			Hazard:     def.Hazards,
 		}
 		g.SideSchemes[s.ID] = s
-		g.logf("%s plays %s (threat %d)", p.Name, def.Name, s.Threat)
+		g.tlogf("log.playsThreat", p.Name, def.Name, s.Threat)
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, s)...)
 		}
 	default:
 		// Events and anything else: resolve then discard.
-		g.logf("%s plays %s", p.Name, def.Name)
+		g.tlogf("log.plays", p.Name, def.Name)
 		ec := &EventCard{Code: def.Code, Owner: p.ID, Paid: m.Paid}
 		if def.Type == "event" {
 			// Announce the play before the effect resolves so that
@@ -2442,7 +2442,7 @@ func (g *Game) handlePlayCard(m PlayCard) {
 		}
 		p.Discard = append(p.Discard, card)
 		if firstOfRound && data.BaseCode(def.Code) == "45046" {
-			g.logf("Clobber is the first card played this round — it returns to hand")
+			g.tlogf("log.clobberReturns")
 			g.PushFront(ReturnDiscardCard{Player: p.ID, CardID: card.ID})
 		}
 	}
@@ -2457,7 +2457,7 @@ func (g *Game) handlePlayDefenseEvent(m PlayDefenseEvent) {
 	}
 	card, ok := p.Hand.Find(m.Card.ID)
 	if !ok {
-		g.logf("cannot play missing defense event %s", m.Card.Code)
+		g.tlogf("log.cannotPlayMissingDefense", m.Card.Code)
 		return
 	}
 	def := card.Def()
@@ -2468,7 +2468,7 @@ func (g *Game) handlePlayDefenseEvent(m PlayDefenseEvent) {
 	}
 	p.Hand.Remove(card.ID)
 	p.Discard = append(p.Discard, card)
-	g.logf("%s plays %s", p.Name, def.Name)
+	g.tlogf("log.plays", p.Name, def.Name)
 	b := behavior(def.Code)
 	if b.DefenseEvent == nil {
 		return
@@ -2505,7 +2505,7 @@ func (g *Game) handleAllyEntersPlayFree(m AllyEntersPlayFree) {
 		}
 	}
 	if !found {
-		g.logf("cannot put missing ally %s into play", m.Card.Code)
+		g.tlogf("log.cannotPutMissingAlly", m.Card.Code)
 		return
 	}
 	def := card.Def()
@@ -2521,7 +2521,7 @@ func (g *Game) handleAllyEntersPlayFree(m AllyEntersPlayFree) {
 	g.Allies[a.ID] = a
 	p.Allies = append(p.Allies, a.ID)
 	p.AllyPlayedThisRound = true
-	g.logf("%s puts %s into play", p.Name, def.Name)
+	g.tlogf("log.putsIntoPlay", p.Name, def.Name)
 	g.Push(AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 	if b := behavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, a)...)
@@ -2549,7 +2549,7 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 		final := append([]Message{ConsumeHandCard{Player: p.ID, CardID: hc.ID}}, repl...)
 		cost := deref(hc.Def().Cost, 0)
 		choice := Choice{
-			ID: "interrupt-" + hc.ID, Label: "Play " + hc.Def().Name,
+			ID: "interrupt-" + hc.ID, Label: Tf("m.playCard", hc.Def().Name),
 			Kind: ChoicePlay, CardCode: hc.Code,
 		}
 		if cost > 0 && len(p.Hand) > cost {
@@ -2559,7 +2559,7 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 					continue
 				}
 				pays = append(pays, Choice{
-					Label: "Discard " + rc.Def().Name, Kind: ChoiceCard, CardCode: rc.Code,
+					Label: Tf("m.discardCard", rc.Def().Name), Kind: ChoiceCard, CardCode: rc.Code,
 				}.Msgs(append([]Message{DiscardCards{Player: p.ID, Cards: CardList{rc}}}, final...)...))
 			}
 			interrupts = append(interrupts, choice.WithThen(
@@ -2579,7 +2579,7 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 			continue
 		}
 		interrupts = append(interrupts, Choice{
-			ID: "bw-cancel", Label: "Exhaust Black Widow → cancel " + m.Card.Def().Name,
+			ID: "bw-cancel", Label: Tf("m.bwCancel", m.Card.Def().Name),
 			Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code,
 		}.Msgs(ExhaustEntity{ID: a.ID}))
 	}
@@ -2596,7 +2596,7 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 		}
 		if repl := hb.TreacheryInterrupt(g, p, m.Card); repl != nil {
 			interrupts = append(interrupts, Choice{
-				ID: "upgrade-interrupt-" + u.ID.String(), Label: "Use " + u.EDef().Name,
+				ID: "upgrade-interrupt-" + u.ID.String(), Label: Tf("m.use", u.EDef().Name),
 				Kind: ChoiceAbility, SourceID: u.ID, CardCode: u.Code,
 			}.Msgs(repl...))
 		}
@@ -2609,7 +2609,7 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 			continue
 		}
 		interrupts = append(interrupts, Choice{
-			ID: "ntw-cancel", Label: "Damage Negasonic Teenage Warhead (2) → cancel " + m.Card.Def().Name,
+			ID: "ntw-cancel", Label: Tf("m.ntwCancel", m.Card.Def().Name),
 			Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code,
 		}.Msgs(
 			DamageEntity{Target: a.ID, Damage: 2, Source: p.ID},
@@ -2628,7 +2628,7 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 			continue
 		}
 		interrupts = append(interrupts, Choice{
-			ID: "cuckoos-cancel", Label: "Exhaust Stepford Cuckoos (psi counter) → cancel " + m.Card.Def().Name,
+			ID: "cuckoos-cancel", Label: Tf("m.cuckoosCancel", m.Card.Def().Name),
 			Kind: ChoiceAbility, SourceID: s2.ID, CardCode: s2.Code,
 		}.Msgs(
 			ExhaustEntity{ID: s2.ID},
@@ -2642,9 +2642,9 @@ func (g *Game) handleTreacheryWindow(m TreacheryWindow) {
 		return
 	}
 	interrupts = append(interrupts, Choice{
-		ID: "continue", Label: "Let " + m.Card.Def().Name + " resolve", Kind: ChoicePass,
+		ID: "continue", Label: Tf("m.letResolve", m.Card.Def().Name), Kind: ChoicePass,
 	}.Msgs(TreacheryResolve{Player: m.Player, Card: m.Card}))
-	g.Push(AskQuestion{Player: p.ID, Question: Ask(m.Card.Def().Name+" — interrupts?", interrupts...)})
+	g.Push(AskQuestion{Player: p.ID, Question: Ask(Tf("q.interruptsQ", m.Card.Def().Name), interrupts...)})
 }
 
 // indirectQuestion builds the one-point distribution prompt for indirect
@@ -2663,7 +2663,7 @@ func (g *Game) indirectQuestion(p *Player, n int, chars []EntityID) *Question {
 		picks = append(picks, Choice{Label: fmt.Sprintf("1 damage to %s", label), Kind: ChoiceTarget, SourceID: id}.
 			Msgs(msgs...))
 	}
-	return Ask(fmt.Sprintf("%s: assign %d indirect damage", p.Name, n), picks...)
+	return Ask(Tf("q.assignIndirect", p.Name, n), picks...)
 }
 
 // handleTreacheryResolve performs the treachery resolution, or the
@@ -2675,7 +2675,7 @@ func (g *Game) handleTreacheryResolve(m TreacheryResolve) {
 	}
 	def := m.Card.Def()
 	if m.Cancelled {
-		g.logf("%s cancels the effects of %s", p.Name, def.Name)
+		g.tlogf("log.cancelsEffects", p.Name, def.Name)
 		return
 	}
 	t := &Treachery{ID: g.nextEntityID(KindTreachery), Code: def.Code}
@@ -2683,7 +2683,7 @@ func (g *Game) handleTreacheryResolve(m TreacheryResolve) {
 	if b := behavior(def.Code); b.ResolveTreachery != nil {
 		g.Push(b.ResolveTreachery(g, t, p)...)
 	} else {
-		g.logf("(no effect implemented for %s)", def.Name)
+		g.tlogf("log.noEffect", def.Name)
 		g.Delete(t.ID)
 	}
 }
@@ -2697,14 +2697,14 @@ func (g *Game) handleSenseEnterPlay(m SenseEnterPlay) {
 	}
 	card, ok := p.SenseDeck.Remove(m.Card.ID)
 	if !ok {
-		g.logf("cannot play missing Sense card %s", m.Card.Code)
+		g.tlogf("log.cannotPlayMissingSense", m.Card.Code)
 		return
 	}
 	def := card.Def()
 	u := &Upgrade{ID: g.nextEntityID(KindUpgrade), Code: def.Code, Owner: p.ID}
 	g.Upgrades[u.ID] = u
 	p.Upgrades = append(p.Upgrades, u.ID)
-	g.logf("%s plays %s from the Sense deck", p.Name, def.Name)
+	g.tlogf("log.playsSense", p.Name, def.Name)
 	if b := behavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, u)...)
 	}
@@ -2719,7 +2719,7 @@ func (g *Game) handlePlayDiscardAlly(m PlayDiscardAlly) {
 	}
 	card, ok := p.Discard.Find(m.Card.ID)
 	if !ok {
-		g.logf("cannot play missing discard ally %s", m.Card.Code)
+		g.tlogf("log.cannotPlayMissingDiscardAlly", m.Card.Code)
 		return
 	}
 	for _, id := range m.Paid.CardIDs {
@@ -2742,7 +2742,7 @@ func (g *Game) handlePlayDiscardAlly(m PlayDiscardAlly) {
 	p.Allies = append(p.Allies, a.ID)
 	p.AllyPlayedThisRound = true
 	g.consumeDiscount(p, def)
-	g.logf("%s plays %s from their discard pile", p.Name, def.Name)
+	g.tlogf("log.playsFromDiscard", p.Name, def.Name)
 	if b := behavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, a)...)
 	}
@@ -2767,7 +2767,7 @@ func (e *EventCard) React(g *Game, msg Message) []Message { return nil }
 func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 	p := g.Player(pid)
 	def := card.Def()
-	g.logf("%s reveals %s", p.Name, def.Name)
+	g.tlogf("log.reveals", p.Name, def.Name)
 
 	// Obligations resolve for their owner, not the revealer, and do not
 	// enter the encounter discard.
@@ -2780,7 +2780,7 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 			g.Push(b.ResolveObligation(g, owner, card)...)
 		} else {
 			owner.ObligationDiscard = append(owner.ObligationDiscard, card)
-			g.logf("(no effect implemented for %s)", def.Name)
+			g.tlogf("log.noEffect", def.Name)
 		}
 		return
 	}
@@ -2817,7 +2817,7 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 			Hazard:    def.Hazards,
 		}
 		g.SideSchemes[s.ID] = s
-		g.logMajorf("Side scheme %s enters play (threat %d)", def.Name, s.Threat)
+		g.tlogMajorf("log.sideSchemeEnters", def.Name, s.Threat)
 		if b := behavior(def.Code); b.OnPlay != nil {
 			g.Push(b.OnPlay(g, s)...)
 		}
@@ -2837,15 +2837,15 @@ func (g *Game) revealEncounterCard(pid PlayerID, card Card) {
 				t.Target = id
 				break
 			}
-			g.logf("%s attaches to the villain", def.Name)
+			g.tlogf("log.attachesVillain", def.Name)
 		}
 	case "environment":
 		env := &Environment{ID: g.nextEntityID(KindEnvironment), Code: def.Code}
 		g.Environments[env.ID] = env
-		g.logMajorf("Environment %s enters play", def.Name)
+		g.tlogMajorf("log.environmentEnters", def.Name)
 
 	default:
-		g.logf("(unhandled encounter type %s for %s)", def.Type, def.Name)
+		g.tlogf("log.unhandledType", def.Type, def.Name)
 	}
 
 	if def.HasKeyword("Surge") {
@@ -2865,7 +2865,7 @@ func (g *Game) advanceVillainStage(id EntityID) {
 			g.Push(scen.OnVillainDefeated(g, v)...)
 			return
 		}
-		g.Push(GameOver{Won: true, Reason: "The villain was defeated"})
+		g.Push(GameOver{Won: true, Reason: Tf("reason.villainDefeated")})
 		return
 	}
 	v.Stage++
@@ -2876,7 +2876,7 @@ func (g *Game) advanceVillainStage(id EntityID) {
 	v.SchemeVal = deref(def.Scheme, v.SchemeVal)
 	v.AttackVal = deref(def.Attack, v.AttackVal)
 	v.Tough = def.HasKeyword("Toughness")
-	g.logf("%s advances to stage %s", def.Name, def.StageLabel)
+	g.tlogf("log.advancesStage", def.Name, def.StageLabel)
 	if b := behavior(v.Code); b.VillainStage != nil {
 		g.Push(b.VillainStage(g, v, v.Stage)...)
 	}
@@ -3003,7 +3003,7 @@ func (g *Game) boostSpawnTarget(v *Villain) PlayerID {
 
 func (g *Game) handleSchemeDefeated(id EntityID) {
 	if s := g.SideSchemes[id]; s != nil {
-		g.logMajorf("Side scheme %s is defeated", s.EDef().Name)
+		g.tlogMajorf("log.sideSchemeDefeated", s.EDef().Name)
 		if b := behavior(s.Code); b.SideSchemeDefeated != nil {
 			g.Push(b.SideSchemeDefeated(g, s)...)
 		}
@@ -3018,7 +3018,7 @@ func (g *Game) handleSchemeDefeated(id EntityID) {
 		if scen.OnMainSchemeDefeated != nil {
 			g.Push(scen.OnMainSchemeDefeated(g, g.MainScheme)...)
 		} else {
-			g.logMajorf("Main scheme %s is defeated", g.MainScheme.EDef().Name)
+			g.tlogMajorf("log.mainSchemeDefeated", g.MainScheme.EDef().Name)
 		}
 	}
 }

@@ -104,15 +104,34 @@ func main() {
 	staticDir := envOr("MC_STATIC_DIR", "web/dist")
 	cacheDir := envOr("MC_CACHE_DIR", "cache")
 
-	// Optional Simplified Chinese translation overlay: a directory of pack
-	// JSON files (tools/zh/out). Untranslated cards keep English values.
-	if zhDir := os.Getenv("MC_ZH_DIR"); zhDir != "" {
+	// Simplified Chinese output (default): MC_LANG=zh overlays the card
+	// database with the community translations (tools/zh/out by default,
+	// override with MC_ZH_DIR) and makes the engine emit Chinese logs,
+	// prompts, and choice labels via the i18n message catalog. MC_LANG=en
+	// serves English; an explicitly set MC_ZH_DIR still applies the
+	// card-name overlay alone.
+	lang := engine.Lang(os.Getenv("MC_LANG"))
+	if lang == "" {
+		lang = engine.LangZh
+	}
+	zhDir := os.Getenv("MC_ZH_DIR")
+	if zhDir == "" && lang == engine.LangZh {
+		zhDir = "tools/zh/out"
+	}
+	if zhDir != "" {
 		n, err := engine.ApplyChinese(engine.DB, zhDir)
 		if err != nil {
-			logx.Fatal("zh translations", "error", err)
+			if os.Getenv("MC_ZH_DIR") != "" {
+				logx.Fatal("zh translations", "error", err)
+			}
+			slog.Warn("zh translations unavailable; serving English", "error", err)
+		} else {
+			engine.RelabelScenarios(engine.DB)
+			slog.Info("zh translations overlaid", "cards", n, "dir", zhDir)
+			if lang == engine.LangZh {
+				engine.SetLang(engine.LangZh)
+			}
 		}
-		engine.RelabelScenarios(engine.DB)
-		slog.Info("zh translations overlaid", "cards", n, "dir", zhDir)
 	}
 
 	secret := os.Getenv("MC_JWT_SECRET")

@@ -207,7 +207,7 @@ func registerSignatures() {
 				Player: p.ID,
 				Question: engine.Ask("Echo's Katana — deal damage equal to the event's cost?",
 					engine.Choice{ID: "hit", Label: "Hit", Kind: engine.ChoiceLabel}.WithThen(
-						engine.Ask("Choose an enemy", choices...)),
+						engine.Ask(engine.Tf("q.chooseEnemy"), choices...)),
 					engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
 				),
 			}}

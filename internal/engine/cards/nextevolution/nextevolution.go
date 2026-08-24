@@ -155,7 +155,7 @@ func registerScenarios() {
 					env.StoredCards = append(env.StoredCards, engine.Card{ID: g.NextCardID(), Code: code})
 					g.Logf("%s is routed (%d villains under Routed)", name, len(env.StoredCards))
 					if len(env.StoredCards) >= 3 {
-						return []engine.Message{engine.GameOver{Won: true, Reason: "Three Marauders routed — Mutant Massacre foiled"}}
+						return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.threeMaraudersRouted")}}
 					}
 				}
 			}
@@ -166,7 +166,7 @@ func registerScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The main scheme completed"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.mainSchemeCompleted")}}
 		},
 	})
 
@@ -212,13 +212,13 @@ func registerScenarios() {
 			return nil
 		},
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
-			return []engine.Message{engine.GameOver{Won: true, Reason: "The Marauder is stopped — Hope is free"}}
+			return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.marauderStopped")}}
 		},
 		OnMainSchemeMaxed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Marauders escaped with Hope"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.maraudersEscaped")}}
 		},
 	})
 
@@ -281,7 +281,7 @@ func registerScenarios() {
 				g.Logf("The stage completes — advancing")
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Sinister Ends"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.sinisterEnds")}}
 		},
 	})
 
@@ -303,7 +303,7 @@ func registerScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Stryfe's power runs uncontrollable"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.stryfeUncontrollable")}}
 		},
 	})
 }

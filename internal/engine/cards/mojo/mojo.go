@@ -585,7 +585,7 @@ func registerMojoScenarios() {
 			return nil
 		},
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
-			return []engine.Message{engine.GameOver{Won: true, Reason: "MaGog is knocked out of the ring"}}
+			return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.magogOut")}}
 		},
 	})
 

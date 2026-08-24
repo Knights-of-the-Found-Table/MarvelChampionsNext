@@ -190,7 +190,7 @@ func registerMakeTheCall() {
 						Label: fmt.Sprintf("%s (cost %d) — from %s's discard pile", def.Name, cost, pl.Name),
 						Kind:  engine.ChoiceCard, CardCode: def.Code,
 					}.WithThen(g.CustomPaymentQuestion(p, cost,
-						fmt.Sprintf("Pay %d resources for %s", cost, def.Name),
+						engine.Tf("q.payGeneric", cost, def.Name),
 						map[string]any{
 							"makeCallFrom": pl.ID.String(),
 							"makeCallCard": c.ID,

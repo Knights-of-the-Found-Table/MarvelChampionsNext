@@ -255,7 +255,7 @@ func registerSilkComplete() {
 			if mn := atlasMinion(g); mn != nil {
 				s.Threat += mn.Counters
 				if mn.Counters >= 10 {
-					return []engine.Message{engine.GameOver{Won: false, Reason: "Atlas grew beyond control"}}
+					return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.atlasGrew")}}
 				}
 			}
 			return nil
@@ -316,4 +316,3 @@ func enemiesOf(g *engine.Game) []engine.EntityID {
 	}
 	return out
 }
-

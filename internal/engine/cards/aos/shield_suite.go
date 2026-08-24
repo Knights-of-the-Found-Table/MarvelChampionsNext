@@ -245,7 +245,7 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Melinda May — top of the encounter deck: " + top.Def().Name,
+				"Melinda May — top of the encounter deck: "+top.Def().Name,
 				engine.Choice{Label: "Discard it", Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
 				engine.Choice{Label: "Leave it", Kind: engine.ChoicePass},
 			)}}
@@ -423,7 +423,7 @@ func registerFurySuite() {
 					engine.DiscardControlled{Player: p.ID, ID: u.ID},
 					engine.ConfuseEntity{Target: m.MinionID},
 					engine.DamageEntity{Target: m.MinionID, Damage: 2, Source: u.ID}),
-				engine.Choice{Label: "Pass", Kind: engine.ChoicePass},
+				engine.Choice{Label: engine.Tf("m.pass"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})

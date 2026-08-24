@@ -103,7 +103,7 @@ func registerAspectCards() {
 				}
 				choices = append(choices, engine.Choice{
 					ID: "damage", Label: "Deal 4 damage to an enemy", Kind: engine.ChoiceLabel,
-				}.WithThen(engine.Ask("Choose an enemy", dmgChoices...)))
+				}.WithThen(engine.Ask(engine.Tf("q.chooseEnemy"), dmgChoices...)))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,

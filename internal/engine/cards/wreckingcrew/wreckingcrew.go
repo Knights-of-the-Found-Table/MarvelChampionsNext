@@ -62,7 +62,7 @@ func registerScenario() {
 				setActiveLeastThreat(g)
 			}
 			if len(g.Villains) == 0 {
-				return []engine.Message{engine.GameOver{Won: true, Reason: "The Wrecking Crew was defeated"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.wreckingCrewDefeated")}}
 			}
 			return nil
 		},

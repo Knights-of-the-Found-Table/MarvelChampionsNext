@@ -91,7 +91,7 @@ func registerMansionAttack() {
 				}
 			}
 			if remaining == 0 {
-				return []engine.Message{engine.GameOver{Won: true, Reason: "The X-Mansion stands — every Brotherhood villain is defeated"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.xMansionStands")}}
 			}
 			g.Logf("Another Brotherhood villain reveals themselves!")
 			return nil

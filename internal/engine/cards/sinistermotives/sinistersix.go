@@ -124,7 +124,7 @@ func registerSinisterSix() {
 			var msgs []engine.Message
 			msgs = append(msgs, sixAmbush(g)...)
 			if len(g.Villains) == 0 && len(g.SetAside) == 0 {
-				msgs = append(msgs, engine.GameOver{Won: true, Reason: "The players escaped the Sinister Six"})
+				msgs = append(msgs, engine.GameOver{Won: true, Reason: engine.Tf("reason.escapedSinisterSix")})
 			} else {
 				// Stay in play with fresh threat.
 				s.Threat = tw.N + 3
@@ -147,7 +147,7 @@ func registerSinisterSix() {
 
 	// 27108–27110 summon treacheries: pull the benched members.
 	for _, spec := range []struct {
-		code         string
+		code          string
 		first, second string
 	}{
 		{"27108", "27096", "27099"},

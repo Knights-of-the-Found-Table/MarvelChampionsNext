@@ -56,7 +56,7 @@ func registerDaredevil() {
 					}
 					if cost > 0 {
 						play = play.WithThen(g.CustomPaymentQuestion(p, cost,
-							fmt.Sprintf("Pay %d resources for %s", cost, top.Def().Name),
+							engine.Tf("q.payGeneric", cost, top.Def().Name),
 							map[string]any{"senseCard": top.ID}))
 					} else {
 						play = play.Msgs(engine.SenseEnterPlay{Player: p.ID, Card: top})

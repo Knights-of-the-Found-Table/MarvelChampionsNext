@@ -92,7 +92,7 @@ func invokeQuestion(g *engine.Game, p *engine.Player, card engine.Card, returnTo
 			ID: "resolve", Label: fmt.Sprintf("Resolve %s (cost %d)", card.Def().Name, cost),
 			Kind: engine.ChoiceCard, CardCode: card.Code,
 		}.WithThen(g.CustomPaymentQuestion(p, cost,
-			fmt.Sprintf("Pay %d resources for %s", cost, card.Def().Name), ctx))
+			engine.Tf("q.payGeneric", cost, card.Def().Name), ctx))
 	} else {
 		invoke = engine.Choice{
 			ID: "resolve", Label: fmt.Sprintf("Resolve %s (cost 0)", card.Def().Name),

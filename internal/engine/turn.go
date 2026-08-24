@@ -28,7 +28,7 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 			target = p.HeroDef().Name
 		}
 		choices = append(choices, Choice{
-			ID: "form", Label: "Change to " + target, Kind: ChoiceForm,
+			ID: "form", Label: Tf("m.changeTo", target), Kind: ChoiceForm,
 			CardCode: otherSideCode(p), SourceID: p.ID,
 		}.Msgs(ChangeForm{Player: p.ID}))
 	}
@@ -49,7 +49,7 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		}
 		cost := g.costFor(p, def)
 		choice := Choice{
-			Label:    fmt.Sprintf("%s (cost %d)", def.Name, cost),
+			Label:    Tf("m.cost", def.Name, cost),
 			Kind:     ChoicePlay,
 			CardCode: def.Code,
 			SourceID: EntityID(c.ID),
@@ -70,14 +70,14 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		}
 		cost := g.costFor(p, def)
 		choice := Choice{
-			Label:    fmt.Sprintf("%s from discard (cost %d)", def.Name, cost),
+			Label:    Tf("m.fromDiscardCost", def.Name, cost),
 			Kind:     ChoicePlay,
 			CardCode: def.Code,
 		}
 		if cost > 0 {
 			q := &Question{
 				Type:   "choose_n",
-				Prompt: fmt.Sprintf("Pay %d resources for %s (select cards)", cost, def.Name),
+				Prompt: Tf("q.paySelect", cost, def.Name),
 			}
 			q.Choices = g.resourcePayChoices(p, &c, def)
 			q.Validate = fmt.Sprintf("payment:%d", cost)
@@ -95,25 +95,25 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 	// Basic powers.
 	if p.IsHero() && !p.Exhausted && !p.Stunned {
 		if len(g.Enemies()) > 0 {
-			targets := Ask("Choose an enemy", g.enemyChoices(p.AttackStat(g))...)
+			targets := Ask(Tf("q.chooseEnemy"), g.enemyChoices(p.AttackStat(g))...)
 			choices = append(choices, Choice{
-				ID: "basic-attack", Label: fmt.Sprintf("Attack (%d)", p.AttackStat(g)),
+				ID: "basic-attack", Label: Tf("m.attack", p.AttackStat(g)),
 				Kind: ChoiceBasicPower, SourceID: p.ID,
 			}.WithThen(targets))
 		}
 	}
 	if p.IsHero() && !p.Exhausted && !p.Confused {
 		if len(g.thwartableSchemes()) > 0 {
-			targets := Ask("Choose a scheme", g.schemeChoices(p.ThwartStat(g))...)
+			targets := Ask(Tf("q.chooseScheme"), g.schemeChoices(p.ThwartStat(g))...)
 			choices = append(choices, Choice{
-				ID: "basic-thwart", Label: fmt.Sprintf("Thwart (%d)", p.ThwartStat(g)),
+				ID: "basic-thwart", Label: Tf("m.thwart", p.ThwartStat(g)),
 				Kind: ChoiceBasicPower, SourceID: p.ID,
 			}.WithThen(targets))
 		}
 	}
 	if !p.IsHero() && !p.Exhausted {
 		choices = append(choices, Choice{
-			ID: "basic-recover", Label: fmt.Sprintf("Recover (%d)", p.RecoverStat(g)),
+			ID: "basic-recover", Label: Tf("m.recover", p.RecoverStat(g)),
 			Kind: ChoiceBasicPower, SourceID: p.ID,
 		}.Msgs(BasicRecover{Player: p.ID}))
 	}
@@ -133,16 +133,16 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		if attackOK {
 			choices = append(choices, Choice{
 				ID:    "ally-atk-" + a.ID.String(),
-				Label: fmt.Sprintf("%s attacks (%d)", a.EDef().Name, a.AttackVal+a.BonusATK+a.PermATK),
+				Label: Tf("m.allyAttacks", a.EDef().Name, a.AttackVal+a.BonusATK+a.PermATK),
 				Kind:  ChoiceBasicPower, SourceID: a.ID,
-			}.WithThen(Ask("Choose an enemy", g.enemyChoicesForAlly(a)...)))
+			}.WithThen(Ask(Tf("q.chooseEnemy"), g.enemyChoicesForAlly(a)...)))
 		}
 		if len(g.thwartableSchemes()) > 0 && !a.Confused {
 			choices = append(choices, Choice{
 				ID:    "ally-thw-" + a.ID.String(),
-				Label: fmt.Sprintf("%s thwarts (%d)", a.EDef().Name, a.ThwartVal+a.BonusTHW+a.PermTHW),
+				Label: Tf("m.allyThwarts", a.EDef().Name, a.ThwartVal+a.BonusTHW+a.PermTHW),
 				Kind:  ChoiceBasicPower, SourceID: a.ID,
-			}.WithThen(Ask("Choose a scheme", g.schemeChoicesForAlly(a)...)))
+			}.WithThen(Ask(Tf("q.chooseScheme"), g.schemeChoicesForAlly(a)...)))
 		}
 	}
 
@@ -151,7 +151,7 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 	// "Never mind" backs out without asking anyone.
 	if ownTurn && len(g.Players) > 1 {
 		who := []Choice{
-			Choice{ID: "never-mind", Label: "Never mind", Kind: ChoicePass},
+			Choice{ID: "never-mind", Label: Tf("m.neverMind"), Kind: ChoicePass},
 		}
 		for _, q := range g.Players {
 			if q.ID == p.ID || q.KOed {
@@ -164,22 +164,22 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		}
 		if len(who) > 1 {
 			choices = append(choices, Choice{
-				ID: "ask-action", Label: "Ask another player to act", Kind: ChoiceLabel,
-			}.WithThen(Ask("Ask which player?", who...)))
+				ID: "ask-action", Label: Tf("m.askAnotherAct"), Kind: ChoiceLabel,
+			}.WithThen(Ask(Tf("q.askWhichPlayer"), who...)))
 		}
 	}
 
 	if ownTurn {
 		choices = append(choices, Choice{
-			ID: "end-turn", Label: "End turn", Kind: ChoiceEndTurn,
+			ID: "end-turn", Label: Tf("m.endTurn"), Kind: ChoiceEndTurn,
 		}.Msgs(PlayerTurnEnd{Player: p.ID}))
 	} else {
 		choices = append(choices, Choice{
-			ID: "done", Label: "Done", Kind: ChoicePass,
+			ID: "done", Label: Tf("m.done"), Kind: ChoicePass,
 		})
 	}
 
-	return Ask("Your turn", choices...)
+	return Ask(Tf("q.yourTurn"), choices...)
 }
 
 func otherSideCode(p *Player) string {
@@ -380,7 +380,7 @@ func (g *Game) resourcePayChoices(p *Player, self *Card, targetDef *data.CardDef
 	for _, src := range g.resourceProducers(p, targetDef) {
 		ra := behavior(src.ECode()).Resource
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — generate [%s]", src.EDef().Name, ra.Icon),
+			Label: Tf("m.generate", src.EDef().Name, ra.Icon),
 			Kind:  ChoiceAbility, SourceID: src.EID(), CardCode: src.ECode(),
 		}.Msgs(AbilityPayStub{Source: src.EID(), Icon: ra.Icon}))
 	}
@@ -398,7 +398,7 @@ func (g *Game) PaymentChoicesFor(p *Player, card Card) []Choice {
 func (g *Game) paymentQuestion(p *Player, card Card, cost int) *Question {
 	q := &Question{
 		Type:   "choose_n",
-		Prompt: fmt.Sprintf("Pay %d resources for %s (select cards)", cost, card.Def().Name),
+		Prompt: Tf("q.paySelect", cost, card.Def().Name),
 	}
 	q.Choices = g.resourcePayChoices(p, &card, card.Def())
 	q.Validate = fmt.Sprintf("payment:%d", cost)
@@ -411,7 +411,7 @@ func (g *Game) paymentQuestion(p *Player, card Card, cost int) *Question {
 // completion it emits PlayDefenseEvent instead of PlayCard.
 func (g *Game) defensePaymentQuestion(p *Player, card Card, cost int, against EntityID) *Question {
 	q := g.paymentQuestion(p, card, cost)
-	q.Prompt = fmt.Sprintf("Pay %d resources for %s (defense)", cost, card.Def().Name)
+	q.Prompt = Tf("q.payDefense", cost, card.Def().Name)
 	q.Context["defenseAgainst"] = against.String()
 	return q
 }
@@ -420,7 +420,7 @@ func (g *Game) defensePaymentQuestion(p *Player, card Card, cost int, against En
 func (g *Game) abilityPaymentQuestion(p *Player, src Entity, idx int, ab Ability) *Question {
 	q := &Question{
 		Type:   "choose_n",
-		Prompt: fmt.Sprintf("Pay %d resources for %s", ab.Cost, ab.Label),
+		Prompt: Tf("q.payGeneric", ab.Cost, ab.Label),
 	}
 	q.Choices = g.resourcePayChoices(p, nil, nil)
 	q.Validate = fmt.Sprintf("payment:%d", ab.Cost)
@@ -437,9 +437,27 @@ func resourceLabels(def *data.CardDef) string {
 		if out != "" {
 			out += " "
 		}
-		out += r
+		out += lres(r)
 	}
 	return out
+}
+
+// lres localizes a resource icon token for label display ("[energy]" etc.).
+func lres(r string) string {
+	if uiLang != LangZh {
+		return r
+	}
+	switch r {
+	case "energy":
+		return "能量"
+	case "mental":
+		return "精神"
+	case "physical":
+		return "物理"
+	case "wild":
+		return "万用"
+	}
+	return r
 }
 
 // thwartableSchemes lists schemes that can currently be thwarted. The crisis
@@ -506,14 +524,14 @@ func (g *Game) enemyChoices(dmg int) []Choice {
 			continue // guard minion engaged: villain cannot be attacked
 		}
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — %d/%d HP", v.EDef().Name, v.HP(), v.MaxHP),
+			Label: Tf("m.hp", v.EDef().Name, v.HP(), v.MaxHP),
 			Kind:  ChoiceTarget, SourceID: v.ID, CardCode: v.Code,
 		}.Msgs(BasicAttack{Player: pid, N: dmg, Target: v.ID}))
 	}
 	for _, id := range sortedIDs(g.Minions) {
 		mn := g.Minions[id]
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — %d/%d HP", mn.EDef().Name, mn.HP(), mn.MaxHP),
+			Label: Tf("m.hp", mn.EDef().Name, mn.HP(), mn.MaxHP),
 			Kind:  ChoiceTarget, SourceID: mn.ID, CardCode: mn.Code,
 		}.Msgs(BasicAttack{Player: g.currentPlayerID(), N: dmg, Target: mn.ID}))
 	}
@@ -556,13 +574,13 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 			continue // guard minion engaged: villain cannot be attacked
 		}
 		out = append(out, allyAttackChoice(
-			fmt.Sprintf("%s — %d/%d HP", v.EDef().Name, v.HP(), v.MaxHP), v.ID, v.Code,
+			Tf("m.hp", v.EDef().Name, v.HP(), v.MaxHP), v.ID, v.Code,
 			consequential(v.ID), needsDiscard, a, p))
 	}
 	for _, id := range sortedIDs(g.Minions) {
 		mn := g.Minions[id]
 		out = append(out, allyAttackChoice(
-			fmt.Sprintf("%s — %d/%d HP", mn.EDef().Name, mn.HP(), mn.MaxHP), mn.ID, mn.Code,
+			Tf("m.hp", mn.EDef().Name, mn.HP(), mn.MaxHP), mn.ID, mn.Code,
 			consequential(mn.ID), needsDiscard, a, p))
 	}
 	return out
@@ -580,10 +598,10 @@ func allyAttackChoice(label string, target EntityID, code string, attackMsgs []M
 	var picks []Choice
 	for _, hc := range p.Hand {
 		picks = append(picks, Choice{
-			Label: "Discard " + hc.Def().Name, Kind: ChoiceCard, CardCode: hc.Code,
+			Label: Tf("m.discardCard", hc.Def().Name), Kind: ChoiceCard, CardCode: hc.Code,
 		}.Msgs(append([]Message{DiscardCards{Player: p.ID, Cards: CardList{hc}}}, attackMsgs...)...))
 	}
-	return c.WithThen(Ask(fmt.Sprintf("Discard a card for %s to attack", a.EDef().Name), picks...))
+	return c.WithThen(Ask(Tf("q.discardCardForAttack", a.EDef().Name), picks...))
 }
 
 // attachedConsequential sums ConsequentialBonus of upgrades attached to an
@@ -608,14 +626,14 @@ func (g *Game) schemeChoices(n int) []Choice {
 	if g.MainScheme != nil && !g.crisisInPlay() {
 		s := g.MainScheme
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — %d/%d threat", s.EDef().Name, s.Threat, s.MaxThreat),
+			Label: Tf("m.threatMax", s.EDef().Name, s.Threat, s.MaxThreat),
 			Kind:  ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 		}.Msgs(BasicThwart{Player: pid, N: n, Target: s.ID}))
 	}
 	for _, id := range sortedIDs(g.SideSchemes) {
 		s := g.SideSchemes[id]
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — %d threat", s.EDef().Name, s.Threat),
+			Label: Tf("m.threat", s.EDef().Name, s.Threat),
 			Kind:  ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 		}.Msgs(BasicThwart{Player: pid, N: n, Target: s.ID}))
 	}
@@ -644,14 +662,14 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 	if g.MainScheme != nil && !g.crisisInPlay() {
 		s := g.MainScheme
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — %d/%d threat", s.EDef().Name, s.Threat, s.MaxThreat),
+			Label: Tf("m.threatMax", s.EDef().Name, s.Threat, s.MaxThreat),
 			Kind:  ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 		}.Msgs(consequential(s.ID)...))
 	}
 	for _, id := range sortedIDs(g.SideSchemes) {
 		s := g.SideSchemes[id]
 		out = append(out, Choice{
-			Label: fmt.Sprintf("%s — %d threat", s.EDef().Name, s.Threat),
+			Label: Tf("m.threat", s.EDef().Name, s.Threat),
 			Kind:  ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 		}.Msgs(consequential(s.ID)...))
 	}
@@ -664,18 +682,18 @@ func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 // all decline, the attack resolves undefended against p).
 func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Question {
 	attacker := g.Entity(attackerID)
-	name := "enemy"
+	name := T("m.enemy")
 	if attacker != nil {
 		name = attacker.EDef().Name
 	}
-	prompt := fmt.Sprintf("%s attacks for %d: defend?", name, atk)
+	prompt := Tf("q.attacksForDefend", name, atk)
 	var choices []Choice
 	choices = append(choices, Choice{
-		ID: "take", Label: "Take the attack", Kind: ChoiceLabel,
+		ID: "take", Label: Tf("m.takeAttack"), Kind: ChoiceLabel,
 	}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
 	if others := g.otherDefenders(p); len(others) > 0 {
 		choices = append(choices, Choice{
-			ID: "ask-defend", Label: "Ask another player to defend", Kind: ChoiceLabel,
+			ID: "ask-defend", Label: Tf("m.askAnotherDefend"), Kind: ChoiceLabel,
 		}.Msgs(OtherDefenders{Against: attackerID, For: p.ID, Remaining: others}))
 	}
 	choices = append(choices, g.defenseOptions(attackerID, p)...)
@@ -687,17 +705,17 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 // attacked player's place or pass to the next willing player.
 func (g *Game) otherDefenderQuestion(attackerID EntityID, atk int, p *Player, forWhom PlayerID, rest []PlayerID) *Question {
 	attacker := g.Entity(attackerID)
-	name := "enemy"
+	name := T("m.enemy")
 	if attacker != nil {
 		name = attacker.EDef().Name
 	}
-	forName := "them"
+	forName := T("m.them")
 	if f := g.Player(forWhom); f != nil {
 		forName = f.Name
 	}
-	prompt := fmt.Sprintf("%s attacks %s for %d: defend?", name, forName, atk)
+	prompt := Tf("q.attacksPlayerDefend", name, forName, atk)
 	choices := []Choice{
-		Choice{ID: "pass", Label: "Don't defend", Kind: ChoicePass}.Msgs(
+		Choice{ID: "pass", Label: Tf("m.dontDefend"), Kind: ChoicePass}.Msgs(
 			OtherDefenders{Against: attackerID, For: forWhom, Remaining: rest}),
 	}
 	choices = append(choices, g.defenseOptions(attackerID, p)...)
@@ -716,7 +734,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 	if heroDefendOK {
 		choices = append(choices, Choice{
 			ID:    "hero-defend",
-			Label: fmt.Sprintf("Exhaust %s to defend (+%d DEF)", p.HeroDef().Name, p.DefenseStat(g)),
+			Label: Tf("m.exhaustDefend", p.HeroDef().Name, p.DefenseStat(g)),
 			Kind:  ChoiceBasicPower,
 		}.Msgs(Defends{Defender: p.ID, Against: attackerID}))
 	}
@@ -727,7 +745,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 		}
 		choices = append(choices, Choice{
 			ID:    "ally-defend-" + a.ID.String(),
-			Label: fmt.Sprintf("%s defends (+%d DEF)", a.EDef().Name, a.Defense()),
+			Label: Tf("m.allyDefends", a.EDef().Name, a.Defense()),
 			Kind:  ChoiceBasicPower, SourceID: a.ID, CardCode: a.Code,
 		}.Msgs(Defends{Defender: a.ID, Against: attackerID}))
 	}
@@ -746,7 +764,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 			continue
 		}
 		choice := Choice{
-			ID: "defense-event-" + c.ID, Label: "Play " + def.Name,
+			ID: "defense-event-" + c.ID, Label: Tf("m.playCard", def.Name),
 			Kind: ChoicePlay, CardCode: def.Code,
 		}
 		if cost := deref(def.Cost, 0); cost > 0 {
@@ -772,7 +790,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 		}
 		d.Via = u.Code
 		choice := Choice{
-			ID: "defense-sub-" + u.ID.String(), Label: u.EDef().Name + " — defend without exhausting",
+			ID: "defense-sub-" + u.ID.String(), Label: Tf("m.defendNoExhaust", u.EDef().Name),
 			Kind: ChoiceAbility, SourceID: u.ID, CardCode: u.Code,
 		}.Msgs(append([]Message{d}, extra...)...)
 		choices = append(choices, choice)
@@ -819,7 +837,7 @@ func (g *Game) attackQuestion(attackerID EntityID, atk int, p *Player, trigger s
 		msgs = append(msgs, RunAbility{Player: p.ID, Source: src.EID(), Index: i})
 		interrupts = append(interrupts, Choice{
 			ID:       fmt.Sprintf("interrupt-%s-%d", src.EID().Kind(), i),
-			Label:    ab.Label + " (interrupt)",
+			Label:    Tf("m.interruptSuffix", ab.Label),
 			Kind:     ChoiceAbility,
 			SourceID: src.EID(),
 			CardCode: src.ECode(),
@@ -868,7 +886,7 @@ func (g *Game) attackQuestion(attackerID EntityID, atk int, p *Player, trigger s
 		return defend
 	}
 	interrupts = append(interrupts, Choice{
-		ID: "pass-interrupt", Label: "Continue to defense", Kind: ChoicePass,
+		ID: "pass-interrupt", Label: Tf("m.continueDefense"), Kind: ChoicePass,
 	}.WithThen(defend))
-	return Ask("Interrupts", interrupts...)
+	return Ask(Tf("q.interrupts"), interrupts...)
 }

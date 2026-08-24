@@ -89,7 +89,7 @@ func registerScenario() {
 				msgs = append(msgs, spawnSchemeMsg(g, "11023")...)
 				return msgs
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Kang conquered all of time"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.kangConquered")}}
 		},
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
 			base := v.Code[:5]
@@ -102,7 +102,7 @@ func registerScenario() {
 					return []engine.Message{engine.MainSchemeMaxed{Scheme: g.MainScheme.ID}}
 				}
 			case "11006", "11039":
-				return []engine.Message{engine.GameOver{Won: true, Reason: "Kang was defeated across all of time"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.kangDefeated")}}
 			default:
 				// A variant fell. When every variant is gone, the scheme
 				// advances to stage 3.

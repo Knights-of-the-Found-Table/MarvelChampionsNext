@@ -48,7 +48,7 @@ func registerAoaScenarios() {
 					return nil
 				}
 			}
-			return []engine.Message{engine.GameOver{Won: true, Reason: "All four Horsemen have fallen"}}
+			return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.horsemenFallen")}}
 		},
 	})
 
@@ -128,7 +128,7 @@ func registerAoaScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Apocalypse rises"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.apocalypseRises")}}
 		},
 	})
 }

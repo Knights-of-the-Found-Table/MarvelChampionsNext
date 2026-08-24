@@ -149,7 +149,7 @@ func registerRemaining() {
 			for _, sid := range g.Schemes() {
 				s := g.Entity(sid)
 				picks = append(picks, engine.Choice{
-					Label: fmt.Sprintf("%s — %d threat", s.EDef().Name, n), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
+					Label: engine.Tf("m.threat", s.EDef().Name, n), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: sid, N: n, Source: e.EOwner()}))
 			}
 			if len(picks) == 0 {

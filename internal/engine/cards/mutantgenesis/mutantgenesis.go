@@ -67,7 +67,7 @@ func registerScenarios() {
 				g.Logf("Sabretooth corners his prey — the main scheme advances")
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Injured Senator scheme completed"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.injuredSenator")}}
 		},
 	})
 
@@ -130,7 +130,7 @@ func registerScenarios() {
 				}
 			}
 			if saved >= 3 {
-				return []engine.Message{engine.GameOver{Won: true, Reason: "Three mansion locations saved"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.threeLocationsSaved")}}
 			}
 			return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 		},

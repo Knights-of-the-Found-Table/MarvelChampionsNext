@@ -95,7 +95,7 @@ func registerSabretooth() {
 				return nil
 			}
 			if a := g.Allies[e.EID()]; a != nil && a.Code == "32066" {
-				return []engine.Message{engine.GameOver{Won: false, Reason: "Robert Kelly was defeated"}}
+				return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.kellyDefeated")}}
 			}
 			return nil
 		},

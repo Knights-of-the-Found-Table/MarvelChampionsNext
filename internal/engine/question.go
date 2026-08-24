@@ -304,7 +304,7 @@ func legacySubtreeIDs(q *Question) bool {
 // so rebuilding is safe and only changes presentation (ids), not semantics.
 func (g *Game) RebuildTurnMenu() bool {
 	pq := g.Pending()
-	if pq == nil || pq.Question.Prompt != "Your turn" || !legacySubtreeIDs(pq.Question) {
+	if pq == nil || !msgIs(pq.Question.Prompt, "q.yourTurn") || !legacySubtreeIDs(pq.Question) {
 		return false
 	}
 	p := g.Player(pq.Player)

@@ -1,8 +1,9 @@
 # 给前端导出简中卡牌名称：tools/zh/out/*.json -> web/src/i18n/zh-cards.json
 #
-# 页面语言为中文时，前端把服务端英文卡名覆盖为译文。完整译文文件里
-# 还有 text/flavor/背面字段，但网页以卡图渲染、从不显示卡牌正文，
-# 所以这里只裁剪出界面用到的字段：
+# 服务端默认按 MC_LANG=zh 输出中文文案（internal/engine/zhtext.go +
+# MC_ZH_DIR 覆盖层）；这份映射作为 MC_LANG=en 时的前端兜底，把服务端
+# 英文卡名覆盖为译文。完整译文文件里还有 text/flavor/背面字段，但网页
+# 以卡图渲染、从不显示卡牌正文，所以这里只裁剪出界面用到的字段：
 #
 #   web/src/i18n/zh-cards.json = { "<code>": { "name": "...", "subname": "..." } }
 #

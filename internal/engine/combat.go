@@ -38,9 +38,9 @@ func (g *Game) drawEncounter() (Card, bool) {
 		g.shuffle(&g.EncounterDeck)
 		if g.MainScheme != nil {
 			g.MainScheme.AccelerationTokens++
-			g.logf("Encounter deck reshuffled: %s gains an acceleration token", g.MainScheme.EDef().Name)
+			g.tlogf("log.encounterReshuffledAccel", g.MainScheme.EDef().Name)
 		} else {
-			g.logf("Encounter deck reshuffled")
+			g.tlogf("log.encounterReshuffled")
 		}
 	}
 	card := g.EncounterDeck[0]
@@ -77,7 +77,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 	if s := g.SideSchemes[schemeID]; s != nil {
 		s.Threat += n
 		g.emit(Evt{Type: "threat", Src: source, Dst: schemeID, N: n})
-		g.logf("%s gains %d threat (now %d)", s.EDef().Name, n, s.Threat)
+		g.tlogf("log.gainsThreat", s.EDef().Name, n, s.Threat)
 		return
 	}
 	if g.MainScheme != nil && schemeID == g.MainScheme.ID {
@@ -90,7 +90,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 				if p.HeroCode == "01019a" && !p.IsHero() {
 					n--
 					g.UsedThisRound[objectKey] = true
-					g.logf("Jennifer Walters prevents 1 threat (I Object!)")
+					g.tlogf("log.jenniferPrevents")
 					break
 				}
 			}
@@ -100,7 +100,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 		}
 		s.Threat += n
 		g.emit(Evt{Type: "threat", Src: source, Dst: schemeID, N: n})
-		g.logf("%s gains %d threat (now %d/%d)", s.EDef().Name, n, s.Threat, s.MaxThreat)
+		g.tlogf("log.gainsThreatMax", s.EDef().Name, n, s.Threat, s.MaxThreat)
 		if s.Threat >= s.MaxThreat {
 			g.Push(MainSchemeMaxed{Scheme: s.ID})
 		}
@@ -116,13 +116,13 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "20024" {
 		for _, mn := range g.Minions {
 			if mn.EDef().HasTrait("symbiote") {
-				g.logf("threat cannot be removed from Klyntar Frenzy while a Symbiote is in play")
+				g.tlogf("log.klyntarLock")
 				return
 			}
 		}
 		for _, v := range g.Villains {
 			if v.EDef().HasTrait("symbiote") {
-				g.logf("threat cannot be removed from Klyntar Frenzy while a Symbiote is in play")
+				g.tlogf("log.klyntarLock")
 				return
 			}
 		}
@@ -132,7 +132,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "10027" {
 		for _, mn := range g.Minions {
 			if mn.Code == "10026" {
-				g.logf("threat cannot be removed from Total Destruction while Abomination is in play")
+				g.tlogf("log.totalDestructionLock")
 				return
 			}
 		}
@@ -142,7 +142,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	if g.MainScheme != nil && schemeID == g.MainScheme.ID {
 		for _, v := range g.Villains {
 			if v != nil && data.BaseCode(v.Code) == "39012" {
-				g.logf("threat cannot be removed while Spiral is in play")
+				g.tlogf("log.spiralLock")
 				return
 			}
 		}
@@ -152,7 +152,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "31030" {
 		for _, mn := range g.Minions {
 			if mn != nil && mn.EDef().HasTrait("criminal") {
-				g.logf("threat cannot be removed from Grand Larceny while a Criminal is in play")
+				g.tlogf("log.larcenyLock")
 				return
 			}
 		}
@@ -162,11 +162,11 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	// presence; the damage locks are not modeled).
 	if s := g.SideSchemes[schemeID]; s != nil && s.Code == "40033" {
 		if !source.Is(KindPlayer) || !g.heroIs(source, "40001") {
-			g.logf("only the Cable player can remove threat from Back to the Future")
+			g.tlogf("log.cableOnlyPlayer")
 			return
 		}
 	} else if source.Is(KindPlayer) && g.heroIs(source, "40001") && g.sideSchemeInPlay("40033") {
-		g.logf("Cable can only remove threat from Back to the Future while it is in play")
+		g.tlogf("log.cableOnlyInPlay")
 		return
 	}
 	if adj, ok := g.eventBonusFor(n, source, "threat"); ok {
@@ -181,7 +181,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 		if d := before - s.Threat; d > 0 {
 			g.emit(Evt{Type: "thwart", Src: source, Dst: schemeID, N: d})
 		}
-		g.logf("%s loses %d threat (now %d)", s.EDef().Name, n, s.Threat)
+		g.tlogf("log.losesThreat", s.EDef().Name, n, s.Threat)
 		if s.Threat == 0 {
 			g.Push(SchemeDefeated{Scheme: s.ID})
 		}
@@ -197,7 +197,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 		if d := before - s.Threat; d > 0 {
 			g.emit(Evt{Type: "thwart", Src: source, Dst: schemeID, N: d})
 		}
-		g.logf("%s loses %d threat (now %d/%d)", s.EDef().Name, before-s.Threat, s.Threat, s.MaxThreat)
+		g.tlogf("log.losesThreatMax", s.EDef().Name, before-s.Threat, s.Threat, s.MaxThreat)
 		if before > 0 && s.Threat == 0 {
 			g.Push(SchemeDefeated{Scheme: s.ID})
 		}
@@ -251,19 +251,19 @@ func (g *Game) attachmentDamageMods(list []EntityID, n int, source EntityID) int
 		switch a.Code {
 		case "40091": // Titanium Exoskeleton
 			if n > 2 {
-				g.logf("Titanium Exoskeleton caps the damage at 2")
+				g.tlogf("log.titaniumCaps")
 				n = 2
 			}
 		case "40156": // Impervious
 			n--
-			g.logf("Impervious reduces the damage by 1")
+			g.tlogf("log.imperviousReduces")
 		case "40106": // Hidden in the Clutter
 			a.Counters += n
-			g.logf("Hidden in the Clutter banks %d damage (%d stored)", n, a.Counters)
+			g.tlogf("log.clutterBanks", n, a.Counters)
 			if a.Counters >= 3 {
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
-				g.logf("Hidden in the Clutter bursts — the attached enemy attacks!")
+				g.tlogf("log.clutterBursts")
 				if source.Is(KindPlayer) && a.Target != "" {
 					g.Push(AskAttack{Enemy: a.Target, Player: PlayerID(source)})
 				}
@@ -354,7 +354,7 @@ func (g *Game) destroyAlly(id EntityID) {
 	code := a.Code
 	g.Delete(id)
 	g.cardLeavesPlay(owner, code, a.EDef().Name)
-	g.logMajorf("%s is destroyed", a.EDef().Name)
+	g.tlogMajorf("log.destroyed", a.EDef().Name)
 }
 
 // eventBonusFor applies a pending Embiggen!/Shrink bonus to a value
@@ -381,7 +381,7 @@ func (g *Game) eventBonusFor(n int, source EntityID, kind string) (int, bool) {
 	case "threat":
 		delete(g.EventThreatBonus, source)
 	}
-	g.logMinorf("event bonus +%d %s", bonus, kind)
+	g.tlogMinorf("log.eventBonus", bonus, kind)
 	return n + bonus, true
 }
 
@@ -396,7 +396,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		}
 		scen := g.Scenario()
 		if scen.VillainUndamageable[e.Stage] {
-			g.logf("%s cannot be damaged", e.EDef().Name)
+			g.tlogf("log.cannotBeDamaged", e.EDef().Name)
 			return
 		}
 		if b := behavior(e.Code); b.VillainDamageable != nil && !b.VillainDamageable(g, e, n) {
@@ -413,17 +413,17 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			if a == nil || a.Code != "40034" {
 				continue
 			}
-			g.logf("%s takes no damage (Telekinetic Force Field)", e.EDef().Name)
+			g.tlogf("log.takesNoDamageTFF", e.EDef().Name)
 			if n >= 2 {
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
-				g.logf("Telekinetic Force Field is discarded")
+				g.tlogf("log.tffDiscarded")
 			}
 			return
 		}
 		if e.Tough {
 			e.Tough = false
-			g.logf("%s's tough status card prevents the damage", e.EDef().Name)
+			g.tlogf("log.toughPrevents", e.EDef().Name)
 			return
 		}
 		if adj, ok := g.eventBonusFor(n, source, "damage"); ok {
@@ -431,7 +431,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
+		g.tlogf("log.takesDamage", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(VillainDefeated{VillainID: e.ID})
 		}
@@ -443,7 +443,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		// take damage.
 		for _, aid := range e.Attachments {
 			if a := g.Attachments[aid]; a != nil && a.Code == "38035" {
-				g.logf("%s cannot take damage (Cybernetic Enhancements)", e.EDef().Name)
+				g.tlogf("log.cannotTakeDamageCyb", e.EDef().Name)
 				return
 			}
 		}
@@ -453,11 +453,11 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 			if a == nil || a.Code != "40034" {
 				continue
 			}
-			g.logf("%s takes no damage (Telekinetic Force Field)", e.EDef().Name)
+			g.tlogf("log.takesNoDamageTFF", e.EDef().Name)
 			if n >= 2 {
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
-				g.logf("Telekinetic Force Field is discarded")
+				g.tlogf("log.tffDiscarded")
 			}
 			return
 		}
@@ -490,13 +490,13 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 				e.Damage = 0
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
-				g.logMajorf("%s heals all damage instead of being defeated (Biomechanical Upgrades)", e.EDef().Name)
+				g.tlogMajorf("log.healsAllBiomech", e.EDef().Name)
 				return
 			}
 		}
 		if e.Tough {
 			e.Tough = false
-			g.logf("%s's tough status card prevents the damage", e.EDef().Name)
+			g.tlogf("log.toughPrevents", e.EDef().Name)
 			return
 		}
 		if adj, ok := g.eventBonusFor(n, source, "damage"); ok {
@@ -504,7 +504,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
+		g.tlogf("log.takesDamage", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(MinionDefeated{MinionID: e.ID})
 		}
@@ -521,7 +521,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.logf("%s takes %d damage (%d/%d)", e.EDef().Name, n, e.Damage, e.MaxHP)
+		g.tlogf("log.takesDamage", e.EDef().Name, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(AllyDefeated{AllyID: e.ID})
 		}
@@ -573,19 +573,19 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		}
 		if prevented > 0 {
 			n -= prevented
-			g.logf("%s prevents %d damage", e.Name, prevented)
+			g.tlogf("log.preventsDamage", e.Name, prevented)
 			if n <= 0 {
 				return
 			}
 		}
 		if e.Tough {
 			e.Tough = false
-			g.logf("%s's tough status card prevents the damage", e.Name)
+			g.tlogf("log.toughPrevents", e.Name)
 			return
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.logf("%s takes %d damage (HP %d/%d)", e.Name, n, e.HP(), e.MaxHP)
+		g.tlogf("log.takesDamageHP", e.Name, n, e.HP(), e.MaxHP)
 		if e.HP() <= 0 && !e.KOed {
 			if g.applyDefeatSave(e) {
 				return
@@ -601,7 +601,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 // the players only lose once everyone is eliminated.
 func (g *Game) eliminatePlayer(p *Player) {
 	p.KOed = true
-	g.logMajorf("%s is eliminated!", p.Name)
+	g.tlogMajorf("log.eliminated", p.Name)
 	for _, id := range append([]EntityID(nil), p.Allies...) {
 		g.discardControlled(p.ID, id)
 	}
@@ -640,7 +640,7 @@ func (g *Game) eliminatePlayer(p *Player) {
 			return
 		}
 	}
-	g.Push(GameOver{Won: false, Reason: "All players were eliminated"})
+	g.Push(GameOver{Won: false, Reason: Tf("reason.allEliminated")})
 }
 
 // applyDefeatSave lets an upgrade save the identity from defeat (Captain
@@ -681,7 +681,7 @@ func (g *Game) heal(id EntityID, n int) {
 		if d := before - e.Damage; d > 0 {
 			g.emit(Evt{Type: "heal", Dst: id, N: d})
 		}
-		g.logf("%s heals %d damage", e.Name, before-e.Damage)
+		g.tlogf("log.heals", e.Name, before-e.Damage)
 	case *Ally:
 		before := e.Damage
 		e.Damage -= n
@@ -691,7 +691,7 @@ func (g *Game) heal(id EntityID, n int) {
 		if d := before - e.Damage; d > 0 {
 			g.emit(Evt{Type: "heal", Dst: id, N: d})
 		}
-		g.logf("%s heals %d damage", e.EDef().Name, before-e.Damage)
+		g.tlogf("log.heals", e.EDef().Name, before-e.Damage)
 	case *Villain:
 		// villains do not heal via generic HealEntity
 	}
@@ -740,7 +740,7 @@ func (g *Game) setStatus(id EntityID, status string, on bool) {
 	}
 	if on {
 		g.emit(Evt{Type: "status", Dst: id, Status: status, On: true})
-		g.logf("%s gains %s status", id, status)
+		g.tlogf("log.gainsStatus", id, status)
 	}
 }
 

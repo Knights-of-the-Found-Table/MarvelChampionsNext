@@ -427,7 +427,7 @@ func registerRemainingPhoenix() {
 				return nil
 			}
 			if s.Threat+m.N >= 12 {
-				return []engine.Message{engine.GameOver{Won: false, Reason: "Dark Phoenix consumed the world"}}
+				return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.darkPhoenix")}}
 			}
 			return nil
 		},
@@ -552,7 +552,7 @@ func attachTrainingPHX(bonus func() (thw, atk, hp int)) func(g *engine.Game, e e
 		}
 		return []engine.Message{engine.AskQuestion{
 			Player:   p.ID,
-			Question: engine.Ask(u.EDef().Name + " — attach to an X-Men ally", choices...),
+			Question: engine.Ask(u.EDef().Name+" — attach to an X-Men ally", choices...),
 		}}
 	}
 }

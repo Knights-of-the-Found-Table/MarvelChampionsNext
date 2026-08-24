@@ -30,7 +30,7 @@ func registerMutagenFormula() {
 				msgs := []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 				return msgs
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "The Mutagen Cloud was released"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.mutagenCloud")}}
 		},
 	})
 
@@ -91,7 +91,7 @@ func registerRiskyBusiness() {
 				}
 				return msgs
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "Osborn completed his corporate acquisition"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.osbornAcquisition")}}
 		},
 	})
 

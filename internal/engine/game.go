@@ -123,7 +123,7 @@ func (g *Game) nextCardID() string {
 func (g *Game) SpawnSupport(code string, owner PlayerID) *Support {
 	s := &Support{ID: g.nextEntityID(KindSupport), Code: code, Owner: owner}
 	g.Supports[s.ID] = s
-	g.logMajorf("%s enters play under %s's control", s.EDef().Name, g.Player(owner).Name)
+	g.tlogMajorf("log.entersControl", s.EDef().Name, g.Player(owner).Name)
 	return s
 }
 
@@ -170,7 +170,7 @@ func (g *Game) SpawnAttachment(code string, target EntityID) *Attachment {
 func (g *Game) SpawnEnvironment(code string) *Environment {
 	e := &Environment{ID: g.nextEntityID(KindEnvironment), Code: code}
 	g.Environments[e.ID] = e
-	g.logMajorf("Environment %s enters play", e.EDef().Name)
+	g.tlogMajorf("log.environmentEnters", e.EDef().Name)
 	return e
 }
 
@@ -737,18 +737,18 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 				for _, eid := range sortedIDs(g.Villains) {
 					v := g.Villains[eid]
 					picks = append(picks, Choice{
-						Label: fmt.Sprintf("%s — %d/%d HP", v.EDef().Name, v.HP(), v.MaxHP),
+						Label: Tf("m.hp", v.EDef().Name, v.HP(), v.MaxHP),
 						Kind:  ChoiceTarget, SourceID: eid, CardCode: v.Code,
 					}.Msgs(DamageEntity{Target: eid, Damage: dmg, Source: playerID}))
 				}
 				for _, eid := range sortedIDs(g.Minions) {
 					mn := g.Minions[eid]
 					picks = append(picks, Choice{
-						Label: fmt.Sprintf("%s — %d/%d HP", mn.EDef().Name, mn.HP(), mn.MaxHP),
+						Label: Tf("m.hp", mn.EDef().Name, mn.HP(), mn.MaxHP),
 						Kind:  ChoiceTarget, SourceID: eid, CardCode: mn.Code,
 					}.Msgs(DamageEntity{Target: eid, Damage: dmg, Source: playerID}))
 				}
-				out = append(out, AskQuestion{Player: playerID, Question: Ask("Choose an enemy", picks...)})
+				out = append(out, AskQuestion{Player: playerID, Question: Ask(Tf("q.chooseEnemy"), picks...)})
 			}
 			return out, nil
 		}
@@ -925,9 +925,9 @@ func (g *Game) consumeDiscount(p *Player, def *data.CardDef) {
 	for _, d := range p.CostDiscounts {
 		if discountMatches(d, def) && d.Amount != 0 {
 			if d.Amount > 0 {
-				g.logMinorf("%s costs %d less (%s)", def.Name, d.Amount, p.Name)
+				g.tlogMinorf("log.costsLess", def.Name, d.Amount, p.Name)
 			} else {
-				g.logMinorf("%s costs %d more (%s)", def.Name, -d.Amount, p.Name)
+				g.tlogMinorf("log.costsMore", def.Name, -d.Amount, p.Name)
 			}
 			continue
 		}
@@ -1225,7 +1225,7 @@ func (g *Game) spawnVillain(stages []string, stage int) *Villain {
 	}
 	v.stageCodes = stages
 	g.Villains[v.ID] = v
-	g.logMajorf("%s enters play (stage %s)", def.Name, def.StageLabel)
+	g.tlogMajorf("log.entersStage", def.Name, def.StageLabel)
 	return v
 }
 
@@ -1246,7 +1246,7 @@ func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 		Hazard:     def.Hazards,
 	}
 	g.MainScheme = s
-	g.logMajorf("Main scheme: %s reveals stage %s", def.Name, s.EDef().StageLabel)
+	g.tlogMajorf("log.mainSchemeReveals", def.Name, s.EDef().StageLabel)
 	if b := behavior(s.Code); b.MainSchemeRevealed != nil {
 		g.Push(b.MainSchemeRevealed(g, s)...)
 	}

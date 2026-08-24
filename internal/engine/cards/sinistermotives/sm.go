@@ -45,9 +45,9 @@ func registerSMScenarios() {
 		Setup: func(g *engine.Game) []engine.Message {
 			// The Light at the End starts faceup.
 			s := &engine.SideScheme{
-				ID:       g.NextEntityID("sidescheme"),
-				Code:     "27102a",
-				Threat:   10 * len(g.Players),
+				ID:        g.NextEntityID("sidescheme"),
+				Code:      "27102a",
+				Threat:    10 * len(g.Players),
 				MaxThreat: 10 * len(g.Players),
 			}
 			g.SideSchemes[s.ID] = s
@@ -65,7 +65,7 @@ func registerSMScenarios() {
 			}
 			if len(g.Villains) == 0 {
 				if msgs := sixAmbush(g); len(msgs) == 0 && len(g.SetAside) == 0 {
-					return []engine.Message{engine.GameOver{Won: true, Reason: "The Sinister Six was defeated"}}
+					return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.sinisterSixDefeated")}}
 				}
 			}
 			return nil
@@ -89,9 +89,9 @@ func registerSMScenarios() {
 					maxT = *def.Threat
 				}
 				s := &engine.SideScheme{
-					ID:       g.NextEntityID("sidescheme"),
-					Code:     code,
-					Threat:   maxT / 2,
+					ID:        g.NextEntityID("sidescheme"),
+					Code:      code,
+					Threat:    maxT / 2,
 					MaxThreat: maxT,
 				}
 				g.SideSchemes[s.ID] = s

@@ -196,7 +196,7 @@ func registerMarauders() {
 					}
 				}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: "No Morlock allies remain (Mutant Massacre)"}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.noMorlocks")}}
 		},
 	})
 
@@ -727,4 +727,3 @@ func fewestHPEnemy(g *engine.Game) engine.EntityID {
 	}
 	return bestID
 }
-

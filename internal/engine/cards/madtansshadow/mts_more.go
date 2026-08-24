@@ -606,7 +606,7 @@ func registerMTSScenarios() {
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
 			delete(g.Villains, v.ID)
 			if len(g.Villains) == 0 {
-				return []engine.Message{engine.GameOver{Won: true, Reason: "The Black Order's siege was broken"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.blackOrderBroken")}}
 			}
 			return nil
 		},
@@ -641,7 +641,7 @@ func registerMTSScenarios() {
 				}
 			}
 			delete(g.Villains, v.ID)
-			return []engine.Message{engine.GameOver{Won: true, Reason: "Hela was cast down"}}
+			return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.helaCastDown")}}
 		},
 	})
 
@@ -666,11 +666,11 @@ func registerMTSScenarios() {
 				need = 4
 			}
 			if lokis >= need {
-				return []engine.Message{engine.GameOver{Won: true, Reason: "Enough Loki variants were unmasked"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.lokiVariants")}}
 			}
 			swapLoki(g)
 			if len(g.Villains) == 0 {
-				return []engine.Message{engine.GameOver{Won: true, Reason: "The variant gauntlet is spent"}}
+				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.variantGauntletSpent")}}
 			}
 			return nil
 		},

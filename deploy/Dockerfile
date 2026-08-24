@@ -30,6 +30,7 @@ RUN adduser -D -u 10001 marvel && mkdir -p /data /app && chown -R marvel /data /
 USER marvel
 WORKDIR /app
 COPY --from=gobuild /out/server /app/server
+COPY --from=gobuild /src/tools/zh/out /app/tools/zh/out
 COPY --from=webbuild /web/dist /app/web/dist
 ENV MC_LISTEN=:3000 \
     MC_DB_PATH=/data/marvelchampions.db \
