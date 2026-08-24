@@ -56,6 +56,26 @@ func TestCoreSetCards(t *testing.T) {
 	}
 }
 
+func TestPrintedResourceMultiplicity(t *testing.T) {
+	// Core-set Energy, Genius, and Strength each print two identical resource
+	// icons. Payment validation counts this slice, so both copies must survive
+	// conversion from the raw resource_* integer fields.
+	want := map[string]string{
+		"01088": "energy",
+		"01089": "mental",
+		"01090": "physical",
+	}
+	for code, icon := range want {
+		def, ok := db.Lookup(code)
+		if !ok {
+			t.Fatalf("missing resource card %s", code)
+		}
+		if len(def.Resources) != 2 || def.Resources[0] != icon || def.Resources[1] != icon {
+			t.Errorf("%s resources = %v, want [%s %s]", code, def.Resources, icon, icon)
+		}
+	}
+}
+
 func TestGreenGoblinEncounterSets(t *testing.T) {
 	gob := db.InSet("the_green_goblin")
 	if len(gob) == 0 {

@@ -289,18 +289,21 @@ func normalize(def *CardDef, raw rawCard) {
 	def.Traits = parseTraits(raw.Traits)
 	def.Keywords = parseKeywords(raw.Text)
 
-	if raw.ResourceEnergy != nil && *raw.ResourceEnergy > 0 {
-		def.Resources = append(def.Resources, "energy")
+	// Preserve printed resource multiplicity. Basic resource cards such as
+	// Energy/Genius/Strength carry two copies of the same icon; collapsing the
+	// count here makes each of them pay for only one resource.
+	appendResources := func(count *int, icon string) {
+		if count == nil {
+			return
+		}
+		for range max(0, *count) {
+			def.Resources = append(def.Resources, icon)
+		}
 	}
-	if raw.ResourcePhysical != nil && *raw.ResourcePhysical > 0 {
-		def.Resources = append(def.Resources, "physical")
-	}
-	if raw.ResourceMental != nil && *raw.ResourceMental > 0 {
-		def.Resources = append(def.Resources, "mental")
-	}
-	if raw.ResourceWild != nil && *raw.ResourceWild > 0 {
-		def.Resources = append(def.Resources, "wild")
-	}
+	appendResources(raw.ResourceEnergy, "energy")
+	appendResources(raw.ResourcePhysical, "physical")
+	appendResources(raw.ResourceMental, "mental")
+	appendResources(raw.ResourceWild, "wild")
 
 	switch {
 	case playerTypes[raw.TypeCode]:
