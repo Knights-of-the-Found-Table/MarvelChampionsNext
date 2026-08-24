@@ -485,6 +485,41 @@ type (
 	CollectCard struct{ Card Card }
 	// SummonSix pulls set-aside Sinister Six members into play.
 	SummonSix struct{ Cards []string }
+	// ApplySchemeThreat commits threat placement after the Great
+	// Responsibility interrupt window declined to redirect it.
+	ApplySchemeThreat struct {
+		Scheme EntityID
+		N      int
+		Source EntityID
+	}
+	// ApplyDamage commits damage after the Warning interrupt window
+	// declined to reduce it.
+	ApplyDamage struct {
+		Target EntityID
+		Damage int
+		Source EntityID
+	}
+	// CancelBoostIcons removes N boost icons from a villain's pending
+	// activation (Foiled!).
+	CancelBoostIcons struct {
+		Enemy EntityID
+		N     int
+	}
+	// GuessCheck resolves a "name a card type" guess: if the named card's
+	// type matches, the guessing player draws 1 and the penalty entity
+	// takes 1 damage (Scarlet Spider).
+	GuessCheck struct {
+		Player   PlayerID
+		CardCode string
+		Guess    string
+		Penalty  EntityID
+	}
+	// EncounterTakeCard removes a card from the encounter deck (search
+	// effects, e.g. One Way or Another).
+	EncounterTakeCard struct{ CardID string }
+	// ShuffleEncounterDeck shuffles the encounter deck.
+	ShuffleEncounterDeck struct{}
+
 
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
@@ -758,6 +793,12 @@ func (IndirectDamage) msg()        {}
 func (BarrageCharge) msg()         {}
 func (CollectCard) msg()           {}
 func (SummonSix) msg()             {}
+func (ApplySchemeThreat) msg()     {}
+func (ApplyDamage) msg()           {}
+func (CancelBoostIcons) msg()      {}
+func (GuessCheck) msg()            {}
+func (EncounterTakeCard) msg()     {}
+func (ShuffleEncounterDeck) msg()  {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}

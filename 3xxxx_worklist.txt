@@ -1,0 +1,502 @@
+=== RUN   TestSurvey
+implemented: text=2137 notext=7 | gap: text=484 notext=5
+== gap with text by pack ==
+core         1
+cyclops      20
+drs          3
+gambit       20
+mojo         81
+mut_gen      232
+phoenix      20
+rogue        22
+spdr         20
+spiderham    22
+storm        21
+wolv         22
+GAP core       01061 Great Responsibility event            <b>Hero Interrupt</b>: When any amount of threat would be placed
+GAP drs        09021 Warning            event            <b>Interrupt</b>: When a hero would take any amount of damage, r
+GAP drs        09038 Foiled!            event            <b>Interrupt</b>: When a boost card is turned faceup during a sc
+GAP drs        09039 Iron Man           ally             Reduce the cost to play each upgrade on Iron Man by 1.
+GAP spiderham  30012 Lady Spider        ally             [star] <b>Response</b>: After Lady Spider thwarts and removes th
+GAP spiderham  30013 Spider-Man         ally             <b>Response</b>: After Spider-Man enters play, remove 1 threat f
+GAP spiderham  30014 Even the Odds      event            Requirement ([energy]). <b>Hero Action</b> <i>(thwart)</i>: Remo
+GAP spiderham  30015 Great Responsibility event            <b>Hero Interrupt</b>: When any amount of threat would be placed
+GAP spiderham  30016 Making an Entrance event            <b>Hero Interrupt:</b> When your hero makes a basic thwart, it g
+GAP spiderham  30017 One Way or Another event            Max 1 per round. <b>Hero Action</b>: Search the encounter deck f
+GAP spiderham  30018 Followed           upgrade          Attach to a side scheme. Max 1 per scheme. <b>Interrupt</b>: Whe
+GAP spiderham  30019 Overwatch          upgrade          Attach to a scheme. Max 1 per scheme. <b>Hero Interrupt</b>: Whe
+GAP spiderham  30020 Scarlet Spider     ally             Play only if you control a [[Web-Warrior]] card. <b>Interrupt</b
+GAP spiderham  30021 SP//dr             ally             Play only if you control a [[Web-Warrior]] card. <b>When Defeate
+GAP spiderham  30022 Team-Building Exercise support          <b>Hero Action</b>: Exhaust Team-Building Exercise → play a ca
+GAP spiderham  30023 Web of Life and Destiny support          Ignore this card's resource cost if your identity has the [[Web-
+GAP spiderham  30029 Warrior of the Great Web upgrade          Attach to a character with "Spider" in its title. Max 1 per char
+GAP spiderham  30030 Hunting the Spider-Totems side_scheme      <b>Forced Interrupt</b>: When the villain phase begins, discard 
+GAP spiderham  30031 Bora               minion           Each [[Inheritor]] minion gains 1 acceleration icon ([accelerati
+GAP spiderham  30032 Brix               minion           Each [[Inheritor]] minion gains patrol. <b>When Revealed</b>: If
+GAP spiderham  30033 Daemos             minion           Each [[Inheritor]] minion gains stalwart. <b>When Revealed</b>: 
+GAP spiderham  30034 Jennix             minion           Each [[Inheritor]] minion gains guard. <b>When Revealed</b>: If 
+GAP spiderham  30035 Karn               minion           Each [[Inheritor]] minion's attacks gain overkill and piercing. 
+GAP spiderham  30036 Morlun             minion           Each [[Inheritor]] minion gets +1 ATK. <b>When Revealed</b>: If 
+GAP spiderham  30037 Solus              minion           Each [[Inheritor]] minion gains villainous. <b>When Revealed</b>
+GAP spiderham  30038 Verna              minion           Each [[Inheritor]] minion gains retaliate 1. <b>When Revealed</b
+GAP spdr       31014 Daredevil          ally             <b>Response</b>: After Daredevil defends against an attack, move
+GAP spdr       31015 Spider-Man Noir    ally             X is equal to the number of facedown cards attached to Spider-Ma
+GAP spdr       31016 Repurpose          event            <b>Hero Action</b>: Discard a [[Tech]] upgrade you control → r
+GAP spdr       31017 Thwip Thwip!       event            <b>Hero Action</b>: Deal 1 damage to a [[Web-Warrior]] character
+GAP spdr       31018 Energy Barrier     upgrade          Uses (3 reflection counters). <b>Interrupt:</b> When you would t
+GAP spdr       31019 Forcefield Generator upgrade          Uses (6 energy counters). Max 1 per player. <b>Forced Interrupt<
+GAP spdr       31020 Spider-Tingle      upgrade          <b>Interrupt</b>: When you would reveal an encounter card, deal 
+GAP spdr       31021 Spider-Ham         ally             Play only if you control a [[Web-Warrior]] card. [star] <b>Force
+GAP spdr       31022 Spider-Man         ally             Play only if you control a [[Web-Warrior]] card. <b>Response</b>
+GAP spdr       31023 Limitless Stamina  event            Play only if your identity has at least 14 printed hit points. <
+GAP spdr       31024 Unshakable         upgrade          Play only if your identity has at least 14 printed hit points. Y
+GAP spdr       31029 Clarity of Purpose upgrade          Attach to a friendly character. Max 1 per character. <b>Hero Res
+GAP spdr       31030 Grand Larceny      side_scheme      Threat cannot be removed from this scheme while a [[Criminal]] m
+GAP spdr       31031 Bombshell          minion           [star] Divide damage from Bombshell's attack among each characte
+GAP spdr       31032 Electro            minion           [star] Electro gets +1 hit point for each [energy] resource atta
+GAP spdr       31033 Hobgoblin          minion           [star] <b>Forced Interrupt</b>: When Hobgoblin would attack you,
+GAP spdr       31034 Iron Spider        minion           Guard. Patrol. Retaliate 1. Toughness. [star] Iron Spider's atta
+GAP spdr       31035 Sandman            minion           <b>Forced Response</b>: After Sandman takes any amount of damage
+GAP spdr       31036 Spot               minion           <b>When Defeated</b>: If Spot was defeated without excess damage
+GAP spdr       31037 Surge in Crime     environment      Surge. Each [[Criminal]] minion gains surge. <b>Hero Action</b>:
+GAP mut_gen    32002 Shadowcat          ally             Shadowcat ignores the guard and patrol keywords, and any crisis 
+GAP mut_gen    32003 Piotr's Studio     support          <b>Alter-Ego Action</b>: Exhaust Piotr's Studio → discard card
+GAP mut_gen    32004 Iron Will          upgrade          Colossus gets +1 THW. <b>Response</b>: After a tough status card
+GAP mut_gen    32005 Titanium Muscles   upgrade          Colossus gets +1 ATK. <b>Hero Resource</b>: Exhaust this card �
+GAP mut_gen    32006 Organic Steel      upgrade          Uses (2 steel counters). <b>Hero Response</b>: After a tough sta
+GAP mut_gen    32007 Made of Rage       event            <b>Hero Interrupt</b>: When you make a basic attack, discard a t
+GAP mut_gen    32008 Steel Fist         event            <b>Hero Action</b>: Deal 5 damage to an enemy. You may discard a
+GAP mut_gen    32009 Bulletproof Protector event            <b>Hero Action</b>: Discard a tough status card from your hero �
+GAP mut_gen    32010 Armor Up           event            <b>Alter-Ego Interrupt</b>: When the villain would activate, cha
+GAP mut_gen    32011 Nightcrawler       ally             <b>Interrupt</b>: When an [[X-MEN]] character would take any amo
+GAP mut_gen    32012 Polaris            ally             <b>Response</b>: After Polaris enters play, give an [[X-MEN]] ch
+GAP mut_gen    32013 Protective Training upgrade          Attach to an [[X-MEN]] ally. Max 1 [[Training]] upgrade per ally
+GAP mut_gen    32015 Bait and Switch    event            <b>Hero Action</b> <i>(thwart)</i>: The villain attacks you. Rem
+GAP mut_gen    32016 Perseverance       event            <b>Hero Response</b>: After you change form, give your hero a to
+GAP mut_gen    32017 Mutant Protectors  event            Play only if your identity has the [[X-MEN]] trait. <b>Hero Inte
+GAP mut_gen    32018 Defensive Energy   resource         Max 2 per deck. <b>Hero Interrupt</b>: When you spend this card 
+GAP mut_gen    32019 Professor X        ally             <b>Forced Response</b>: After Professor X enters play, choose on
+GAP mut_gen    32020 The X-Jet          support          <b>Resource</b>: Exhaust The X-Jet → generate a [wild] resourc
+GAP mut_gen    32021 Shadow and Steel   event            Team-Up (Colossus and Shadowcat). Max 1 per deck. <b>Hero Interr
+GAP mut_gen    32022 Energy             resource         Max 1 per deck.
+GAP mut_gen    32023 Genius             resource         Max 1 per deck.
+GAP mut_gen    32024 Strength           resource         Max 1 per deck.
+GAP mut_gen    32025 Homesick           obligation       <b><i>Give to the Piotr Rasputin player.</i></b> You may flip to
+GAP mut_gen    32026 Juggernaut         minion           Stalwart. Toughness. <hr /> [star] <b>Boost</b>: If this activat
+GAP mut_gen    32027 Rampaging Juggernaut side_scheme      <b>When Revealed</b>: Discard each tough status card from each f
+GAP mut_gen    32028 Unstoppable        attachment       Attach to the enemy with the highest printed ATK without a copy 
+GAP mut_gen    32029 Slammed            treachery        <b>When Revealed</b>: You are stunned. If you are already stunne
+GAP mut_gen    32031 Solid              upgrade          Mass form. Permanent. <b>Hero Resource</b>: Exhaust this card �
+GAP mut_gen    32031 Phased             upgrade          Mass form. Permanent. While Shadowcat is defending, she cannot t
+GAP mut_gen    32032 Lockheed           ally             <b>Response</b>: After Lockheed enters play, if you are in: • 
+GAP mut_gen    32033 Kitty's Room       support          <b>Alter-Ego Action</b>: Exhaust Kitty's Room → if you are in:
+GAP mut_gen    32034 Acute Control      upgrade          <b>Hero Response</b>: After you ignore the guard or patrol keywo
+GAP mut_gen    32035 Intangible Interference upgrade          <b>Hero Response</b>: After you ignore the crisis icon ([crisis]
+GAP mut_gen    32036 Phased and Confused upgrade          Hero form only. Attach to an enemy. Max 1 per enemy. <b>Forced I
+GAP mut_gen    32037 Shadowcat Surprise event            <b>Hero Action</b> <i>(attack)</i>: Deal 3 damage to an enemy. R
+GAP mut_gen    32038 Phase Strike       event            <b>Hero Action</b> <i>(attack)</i>: Deal 6 damage to an enemy. I
+GAP mut_gen    32039 Airwalk            event            <b>Hero Action</b> <i>(thwart)</i>: Remove 2 threat from a schem
+GAP mut_gen    32040 Quick Shift        event            <b>Hero Interrupt</b> <i>(defense)</i>: When an enemy attacks, i
+GAP mut_gen    32041 Wolverine          ally             [star] Wolverine's attacks gain piercing. <b>Response</b>: After
+GAP mut_gen    32042 Magik              ally             <b>Response</b>: After you play Magik from your hand, spend a [m
+GAP mut_gen    32043 Attack Training    upgrade          Attach to an [[X-MEN]] ally. Max 1 [[Training]] upgrade per ally
+GAP mut_gen    32044 Gatekeeper         upgrade          Attach to a minion. Attached minion gets +2 hit points and gains
+GAP mut_gen    32045 Team Strike        event            Play only if your identity has the [[X-MEN]] trait. <b>Hero Acti
+GAP mut_gen    32046 Toe to Toe         event            <b>Hero Action</b> <i>(attack)</i>: Choose an enemy. That enemy 
+GAP mut_gen    32047 Aggressive Energy  resource         Max 2 per deck. <b>Hero Interrupt</b>: When you spend this card 
+GAP mut_gen    32048 Colossus           ally             Reduce the cost to play Colossus by 1 if your identity has the [
+GAP mut_gen    32049 X-Mansion          support          <b>Alter-Ego Action</b>: Exhaust X-Mansion → heal 1 damage fro
+GAP mut_gen    32050 Shadow and Steel   event            Team-Up (Colossus and Shadowcat). Max 1 per deck. <b>Hero Interr
+GAP mut_gen    32051 Ready to Rumble    upgrade          Play under any player's control. Max 1 per player. <b>Hero Respo
+GAP mut_gen    32052 Energy             resource         Max 1 per deck.
+GAP mut_gen    32053 Genius             resource         Max 1 per deck.
+GAP mut_gen    32054 Strength           resource         Max 1 per deck.
+GAP mut_gen    32055 Permanently Phased obligation       <b><i>Give to the Kitty Pryde player.</i></b> Flip your mass for
+GAP mut_gen    32056 White Queen        minion           Villainous. While White Queen is engaged with you, you are confu
+GAP mut_gen    32057 The Hellfire Club  side_scheme      <b>When Defeated</b>: The player who defeated this scheme search
+GAP mut_gen    32058 Hellfire Pawn      minion           Guard. Patrol. Surge. <hr /> [star] <b>Boost</b>: Put Hellfire P
+GAP mut_gen    32059 Telepathic Restraint attachment       Attach to your identity. While Telepathic Restraint is attached 
+GAP mut_gen    32060 Sabretooth         villain          [star] <b>Forced Response</b>: After Sabretooth activates agains
+GAP mut_gen    32061 Sabretooth         villain          Toughness. [star] <b>Forced Response</b>: After Sabretooth activ
+GAP mut_gen    32062 Sabretooth         villain          Retaliate 1. Toughness. [star] <b>Forced Response</b>: After Sab
+GAP mut_gen    32063 Stalked by Sabretooth main_scheme      [star] <b>Forced Response</b>: After resolving step 1 of the vil
+GAP mut_gen    32063 Stalked by Sabretooth main_scheme      <b>Contents</b>: Sabretooth (I) and Sabretooth (II). <i>(Sabreto
+GAP mut_gen    32063 Stalked by Sabretooth main_scheme      [star] <b>Forced Response</b>: After resolving step 1 of the vil
+GAP mut_gen    32064 The Injured Senator main_scheme      <b>When Completed</b>: Defeat Robert Kelly. <b>If Robert Kelly l
+GAP mut_gen    32064 The Injured Senator main_scheme      <b>When Revealed</b>: Deal each player a facedown encounter card
+GAP mut_gen    32064 The Injured Senator main_scheme      <b>When Completed</b>: Defeat Robert Kelly. <b>If Robert Kelly l
+GAP mut_gen    32065 Find the Senator   side_scheme      Robert Kelly cannot be healed by player card effects and cannot 
+GAP mut_gen    32065 Protect the Senator environment      Robert Kelly cannot be healed by player card effects and cannot 
+GAP mut_gen    32066 Robert Kelly       ally             The first player controls Robert Kelly. He does not count agains
+GAP mut_gen    32067 Adamantium Claws   attachment       Attach to Sabretooth. [star] Sabretooth's attacks gain piercing.
+GAP mut_gen    32068 Animal Ferocity    attachment       Attach to Sabretooth. Sabretooth gains stalwart. <i>(This charac
+GAP mut_gen    32069 Sabretooth Strikes treachery        <b>When Revealed</b>: Deal 1 damage to Robert Kelly. You may exh
+GAP mut_gen    32070 Unrelenting Savage treachery        <b>When Revealed (Alter_Ego)</b>: Sabretooth schemes. If he has 
+GAP mut_gen    32071 Medical Emergency  side_scheme      Hinder 2[per_hero]. Victory 1. <b>When Defeated</b>: Heal 2 dama
+GAP mut_gen    32072 Feral Rage         side_scheme      <b>When Defeated</b>: Sabretooth attacks the player who defeated
+GAP mut_gen    32073 Avalanche          minion           [star] <b>Forced Response</b>: After Avalanche attacks you, exha
+GAP mut_gen    32074 Blob               minion           Guard. [star] <b>Forced Response</b>: After Blob attacks and dam
+GAP mut_gen    32075 Pyro               minion           [star] <b>Forced Response</b>: After Pyro attacks you, discard t
+GAP mut_gen    32076 Toad               minion           [star] <b>Forced Response</b>: After Toad attacks and damages a 
+GAP mut_gen    32077 Homo Superior      attachment       Attach to a minion and give it a tough status card. Otherwise, t
+GAP mut_gen    32078 Mutant Terrorists  treachery        <b>When Revealed</b>: Search the encounter deck and discard pile
+GAP mut_gen    32079 The Brotherhood    side_scheme      Hinder 2[per_hero]. Each [[Brotherhood of Mutants]] minion gains
+GAP mut_gen    32080 Mystique           minion           Toughness. Players cannot attack the villain. [star] Mystique's 
+GAP mut_gen    32081 Metamorphic Mayhem side_scheme      <b>When Defeated</b>: The player who defeated this scheme shuffl
+GAP mut_gen    32082 Infiltration       treachery        <b>When Revealed</b>: Shuffle this card into your deck. This car
+GAP mut_gen    32083 Shapeshifter Surprise treachery        <b>When Revealed</b>: Shuffle this card into your deck. This car
+GAP mut_gen    32084 Sentinel           villain          Toughness. <b>When Revealed</b>: The first player searches the e
+GAP mut_gen    32085 Sentinel           villain          Steady. Toughness. <b>When Revealed</b>: The first player search
+GAP mut_gen    32086 Sentinel           villain          Stalwart. Toughness. <b>When Revealed</b>: The first player sear
+GAP mut_gen    32087 Night of the Sentinels main_scheme      Operation Zero Tolerance gains permanent. <b>Forced Response</b>
+GAP mut_gen    32087 Night of the Sentinels main_scheme      <b>Contents</b>: Sentinel (I) and Sentinel (II). <i>(Sentinel (I
+GAP mut_gen    32087 Night of the Sentinels main_scheme      Operation Zero Tolerance gains permanent. <b>Forced Response</b>
+GAP mut_gen    32088 Mutants at the Mall side_scheme      <b>When Defeated</b>: The first player searches the encounter de
+GAP mut_gen    32088 Jubilee            ally             Victory -1. The first player controls Jubilee. She does not coun
+GAP mut_gen    32089 Rictor             ally             [star] <b>Response</b>: After Rictor attacks, deal 1 damage to t
+GAP mut_gen    32090 Boom Boom          ally             [star] <b>Response</b>: After Boom Boom attacks an enemy, place 
+GAP mut_gen    32091 Cannonball         ally             [star] Cannonball takes -1 consequential damage after he attacks
+GAP mut_gen    32092 Wolfsbane          ally             [star] Wolfbane's attacks gain piercing.
+GAP mut_gen    32093 Sentinel Mark IV   minion           Guard. Patrol. <hr /> [star] <b>Boost</b>: Put Sentinel Mark IV 
+GAP mut_gen    32094 Gauntlet Beam      attachment       Attach to the villain. [star] The villain's attacks gain piercin
+GAP mut_gen    32095 Learning A.I.      attachment       Attach to the villain. The villain gains retaliate 1. <b>Hero Ac
+GAP mut_gen    32096 Adaptive Armor     attachment       Attach to the villain. The villain gets +8 hit points. <b>Hero A
+GAP mut_gen    32097 Self-Repair        treachery        <b>When Revealed</b>: Discard each status card from the villain.
+GAP mut_gen    32098 Mutant Detected    treachery        <b>When Revealed</b>: Choose: • Place the top card of your dec
+GAP mut_gen    32099 Warn the Others    obligation       <b>Forced Response</b>: After your turn ends, place this card fa
+GAP mut_gen    32100 Abduction Protocols side_scheme      Hinder 2[per_hero]. Victory 2. <b>When Defeated</b>: The player 
+GAP mut_gen    32101 Sentinel Mark II   minion           <b>When Revealed</b>: If Operation Zero Tolerance is in play, Se
+GAP mut_gen    32102 Sentinel Mark III  minion           Toughness. <b>When Revealed</b>: Search the encounter deck and d
+GAP mut_gen    32103 Energy Barrier     attachment       Attach to a [[Sentinel]] minion without Energy Barrier attached 
+GAP mut_gen    32104 Operation Zero Tolerance side_scheme      <b>Forced Response</b>: After an enemy attacks and defeats an al
+GAP mut_gen    32105 Sentinel Mark V    minion           <b>When Revealed</b>: If Targeted for Elimination is attached to
+GAP mut_gen    32106 Sentinel Mark VI   minion           Quickstrike. <hr /> [star] <b>Boost</b>: If Targeted for Elimina
+GAP mut_gen    32107 Targeted for Elimination attachment       Attach to your identity if a copy of Targeted for Elimination is
+GAP mut_gen    32108 Relentless Robots  side_scheme      Each player engaged with a [[Sentinel]] minion cannot thwart thi
+GAP mut_gen    32109 Master Mold        villain          Stalwart. Toughness. [star] <b>Forced Interrupt</b>: When Master
+GAP mut_gen    32110 Master Mold        villain          Stalwart. Toughness. [star] <b>Forced Interrupt</b>: When Master
+GAP mut_gen    32111 Master Mold        villain          Stalwart. Toughness. [star] <b>Forced Interrupt</b>: When Master
+GAP mut_gen    32112 The Sentinel Factory main_scheme      Each [[Sentinel]] minion gains guard. <b>When Revealed</b>: Each
+GAP mut_gen    32112 The Sentinel Factory main_scheme      <b>Contents</b>: Master Mold (I) and Master Mold (II). <i>(Maste
+GAP mut_gen    32112 The Sentinel Factory main_scheme      Each [[Sentinel]] minion gains guard. <b>When Revealed</b>: Each
+GAP mut_gen    32113 Master Mold's Agenda main_scheme      Each [[Sentinel]] minion gains guard. <b>If this stage is comple
+GAP mut_gen    32113 Master Mold's Agenda main_scheme      <b>When Revealed</b>: Shuffle the encounter discard pile into th
+GAP mut_gen    32113 Master Mold's Agenda main_scheme      Each [[Sentinel]] minion gains guard. <b>If this stage is comple
+GAP mut_gen    32114 Sentinel Mark VIII minion           <b>Forced Response</b>: After this minion engages you, attach th
+GAP mut_gen    32115 Unit Upgrade       attachment       Attach to a [[Sentinel]] minion. Otherwise, this card gains surg
+GAP mut_gen    32116 Stun Beam          attachment       Attach to a [[Sentinel]] minion without Stun Beam attached. Othe
+GAP mut_gen    32117 Master Mold's Children treachery        <b>When Revealed (Alter-Ego)</b>: Each minion engaged with you s
+GAP mut_gen    32118 Shields Up         treachery        <b>When Revealed</b>: Give each [[Sentinel]] minion engaged with
+GAP mut_gen    32119 Intruder Alert!    side_scheme      <b>When Defeated</b>: The player who defeated this scheme discar
+GAP mut_gen    32120 Insert Virus Program side_scheme      Hinder 2[per_hero]. Victory 1. <b>When Defeated</b>: Deal 2 dama
+GAP mut_gen    32121 Avalanche          villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Avala
+GAP mut_gen    32121 Avalanche          villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Avala
+GAP mut_gen    32122 Blob               villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Blob 
+GAP mut_gen    32122 Blob               villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Blob 
+GAP mut_gen    32123 Pyro               villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Pyro 
+GAP mut_gen    32123 Pyro               villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Pyro 
+GAP mut_gen    32124 Toad               villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Toad 
+GAP mut_gen    32124 Toad               villain          Toughness. Victory 2. [star] <b>Forced Response</b>: After Toad 
+GAP mut_gen    32125 The Brotherhood Strikes! main_scheme      <b>When Revealed</b>: Deal each player a facedown encounter card
+GAP mut_gen    32125 The Brotherhood Strikes! main_scheme      <b>Contents</b>: Avalanche (A), Blob (A), Pyro (A), and Toad (A)
+GAP mut_gen    32125 The Brotherhood Strikes! main_scheme      <b>When Revealed</b>: Deal each player a facedown encounter card
+GAP mut_gen    32126 The Atrium         main_scheme      Each character gains steady. <b>When Completed</b>: Add this sch
+GAP mut_gen    32126 The Atrium         main_scheme      <b>When Revealed</b>: Flip this card.
+GAP mut_gen    32126 The Atrium         main_scheme      Each character gains steady. <b>When Completed</b>: Add this sch
+GAP mut_gen    32127 The Cafeteria      main_scheme      Each character gains retaliate 1. <b>When Completed</b>: Add thi
+GAP mut_gen    32127 The Cafeteria      main_scheme      <b>When Revealed</b>: Flip this card.
+GAP mut_gen    32127 The Cafeteria      main_scheme      Each character gains retaliate 1. <b>When Completed</b>: Add thi
+GAP mut_gen    32128 The Basketball Court main_scheme      Each ally and minion gains toughness. <b>When Completed</b>: Add
+GAP mut_gen    32128 The Basketball Court main_scheme      <b>When Revealed</b>: Flip this card.
+GAP mut_gen    32128 The Basketball Court main_scheme      Each ally and minion gains toughness. <b>When Completed</b>: Add
+GAP mut_gen    32129 The Courtyard      main_scheme      Each character gains +1 ATK. <b>When Completed</b>: Add this sch
+GAP mut_gen    32129 The Courtyard      main_scheme      <b>When Revealed</b>: Flip this card.
+GAP mut_gen    32129 The Courtyard      main_scheme      Each character gains +1 ATK. <b>When Completed</b>: Add this sch
+GAP mut_gen    32130 Save the School    environment      <b>Forced Response</b>: After the villain is defeated, if there 
+GAP mut_gen    32131 Brotherhood Beatdown treachery        <b>When Revealed</b>: For each of the following enemies in play:
+GAP mut_gen    32132 Ground Swell       treachery        <b>When Revealed</b>: Avalanche activates against you. If he is 
+GAP mut_gen    32133 Immovable          treachery        <b>When Revealed</b>: Blob activates against you. If he is not i
+GAP mut_gen    32134 Pyromaniac         treachery        <b>When Revealed</b>: Pyro activates against you. If he is not i
+GAP mut_gen    32135 Hopping Mad        treachery        <b>When Revealed</b>: Toad activates against you. If he is not i
+GAP mut_gen    32136 Protect the Students side_scheme      Hinder 2[per_hero]. <b>When Defeated</b>: The player who defeate
+GAP mut_gen    32137 Under Siege        side_scheme      <b>When Revealed</b>: Place 3 threat on this scheme for each [[B
+GAP mut_gen    32138 Magneto            villain          Steady. Toughness. [star] <b>Forced Response</b>: After Magneto 
+GAP mut_gen    32139 Magneto            villain          Steady. Toughness. <b>When Revealed</b>: Deal each player a face
+GAP mut_gen    32140 Magneto            villain          Steady. Toughness. <b>When Revealed</b>: Deal each player a face
+GAP mut_gen    32141 Asteroid M         main_scheme      <b>Forced Response</b>: After you place a magnet counter on this
+GAP mut_gen    32141 Asteroid M         main_scheme      <b>Contents</b>: Magneto (I) and Magneto (II). <i>(Magneto (II) 
+GAP mut_gen    32141 Asteroid M         main_scheme      <b>Forced Response</b>: After you place a magnet counter on this
+GAP mut_gen    32142 Factory Online     main_scheme      <b>Forced Response</b>: After you place a magnet counter on this
+GAP mut_gen    32142 Factory Online     main_scheme      <b>When Revealed</b>: Place 1 magnet counter here. If Sabotage M
+GAP mut_gen    32142 Factory Online     main_scheme      <b>Forced Response</b>: After you place a magnet counter on this
+GAP mut_gen    32143 The Rule of Magnus main_scheme      <b>Forced Response</b>: After you place a magnet counter on this
+GAP mut_gen    32143 The Rule of Magnus main_scheme      <b>When Revealed</b>: Place 2 magnet counters here. If Physical 
+GAP mut_gen    32143 The Rule of Magnus main_scheme      <b>Forced Response</b>: After you place a magnet counter on this
+GAP mut_gen    32144 Boarding Party     side_scheme      Magneto cannot have more than 6[per_hero] sustained damage. <b>W
+GAP mut_gen    32144 Sabotage Master Mold side_scheme      Magneto cannot have more than 12[per_hero] sustained damage. <b>
+GAP mut_gen    32145 Orbital Decay      side_scheme      Magneto cannot have more than 18[per_hero] sustained damage. <b>
+GAP mut_gen    32145 Physical Strain    attachment       Attach to Magneto. Permanent. Magneto loses steady.
+GAP mut_gen    32146 M-Type Sentinel    minion           Guard. <b>When Defeated</b>: Give Magneto a tough status card. <
+GAP mut_gen    32147 Magneto's Helmet   attachment       Attach to Magneto. Magneto cannot be confused. <b>Hero Response<
+GAP mut_gen    32148 Magneto's Armor    attachment       Attach to Magneto. Magneto cannot be stunned. <b>Hero Response</
+GAP mut_gen    32149 Magnetic Bubble    attachment       Attach to Magneto. Magneto gains retaliate 1. <b>Forced Interrup
+GAP mut_gen    32150 Wrapped in Metal   attachment       Attach to your identity. Max 1 per identity. Attached identity c
+GAP mut_gen    32151 Master of Magnetism treachery        <b>When Revealed</b>: Take the topmost [[Magnetic]] card in the 
+GAP mut_gen    32152 Electric Shock     treachery        <b>When Revealed (Alter-Ego)</b>: You are confused. Place 1 thre
+GAP mut_gen    32153 Electromagnetic Blast treachery        <b>When Revealed</b>: Exhaust each upgrade and support you contr
+GAP mut_gen    32154 Metal Shards       treachery        <b>When Revealed</b>: Deal 1 damage to each character you contro
+GAP mut_gen    32155 Magnetic Missile   treachery        Surge. <b>When Revealed</b>: Defeat a [[Sentinel]] minion in pla
+GAP mut_gen    32156 Magnetic Mayhem    side_scheme      <b>When Defeated</b>: The player who defeated this scheme discar
+GAP mut_gen    32157 Magnetically Sealed side_scheme      <b>When Revealed</b>: Place 2 additional threat here for each al
+GAP mut_gen    32158 Seized!            side_scheme      <b>When Revealed</b>: Each player places the top 6 cards of thei
+GAP mut_gen    32159 Fabian Cortez      minion           Teamwork ([[ACOLYTE]]). Villainous. <b>When Defeated</b>: The pl
+GAP mut_gen    32160 Amelia Voght       minion           Stalwart. Teamwork ([[ACOLYTE]]). <b>When Defeated</b>: The play
+GAP mut_gen    32161 Senyaka            minion           Teamwork ([[ACOLYTE]]). [star] Senyaka's attacks gain piercing. 
+GAP mut_gen    32162 Delgado            minion           Retaliate 1. Teamwork ([[ACOLYTE]]). <b>When Defeated</b>: Disca
+GAP mut_gen    32163 Unuscione          minion           Teamwork ([[ACOLYTE]]). Toughness. <b>When Defeated</b>: Give th
+GAP mut_gen    32164 Zeal for the Cause treachery        <b>When Revealed</b>: Resolve the "When Defeated" ability of eac
+GAP mut_gen    32165 The Acolytes       side_scheme      Each [[Acolyte]] minion gains guard. <hr /> [star] <b>Boost</b>:
+GAP mut_gen    32166 Nimrod             minion           Stalwart. Victory 1. Nimrod cannot take more than 3 damage each 
+GAP mut_gen    32167 Bastion            minion           Toughness. Villainous. Victory 1. <hr /> [star] <b>Boost</b>: De
+GAP mut_gen    32168 Nimrod's Portal    side_scheme      Victory 1. <b>When Defeated</b>: In player order, each player di
+GAP mut_gen    32169 Bastion's Machinations side_scheme      Victory 1. <b>When Revealed</b>: Each player places the top 9 ca
+GAP mut_gen    32170 Nano-Sentinel Tech attachment       Victory 1. Attached minion gets +4 hit points and gains the [[Se
+GAP mut_gen    32171 Frightened Police  side_scheme      <b>When Defeated</b>: Shuffle the top card of the Future Past de
+GAP mut_gen    32171 Metro P.D.         support          Permanent. The first player controls Metro P.D. <b>Action</b>: E
+GAP mut_gen    32172 Enemy of My Enemy  side_scheme      <b>When Defeated</b>: Shuffle the top card of the Future Past de
+GAP mut_gen    32172 Magneto            ally             Victory 1. The first player controls Magneto. He does not count 
+GAP mut_gen    32173 Find the Prisoners side_scheme      <b>When Revealed</b>: Each player searches their deck for an all
+GAP mut_gen    32173 Rescue Captives    environment      <b>Response</b>: After you defeat a [[Sentinel]] minion, spend 1
+GAP mut_gen    32174 Surprise Attack    side_scheme      <b>When Defeated</b>: Shuffle the top card of the Future Past de
+GAP mut_gen    32174 Reactive Defense   obligation       <b>Alter-Ego Action</b>: Spend [energy] [mental] [physical] reso
+GAP mut_gen    32175 Magneto's Fortress side_scheme      <b>When Defeated</b>: Shuffle the top card of the Future Past de
+GAP mut_gen    32175 Magneto's Power    attachment       Attach to Magneto. Permanent.
+GAP mut_gen    32176 Coup de Grâce      upgrade          <b>Hero Interrupt</b>: When you attack, this attack deals 3 addi
+GAP mut_gen    32177 Swagger            upgrade          <b>Hero Interrupt</b> <i>(defense)</i>: When you make a basic de
+GAP mut_gen    32178 Brazen Defense     upgrade          <b>Hero Interrupt</b> <i>(attack/defense)</i>: When an enemy att
+GAP mut_gen    32179 Ferocious Attack   upgrade          <b>Hero Action</b> <i>(attack)</i>: Spend 3 resources of any typ
+GAP mut_gen    32180 War Cry            upgrade          <b>Hero Resource</b>: Generate [wild][wild] resources for an [[A
+GAP mut_gen    32181 Coup de Grâce      upgrade          <b>Hero Interrupt</b>: When you attack, this attack deals 3 addi
+GAP mut_gen    32182 Compassion         upgrade          <b>Alter-Ego Response</b>: After you recover, heal 3 damage from
+GAP mut_gen    32183 Group Assault      upgrade          <b>Hero Action</b>: Until the end of the phase, prevent all cons
+GAP mut_gen    32184 Shock and Awe      upgrade          <b>Hero Action</b> <i>(attack)</i>: Spend 3 resources of any typ
+GAP mut_gen    32185 Improvisation      upgrade          <b>Hero Resource</b>: Generate [wild][wild] resources for an [[A
+GAP mut_gen    32186 Swagger            upgrade          <b>Hero Interrupt</b> <i>(defense)</i>: When you make a basic de
+GAP mut_gen    32187 Surprise!          upgrade          <b>Hero Reponse</b>: After you thwart, remove 3 threat from amon
+GAP mut_gen    32188 Heroic Intervention upgrade          <b>Hero Action</b> <i>(thwart)</i>: Spend 3 resources of any typ
+GAP mut_gen    32189 Determined Defense upgrade          <b>Hero Interrupt</b> <i>(defense/thwart)</i>: When you defend a
+GAP mut_gen    32190 Bodyguard          upgrade          <b>Hero Resource</b>: Generate [wild][wild] resources for a [[De
+GAP mut_gen    32191 Surprise!          upgrade          <b>Hero Reponse</b>: After you thwart, remove 3 threat from amon
+GAP mut_gen    32192 Compassion         upgrade          <b>Alter-Ego Response</b>: After you recover, heal 3 damage from
+GAP mut_gen    32193 Rescue Operation   upgrade          <b>Hero Action</b>: Until the end of the phase, prevent all cons
+GAP mut_gen    32194 Mentorship         upgrade          <b>Hero Action</b> <i>(thwart)</i>: Spend 3 resources of any typ
+GAP mut_gen    32195 Fortitude          upgrade          <b>Hero Resource</b>: Generate [wild][wild] resources for a [[Ta
+GAP cyclops    33011 Beast              ally             <b>Response</b>: After Beast enters play, search your deck and d
+GAP cyclops    33012 Dust               ally             [star] <b>Interrupt</b>: When Dust attacks a minion, she attacks
+GAP cyclops    33013 Rockslide          ally             Retaliate 1.
+GAP cyclops    33014 Blindfold          ally             <b>Response</b>: After Blindfold enters play, look at the top 5 
+GAP cyclops    33015 Danger Room Training upgrade          Attach to an [[X-MEN]] ally. Max 1 [[TRAINING]] upgrade per ally
+GAP cyclops    33016 Coordinated Attack upgrade          Attach to a minion. Max 1 per minion. Each ally takes -1 consequ
+GAP cyclops    33017 Teamwork           event            <b>Hero Interrupt</b> When you use your basic thwart power <i>(T
+GAP cyclops    33018 Effective Leadership resource         Max 2 per deck. <b>Interrupt</b>: When you spend this card to pl
+GAP cyclops    33019 Angel              ally             Reduce the cost to play Angel by 1 if your identity has the [[MU
+GAP cyclops    33020 Utopia             support          If each of your allies has the [[X-MEN]] trait, increase your al
+GAP cyclops    33021 Danger Room        support          <b>Alter-Ego Response</b>: After an [[X-MEN]] ally enters play, 
+GAP cyclops    33022 Game Time          event            <b>Hero Action</b>: Choose an ally with a [[TRAINING]] upgrade a
+GAP cyclops    33023 Psychic Rapport    event            Team-Up (Cyclops and Phoenix). Max 1 per deck. <b>Hero Action</b
+GAP cyclops    33024 Energy             resource         Max 1 per deck.
+GAP cyclops    33025 Genius             resource         Max 1 per deck.
+GAP cyclops    33026 Strength           resource         Max 1 per deck.
+GAP cyclops    33032 Marked             upgrade          Attach to a minion. Max 1 per minion. Attacks against attached m
+GAP cyclops    33033 Befuddle           upgrade          Attach to a minion. Max 1 per minion. <b>Interrupt</b>: When a c
+GAP cyclops    33034 Pinned Down        upgrade          Attach to a minion. Max 1 per minion. Attached minion gets -2 AT
+GAP cyclops    33035 Honorary X-Men     upgrade          Play only if your identity has the [[X-MEN]] trait. Attach to a 
+GAP phoenix    34007 Telekinetic Shield upgrade          Attach to a friendly character. <b>Forced Interrupt</b>: When at
+GAP phoenix    34008 Mental Paralysis   upgrade          Hero form only. Attach to a non-[[ELITE]] minion. Attached minio
+GAP phoenix    34009 Mind Control       upgrade          Attach to a non-[[ELITE]] minion. Take control of attached minio
+GAP phoenix    34014 Banshee            ally             [star] <b>Response</b>: After Banshee thwarts, confuse a minion.
+GAP phoenix    34015 Marvel Girl        ally             [star] <b>Interrupt</b>: When Marvel Girl attacks a minion, remo
+GAP phoenix    34016 Mission Training   upgrade          Attach to an [[X-MEN]] ally. Max 1 [[TRAINING]] upgrade per ally
+GAP phoenix    34017 Psychic Manipulation event            Play only if your identity has the [[PSIONIC]] trait. <b>Interru
+GAP phoenix    34018 Mutant Peacekeepers event            Play only if your identity has the [[X-MEN]] trait. <b>Hero Acti
+GAP phoenix    34019 Swift Retribution  event            <b>Hero Action</b> <i>(attack)</i>: The villain schemes. Deal 4 
+GAP phoenix    34020 Passion for Justice resource         Max 2 per deck. <b>Interrupt</b>: When you spend this card to pl
+GAP phoenix    34021 Storm              ally             Reduce the cost to play Storm by 1 if your identity has the [[MU
+GAP phoenix    34022 Cerebro            support          Play only if your identity has the [[MUTANT]] trait. <b>Alter-Eg
+GAP phoenix    34024 Down Time          upgrade          Play under any player's control. Max 1 per player. Your alter-eg
+GAP phoenix    34025 Energy             resource         Max 1 per deck.
+GAP phoenix    34026 Genius             resource         Max 1 per deck.
+GAP phoenix    34027 Strength           resource         Max 1 per deck.
+GAP phoenix    34031 Fiery Rage         treachery        Peril.
+GAP phoenix    34032 Psychic Assault    event            Play only if your identity has the [[PSIONIC]] trait. <b>Hero Ac
+GAP phoenix    34033 Psychic Misdirection event            Play only if your identity has the [[PSIONIC]] trait. <b>Hero In
+GAP phoenix    34034 Psychic Kicker     event            Play only if your identity has the [[PSIONIC]] trait. <b>Hero Ac
+GAP wolv       35013 Psylocke           ally             Psylocke enters play with 2 psionic counters on her. [star] <b>I
+GAP wolv       35014 Sunfire            ally             <b>Response</b>: After you play Sunfire from your hand, spend a 
+GAP wolv       35015 Battle Fury        upgrade          Play under any player's control. Max 1 per player. <b>Response:<
+GAP wolv       35016 Warrior Skill      upgrade          Uses (3 warrior counters). Max 1 per player. <b>Interrupt</b>: W
+GAP wolv       35017 Outta My Way!      event            <b>Hero Action</b> <i>(attack)</i>: Deal 3 damage to an enemy (5
+GAP wolv       35018 Precision Strike   event            <b>Hero Action</b> <i>(attack)</i>: Deal 2 damage to an enemy. I
+GAP wolv       35019 Mean Swing         event            <b>Hero Interrupt</b>: When your hero makes a basic attack, exha
+GAP wolv       35020 Aggressive Energy  resource         Max 2 per deck. <b>Hero Interrupt</b>: When you spend this card 
+GAP wolv       35021 Colossus           ally             Reduce the cost to play Colossus by 1 if your identity has the [
+GAP wolv       35022 Weapon X           support          Play only if your identity has the [[MUTANT]] trait. <b>Alter-Eg
+GAP wolv       35023 Fastball Special   event            Team-Up (Colossus and Wolverine). Max 1 per deck. <b>Hero Action
+GAP wolv       35024 Energy             resource         Max 1 per deck.
+GAP wolv       35025 Genius             resource         Max 1 per deck.
+GAP wolv       35026 Strength           resource         Max 1 per deck.
+GAP wolv       35029 The Carbonadium Synthesizer side_scheme      While the Carbonadium Synthesizer is in play, Omega Red cannot b
+GAP wolv       35030 Death Factor       attachment       Attach to your identity. <b>Forced Response:</b> After your turn
+GAP wolv       35031 Tentacle Strike    treachery        <b>When Revealed</b>: You are stunned. Take 1 damage (4 damage i
+GAP wolv       35032 Command Center     support          Max 1 per player. <b>Response</b>: After an ally thwarts and def
+GAP wolv       35033 Longshot           ally             Play only if your identity has the [[X-MEN]] trait. [star] <b>Re
+GAP wolv       35035 Seeking Vengeance  side_scheme      <b>When Revealed</b>: If Lady Deathstrike is in play, she activa
+GAP wolv       35036 Adamantium Upgrades attachment       Attach to an enemy without a copy of Adamantium Upgrades attache
+GAP wolv       35037 Hack 'n' Slash     treachery        <b>When Revealed</b>: Discard 1 random card from your hand and t
+GAP storm      36014 Havok              ally             [star] <b>Forced Interrupt</b>: When Havok attacks, discard the 
+GAP storm      36015 Mirage             ally             <b>Response</b>: After Mirage enters play, choose an enemy whose
+GAP storm      36016 Gentle             ally             [star] Gentle takes +1 consequential damage ([cost]) after he at
+GAP storm      36017 Pixie              ally             <b>Response</b>: After you play Pixie from your hand, add an [[X
+GAP storm      36018 Uncanny X-Men      support          Play under any player's control. Max 1 [[TEAM]] card per player.
+GAP storm      36019 Leadership Skill   upgrade          Uses (3 leadership counters). Max 1 per player. <b>Interrupt</b>
+GAP storm      36020 "To Me, My X-Men!" event            Play only if your identity has the [[X-MEN]] trait. <b>Hero Acti
+GAP storm      36021 Effective Leadership resource         Max 2 per deck. <b>Interrupt</b>: When you spend this card to pl
+GAP storm      36022 Forge              ally             <b>Response</b>: After Forge enters play, search your deck and d
+GAP storm      36023 The X-Jet          support          <b>Resource</b>: Exhaust The X-Jet → generate a [wild] resourc
+GAP storm      36024 Utopia             support          If each of your allies has the [[X-MEN]] trait, increase your al
+GAP storm      36025 X-Mansion          support          <b>Alter-Ego Action</b>: Exhaust X-Mansion → heal 1 damage fro
+GAP storm      36026 Endurance          upgrade          Play under any player's control. Max 1 per player. You get +3 hi
+GAP storm      36027 Energy             resource         Max 1 per deck.
+GAP storm      36028 Genius             resource         Max 1 per deck.
+GAP storm      36029 Strength           resource         Max 1 per deck.
+GAP storm      36035 Hangar Bay         support          Max 1 per player. <b>Response</b>: After an ally defends against
+GAP storm      36036 The Shadow King    minion           While a [[Controlled]] minion is in play, The Shadow King cannot
+GAP storm      36037 Ruler of the Astral Plane side_scheme      <b>When Defeated</b>: Discard 1 copy of Possessed from play. <hr
+GAP storm      36038 Possessed          attachment       Treat attached ally as a [[Controlled]] minion with a blank text
+GAP storm      36039 Astral Attack      treachery        <b>When Revealed</b>: Each [[Controlled]] minion activates again
+GAP gambit     37011 Bishop             ally             <b>Response</b>: After an enemy attacks you, place 1 energy coun
+GAP gambit     37012 Dazzler            ally             <b>Response</b>: After Dazzler enters play, confuse an enemy.
+GAP gambit     37013 Operative Skill    upgrade          Uses (3 operative counters). Max 1 per player. <b>Interrupt</b>:
+GAP gambit     37014 Stealth Strike     event            <b>Hero Action</b> <i>(attack)</i>: Deal 4 damage to an enemy. I
+GAP gambit     37015 Breaking and Entering event            Play only if your identity has the [[SPY]] or [[THIEF]] trait. <
+GAP gambit     37016 Passion for Justice resource         Max 2 per deck. <b>Interrupt</b>: When you spend this card to pl
+GAP gambit     37017 Professor X        ally             <b>Forced Response</b>: After Professor X enters play, choose on
+GAP gambit     37018 X-Mansion          support          <b>Alter-Ego Action</b>: Exhaust X-Mansion → heal 1 damage fro
+GAP gambit     37019 Beauty and the Thief event            Team-Up (Gambit and Rogue). Max 1 per deck. <b>Hero Action</b> <
+GAP gambit     37020 Hit and Run        event            <b>Hero Action</b> <i>(attack/thwart)</i>: Deal 2 damage to an e
+GAP gambit     37021 Mutant Education   event            Play only if your identity has the [[MUTANT]] trait. <b>Alter-Eg
+GAP gambit     37022 Energy             resource         Max 1 per deck.
+GAP gambit     37023 Genius             resource         Max 1 per deck.
+GAP gambit     37024 Strength           resource         Max 1 per deck.
+GAP gambit     37030 War Room           support          Max 1 per player. <b>Response</b>: After an ally attacks and def
+GAP gambit     37031 X-Men Instruction  event            Play only if your identity has the [[MUTANT]] trait. <b>Alter-Eg
+GAP gambit     37032 Exodus             minion           Retaliate 1. Villainous. <b>When Revealed</b>: Search the encoun
+GAP gambit     37033 Herald of Avalon   side_scheme      <b>When Defeated</b>: The player who defeated this scheme search
+GAP gambit     37034 Psionic Shield     attachment       Attach to a minion. Otherwise, Psionic Shield gains surge. <b>Fo
+GAP gambit     37035 Acolyte Frenzy     treachery        <b>When Revealed</b>: Each [[ACOLYTE]] minion engaged with you a
+GAP rogue      38010 Iceman             ally             Iceman enters play with 3 freeze counters on him. <b>Response</b
+GAP rogue      38011 Karma              ally             <b>Response</b>: After you play Karma from your hand, choose a n
+GAP rogue      38012 Armor              ally             Play only if your identity has the [[X-MEN]] trait. Toughness.
+GAP rogue      38013 Unflappable        upgrade          Play under any player's control. Max 1 per player. <b>Response</
+GAP rogue      38014 Judoka Skill       upgrade          Uses (3 judo counters). Max 1 per player. <b>Interrupt</b>: When
+GAP rogue      38015 Preemptive Strike  event            <b>Hero Interrupt</b> <i>(defense)</i>: When a boost card is tur
+GAP rogue      38016 Not Today!         event            <b>Hero Interrupt</b> <i>(defense)</i>: When your hero defends a
+GAP rogue      38017 Defensive Energy   resource         Max 2 per deck. <b>Hero Interrupt</b>: When you spend this card 
+GAP rogue      38018 Moira MacTaggert   support          Play only if your identity has the [[MUTANT]] trait. <b>Response
+GAP rogue      38019 X-Gene             upgrade          Play only if your identity has the [[MUTANT]] trait. Max 1 per p
+GAP rogue      38020 Beauty and the Thief event            Team-Up (Gambit and Rogue). Max 1 per deck. <b>Hero Action</b> <
+GAP rogue      38021 Energy             resource         Max 1 per deck.
+GAP rogue      38022 Genius             resource         Max 1 per deck.
+GAP rogue      38023 Strength           resource         Max 1 per deck.
+GAP rogue      38028 Med Lab            support          Max 1 per player. <b>Response</b>: After an ally is defeated by 
+GAP rogue      38029 Donald Pierce      minion           Teamwork ([[REAVER]]). Villainous. <b>Forced Response</b>: After
+GAP rogue      38030 Skullbuster        minion           Teamwork ([[REAVER]]). Toughness. <b>Forced Response</b>: After 
+GAP rogue      38031 Bonebreaker        minion           Teamwork ([[REAVER]]). Toughness. <b>Forced Response</b>: After 
+GAP rogue      38032 Wade Cole          minion           Teamwork ([[REAVER]]). <b>When Revealed</b>: Search the encounte
+GAP rogue      38033 Murray Reese       minion           Teamwork ([[REAVER]]). <b>When Revealed</b>: Search the encounte
+GAP rogue      38034 The Reavers        side_scheme      <b>When Defeated</b>: The player who defeated this scheme discar
+GAP rogue      38035 Cybernetic Enhancements attachment       Attach to a minion. Otherwise, this card gains surge. Attached m
+GAP mojo       39001 MaGog              villain          [star] <b>Forced Response</b>: After MaGog attacks and damages a
+GAP mojo       39001 MaGog              villain          [star] <b>Forced Response</b>: After MaGog attacks and damages a
+GAP mojo       39002 Melee in the Mojo-seum main_scheme      <b>Contents</b>: MaGog (A) <i>(MaGog (B) instead for expert mode
+GAP mojo       39002 Melee in the Mojo-seum main_scheme      The players cannot win the game unless they wow the crowd as The
+GAP mojo       39003 The Champion       environment      If there are at least 5[per_hero] ratings counters here, flip th
+GAP mojo       39003 The Champion       environment      Underdogs — <b>Forced Response</b>: After The Champion flips t
+GAP mojo       39004 The Challengers    environment      If there are at least 5[per_hero] ratings counters here, flip th
+GAP mojo       39004 The Challengers    environment      Tag Team — <b>Forced Response</b>: After The Challengers flips
+GAP mojo       39005 Jolt of Adrenaline attachment       Attach to MaGog. MaGog gains retaliate 1 and stalwart. <b>Forced
+GAP mojo       39006 Surge of Aggression attachment       Attach to MaGog. <b>Forced Response</b>: After MaGog's hit point
+GAP mojo       39007 Surprise Contender minion           Villainous. [star] <b>Forced Response</b>: After Surprise Conten
+GAP mojo       39008 Pump Up the Crowd  side_scheme      <b>When Revealed</b>: If The Champion is on its [[Cheering Crowd
+GAP mojo       39009 Break a Leg        treachery        <b>When Revealed</b>: You are stunned. Take 2 damage (4 damage i
+GAP mojo       39010 Defend the Title   treachery        <b>When Revealed (Alter-Ego)</b>: Place 2 ratings counters on Th
+GAP mojo       39011 Stage Fright       treachery        <b>When Revealed</b>: You are confused. Place 2 threat on the ma
+GAP mojo       39012 Spiral             villain          Spiral cannot take damage or be stunned. Threat cannot be remove
+GAP mojo       39012 Spiral             villain          If there are at least 3[per_hero] teleport counters here, remove
+GAP mojo       39013 Spiral             villain          Spiral cannot take damage or be stunned. Threat cannot be remove
+GAP mojo       39013 Spiral             villain          If there are at least 2[per_hero] teleport counters here, remove
+GAP mojo       39014 Spiral             villain          Spiral cannot take damage or be stunned. Threat cannot be remove
+GAP mojo       39014 Spiral             villain          If there are at least 3[per_hero] teleport counters here, remove
+GAP mojo       39015 Across the Mojoverse main_scheme      <b>Contents</b>: Spiral (I) and Spiral (II) <i>(Spiral (II) and 
+GAP mojo       39015 Across the Mojoverse main_scheme      <b>Forced Interrupt</b>: When a [[SHOW]] environment would be di
+GAP mojo       39016 The Search for Spiral side_scheme      Permanent. <b>Forced Interrupt</b>: After the last threat is rem
+GAP mojo       39017 Cornered!          treachery        <b>When Revealed</b>: Flip Spiral to her [[Cornered]] side. <i>(
+GAP mojo       39018 Spiral's Swords    attachment       Attach to Spiral. Uses (3 sword counters). [star] Spiral gets +1
+GAP mojo       39019 Erratic Teleportation treachery        Surge. <b>When Revealed</b>: If Spiral is on her [[Cornered]] si
+GAP mojo       39020 The Show Must Go On treachery        <b>When Revealed</b>: Each player searches the encounter deck an
+GAP mojo       39021 Well-Armed         treachery        <b>When Revealed</b>: If a copy of Spiral's Sword is attached to
+GAP mojo       39022 Mojo               villain          <b>Forced Response (Hero)</b>: After your turn ends, discard the
+GAP mojo       39023 Mojo               villain          <b>When Revealed</b>: Place 2 threat on each friendly character.
+GAP mojo       39024 Mojo               villain          <b>When Revealed</b>: Place 3 threat on each friendly character.
+GAP mojo       39025 MojoMania          main_scheme      <b>Contents</b>: Mojo (I) and Mojo (II) <i>(Mojo (II) and Mojo (
+GAP mojo       39025 MojoMania          main_scheme      <b>When Revealed</b>: Choose 1 set-aside encounter set at random
+GAP mojo       39026 Wheel of Genres    environment      <b>Forced Response</b>: After the encounter deck resets, <b>if t
+GAP mojo       39026 Wheel of Genres    environment      <b>Forced Interrupt</b>: At the start of step three of the villa
+GAP mojo       39027 Major Domo         attachment       Attach to Mojo. [star] <b>Forced Response</b>: After Mojo attack
+GAP mojo       39028 Stinger Tail       attachment       Attach to Mojo. Mojo gains retaliate 2. <b>Forced Interrupt</b>:
+GAP mojo       39029 Supporting Actor   minion           [star] <b>Forced Response</b>: After Supporting Actor activates 
+GAP mojo       39030 Paparazzi          obligation       Hinder 10. <b>Action</b>: Choose to either exhaust a character y
+GAP mojo       39031 Undercover Mojo    side_scheme      Hinder 2[per_hero]. <b>Forced Interrupt</b>: When Mojo would tak
+GAP mojo       39032 Curtain Call       treachery        <b>When Revealed</b>: Move all threat from the character with th
+GAP mojo       39033 Director's Directions treachery        <b>When Revealed</b>: Choose one: • Spend 2 different resource
+GAP mojo       39034 Top Billing        treachery        <b>When Revealed</b>: Heal 1 damage from each character you cont
+GAP mojo       39035 Dial M for Mojo    environment      Each other encounter card gains incite 1. Each friendly characte
+GAP mojo       39036 Build the Case     obligation       <b>Forced Response</b>: After a side scheme is defeated, place 1
+GAP mojo       39037 Crime Scene Investigation side_scheme      Hinder 1[per_hero]. <i>(When revealed, place 1[per_hero] threat 
+GAP mojo       39038 Law & Order        side_scheme      Hinder 1[per_hero]. <i>(When revealed, place 1[per_hero] threat 
+GAP mojo       39039 Dragnet            side_scheme      Hinder 1[per_hero]. <i>(When revealed, place 1[per_hero] threat 
+GAP mojo       39040 Elementary, My Dear Mojo treachery        <b>When Revealed</b>: Choose one: • Move all threat from a sid
+GAP mojo       39041 A Game of Mojo's   environment      Each player gets +1 hand size. <b>When Revealed</b>: Discard eac
+GAP mojo       39042 Dragon             minion           Retaliate 1. Toughness. Double the amount of damage this minion 
+GAP mojo       39043 Goblin             minion           Surge. This minion can only take damage from cards with a printe
+GAP mojo       39044 Troll              minion           Toughness. This minion takes 1 additional damage from each card 
+GAP mojo       39045 Fetch Quest        side_scheme      Surge. <b>When Defeated</b>: In player order, each player may se
+GAP mojo       39046 Mana Drain         treachery        <b>When Revealed</b>: Choose a non-wild (non-[wild]) resource ty
+GAP mojo       39047 The Mojo Files     environment      Each minion gains quickstrike. Each ally takes -1 consequential 
+GAP mojo       39048 Bandolier of Stakes attachment       Surge. Uses (3 stake counters).<b>When Revealed</b>: You may spe
+GAP mojo       39049 Cultist            minion           [star] <b>Forced Response</b>: After Cultist activates against y
+GAP mojo       39050 The Kraken         minion           [star] <b>Forced Response</b>: After The Kraken activates, each 
+GAP mojo       39051 Vampire            minion           Attacks with piercing deal double damage to Vampire. [star] <b>F
+GAP mojo       39052 Werewolf Pack      minion           <b>When Revealed</b>: Defeat an ally you control and place it fa
+GAP mojo       39053 Mojo Runner        environment      Each minion and ally gains toughness. <b>When Revealed</b>: Disc
+GAP mojo       39054 Avalanche 9.0      minion           <b>Forced Response</b>: After Avalanche 9.0 engages you, exhaust
+GAP mojo       39055 Blob 3.14          minion           Blob 3.14 cannot take more than 2 damage from each attack. <hr /
+GAP mojo       39056 Magneto 2.6        minion           Villainous. [star] <b>Forced Response</b>: After Magneto 2.6 act
+GAP mojo       39057 Pyro 4.0           minion           [star] <b>Forced Interrupt</b>: When Pyro 4.0 attacks you, take 
+GAP mojo       39058 Toad 2.0           minion           <b>Forced Response</b>: After Toad 2.0 engages you, place 1 upgr
+GAP mojo       39059 ICE-Teroid M       side_scheme      Each minion gains guard and patrol. <b>Forced Interrupt</b>: At 
+GAP mojo       39060 Mojo in the Middle environment      Each obligation gains 1 acceleration icon ([acceleration]). <b>R
+GAP mojo       39061 Family Matters     obligation       Treat the printed text box of each support you control as if it 
+GAP mojo       39062 Growing Pains      obligation       Increase the cost to play each of your upgrades by 2. <b>Alter-E
+GAP mojo       39063 The Odd Couple     obligation       Reduce your ally limit by 2. <b>Alter-Ego Action</b>: Exhaust 2 
+GAP mojo       39064 The One with the Breakup obligation       Each encounter card gains peril. <b>Alter-Ego Action</b>: Discar
+GAP mojo       39065 Watch Me Play      obligation       Incite 3. Peril. <b>Forced Interrupt</b>: When you look up a rul
+GAP mojo       39066 Wild Wild Mojo     environment      Each enemy attack gains overkill. <b>Forced Interrupt</b>: When 
+GAP mojo       39067 Dead or Alive      attachment       Attach to the minion with the highest printed hit points. If you
+GAP mojo       39068 Card Shark         minion           [star] <b>Forced Response</b>: After Card Shark attacks you, dis
+GAP mojo       39069 Gunslinger         minion           Quickstrike. <b>Forced Interrupt</b>: When this minion engages y
+GAP mojo       39070 A Game of Cards    treachery        <b>When Revealed</b>: Draw 5 cards. Choose and discard 5 cards f
+GAP mojo       39071 Longshot           ally             [star] Longshot's attacks gain piercing. Longshot does not count
+--- PASS: TestSurvey (0.00s)
+PASS
+ok  	github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine	(cached)

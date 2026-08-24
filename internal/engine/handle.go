@@ -307,13 +307,93 @@ func (g *Game) handle(msg Message) {
 		g.handleAskOtherAction(m)
 
 	case SchemeThreat:
+		// Great Responsibility interrupt window (01061/30015): a player
+		// holding the event may take the threat as damage instead.
+		if m.N > 0 {
+			if p, card, ok := g.handCardHolding("01061", "30015"); ok {
+				g.Push(AskQuestion{Player: p.ID, Question: Ask(
+					fmt.Sprintf("%s: play Great Responsibility? Take %d damage instead of the threat", p.Name, m.N),
+					Choice{ID: "gr-play", Label: fmt.Sprintf("Play Great Responsibility — take %d damage", m.N), Kind: ChoicePlay, CardCode: card.Code}.
+						Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+							DamageEntity{Target: p.ID, Damage: m.N, Source: p.ID}),
+					Choice{ID: "gr-pass", Label: "Pass", Kind: ChoicePass}.
+						Msgs(ApplySchemeThreat{Scheme: m.Scheme, N: m.N, Source: m.Source}),
+				)})
+				return
+			}
+		}
+		g.addThreat(m.Scheme, m.N, m.Source)
+
+	case ApplySchemeThreat:
 		g.addThreat(m.Scheme, m.N, m.Source)
 
 	case ThwartScheme:
 		g.removeThreat(m.Scheme, m.N, m.Source)
 
 	case DamageEntity:
+		// Warning interrupt window (09021): the damaged hero's player may
+		// play Warning to reduce the damage by 1 (approximation: only the
+		// damaged player's own copy triggers).
+		if m.Damage > 0 && m.Target.Is(KindPlayer) {
+			p := g.Player(PlayerID(m.Target))
+			if p != nil && !p.KOed {
+				var warn Card
+				found := false
+				for _, hc := range p.Hand {
+					if data.BaseCode(hc.Code) == "09021" {
+						warn, found = hc, true
+						break
+					}
+				}
+				if found {
+					card := warn
+					g.Push(AskQuestion{Player: p.ID, Question: Ask(
+						fmt.Sprintf("%s: play Warning? Reduce the %d damage to %d", p.Name, m.Damage, m.Damage-1),
+						Choice{ID: "warn-play", Label: "Play Warning — reduce damage by 1", Kind: ChoicePlay, CardCode: card.Code}.
+							Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+								ApplyDamage{Target: m.Target, Damage: m.Damage - 1, Source: m.Source}),
+						Choice{ID: "warn-pass", Label: "Pass", Kind: ChoicePass}.
+							Msgs(ApplyDamage{Target: m.Target, Damage: m.Damage, Source: m.Source}),
+					)})
+					return
+				}
+			}
+		}
 		g.damage(m.Target, m.Damage, m.Source)
+
+	case ApplyDamage:
+		g.damage(m.Target, m.Damage, m.Source)
+
+	case CancelBoostIcons:
+		if v := g.Villains[m.Enemy]; v != nil && m.N > 0 {
+			v.BoostCount -= m.N
+			if v.BoostCount < 0 {
+				v.BoostCount = 0
+			}
+			g.logf("Boost icons cancelled (-%d, activation now +%d)", m.N, v.BoostCount)
+		}
+
+	case GuessCheck:
+		if p := g.Player(m.Player); p != nil {
+			if def, ok := DB.Lookup(m.CardCode); ok {
+				if def.Type == m.Guess {
+					g.Logf("%s guessed right — draws 1 card", p.Name)
+					g.Push(DamageEntity{Target: m.Penalty, Damage: 1, Source: p.ID}, DrawCards{Player: p.ID, N: 1})
+				} else {
+					g.Logf("%s guessed wrong (%s is not a %s)", p.Name, def.Name, m.Guess)
+				}
+			}
+		}
+
+	case EncounterTakeCard:
+		g.EncounterDeck.Remove(m.CardID)
+
+	case ShuffleEncounterDeck:
+		for i := len(g.EncounterDeck) - 1; i > 0; i-- {
+			j := g.Random(i + 1)
+			g.EncounterDeck[i], g.EncounterDeck[j] = g.EncounterDeck[j], g.EncounterDeck[i]
+		}
+		g.logf("Encounter deck shuffled")
 
 	case HealEntity:
 		g.heal(m.Target, m.N)
@@ -354,13 +434,30 @@ func (g *Game) handle(msg Message) {
 						g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(v), Card: c})
 						continue
 					}
-					add := deref(def.Boost, 0)
-					v.BoostCount += add
-					g.logf("Boost card revealed: %s (+%d)", def.Name, add)
-					v.RevealedBoosts = append(v.RevealedBoosts, c)
-					if b := behavior(def.Code); b.Boost != nil {
-						g.Push(b.Boost(g, c)...)
+				add := deref(def.Boost, 0)
+				v.BoostCount += add
+				g.logf("Boost card revealed: %s (+%d)", def.Name, add)
+				v.RevealedBoosts = append(v.RevealedBoosts, c)
+				// Foiled! interrupt window (09038): when the boost card
+				// is turned faceup during a scheme activation, a player
+				// holding the event may cancel its boost icons. The
+				// pending ApplyVillainScheme in the queue marks this as a
+				// scheme activation (attack activations queue AskAttack
+				// instead).
+				if add > 0 && g.schemeActivationPending(v.ID) {
+					if p, card, ok := g.handCardHolding("09038"); ok {
+						g.Push(AskQuestion{Player: p.ID, Question: Ask(
+							fmt.Sprintf("%s: play Foiled!? Cancel the +%d boost icons", p.Name, add),
+							Choice{ID: "foiled-play", Label: fmt.Sprintf("Play Foiled! — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
+								Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+									CancelBoostIcons{Enemy: v.ID, N: add}),
+							Choice{ID: "foiled-pass", Label: "Pass", Kind: ChoicePass},
+						)})
 					}
+				}
+				if b := behavior(def.Code); b.Boost != nil {
+					g.Push(b.Boost(g, c)...)
+				}
 				} else {
 					stillFacedown = append(stillFacedown, c)
 				}
@@ -1353,8 +1450,15 @@ func (g *Game) thwartBlocked(p *Player) bool {
 func (g *Game) thwartBlockerName(p *Player) string {
 	for _, id := range sortedIDs(g.Minions) {
 		mn := g.Minions[id]
-		if mn.EngagedWith == p.ID && behavior(mn.Code).EngagedBlocksThwart {
+		if mn.EngagedWith != p.ID {
+			continue
+		}
+		if behavior(mn.Code).EngagedBlocksThwart {
 			return mn.EDef().Name
+		}
+		// Brix (30032) grants every Inheritor minion patrol.
+		if mn.EDef().HasTrait("inheritor") && g.minionInPlay("30032") {
+			return mn.EDef().Name + " (patrol)"
 		}
 	}
 	return ""
@@ -1714,7 +1818,8 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 			return
 		}
 		g.logf("%s attacks %s", def.Name, p.Name)
-		if def.HasKeyword("Villainous") {
+		// Solus (30037) grants every Inheritor minion villainous.
+		if def.HasKeyword("Villainous") || (def.HasTrait("inheritor") && g.minionInPlay("30037")) {
 			g.dealMinionBoost(mn)
 		}
 		g.Push(AskAttack{Enemy: mn.ID, Player: p.ID})
@@ -2441,6 +2546,47 @@ func boostSpawnsMinion(def *data.CardDef) bool {
 		return false
 	}
 	return strings.Contains(def.Text, "Boost: Put") || strings.Contains(def.Text, "Boost: put")
+}
+
+// handCardHolding finds the first player holding a card with one of the
+// given base codes in hand (interrupt-event windows).
+func (g *Game) handCardHolding(codes ...string) (*Player, Card, bool) {
+	for _, p := range g.Players {
+		if p.KOed {
+			continue
+		}
+		for _, hc := range p.Hand {
+			for _, code := range codes {
+				if data.BaseCode(hc.Code) == code {
+					return p, hc, true
+				}
+			}
+		}
+	}
+	return nil, Card{}, false
+}
+
+// schemeActivationPending reports whether a villain's scheme resolution is
+// still queued (boost cards revealed during a scheme activation vs an
+// attack).
+func (g *Game) schemeActivationPending(villain EntityID) bool {
+	for _, msg := range g.queue {
+		if m, ok := msg.(ApplyVillainScheme); ok && m.VillainID == villain {
+			return true
+		}
+	}
+	return false
+}
+
+// minionInPlay reports whether a minion with the given base code is in
+// play (Inheritor aura checks).
+func (g *Game) minionInPlay(code string) bool {
+	for _, mn := range g.Minions {
+		if mn != nil && data.BaseCode(mn.Code) == code {
+			return true
+		}
+	}
+	return false
 }
 
 // boostSpawnTarget picks the first player for boost-spawned cards.

@@ -684,6 +684,12 @@ func registerRemainingPlayerCards() {
 		},
 	})
 
+	// 01061 Great Responsibility: Hero Interrupt — when any amount of
+	// threat would be placed on a scheme, you take it as damage instead.
+	// Resolved by the interrupt window in handle(SchemeThreat) whenever a
+	// copy (01061 or the 30015 reprint) sits in any player's hand.
+	engine.RegisterBehavior("01061", &engine.Behavior{})
+
 	// Interrogation Room: after you defeat a minion, exhaust it → remove
 	// 1 threat. Approximation: offered to the owner whenever any minion is
 	// defeated (the defeater cannot be identified from the message).

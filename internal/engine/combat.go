@@ -555,7 +555,12 @@ func retaliateOf(g *Game, e Entity) int {
 	if p, ok := e.(*Player); ok {
 		return printedRetaliate(p.EDef()) + p.upgradeStats(g).Retaliate
 	}
-	return printedRetaliate(e.EDef())
+	n := printedRetaliate(e.EDef())
+	// Verna (30038) grants every Inheritor minion retaliate 1.
+	if mn, ok := e.(*Minion); ok && mn.EDef().HasTrait("inheritor") && g.minionInPlay("30038") {
+		n++
+	}
+	return n
 }
 
 // printedRetaliate reads the printed Retaliate keyword value.

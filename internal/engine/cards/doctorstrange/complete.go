@@ -1,12 +1,12 @@
 package doctorstrange
 
-// complete.go implements the remaining Doctor Strange pack cards that the
-// engine can express. Warning (damage interrupt), Foiled! (boost-icon
-// cancel) and Iron Man's upgrade discount need reaction windows that do
-// not exist yet and remain unimplemented.
+// complete.go implements the remaining Doctor Strange pack cards.
+// Warning, Foiled! and Iron Man resolve through engine-level interrupt
+// windows and cost hooks (see handle.go and costFor).
 
 import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
 
 func registerRemainingDRS() {
@@ -81,6 +81,30 @@ func registerRemainingDRS() {
 	engine.RegisterBehavior("09037", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			return []engine.Message{engine.ApplyStatBonus{Target: e.EOwner(), ATK: 2}}
+		},
+	})
+
+	// 09021 Warning: Interrupt — when a hero would take any amount of
+	// damage, reduce that amount by 1. Resolved by the interrupt window in
+	// handle(DamageEntity) whenever a copy sits in the damaged player's
+	// hand.
+	engine.RegisterBehavior("09021", &engine.Behavior{})
+
+	// 09038 Foiled!: Interrupt — when a boost card is turned faceup during
+	// a scheme activation, cancel its boost icons. Resolved by the window
+	// in handle(RevealBoost).
+	engine.RegisterBehavior("09038", &engine.Behavior{})
+
+	// 09039 Iron Man: reduce the cost to play each upgrade on Iron Man by
+	// 1. Approximation: while Iron Man is in play, every upgrade his
+	// controller plays costs 1 less (costFor consults ally CardCost
+	// hooks).
+	engine.RegisterBehavior("09039", &engine.Behavior{
+		CardCost: func(g *engine.Game, p *engine.Player, def *data.CardDef) int {
+			if def.Type == "upgrade" {
+				return 1
+			}
+			return 0
 		},
 	})
 }

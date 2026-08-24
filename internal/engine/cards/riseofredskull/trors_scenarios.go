@@ -507,7 +507,7 @@ func registerZola() {
 					case "04117":
 						m.Guard = true
 					case "04118":
-						m.Tough = m.Tough // retaliate approximated
+						// retaliate 1 aura approximated as nothing extra here
 					}
 				}
 				return nil

@@ -44,6 +44,9 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		default:
 			continue
 		}
+		if b := behavior(def.Code); b.Playable != nil && !b.Playable(g, p, def) {
+			continue
+		}
 		cost := g.costFor(p, def)
 		choice := Choice{
 			Label:    fmt.Sprintf("%s (cost %d)", def.Name, cost),
@@ -472,7 +475,14 @@ func (g *Game) guardBlocksVillain(pid PlayerID, v *Villain) bool {
 		return false
 	}
 	for _, mn := range g.Minions {
-		if mn.EngagedWith == pid && mn.Guard {
+		if mn.EngagedWith != pid {
+			continue
+		}
+		if mn.Guard {
+			return true
+		}
+		// Jennix (30034) grants every Inheritor minion guard.
+		if mn.EDef().HasTrait("inheritor") && g.minionInPlay("30034") {
 			return true
 		}
 	}

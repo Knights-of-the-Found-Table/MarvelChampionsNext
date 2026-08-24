@@ -41,6 +41,8 @@ func init() {
 		ObligationResolve{}, DiscardControlled{}, AddAccelerationToken{}, RevealNextEncounter{},
 		PlayDefenseEvent{}, AddEntityCounter{}, ReturnControlled{},
 		AllyEntersPlayFree{}, MinionEntersPlay{}, AttachUpgrade{}, CostDiscountApply{}, SetAntForm{}, SetMassForm{}, SpawnSymbiote{}, AllForOneDamage{}, HoodFoulPlay{}, AddProgressCounters{}, SwapHeroSide{}, ReplaySideSchemeReveal{}, ChangeFormAgain{}, TempHandSizeMsg{}, RapidReturn{}, AddVengeance{}, ResolveTechnique{}, DiscardAttachmentMsg{}, BunkerDiscard{}, MillEncounter{}, TopDeckPick{}, SlippingSanityMill{}, IndirectDamage{}, BarrageCharge{}, CollectCard{}, SummonSix{},
+		ApplySchemeThreat{}, ApplyDamage{}, CancelBoostIcons{}, GuessCheck{},
+		EncounterTakeCard{}, ShuffleEncounterDeck{},
 		EventPlayed{}, SetEventBonus{}, ReturnDiscardCard{}, DiscardToBottom{},
 		AllyDefeated{}, AllyDestroyed{}, SupportStoreCard{}, SupportRetrieveCards{},
 		TreacheryWindow{}, TreacheryResolve{}, ConsumeHandCard{}, PlayDiscardAlly{},

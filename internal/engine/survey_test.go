@@ -89,7 +89,7 @@ func TestSurvey(t *testing.T) {
 	for _, def := range engine.DB.All() {
 		code := def.Code
 		base := data.BaseCode(code)
-		if base > "29999" || len(base) != 5 {
+		if base > "39999" || len(base) != 5 {
 			continue
 		}
 		hasText := strings.TrimSpace(def.Text) != ""

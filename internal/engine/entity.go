@@ -71,8 +71,14 @@ type Behavior struct {
 	// (Baron Zemo). Applies to basic thwarts (approximation).
 	EngagedBlocksThwart bool
 	// Identity: passive cost reduction for a card being paid for (e.g.
-	// Living Legend: first ally each round costs 1 less).
+	// Living Legend: first ally each round costs 1 less). Also consulted
+	// for the played card itself and controlled allies (self discounts,
+	// Iron Man's upgrade rebate).
 	CardCost func(g *Game, p *Player, def *data.CardDef) int
+	// Playable gates the card's presence in the play menu (Scarlet
+	// Spider / SP//dr: "play only if you control a Web-Warrior card").
+	// nil = always playable.
+	Playable func(g *Game, p *Player, def *data.CardDef) bool
 	// Event: resolves a defense event played from the defense prompt.
 	// Returns the (possibly modified) Defends message plus extra messages
 	// (e.g. draw a card); ok=false when it cannot be played right now.

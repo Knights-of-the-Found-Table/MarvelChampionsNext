@@ -828,6 +828,22 @@ func (g *Game) costFor(p *Player, def *data.CardDef) int {
 	if b := behavior(p.HeroCode); b.CardCost != nil {
 		cost -= b.CardCost(g, p, def)
 	}
+	// Self-referential discounts on the played card itself (Web of Life
+	// and Destiny: free for Web-Warrior identities).
+	if b := behavior(def.Code); b.CardCost != nil {
+		cost -= b.CardCost(g, p, def)
+	}
+	// Discounts from controlled allies (Iron Man 09039: upgrades cost 1
+	// less while he is in play).
+	for _, id := range p.Allies {
+		a := g.Allies[id]
+		if a == nil {
+			continue
+		}
+		if b := behavior(a.Code); b.CardCost != nil {
+			cost -= b.CardCost(g, p, def)
+		}
+	}
 	for _, d := range p.CostDiscounts {
 		if discountMatches(d, def) && d.Amount > 0 {
 			cost -= d.Amount
