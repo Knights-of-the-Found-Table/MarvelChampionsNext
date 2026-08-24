@@ -1,4 +1,4 @@
-﻿// Command server runs the Marvel Champions web service: REST API,
+// Command server runs the Marvel Champions web service: REST API,
 // WebSocket game streaming and static frontend hosting.
 package main
 
@@ -22,7 +22,6 @@ import (
 	// register game content
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/adamwarlock"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/angel"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/madtansshadow"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ant"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/aoa"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/aos"
@@ -51,10 +50,11 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ironheart"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicadrew"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jubilee"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/madtansshadow"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/magneto"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mojo"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/msmarvel"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mutantgenesis"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mojo"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nebula"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nextevolution"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nightcrawler"
@@ -62,26 +62,27 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/onceandfuturekang"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/psylocke"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/quicksilver"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/rogue"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/riseofredskull"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/rogue"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/silk"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/sinistermotives"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spdr"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spectrum"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spiderham"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spidermanmiles"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spiderwoman"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/spectrum"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/starlord"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/storm"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/thor"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/trickster"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/valkyrie"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/venom"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/vision"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/warmachine"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wasp"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/winter"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wolv"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wonderman"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wasp"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/wreckingcrew"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/x23"
 )

@@ -12,9 +12,10 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/core"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/galaxysmostwanted"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/goblinfooblin"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mutantgenesis"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mojo"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mutantgenesis"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/nextevolution"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/trickster"
 )
 
 // Scheme stage codes follow the repo-wide face convention: the b side is the
@@ -33,7 +34,7 @@ var (
 		// the trors snapshot follows the same convention
 		"04061": true, "04062": true, "04063": true, "04079": true,
 		"04096": true, "04112": true, "04113": true, "04128": true,
-		"04129": true,
+		"04129":  true,
 		"27076a": true, "27116a": true, "27101a": true,
 		// the next_evol snapshot codes its gameplay faces without the b
 		// suffix (the a side is the setup face)
@@ -45,9 +46,9 @@ var (
 		"45147": true, "45148": true,
 	}
 	statlessSchemeStages = map[string]bool{
-		"40139": true,  // transition stage, no threat target
+		"40139":  true, // transition stage, no threat target
 		"40139b": true, // transition stage, no threat target
-		"45103": true,  // The Age of Apocalypse: X is villain HP based
+		"45103":  true, // The Age of Apocalypse: X is villain HP based
 		"11008b": true, // Master of Time: variants-arrival transition
 		"50168b": true, // The Accusation: guess-the-traitor transition
 		// sm snapshot gaps: single-face schemes with no threat stats
