@@ -36,12 +36,10 @@ func registerNightcrawlerExtras() {
 						if x == nil {
 							continue
 						}
-						atk, thw, maxhp := x.AttackVal, x.ThwartVal, x.MaxHP
 						return []engine.Message{
 							engine.DamageEntity{Target: id, Damage: 1, Source: p.ID},
-							engine.AllyStatBonus{Ally: self, ATK: atk, THW: thw},
-						} 
-						_ = maxhp
+							engine.AllyStatBonus{Ally: self, ATK: x.AttackVal, THW: x.ThwartVal},
+						}
 					}
 					return nil
 				},
