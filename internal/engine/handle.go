@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"strconv"
-	"regexp"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -514,6 +514,8 @@ func (g *Game) handle(msg Message) {
 		g.setStatus(m.Target, "stunned", false)
 	case ClearConfuse:
 		g.setStatus(m.Target, "confused", false)
+	case ClearTough:
+		g.setStatus(m.Target, "tough", false)
 
 	case Defends:
 		g.handleDefends(m)
@@ -540,46 +542,46 @@ func (g *Game) handle(msg Message) {
 						g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(v), Card: c})
 						continue
 					}
-				add := deref(def.Boost, 0)
-				v.BoostCount += add
-				g.logf("Boost card revealed: %s (+%d)", def.Name, add)
-				v.RevealedBoosts = append(v.RevealedBoosts, c)
-				// Foiled! interrupt window (09038): when the boost card
-				// is turned faceup during a scheme activation, a player
-				// holding the event may cancel its boost icons. The
-				// pending ApplyVillainScheme in the queue marks this as a
-				// scheme activation (attack activations queue AskAttack
-				// instead).
-				scheme := g.schemeActivationPending(v.ID)
-				if add > 0 && scheme {
-					if p, card, ok := g.handCardHolding("09038"); ok {
-						g.Push(AskQuestion{Player: p.ID, Question: Ask(
-							fmt.Sprintf("%s: play Foiled!? Cancel the +%d boost icons", p.Name, add),
-							Choice{ID: "foiled-play", Label: fmt.Sprintf("Play Foiled! — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
-								Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
-									CancelBoostIcons{Enemy: v.ID, N: add}),
-							Choice{ID: "foiled-pass", Label: "Pass", Kind: ChoicePass},
-						)})
+					add := deref(def.Boost, 0)
+					v.BoostCount += add
+					g.logf("Boost card revealed: %s (+%d)", def.Name, add)
+					v.RevealedBoosts = append(v.RevealedBoosts, c)
+					// Foiled! interrupt window (09038): when the boost card
+					// is turned faceup during a scheme activation, a player
+					// holding the event may cancel its boost icons. The
+					// pending ApplyVillainScheme in the queue marks this as a
+					// scheme activation (attack activations queue AskAttack
+					// instead).
+					scheme := g.schemeActivationPending(v.ID)
+					if add > 0 && scheme {
+						if p, card, ok := g.handCardHolding("09038"); ok {
+							g.Push(AskQuestion{Player: p.ID, Question: Ask(
+								fmt.Sprintf("%s: play Foiled!? Cancel the +%d boost icons", p.Name, add),
+								Choice{ID: "foiled-play", Label: fmt.Sprintf("Play Foiled! — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
+									Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+										CancelBoostIcons{Enemy: v.ID, N: add}),
+								Choice{ID: "foiled-pass", Label: "Pass", Kind: ChoicePass},
+							)})
+						}
 					}
-				}
-				// Preemptive Strike (38015): during villain attacks, cancel
-				// all boost icons on this card and deal the villain 1
-				// damage per icon.
-				if add > 0 && !scheme && g.attackActivationPending(v.ID) {
-					if p, card, ok := g.handCardHolding("38015"); ok {
-						g.Push(AskQuestion{Player: p.ID, Question: Ask(
-							fmt.Sprintf("%s: play Preemptive Strike? Cancel +%d boost icons and deal %d damage", p.Name, add, add),
-							Choice{ID: "preemptive-play", Label: fmt.Sprintf("Play Preemptive Strike — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
-								Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
-									CancelBoostIcons{Enemy: v.ID, N: add},
-									DamageEntity{Target: v.ID, Damage: add, Source: p.ID}),
-							Choice{ID: "preemptive-pass", Label: "Pass", Kind: ChoicePass},
-						)})
+					// Preemptive Strike (38015): during villain attacks, cancel
+					// all boost icons on this card and deal the villain 1
+					// damage per icon.
+					if add > 0 && !scheme && g.attackActivationPending(v.ID) {
+						if p, card, ok := g.handCardHolding("38015"); ok {
+							g.Push(AskQuestion{Player: p.ID, Question: Ask(
+								fmt.Sprintf("%s: play Preemptive Strike? Cancel +%d boost icons and deal %d damage", p.Name, add, add),
+								Choice{ID: "preemptive-play", Label: fmt.Sprintf("Play Preemptive Strike — cancel +%d boost icons", add), Kind: ChoicePlay, CardCode: card.Code}.
+									Msgs(ConsumeHandCard{Player: p.ID, CardID: card.ID},
+										CancelBoostIcons{Enemy: v.ID, N: add},
+										DamageEntity{Target: v.ID, Damage: add, Source: p.ID}),
+								Choice{ID: "preemptive-pass", Label: "Pass", Kind: ChoicePass},
+							)})
+						}
 					}
-				}
-				if b := behavior(def.Code); b.Boost != nil {
-					g.Push(b.Boost(g, c)...)
-				}
+					if b := behavior(def.Code); b.Boost != nil {
+						g.Push(b.Boost(g, c)...)
+					}
 				} else {
 					stillFacedown = append(stillFacedown, c)
 				}

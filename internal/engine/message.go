@@ -169,6 +169,9 @@ type (
 	ToughEntity   struct{ Target EntityID }
 	ClearStun     struct{ Target EntityID }
 	ClearConfuse  struct{ Target EntityID }
+	// ClearTough discards a tough status card without treating it as damage
+	// prevention (The Bellerophon and similar effects).
+	ClearTough struct{ Target EntityID }
 
 	// Defend selection resolved: Defender may be a player or ally.
 	Defends struct {
@@ -550,7 +553,6 @@ type (
 		Consequential int
 	}
 
-
 	// EventPlayed announces that a player played an event card
 	// (Morphogenetics, Embiggen!, Shrink).
 	EventPlayed struct {
@@ -762,6 +764,7 @@ func (ConfuseEntity) msg()            {}
 func (ToughEntity) msg()              {}
 func (ClearStun) msg()                {}
 func (ClearConfuse) msg()             {}
+func (ClearTough) msg()               {}
 func (Defends) msg()                  {}
 func (DealBoost) msg()                {}
 func (RevealBoost) msg()              {}
@@ -819,22 +822,22 @@ func (BunkerDiscard) msg()            {}
 func (MillEncounter) msg()            {}
 func (TopDeckPick) msg()              {}
 func (SlippingSanityMill) msg()       {}
-func (IndirectDamage) msg()        {}
-func (BarrageCharge) msg()         {}
-func (CollectCard) msg()           {}
-func (SummonSix) msg()             {}
-func (ApplySchemeThreat) msg()     {}
-func (ApplyDamage) msg()           {}
-func (CancelBoostIcons) msg()      {}
-func (GuessCheck) msg()            {}
-func (EncounterTakeCard) msg()     {}
-func (ShuffleEncounterDeck) msg()  {}
-func (AttachHandCard) msg()        {}
-func (ShuffleMinionIntoDeck) msg() {}
-func (TuckCardUnderOZT) msg()   {}
-func (AddMagnetCounter) msg()  {}
-func (AllyEnteredPlay) msg() {}
-func (ConvertMinionToAlly) msg() {}
+func (IndirectDamage) msg()           {}
+func (BarrageCharge) msg()            {}
+func (CollectCard) msg()              {}
+func (SummonSix) msg()                {}
+func (ApplySchemeThreat) msg()        {}
+func (ApplyDamage) msg()              {}
+func (CancelBoostIcons) msg()         {}
+func (GuessCheck) msg()               {}
+func (EncounterTakeCard) msg()        {}
+func (ShuffleEncounterDeck) msg()     {}
+func (AttachHandCard) msg()           {}
+func (ShuffleMinionIntoDeck) msg()    {}
+func (TuckCardUnderOZT) msg()         {}
+func (AddMagnetCounter) msg()         {}
+func (AllyEnteredPlay) msg()          {}
+func (ConvertMinionToAlly) msg()      {}
 func (EventPlayed) msg()              {}
 func (SetEventBonus) msg()            {}
 func (ReturnDiscardCard) msg()        {}
