@@ -11,6 +11,7 @@ import (
 func init() {
 	registerEcho()
 	registerSignatures()
+	registerEchoCards()
 }
 
 // registerEcho installs the identity (60037a/b).

@@ -314,27 +314,34 @@ func routedEnvOf(g *Game) *Environment {
 }
 
 // schemeValueOf returns an enemy's scheme value including dynamic bonuses
-// (momentum counters, hand-type scaling).
+// (momentum counters, hand-type scaling) and attached-upgrade modifiers
+// (Legal Trouble).
 func (g *Game) schemeValueOf(id EntityID) int {
+	n := 0
 	switch e := g.Entity(id).(type) {
 	case *Villain:
-		n := e.SchemeVal + e.BoostCount
+		n = e.SchemeVal + e.BoostCount
 		if b := behavior(e.Code); b.EnemyStatBonus != nil {
 			if _, sch := b.EnemyStatBonus(g, e); sch != 0 {
 				n += sch
 			}
 		}
-		return n
 	case *Minion:
-		n := e.SchemeVal
+		n = e.SchemeVal
 		if b := behavior(e.Code); b.EnemyStatBonus != nil {
 			if _, sch := b.EnemyStatBonus(g, e); sch != 0 {
 				n += sch
 			}
 		}
-		return n
+	default:
+		return 0
 	}
-	return 0
+	for _, u := range g.Upgrades {
+		if u.AttachTo == id {
+			n += behavior(u.Code).AttachedEnemySchemeMod
+		}
+	}
+	return n
 }
 
 // destroyAlly removes a defeated ally from play and discards its card.

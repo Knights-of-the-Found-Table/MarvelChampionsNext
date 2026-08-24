@@ -16,6 +16,7 @@ func init() {
 	registerNemesis()
 	registerSignatures()
 	registerDeckCards()
+	registerFNECards()
 }
 
 // registerDaredevil installs the identity (60001a/b).

@@ -140,6 +140,9 @@ type Behavior struct {
 	// Upgrade attached to an enemy: flat attack reduction while that
 	// enemy attacks the owner (Heightened Hearing); auto-consumed.
 	AttachedEnemyAttackMod int
+	// Upgrade attached to an enemy: flat scheme reduction while attached
+	// (Legal Trouble); consulted by schemeValueOf, never consumed.
+	AttachedEnemySchemeMod int
 	// Ally: consequential damage hits the owner instead (Elektra).
 	ConsequentialToOwner bool
 	// Side scheme: runs when the scheme is defeated, before it leaves
