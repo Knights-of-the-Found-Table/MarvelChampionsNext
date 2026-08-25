@@ -51,7 +51,7 @@ func registerCWPlayers() {
 						EngagedWith: p.ID, Stunned: true, Confused: true,
 					}
 					g.Minions[mn.ID] = mn
-					g.TLogf("c.moonKnightDragsInStunnedAndConfused", def.Name)
+					g.TLogf("c.moonKnightDragsInStunnedAndConfused", def)
 					return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}, engine.ShuffleEncounterDeck{}}
 				}
 			}

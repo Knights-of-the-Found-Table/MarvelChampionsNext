@@ -443,10 +443,10 @@ func registerLoki() {
 			}
 			def := card.Def()
 			if def.Type != "treachery" {
-				g.TLogf("c.lokiSSelfResolveDiscardedNotATreachery", def.Name)
+				g.TLogf("c.lokiSSelfResolveDiscardedNotATreachery", def)
 				return nil
 			}
-			g.TLogf("c.lokiSSelfResolveTopIsLokiHealsToFull", def.Name)
+			g.TLogf("c.lokiSSelfResolveTopIsLokiHealsToFull", def)
 			mn.Damage = 0
 			return nil
 		},

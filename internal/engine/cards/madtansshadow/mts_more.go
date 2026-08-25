@@ -23,7 +23,7 @@ func spawnSideScheme(g *engine.Game, code string, perHero int) *engine.SideSchem
 		MaxThreat: maxT,
 	}
 	g.SideSchemes[s.ID] = s
-	g.TLogf("c.entersPlay", def.Name)
+	g.TLogf("c.entersPlay", def)
 	return s
 }
 

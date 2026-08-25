@@ -39,6 +39,11 @@ func (m *Manager) PileList(gameID int64, playerID, pile string) ([]PileCard, err
 			list = p.Deck
 		}
 	case "discard":
+		// Empty player id = the shared encounter discard pile.
+		if playerID == "" {
+			list = r.game.EncounterDiscard
+			break
+		}
 		p := r.game.Player(engine.PlayerID(playerID))
 		if p == nil {
 			return nil, fmt.Errorf("unknown player %q", playerID)

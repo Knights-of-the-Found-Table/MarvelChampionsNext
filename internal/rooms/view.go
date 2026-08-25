@@ -37,6 +37,10 @@ type GameView struct {
 	WaitingFor *string `json:"waitingFor,omitempty"`
 	// EncounterCount is the encounter draw deck size (public info).
 	EncounterCount int `json:"encounterCount,omitempty"`
+	// EncounterDiscardCount / EncounterDiscardTop expose the encounter
+	// discard pile: its size and the top card (revealed face-up).
+	EncounterDiscardCount int      `json:"encounterDiscardCount,omitempty"`
+	EncounterDiscardTop   *CardRef `json:"encounterDiscardTop,omitempty"`
 }
 
 type VillainView struct {
@@ -279,6 +283,11 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 		}
 	}
 	v.EncounterCount = len(g.EncounterDeck)
+	v.EncounterDiscardCount = len(g.EncounterDiscard)
+	if n := len(g.EncounterDiscard); n > 0 {
+		top := g.EncounterDiscard[n-1]
+		v.EncounterDiscardTop = &CardRef{ID: top.ID, Code: top.Code, Name: top.Def().Name}
+	}
 	return v
 }
 

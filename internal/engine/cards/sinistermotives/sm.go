@@ -95,7 +95,7 @@ func registerSMScenarios() {
 					MaxThreat: maxT,
 				}
 				g.SideSchemes[s.ID] = s
-				g.TLogf("c.entersPlay", def.Name)
+				g.TLogf("c.entersPlay", def)
 			}
 			if g.MainScheme != nil {
 				g.GliderCounter = g.MainScheme.ID

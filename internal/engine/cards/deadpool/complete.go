@@ -479,7 +479,7 @@ func registerDreadpool() {
 			g.Minions[mn.ID] = mn
 			mn.EngagedWith = owner
 			t.Target = mn.ID
-			g.TLogf("c.isPoolIzed", engine.DB.MustLookup(code).Name)
+			g.TLogf("c.isPoolIzed", engine.DB.MustLookup(code))
 			return nil
 		},
 	})
@@ -645,7 +645,7 @@ func registerCorpsNeutrals() {
 								g.Allies[a.ID] = a
 								p.Allies = append(p.Allies, a.ID)
 								g.Push(engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID})
-								g.TLogf("c.beamsDownFromTheShip", def.Name)
+								g.TLogf("c.beamsDownFromTheShip", def)
 							}
 							return []engine.Message{engine.DealEncounterToPlayer{Player: p.ID}}
 						},

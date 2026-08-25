@@ -251,6 +251,8 @@ export interface GameView {
   question?: Question
   waitingFor?: string
   encounterCount?: number
+  encounterDiscardCount?: number
+  encounterDiscardTop?: CardRef
 }
 
 export interface Deck {

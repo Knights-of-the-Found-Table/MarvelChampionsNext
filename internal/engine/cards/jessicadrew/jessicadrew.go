@@ -365,7 +365,7 @@ func registerSWNemesis() {
 						}
 						g.Minions[mn.ID] = mn
 						mn.EngagedWith = p.ID
-						g.TLogf("c.hailHydraEngages", def.Name, p.Name)
+						g.TLogf("c.hailHydraEngages", def, p.Name)
 						return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}}
 					}
 				}

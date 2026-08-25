@@ -72,13 +72,13 @@ export default function Game() {
     }
   }, [view])
 
-  // 主计谋 a 面故事：主计谋以 a 面（剧情介绍）进场随即翻到 b 面，玩家来
-  // 不及读。检测快照日志里新出现的 log.mainSchemeFlips 条目（seq 单调递
-  // 增，可跨快照 diff），以非阻塞弹窗展示刚被翻走的 a 面；之后随时可在
-  // 对局记录里悬浮翻面行的卡名回看。
+  // 非阻塞卡牌展示队列：主计谋 a 面故事（翻面时）与遭遇牌揭示（自动结算
+  // 但玩家应看到牌面）。检测快照日志里新出现的 log.mainSchemeFlips /
+  // log.reveals 条目（seq 单调递增，可跨快照 diff），弹窗展示；之后随时可
+  // 在对局记录里悬浮对应行的卡名回看。
   const [stories, setStories] = useState<Array<{ aCode: string; name: string }>>([])
   const lastSeqRef = useRef<number | null>(null)
-  // 已弹过故事的翻面 seq：撤销会回退 seq、重放时同一 seq 再次出现；旧快照
+  // 已弹过的翻面 seq：撤销会回退 seq、重放时同一 seq 再次出现；旧快照
   // 乱序到达（初始 GET 晚于 WS 帧）也会重放旧 seq——都按已展示跳过。
   const shownFlipsRef = useRef<Set<number>>(new Set())
   useEffect(() => {
@@ -102,12 +102,20 @@ export default function Game() {
       return
     }
     for (const e of log) {
-      if (!e.seq || e.seq <= seen || e.key !== 'log.mainSchemeFlips') continue
-      if (shownFlipsRef.current.has(e.seq)) continue
-      shownFlipsRef.current.add(e.seq)
-      const arg = e.args?.find((a) => a.k === 'card')
-      const a = arg?.code ? aFaceCode(arg.code) : null
-      if (a) setStories((s) => [...s, { aCode: a, name: arg?.s ?? a }])
+      if (!e.seq || e.seq <= seen) continue
+      if (e.key === 'log.mainSchemeFlips') {
+        if (shownFlipsRef.current.has(e.seq)) continue
+        shownFlipsRef.current.add(e.seq)
+        const arg = e.args?.find((a) => a.k === 'card')
+        const a = arg?.code ? aFaceCode(arg.code) : null
+        if (a) setStories((s) => [...s, { aCode: a, name: arg?.s ?? a }])
+        continue
+      }
+      if (e.key === 'log.reveals') {
+        // 遭遇牌自动结算前先亮给玩家看（不阻塞流程）。
+        const arg = e.args?.find((a) => a.k === 'card')
+        if (arg?.code) setStories((s) => [...s, { aCode: arg.code!, name: arg.s ?? arg.code! }])
+      }
     }
   }, [view])
 
@@ -229,6 +237,8 @@ export default function Game() {
     if (card.kind === 'pile') {
       if (card.id === 'pile-encounter') {
         void openPile('', 'deck', t('pile.encounter'))
+      } else if (card.id === 'pile-encounter-discard') {
+        void openPile('', 'discard', t('pile.encounterDiscard'))
       } else if (card.label === 'deck' || card.label === 'discard') {
         const pid = card.id.replace(/^pile-(deck|discard)-/, '')
         const owner = view?.players.find((p) => p.id === pid)

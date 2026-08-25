@@ -210,6 +210,12 @@ export function layoutBoard(view: GameView): PlacedCard[] {
     id: 'pile-encounter', code: '', kind: 'pile', x: 236, y: 82, playerIndex: -1,
     faceDown: true, title: 'Encounter', z: 1, count: view.encounterCount, label: 'encounter',
   })
+  // 遭遇弃牌堆：与玩家弃牌堆同款堆叠 + 顶牌朝上，点击查看详情。
+  cards.push({
+    id: 'pile-encounter-discard', code: view.encounterDiscardTop?.code ?? '', kind: 'pile',
+    x: 236 + CARD_W + 14, y: 82, playerIndex: -1, faceDown: !view.encounterDiscardTop,
+    title: 'Encounter discard', z: 1, count: view.encounterDiscardCount ?? 0, label: 'encounter-discard',
+  })
 
   villains.forEach((v, i) => cards.push(villainCard(v, commandX + i * (villainVisualW + villainGap), 62)))
   commandX += villainGroupW + (villains.length > 0 && view.mainScheme ? commandGap : 0)

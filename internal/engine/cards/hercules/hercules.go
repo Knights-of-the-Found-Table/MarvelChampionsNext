@@ -287,7 +287,7 @@ func registerLabors() {
 		}
 		g.SideSchemes[s.ID] = s
 		a.Target = s.ID
-		g.TLogf("c.entersPlayWithEmbodyPathosAttachedThreat", def.Name, s.Threat)
+		g.TLogf("c.entersPlayWithEmbodyPathosAttachedThreat", def, s.Threat)
 		if b := engine.LookupBehavior(card.Code); b != nil && b.OnPlay != nil {
 			return b.OnPlay(g, s)
 		}

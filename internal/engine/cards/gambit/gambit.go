@@ -84,7 +84,7 @@ func registerGambit() {
 					engine.SetEventBonus{Player: p.ID, Damage: n},
 				))
 			}
-			g.TLogf("c.throwDeCardMayBoost", p.Name, def.Name)
+			g.TLogf("c.throwDeCardMayBoost", p.Name, def)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
 				Question: engine.Ask(engine.Tf("c.throwDeCardRemoveUpTo3ChargeCounters"), choices...),

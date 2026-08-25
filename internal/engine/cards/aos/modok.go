@@ -97,7 +97,7 @@ func registerMODOK() {
 								AttackVal: intValue(def.Attack, 1), ThwartVal: intValue(def.Thwart, 1),
 							}
 							g.AddAlly(a, p.ID)
-							g.TLogf("c.burstsFreeFromTheHoldingCell", def.Name)
+							g.TLogf("c.burstsFreeFromTheHoldingCell", def)
 							return []engine.Message{engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID}}
 						}
 						return nil

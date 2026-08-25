@@ -77,6 +77,15 @@ type CardDef struct {
 	Threat           *int `json:"threat,omitempty"`
 	Hazards          int  `json:"hazards,omitempty"`
 	Acceleration     int  `json:"acceleration,omitempty"`
+	// Crisis is the printed crisis icon on a side scheme (marvelcdb's
+	// scheme_crisis): while one is in play, threat cannot be removed from
+	// the main scheme.
+	Crisis bool `json:"crisis,omitempty"`
+	// AttackCost/ThwartCost are an ally's printed consequential damage for
+	// attacking / thwarting (marvelcdb's attack_cost / thwart_cost). 0 means
+	// the field was absent on the record — treat as the universal default 1.
+	AttackCost int `json:"attackCost,omitempty"`
+	ThwartCost int `json:"thwartCost,omitempty"`
 
 	ImageSrc     string `json:"imageSrc,omitempty"`
 	BackImageSrc string `json:"backImageSrc,omitempty"`
@@ -152,6 +161,9 @@ type rawCard struct {
 	Threat             *int `json:"threat"`
 	SchemeHazard       *int `json:"scheme_hazard"`
 	SchemeAcceleration *int `json:"scheme_acceleration"`
+	SchemeCrisis       *int `json:"scheme_crisis"`
+	AttackCost         *int `json:"attack_cost"`
+	ThwartCost         *int `json:"thwart_cost"`
 
 	ImageSrc     string `json:"imagesrc"`
 	BackImageSrc string `json:"backimagesrc"`
@@ -294,6 +306,15 @@ func normalize(def *CardDef, raw rawCard) {
 	if raw.SchemeAcceleration != nil && *raw.SchemeAcceleration > 0 {
 		def.Acceleration = *raw.SchemeAcceleration
 	}
+	if raw.SchemeCrisis != nil && *raw.SchemeCrisis > 0 {
+		def.Crisis = true
+	}
+	if raw.AttackCost != nil && *raw.AttackCost > 0 {
+		def.AttackCost = *raw.AttackCost
+	}
+	if raw.ThwartCost != nil && *raw.ThwartCost > 0 {
+		def.ThwartCost = *raw.ThwartCost
+	}
 
 	def.ImageSrc = raw.ImageSrc
 	def.BackImageSrc = raw.BackImageSrc
@@ -391,6 +412,20 @@ func (c *CardDef) KeywordValue(name string) int {
 		}
 	}
 	return 0
+}
+
+// ConsequentialFor returns an ally's printed consequential damage for the
+// given basic action ("attack" or "thwart"). Records missing the field fall
+// back to the universal printed default of 1.
+func (c *CardDef) ConsequentialFor(action string) int {
+	n := c.AttackCost
+	if action == "thwart" {
+		n = c.ThwartCost
+	}
+	if n > 0 {
+		return n
+	}
+	return 1
 }
 
 func (c *CardDef) String() string {

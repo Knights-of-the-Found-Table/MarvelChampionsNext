@@ -140,6 +140,12 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 	// Spiral: while she is in play, threat cannot be removed from the
 	// main scheme.
 	if g.MainScheme != nil && schemeID == g.MainScheme.ID {
+		// Crisis icon: while any crisis side scheme is in play, threat
+		// cannot be removed from the main scheme at all.
+		if g.crisisInPlay() {
+			g.tlogf("log.crisisLock")
+			return
+		}
 		for _, v := range g.Villains {
 			if v != nil && data.BaseCode(v.Code) == "39012" {
 				g.tlogf("log.spiralLock")
@@ -575,7 +581,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 			}
 			if prevented > 0 {
 				n -= prevented
-				g.tlogf("log.preventsDamage", e.Name, prevented)
+				g.tlogf("log.preventsDamage", e, prevented)
 				if n <= 0 {
 					return
 				}
@@ -583,13 +589,13 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 			if e.Tough > 0 {
 				e.Tough--
 				g.Push(ToughDiscarded{Target: id})
-				g.tlogf("log.toughPrevents", e.Name)
+				g.tlogf("log.toughPrevents", e)
 				return
 			}
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.tlogf("log.takesDamageHP", e.Name, n, e.HP(), e.MaxHP)
+		g.tlogf("log.takesDamageHP", e, n, e.HP(), e.MaxHP)
 		if e.HP() <= 0 && !e.KOed {
 			if g.applyDefeatSave(e) {
 				return
@@ -685,7 +691,7 @@ func (g *Game) heal(id EntityID, n int) {
 		if d := before - e.Damage; d > 0 {
 			g.emit(Evt{Type: "heal", Dst: id, N: d})
 		}
-		g.tlogf("log.heals", e.Name, before-e.Damage)
+		g.tlogf("log.heals", e, before-e.Damage)
 	case *Ally:
 		before := e.Damage
 		e.Damage -= n

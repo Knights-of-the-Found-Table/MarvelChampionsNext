@@ -400,7 +400,7 @@ func bounceToHand(g *engine.Game, p *engine.Player, kind string, id engine.Entit
 	}
 	g.Delete(id)
 	p.Hand = append(p.Hand, engine.Card{ID: g.NextCardID(), Code: code, Owner: p.ID})
-	g.TLogf("c.returnsToSHand", engine.DB.MustLookup(code).Name, p.Name)
+	g.TLogf("c.returnsToSHand", engine.DB.MustLookup(code), p.Name)
 	return nil
 }
 

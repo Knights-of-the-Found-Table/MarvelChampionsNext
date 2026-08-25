@@ -208,7 +208,7 @@ func spawnSideSchemeCard(g *engine.Game, code string, threat int) *engine.SideSc
 		MaxThreat: maxT,
 	}
 	g.SideSchemes[s.ID] = s
-	g.TLogf("c.entersPlayThreat", def.Name, threat)
+	g.TLogf("c.entersPlayThreat", def, threat)
 	return s
 }
 

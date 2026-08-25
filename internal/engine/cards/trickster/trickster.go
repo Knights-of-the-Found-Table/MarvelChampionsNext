@@ -42,7 +42,7 @@ func registerTricksterMagic() {
 					AttackVal: ttInt(def.Attack, 1), ThwartVal: ttInt(def.Thwart, 1),
 				}
 				g.AddAlly(a, p.ID)
-				g.TLogf("c.breaksFreeOfTheEnchantmentAndJoins", def.Name, p.Name)
+				g.TLogf("c.breaksFreeOfTheEnchantmentAndJoins", def, p.Name)
 				return []engine.Message{engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID}}
 			},
 		})

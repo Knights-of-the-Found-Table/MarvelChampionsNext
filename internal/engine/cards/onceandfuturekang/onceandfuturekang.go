@@ -144,7 +144,7 @@ func spawnKang(g *engine.Game, base string) *engine.Villain {
 		Tough:     def.HasKeyword("Toughness"),
 	}
 	g.Villains[v.ID] = v
-	g.TLogf("c.entersPlay", def.Name)
+	g.TLogf("c.entersPlay", def)
 	return v
 }
 
@@ -169,7 +169,7 @@ func spawnSchemeMsg(g *engine.Game, code string) []engine.Message {
 		MaxThreat: deref(def.Threat, 6),
 	}
 	g.SideSchemes[s.ID] = s
-	g.TLogf("c.entersPlayThreat", def.Name, s.Threat)
+	g.TLogf("c.entersPlayThreat", def, s.Threat)
 	return nil
 }
 

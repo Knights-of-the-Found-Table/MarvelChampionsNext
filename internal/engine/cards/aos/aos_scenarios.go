@@ -44,7 +44,7 @@ func registerAOSScenarios() {
 							EngagedWith: p.ID,
 						}
 						g.Minions[mn.ID] = mn
-						g.TLogf("c.isAmbushedBy", p.Name, def.Name)
+						g.TLogf("c.isAmbushedBy", p.Name, def)
 						break
 					}
 				}
@@ -153,7 +153,7 @@ func registerAOSScenarios() {
 					EngagedWith: p.ID,
 				}
 				g.Minions[mn.ID] = mn
-				g.TLogf("c.joinsCitizenVSManhunt", def.Name)
+				g.TLogf("c.joinsCitizenVSManhunt", def)
 			}
 			return nil
 		},

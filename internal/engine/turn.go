@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
@@ -478,6 +479,14 @@ func (g *Game) crisisInPlay() bool {
 	return false
 }
 
+// sideSchemeIsCrisis reads the printed crisis icon from the structured
+// card data (marvelcdb's scheme_crisis); the text scan stays as a fallback
+// for the handful of schemes whose crisis icon is phrased in card text
+// (01108 Crowd Control, 40109 Pure Force's conditional icon).
+func sideSchemeIsCrisis(def *data.CardDef) bool {
+	return def.Crisis || strings.Contains(def.Text, "Crisis") || strings.Contains(def.Text, "crisis")
+}
+
 // guardBlocksVillain reports whether pid cannot attack the given villain:
 // while a guard minion is engaged with them, they cannot attack villains
 // without the guard keyword (official Guard keyword).
@@ -543,7 +552,12 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 	var out []Choice
 	p := g.Player(a.Owner)
 	atk := a.AttackVal + a.BonusATK + a.PermATK
-	consq := 1 + g.attachedConsequential(a)
+	consq := a.EDef().ConsequentialFor("attack") + g.attachedConsequential(a)
+	// Wonder Man: the printed attack cost is "discard a card" instead of
+	// consequential damage — the discard question is the cost.
+	if behavior(a.Code).AllyAttackDiscardCost {
+		consq = 0
+	}
 	// Mission Planning (40017): allies skip consequential damage this
 	// round (approximation of "until the end of the phase").
 	if g.UsedThisRound["mission-planning"] {
@@ -589,8 +603,11 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 	return out
 }
 
-// allyAttackChoice builds one enemy target choice for an ally attack,
-// routing through the discard-cost question when required.
+// allyAttackChoice builds one enemy target choice for an ally attack.
+// Allies with a discard-cost attack (Wonder Man) chain into the same
+// select-and-confirm discard flow used by payments: a choose_n of hand
+// cards (board-highlighted like resource pay) validated to exactly one
+// discarded card, whose leaf carries the discard plus the attack.
 func allyAttackChoice(label Msg, target EntityID, code string, attackMsgs []Message, needsDiscard bool, a *Ally, p *Player) Choice {
 	c := Choice{
 		Label: label, Kind: ChoiceTarget, SourceID: target, CardCode: code,
@@ -601,10 +618,13 @@ func allyAttackChoice(label Msg, target EntityID, code string, attackMsgs []Mess
 	var picks []Choice
 	for _, hc := range p.Hand {
 		picks = append(picks, Choice{
-			Label: Tf("m.discardCard", hc), Kind: ChoiceCard, CardCode: hc.Code,
+			Label: S(hc.Def().Name), Kind: ChoiceResource, CardCode: hc.Code, SourceID: EntityID(hc.ID),
 		}.Msgs(append([]Message{DiscardCards{Player: p.ID, Cards: CardList{hc}}}, attackMsgs...)...))
 	}
-	return c.WithThen(Ask(Tf("q.discardCardForAttack", a), picks...))
+	q := AskN(Tf("q.discardCardForAttack", a), 0, picks...)
+	q.Validate = "discardCost:1"
+	q.Context = map[string]any{"player": p.ID.String()}
+	return c.WithThen(q)
 }
 
 // attachedConsequential sums ConsequentialBonus of upgrades attached to an
@@ -646,7 +666,7 @@ func (g *Game) schemeChoices(n int) []Choice {
 func (g *Game) schemeChoicesForAlly(a *Ally) []Choice {
 	var out []Choice
 	thw := a.ThwartVal + a.BonusTHW + a.PermTHW
-	consq := 1
+	consq := a.EDef().ConsequentialFor("thwart")
 	if g.UsedThisRound["mission-planning"] {
 		consq = 0
 	}

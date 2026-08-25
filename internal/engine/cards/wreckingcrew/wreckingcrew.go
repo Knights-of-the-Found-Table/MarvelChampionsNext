@@ -82,7 +82,7 @@ func spawnCrewScheme(g *engine.Game, code string, v *engine.Villain) {
 		MaxThreat: deref(def.Threat, 10),
 	}
 	g.SideSchemes[s.ID] = s
-	g.TLogf("c.entersPlaySSideScheme", def.Name, v)
+	g.TLogf("c.entersPlaySSideScheme", def, v)
 }
 
 // schemeOfVillain finds the crew side scheme owned by the villain's base.

@@ -97,7 +97,7 @@ func changeEnergyForm(g *engine.Game, p *engine.Player, code string) []engine.Me
 	if u := ownedForm(g, p, code); u != nil {
 		u.Counters = 1
 	}
-	g.TLogf("c.changesToEnergyForm", p.Name, engine.DB.MustLookup(code).Name)
+	g.TLogf("c.changesToEnergyForm", p.Name, engine.DB.MustLookup(code))
 	var msgs []engine.Message
 	switch code {
 	case "21002":

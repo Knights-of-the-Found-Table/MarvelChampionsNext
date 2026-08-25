@@ -46,7 +46,7 @@ func registerEcho() {
 			}
 			if _, ok := p.Discard.Remove(m.Card.ID); ok {
 				echo.SenseDeck = append(echo.SenseDeck, m.Card)
-				g.TLogf("c.echoTucksTucked", def.Name, len(echo.SenseDeck))
+				g.TLogf("c.echoTucksTucked", def, len(echo.SenseDeck))
 			}
 			return nil
 		},

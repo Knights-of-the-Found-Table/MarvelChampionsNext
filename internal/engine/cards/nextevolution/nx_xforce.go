@@ -22,7 +22,7 @@ func spawnAllyFor(g *engine.Game, p *engine.Player, c engine.Card) {
 	}
 	g.Allies[a.ID] = a
 	p.Allies = append(p.Allies, a.ID)
-	g.TLogf("log.putsIntoPlay", p.Name, def.Name)
+	g.TLogf("log.putsIntoPlay", p.Name, def)
 	g.Push(engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 	if b := engine.LookupBehavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, a)...)
@@ -35,7 +35,7 @@ func spawnUpgradeFor(g *engine.Game, p *engine.Player, c engine.Card) {
 	u := &engine.Upgrade{ID: g.NextEntityID(engine.KindUpgrade), Code: def.Code, Owner: p.ID}
 	g.Upgrades[u.ID] = u
 	p.Upgrades = append(p.Upgrades, u.ID)
-	g.TLogf("log.putsIntoPlay", p.Name, def.Name)
+	g.TLogf("log.putsIntoPlay", p.Name, def)
 	g.Push(engine.UpgradeEnterPlay{Player: p.ID, Card: c})
 	if b := engine.LookupBehavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, u)...)
@@ -48,7 +48,7 @@ func spawnSupportFor(g *engine.Game, p *engine.Player, c engine.Card) {
 	s := &engine.Support{ID: g.NextEntityID(engine.KindSupport), Code: def.Code, Owner: p.ID}
 	g.Supports[s.ID] = s
 	p.Supports = append(p.Supports, s.ID)
-	g.TLogf("log.putsIntoPlay", p.Name, def.Name)
+	g.TLogf("log.putsIntoPlay", p.Name, def)
 	if b := engine.LookupBehavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, s)...)
 	}

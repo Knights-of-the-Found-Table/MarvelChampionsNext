@@ -602,6 +602,26 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 			return nil, fmt.Errorf("must discard at least %d card(s), selected %d", need, n)
 		}
 		return msgs, nil
+	case strings.HasPrefix(q.Validate, "discardCost:"):
+		// Discard-exactly-N cost (Wonder Man's attack): the selected leaf
+		// carries the discard plus the paid-for effect, so exactly N cards
+		// must come from exactly one selection.
+		var need int
+		fmt.Sscanf(q.Validate, "discardCost:%d", &need)
+		var msgs []Message
+		n := 0
+		for _, c := range choices {
+			msgs = append(msgs, c.msgs...)
+			for _, msg := range c.msgs {
+				if d, ok := msg.(DiscardCards); ok {
+					n += len(d.Cards)
+				}
+			}
+		}
+		if n != need {
+			return nil, fmt.Errorf("discard exactly %d card(s), selected %d", need, n)
+		}
+		return msgs, nil
 	case strings.HasPrefix(q.Validate, "threatPerDiscard:"):
 		// "Choose and discard up to N cards → remove 1 threat from a
 		// scheme for each card discarded this way" (Legal Practice).
@@ -1002,9 +1022,9 @@ func (g *Game) consumeDiscount(p *Player, def *data.CardDef) {
 	for _, d := range p.CostDiscounts {
 		if discountMatches(d, def) && d.Amount != 0 {
 			if d.Amount > 0 {
-				g.tlogMinorf("log.costsLess", def.Name, d.Amount, p.Name)
+				g.tlogMinorf("log.costsLess", def, d.Amount, p.Name)
 			} else {
-				g.tlogMinorf("log.costsMore", def.Name, -d.Amount, p.Name)
+				g.tlogMinorf("log.costsMore", def, -d.Amount, p.Name)
 			}
 			continue
 		}
@@ -1302,7 +1322,7 @@ func (g *Game) spawnVillain(stages []string, stage int) *Villain {
 	}
 	v.stageCodes = stages
 	g.Villains[v.ID] = v
-	g.tlogMajorf("log.entersStage", def.Name, def.StageLabel)
+	g.tlogMajorf("log.entersStage", def, def.StageLabel)
 	return v
 }
 

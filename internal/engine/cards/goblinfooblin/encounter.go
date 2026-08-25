@@ -56,7 +56,7 @@ func registerGoblinEncounterCards() {
 				def := c.Def()
 				if def.Type == "minion" && def.HasTrait("goblin") {
 					g.EncounterDeck = append(g.EncounterDeck[:i], g.EncounterDeck[i+1:]...)
-					g.TLogf("c.goblinKnightSummons", def.Name)
+					g.TLogf("c.goblinKnightSummons", def)
 					return []engine.Message{engine.RevealEncounterCard{Player: mn.EngagedWith, Card: c}}
 				}
 			}

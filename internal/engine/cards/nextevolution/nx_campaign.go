@@ -20,7 +20,7 @@ func hopeSummers(g *engine.Game) {
 		if a := g.Allies[id]; a != nil && engine.BaseCodeOf(a.Code) == "40130" {
 			a.ThwartVal = p.ThwartStat(g)
 			a.AttackVal = p.AttackStat(g)
-			g.TLogf("c.hopeSummersMirrorsThwAtk", p.HeroDef().Name, a.ThwartVal, a.AttackVal)
+			g.TLogf("c.hopeSummersMirrorsThwAtk", p.HeroDef(), a.ThwartVal, a.AttackVal)
 		}
 	}
 }
@@ -226,7 +226,7 @@ func registerCampaign() {
 			g.Minions[mn.ID] = mn
 			mn.EngagedWith = owner
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: "40199"})
-			g.TLogf("c.malicePossessesTreatedAsAPossessedMinion", engine.DB.MustLookup(code).Name)
+			g.TLogf("c.malicePossessesTreatedAsAPossessedMinion", engine.DB.MustLookup(code))
 			return nil
 		},
 	})

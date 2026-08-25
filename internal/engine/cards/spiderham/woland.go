@@ -578,7 +578,7 @@ func registerWoLANDScheme() {
 						MaxHP: hp, AttackVal: atk, SchemeVal: sch, EngagedWith: pid,
 					}
 					g.Minions[mn.ID] = mn
-					g.TLogf("c.huntingTheSpiderTotemsEntersPlayEngagedWith", def.Name, g.Player(pid).Name)
+					g.TLogf("c.huntingTheSpiderTotemsEntersPlayEngagedWith", def, g.Player(pid).Name)
 					msgs = append(msgs, engine.MinionEntersPlay{MinionID: mn.ID, Player: pid})
 				} else {
 					g.EncounterDiscard = append(g.EncounterDiscard, top)
