@@ -10,21 +10,33 @@ function usePromptText(prompt: string | undefined): string {
   return localizePrompt(prompt, lang)
 }
 
+const iconAliases: Record<string, string> = {
+  energy: 'energy',
+  '能量': 'energy',
+  mental: 'mental',
+  '精神': 'mental',
+  physical: 'physical',
+  '物理': 'physical',
+  wild: 'wild',
+  '万用': 'wild',
+}
+
 function iconRequirements(prompt: string): Array<{ icon: string; n: number }> {
-  const icons = ['energy', 'mental', 'physical', 'wild']
   const out = new Map<string, number>()
-  for (const icon of icons) {
-    const n = prompt.match(new RegExp(`\\[${icon}\\]`, 'g'))?.length ?? 0
-    if (n > 0) out.set(icon, n)
+  const re = /\[(energy|mental|physical|wild|能量|精神|物理|万用)\]/g
+  for (const match of prompt.matchAll(re)) {
+    const icon = iconAliases[match[1]]
+    if (icon) out.set(icon, (out.get(icon) ?? 0) + 1)
   }
   return [...out.entries()].map(([icon, n]) => ({ icon, n }))
 }
 
 function choiceIcons(choice: Choice): string[] {
   const out: string[] = []
-  for (const icon of ['energy', 'mental', 'physical', 'wild']) {
-    const n = choice.label.match(new RegExp(`\\[${icon}\\]`, 'g'))?.length ?? 0
-    for (let i = 0; i < n; i++) out.push(icon)
+  const re = /\[(energy|mental|physical|wild|能量|精神|物理|万用)\]/g
+  for (const match of choice.label.matchAll(re)) {
+    const icon = iconAliases[match[1]]
+    if (icon) out.push(icon)
   }
   return out
 }
