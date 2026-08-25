@@ -322,11 +322,10 @@ prompts:
 			if outer.Then == nil {
 				t.Fatalf("step %d: interrupts choice lacks defense subtree", i)
 			}
-			for _, d := range outer.Then.Choices {
-				if d.Label.Text == "Take the attack" {
-					path = d.ID
-				}
-			}
+			// "take" is always the defense question's last choice; its
+			// explicit id is renumbered inside a nested subtree.
+			subs := outer.Then.Choices
+			path = subs[len(subs)-1].ID
 		case strings.Contains(pq.Question.Prompt, "defend?"):
 			path = "take"
 		default:
@@ -621,10 +620,9 @@ func TestMinionActivationOrderChosenByPlayer(t *testing.T) {
 		if c.Then == nil {
 			continue
 		}
-		for _, d := range c.Then.Choices {
-			if d.Label.Text == "Take the attack" {
-				takePath = d.ID
-			}
+		if subs := c.Then.Choices; len(subs) > 0 {
+			// "take" is always the defense question's last choice.
+			takePath = subs[len(subs)-1].ID
 		}
 	}
 	if takePath == "" {
@@ -717,24 +715,46 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	}
 	answerTurnPrompts()
 
-	// findLeaf locates a choice by label in the root question or any Then
-	// subtree (the interrupts question nests the defense choices).
-	findLeaf := func(q *engine.Question, label string) string {
+	// findLeaf locates a defense choice in the root question by its id
+	// ("take", "ask-defend"). Nested defense subtrees (under the
+	// interrupts question) get their ids renumbered, so there we fall
+	// back to structure: "ask-defend" is the defense question's first
+	// choice, "take" its last.
+	findLeaf := func(q *engine.Question, id string) string {
 		var walk func(q *engine.Question) string
 		walk = func(q *engine.Question) string {
 			for _, c := range q.Choices {
-				if c.Label.Text == label {
+				if c.ID == id {
 					return c.ID
 				}
 				if c.Then != nil {
-					if id := walk(c.Then); id != "" {
-						return id
+					if leaf := walk(c.Then); leaf != "" {
+						return leaf
 					}
 				}
 			}
 			return ""
 		}
-		return walk(q)
+		if leaf := walk(q); leaf != "" {
+			return leaf
+		}
+		var sub *engine.Question
+		for _, c := range q.Choices {
+			if c.Then != nil && len(c.Then.Choices) > 0 {
+				sub = c.Then
+				break
+			}
+		}
+		if sub == nil {
+			return ""
+		}
+		switch id {
+		case "take":
+			return sub.Choices[len(sub.Choices)-1].ID
+		case "ask-defend":
+			return sub.Choices[0].ID
+		}
+		return ""
 	}
 
 	// Attack 1 (villain vs P1): "take" resolves immediately — no other
@@ -743,7 +763,7 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	if pq == nil || pq.Player != p1.ID {
 		t.Fatalf("expected villain attack on %s, got %q for %v", p1.Name, promptOf(pq), pq.Player)
 	}
-	takePath := findLeaf(pq.Question, "Take the attack")
+	takePath := findLeaf(pq.Question, "take")
 	if takePath == "" {
 		t.Fatal("no take-the-attack choice")
 	}
@@ -764,7 +784,7 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	if pq == nil || pq.Player != p1.ID || !strings.Contains(pq.Question.Prompt, "defend?") {
 		t.Fatalf("expected minion attack on %s, got %q for %v", p1.Name, promptOf(pq), pq.Player)
 	}
-	askPath := findLeaf(pq.Question, "Ask another player to defend")
+	askPath := findLeaf(pq.Question, "ask-defend")
 	if askPath == "" {
 		t.Fatal("attacked player should be offered the ask-another-player option")
 	}
@@ -796,7 +816,7 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 	if pq == nil || pq.Player != p2.ID {
 		t.Fatalf("expected villain attack on %s, got %q for %v", p2.Name, promptOf(pq), pq.Player)
 	}
-	askPath = findLeaf(pq.Question, "Ask another player to defend")
+	askPath = findLeaf(pq.Question, "ask-defend")
 	if askPath == "" {
 		t.Fatal("ask-another-player option missing on P2's defense question")
 	}

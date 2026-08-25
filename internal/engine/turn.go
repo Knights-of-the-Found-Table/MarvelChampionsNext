@@ -691,15 +691,22 @@ func (g *Game) defenderQuestion(attackerID EntityID, atk int, p *Player) *Questi
 	}
 	prompt := Tf("q.attacksForDefend", name, atk)
 	var choices []Choice
-	choices = append(choices, Choice{
-		ID: "take", Label: Tf("m.takeAttack"), Kind: ChoiceLabel,
-	}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
 	if others := g.otherDefenders(p); len(others) > 0 {
 		choices = append(choices, Choice{
 			ID: "ask-defend", Label: Tf("m.askAnotherDefend"), Kind: ChoiceLabel,
 		}.Msgs(OtherDefenders{Against: attackerID, For: p.ID, Remaining: others}))
 	}
 	choices = append(choices, g.defenseOptions(attackerID, p)...)
+	// The attacked identity can always absorb the hit. Listed after the
+	// defense options so an available hero defense claims the identity
+	// card highlight (same sourceId) on the board; when defense is
+	// impossible (alter-ego form, exhausted, Melter), the identity card
+	// itself highlights as "take the attack".
+	choices = append(choices, Choice{
+		ID:    "take",
+		Label: Tf("m.takeAttack", p.EDef().Name),
+		Kind:  ChoiceBasicPower, SourceID: p.ID, CardCode: p.ECode(),
+	}.Msgs(Defends{Defender: p.ID, Against: attackerID, Undefended: true}))
 	return Ask(prompt, choices...)
 }
 
@@ -738,7 +745,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 		choices = append(choices, Choice{
 			ID:    "hero-defend",
 			Label: Tf("m.exhaustDefend", p.HeroDef().Name, p.DefenseStat(g)),
-			Kind:  ChoiceBasicPower,
+			Kind:  ChoiceBasicPower, SourceID: p.ID, CardCode: p.HeroCode,
 		}.Msgs(Defends{Defender: p.ID, Against: attackerID}))
 	}
 	for _, id := range p.Allies {

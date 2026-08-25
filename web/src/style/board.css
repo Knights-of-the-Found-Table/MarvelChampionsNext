@@ -1084,6 +1084,50 @@
   align-items: center;
 }
 
+/* 左侧操作条：返回主页（二次确认）+ 报告 bug */
+.hud-left {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.hud-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-height: 32px;
+  padding: 4px 10px;
+  background: rgba(34, 43, 54, 0.92);
+  color: var(--text, #dfe7ef);
+  border: 1px solid var(--border, #32404f);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.hud-home:hover {
+  border-color: #5b8ab5;
+}
+
+/* 待确认态：暖色警示，提示再次点击才会离开 */
+.hud-home.confirm {
+  color: #ffe1b8;
+  background: linear-gradient(180deg, rgba(150, 96, 24, 0.95), rgba(78, 47, 12, 0.96));
+  border-color: rgba(235, 160, 66, 0.8);
+  animation: hud-home-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hud-home-pulse {
+  50% {
+    box-shadow: 0 0 12px rgba(235, 160, 66, 0.45);
+  }
+}
+
+
 .hud-undo,
 .hud-toggle {
   padding: 5px 12px;
@@ -2136,9 +2180,11 @@ body.fx-off *::after {
 }
 
 @media (max-width: 1450px) {
-  .hud-top { top: 10px; max-width: 52vw; overflow: hidden; text-overflow: ellipsis; }
+  .hud-top { top: 10px; max-width: 44vw; overflow: hidden; text-overflow: ellipsis; }
   .hud-controls { top: 10px; right: 12px; }
+  .hud-left { top: 10px; left: 12px; }
   .hud-report-bug .bug-report-label { display: none; }
+  .hud-home span:last-child { display: none; }
   .hud-log { top: 50px; right: 12px; width: 276px; max-height: 46vh; }
   .question-collapsed { bottom: 10px; min-width: 320px; max-width: 64vw; }
   .board-hud .question { bottom: 10px; max-height: 42vh; }

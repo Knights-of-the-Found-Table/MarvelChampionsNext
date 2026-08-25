@@ -185,7 +185,7 @@ var messages = map[string]map[Lang]string{
 	"m.playPreemptive":                 {LangEn: "Play Preemptive Strike — cancel +%d boost icons", LangZh: "打出「先发制人」——取消 +%d 个增效图标"},
 	"m.playWarning":                    {LangEn: "Play Warning — reduce damage by 1", LangZh: "打出「预警」——伤害减少 1"},
 	"m.recover":                        {LangEn: "Recover (%d)", LangZh: "恢复（%d）"},
-	"m.takeAttack":                     {LangEn: "Take the attack", LangZh: "承受攻击"},
+	"m.takeAttack":                     {LangEn: "%s takes the attack (undefended)", LangZh: "%s 承受攻击（不防御）"},
 	"m.them":                           {LangEn: "them", LangZh: "该玩家"},
 	"m.threat":                         {LangEn: "%s — %d threat", LangZh: "%s — 威胁 %d"},
 	"m.threatMax":                      {LangEn: "%s — %d/%d threat", LangZh: "%s — 威胁 %d/%d"},

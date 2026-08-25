@@ -33,6 +33,26 @@ export default function Game() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const wsRef = useRef<WebSocket | null>(null)
   const overRef = useRef(false)
+  // 返回主页二次确认：第一次点击进入待确认态（按钮变为警示文案），
+  // 4 秒内再点一次才真正离开；超时自动取消。
+  const [confirmHome, setConfirmHome] = useState(false)
+  const homeTimer = useRef<number | null>(null)
+  useEffect(
+    () => () => {
+      if (homeTimer.current) window.clearTimeout(homeTimer.current)
+    },
+    [],
+  )
+  const askHome = () => {
+    if (confirmHome) {
+      if (homeTimer.current) window.clearTimeout(homeTimer.current)
+      navigate('/')
+      return
+    }
+    setConfirmHome(true)
+    if (homeTimer.current) window.clearTimeout(homeTimer.current)
+    homeTimer.current = window.setTimeout(() => setConfirmHome(false), 4000)
+  }
 
   useEffect(() => {
     initSfx()
@@ -236,6 +256,18 @@ export default function Game() {
       />
       <div className="board-hud">
         <ChatPanel gameId={gameId} incoming={chatMessage} />
+        {/* 左侧操作条：返回主页（二次确认）+ 报告 bug */}
+        <div className="hud-left">
+          <button
+            className={`hud-home ${confirmHome ? 'confirm' : ''}`}
+            onClick={askHome}
+            title={confirmHome ? t('game.backHomeConfirm') : t('game.backHome')}
+          >
+            <span aria-hidden="true">{confirmHome ? '⚠️' : '🏠'}</span>
+            <span>{confirmHome ? t('game.backHomeConfirm') : t('game.backHome')}</span>
+          </button>
+          <ReportBugButton className="hud-report-bug" />
+        </div>
         <div className="hud-top">
           <strong>{lname(zh, view.mainScheme?.code ?? '', view.scenario)}</strong>
           <span className="muted">· {t('game.round', { n: view.round })}</span>
@@ -251,7 +283,6 @@ export default function Game() {
         {error && <div className="error-toast">{error}</div>}
         <div className="hud-controls">
           <TutorialOverlay view={view} />
-          <ReportBugButton className="hud-report-bug" />
           <button
             className={`hud-toggle ${sfxOn ? 'on' : ''}`}
             onClick={toggleSfx}

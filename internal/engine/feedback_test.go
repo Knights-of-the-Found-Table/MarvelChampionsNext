@@ -85,6 +85,64 @@ func TestLegalPracticeDiscardsThenRemovesThreatPerCard(t *testing.T) {
 	}
 }
 
+// The defender question must always offer the attacked identity itself as
+// a card-highlighted "take the attack" choice — even when it cannot defend
+// (alter-ego form, exhausted) — while in hero form the actual defense
+// claims the identity-card highlight (listed before "take").
+func TestDefenderQuestionTakeChoiceHighlightsIdentity(t *testing.T) {
+	g := newRulesGame(t, 42)
+	p := g.Players[0]
+	p.Side = engine.SideAlterEgo
+	enemy := g.Enemies()[0]
+
+	q := g.AttackQuestion(enemy, 3, p, "attack")
+	var take *engine.Choice
+	for i := range q.Choices {
+		if q.Choices[i].ID == "take" {
+			take = &q.Choices[i]
+		}
+	}
+	if take == nil {
+		t.Fatal("defender question should always offer taking the attack")
+	}
+	if take.SourceID != p.ID {
+		t.Fatalf("take choice sourceId = %q, want the attacked player %q", take.SourceID, p.ID)
+	}
+	if take.CardCode != p.AlterEgoCode {
+		t.Fatalf("take choice cardCode = %q, want the alter-ego face %q", take.CardCode, p.AlterEgoCode)
+	}
+	if take.Kind != engine.ChoiceBasicPower {
+		t.Fatalf("take choice kind = %q, want basic_power so the board highlights the identity card", take.Kind)
+	}
+	for _, c := range q.Choices {
+		if c.ID == "hero-defend" {
+			t.Fatal("alter-ego form must not offer hero defense")
+		}
+	}
+
+	// Hero form: the defense option must come first so the board maps the
+	// identity card (same sourceId) to the defense, not to "take".
+	p.Side = engine.SideHero
+	q = g.AttackQuestion(enemy, 3, p, "attack")
+	takeIdx, defendIdx := -1, -1
+	for i, c := range q.Choices {
+		switch c.ID {
+		case "take":
+			takeIdx = i
+		case "hero-defend":
+			defendIdx = i
+		}
+	}
+	if defendIdx < 0 || takeIdx < 0 || defendIdx > takeIdx {
+		t.Fatalf("choice order: hero-defend=%d take=%d, want hero-defend before take", defendIdx, takeIdx)
+	}
+	hd := q.Choices[defendIdx]
+	if hd.SourceID != p.ID || hd.CardCode != p.HeroCode {
+		t.Fatalf("hero-defend sourceId=%q cardCode=%q, want the hero identity %q/%q",
+			hd.SourceID, hd.CardCode, p.ID, p.HeroCode)
+	}
+}
+
 // Klaw main scheme stage 1B (01116b): its When Revealed — discard
 // encounter cards until a minion is discarded, put it into play engaged
 // with the first player — must resolve during setup, right after the

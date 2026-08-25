@@ -76,6 +76,7 @@ export const en = {
   'games.join': 'Join',
   'status.lobby': 'Lobby',
   'status.started': 'Started',
+  'status.active': 'In progress',
   'status.finished': 'Finished',
 
   'game.round': 'Round {n}',
@@ -85,6 +86,7 @@ export const en = {
   'game.backHome': 'Back to games',
   'game.waitingFor': 'Waiting for {name}…',
   'game.undo': 'Undo',
+  'game.backHomeConfirm': 'Leave this game?',
   'game.stage': 'stage {label}',
   'game.hp': '{hp}/{max} HP',
   'game.atkSch': 'ATK {atk} · SCH {sch}',
@@ -230,6 +232,7 @@ export const zh: Record<MsgKey, string> = {
   'games.join': '加入',
   'status.lobby': '等待中',
   'status.started': '进行中',
+  'status.active': '进行中',
   'status.finished': '已结束',
 
   'game.round': '第 {n} 轮',
@@ -239,6 +242,7 @@ export const zh: Record<MsgKey, string> = {
   'game.backHome': '返回对局首页',
   'game.waitingFor': '等待 {name}…',
   'game.undo': '撤销',
+  'game.backHomeConfirm': '确认离开对局？',
   'game.stage': '阶段 {label}',
   'game.hp': '{hp}/{max} 生命',
   'game.atkSch': '攻击 {atk} · 密谋 {sch}',
