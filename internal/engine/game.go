@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -810,7 +811,22 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 			msgs = append(msgs, RunAbility{Player: playerID, Source: src.EID(), Index: idx})
 			return msgs, nil
 		}
-		return nil, fmt.Errorf("payment context missing target")
+		// Unrouted payment (goblin Intimidation, Sonic Boom, Trouble in
+		// Otherworld, Running Interference): the selection itself is the
+		// whole effect — spend the chosen resources. Any post-payment
+		// consequence rides on the parent choice's own messages
+		// (chainMsgs), e.g. ObligationResolve for Trouble in Otherworld.
+		var paidCards []Card
+		for _, id := range paidIDs {
+			if c, ok := p.Hand.Find(id); ok {
+				paidCards = append(paidCards, c)
+			}
+		}
+		out := exhausts
+		if len(paidCards) > 0 {
+			out = append(out, ResourcePay{Player: playerID, Cards: paidCards})
+		}
+		return out, nil
 	}
 	for _, c := range choices {
 		_ = c
@@ -966,15 +982,15 @@ func checkIconRequirements(icons []string, spec string) error {
 		pool[ic]++
 	}
 	for _, part := range strings.Fields(spec) {
-		var icon string
-		var n int
-		if _, err := fmt.Sscanf(part, "%[^:]:%d", &icon, &n); err != nil || n <= 0 {
+		icon, ns, ok := strings.Cut(part, ":")
+		n, err := strconv.Atoi(ns)
+		if !ok || err != nil || icon == "" || n <= 0 {
 			return fmt.Errorf("bad icon requirement %q", part)
 		}
 		use := min(n, pool[icon])
 		pool[icon] -= use
 		if n-use > wilds {
-			return fmt.Errorf("need %d [%s] resources among the payment", n-use+use, icon)
+			return fmt.Errorf("need %d [%s] resources among the payment", n, icon)
 		}
 		wilds -= n - use
 	}

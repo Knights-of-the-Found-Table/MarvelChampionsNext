@@ -82,6 +82,9 @@ export interface Question {
   promptArgs?: ArgWire[]
   choices: Choice[]
   n?: number
+  // Structured icon requirements for payment questions (mirror of the
+  // server's abilityIcons spec); drives the "x/y paid" tracker.
+  payIcons?: Array<{ icon: string; n: number }>
 }
 
 export interface Choice {
@@ -93,6 +96,9 @@ export interface Choice {
   sourceId?: string
   disabled?: boolean
   then?: Question
+  // Resource icons this choice contributes toward a payment (server data;
+  // never parsed back out of the rendered label).
+  icons?: string[]
 }
 
 export interface VillainView {

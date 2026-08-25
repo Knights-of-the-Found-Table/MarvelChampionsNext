@@ -42,6 +42,12 @@ import (
 //    的文本 inherently 脆弱（参数值与格式串歧义、旧存档、嵌套消息都会破），
 //    且无法表达结构化参数。翻译必须在产出点以键完成。
 //  - 严禁依赖渲染后的 Prompt/Label 文本做逻辑判断；用 PromptKey/Choice.ID。
+//    同理严禁游戏逻辑解析卡面印刷文本（def.Text 的 regex/子串匹配——见
+//    paymentIconSpec/hinderRE/boostSpawnsMinion 的三次教训）：印刷数值与
+//    关键词在 data 层加载时解析一次成结构化字段（CardDef.Keywords、
+//    BoostEntersPlay 等），逻辑只读字段。支付图标的线上形态是
+//    Question.PayIcons / Choice.Icons / ctx["abilityIcons"]，前端绝不
+//    反向解析渲染文本。
 //  - 严禁把用户语言渲染进存储或 API（旧存档中的 en 文本按原样显示即可）。
 //
 // 【目录】i18n_catalog.go（手写核心文案）+ i18n_cards_catalog.go（卡牌包批量

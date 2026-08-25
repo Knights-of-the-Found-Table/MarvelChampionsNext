@@ -38,11 +38,21 @@ type CardDef struct {
 	Cost   *int `json:"cost,omitempty"`
 	Unique bool `json:"unique"`
 
-	Traits   []string  `json:"traits,omitempty"`
+	Traits []string `json:"traits,omitempty"`
+	// Keywords are the structured form of printed keywords/rules riders
+	// (Guard, Retaliate 2, Hinder 3, ...). 游戏逻辑严禁解析 Text 做判断
+	// （regex/子串匹配印刷文本一律禁止，参见 engine/i18n.go 的 i18n 规约）：
+	// 需要读取印刷信息时，在 normalize 的加载期解析一次成这里的结构化
+	// 字段，逻辑只读字段。
 	Keywords []Keyword `json:"keywords,omitempty"`
 
 	// Resources lists printed resource icons: energy, physical, mental, wild.
 	Resources []string `json:"resources,omitempty"`
+
+	// BoostEntersPlay marks the "Boost: put this card into play" rider:
+	// revealed as a boost card, it enters play instead of adding boost
+	// icons (parsed at load, never re-matched on Text).
+	BoostEntersPlay bool `json:"boostEntersPlay,omitempty"`
 
 	Text      string `json:"text,omitempty"`
 	Quantity  int    `json:"quantity,omitempty"`
@@ -150,12 +160,14 @@ type rawCard struct {
 }
 
 var (
-	tagRE      = regexp.MustCompile(`</?[a-zA-Z][^>]*>`)
-	retalRE    = regexp.MustCompile(`^Retaliate (\d+)`)
-	keywordSet = []string{"Guard", "Toughness", "Quickstrike", "Surge", "Patrol", "Hazards", "ErrandOfMercy"}
-	romanRE    = regexp.MustCompile(`^(?i)([IVX]+)(?:([A-Z])|\d)?$`)
-	plainNumRE = regexp.MustCompile(`^(\d+)(?:([A-Z])|\d)?$`)
-	letterRE   = regexp.MustCompile(`^([A-Z])(\d)?$`)
+	tagRE       = regexp.MustCompile(`</?[a-zA-Z][^>]*>`)
+	retalRE     = regexp.MustCompile(`^Retaliate (\d+)`)
+	hinderValRE = regexp.MustCompile(`Hinder (\d+)`)
+	boostSelfRE = regexp.MustCompile(`(?i)boost: put this (?:card|minion) into play`)
+	keywordSet  = []string{"Guard", "Toughness", "Quickstrike", "Surge", "Patrol", "Hazards", "ErrandOfMercy"}
+	romanRE     = regexp.MustCompile(`^(?i)([IVX]+)(?:([A-Z])|\d)?$`)
+	plainNumRE  = regexp.MustCompile(`^(\d+)(?:([A-Z])|\d)?$`)
+	letterRE    = regexp.MustCompile(`^([A-Z])(\d)?$`)
 )
 
 // parseStage converts marvelcdb stage markers ("1", "I", "2A", "B1") into a
@@ -289,6 +301,18 @@ func normalize(def *CardDef, raw rawCard) {
 	def.Traits = parseTraits(raw.Traits)
 	def.Keywords = parseKeywords(raw.Text)
 
+	// Riders the game logic keys on, parsed once at load. Hinder is
+	// deliberately unanchored: Standard/Expert-mode side schemes print a
+	// "Standard Mode Only." preamble before "Hinder 3", so the
+	// leading-keyword strip in parseKeywords would miss them.
+	if m := hinderValRE.FindStringSubmatch(raw.Text); m != nil {
+		v, _ := strconv.Atoi(m[1])
+		def.Keywords = append(def.Keywords, Keyword{Name: "Hinder", Value: v})
+	}
+	// "Boost:</b> Put this card into play" — tags stripped before matching
+	// (the literal text carries a bold tag between "Boost:" and "Put").
+	def.BoostEntersPlay = boostSelfRE.MatchString(tagRE.ReplaceAllString(raw.Text, ""))
+
 	// Preserve printed resource multiplicity. Basic resource cards such as
 	// Energy/Genius/Strength carry two copies of the same icon; collapsing the
 	// count here makes each of them pay for only one resource.
@@ -356,6 +380,17 @@ func (c *CardDef) HasKeyword(name string) bool {
 		}
 	}
 	return false
+}
+
+// KeywordValue returns the printed value of a numeric keyword (Retaliate 2,
+// Hinder 3, ...); 0 when the keyword is absent or carries no number.
+func (c *CardDef) KeywordValue(name string) int {
+	for _, k := range c.Keywords {
+		if strings.EqualFold(k.Name, name) {
+			return k.Value
+		}
+	}
+	return 0
 }
 
 func (c *CardDef) String() string {

@@ -399,8 +399,9 @@ func registerValkyrie() {
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
 				engine.Tf("c.troubleInOtherworldSpendEnergyMentalToRemoveIt"),
 				engine.Choice{ID: "pay", Label: engine.Tf("c.spendEnergyMental"), Kind: engine.ChoiceLabel}.
+					Msgs(engine.ObligationResolve{Player: p.ID, Card: card}).
 					WithThen(g.CustomPaymentQuestion(p, 2, engine.S("Spend 1 [energy] and 1 [mental]"),
-						map[string]any{"player": p.ID.String(), "obligationIcons": "energy:1 mental:1", "obligationCard": card.ID})),
+						map[string]any{"player": p.ID.String(), "abilityIcons": "energy:1 mental:1"})),
 				engine.Choice{ID: "keep", Label: engine.Tf("c.keepItInPlay"), Kind: engine.ChoicePass},
 			)}}
 		},

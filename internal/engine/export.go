@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
@@ -80,8 +79,11 @@ func (g *Game) AttackQuestion(attackerID EntityID, atk int, p *Player, trigger s
 }
 
 // CustomPaymentQuestion builds a validated payment prompt for card-defined
-// flows (Make the Call). Context key "makeCallFrom"/"makeCallCard" routes
-// the payment to an AllyEntersPlayFree message.
+// flows (Make the Call). Context key "makeCallFrom"/"makeCallCard" routes the
+// payment to an AllyEntersPlayFree message. Icon constraints are data, not
+// prose: callers pass the same CostIcons spec string abilityPaymentQuestion
+// uses ("energy:1 mental:1") via ctx["abilityIcons"]; the prompt text is
+// never parsed for game rules.
 func (g *Game) CustomPaymentQuestion(p *Player, cost int, prompt Msg, ctx map[string]any) *Question {
 	q := &Question{Type: "choose_n"}
 	q.SetPrompt(prompt)
@@ -91,44 +93,12 @@ func (g *Game) CustomPaymentQuestion(p *Player, cost int, prompt Msg, ctx map[st
 		ctx = map[string]any{}
 	}
 	ctx["player"] = p.ID.String()
-	if ctx["abilityIcons"] == nil {
-		if icons := paymentIconSpec(prompt.Text); icons != "" {
-			ctx["abilityIcons"] = icons
-		}
-	}
 	q.Context = ctx
+	if spec, ok := ctx["abilityIcons"].(string); ok && spec != "" {
+		q.PayIcons = iconReqs(spec)
+	}
 	q.assignIDs("")
 	return q
-}
-
-// paymentIconSpec extracts icon-specific requirements from legacy prompt
-// text such as "pay [energy] [mental] [physical]". Card packages written
-// before CostIcons existed encode the requirement only in prose; keeping this
-// bridge here makes their payments rules-correct without touching game logic.
-var paymentIconRE = regexp.MustCompile(`\[(energy|mental|physical|wild)\]`)
-
-func paymentIconSpec(text string) string {
-	matches := paymentIconRE.FindAllStringSubmatch(text, -1)
-	if len(matches) == 0 {
-		return ""
-	}
-	counts := map[string]int{}
-	var order []string
-	for _, m := range matches {
-		icon := m[1]
-		if counts[icon] == 0 {
-			order = append(order, icon)
-		}
-		counts[icon]++
-	}
-	var out string
-	for _, icon := range order {
-		if out != "" {
-			out += " "
-		}
-		out += fmt.Sprintf("%s:%d", icon, counts[icon])
-	}
-	return out
 }
 
 // EOwnerIfPlayer resolves a side scheme's reveal "owner" to a player:

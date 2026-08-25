@@ -9,37 +9,6 @@ function usePromptText(q: Question): string {
   return em({ key: q.promptKey, args: q.promptArgs, text: q.prompt ?? '' })
 }
 
-const iconAliases: Record<string, string> = {
-  energy: 'energy',
-  '能量': 'energy',
-  mental: 'mental',
-  '精神': 'mental',
-  physical: 'physical',
-  '物理': 'physical',
-  wild: 'wild',
-  '万用': 'wild',
-}
-
-function iconRequirements(prompt: string): Array<{ icon: string; n: number }> {
-  const out = new Map<string, number>()
-  const re = /\[(energy|mental|physical|wild|能量|精神|物理|万用)\]/g
-  for (const match of prompt.matchAll(re)) {
-    const icon = iconAliases[match[1]]
-    if (icon) out.set(icon, (out.get(icon) ?? 0) + 1)
-  }
-  return [...out.entries()].map(([icon, n]) => ({ icon, n }))
-}
-
-function iconsInLabel(label: string): string[] {
-  const out: string[] = []
-  const re = /\[(energy|mental|physical|wild|能量|精神|物理|万用)\]/g
-  for (const match of label.matchAll(re)) {
-    const icon = iconAliases[match[1]]
-    if (icon) out.push(icon)
-  }
-  return out
-}
-
 interface Props {
   current: Question
   selected: Set<string>
@@ -82,16 +51,17 @@ function ChoiceButton({
 export default function QuestionPanel({ current, selected, onPick, onBack, onConfirm, open, onToggle }: Props) {
   const t = useT()
   const promptText = usePromptText(current)
-  const labelOf = useChoiceLabel()
 
   const isMulti = current.type === 'choose_n'
   const need = current.n ?? 1
-  const requiredIcons = iconRequirements(promptText)
+  // 图标需求/贡献全部来自服务端结构化字段（question.payIcons /
+  // choice.icons），绝不解析渲染后的提示或标签文本。
+  const requiredIcons = current.payIcons ?? []
   const selectedIcons = new Map<string, number>()
   if (requiredIcons.length > 0) {
     for (const c of current.choices) {
       if (!selected.has(c.id)) continue
-      for (const icon of iconsInLabel(labelOf(c))) selectedIcons.set(icon, (selectedIcons.get(icon) ?? 0) + 1)
+      for (const icon of c.icons ?? []) selectedIcons.set(icon, (selectedIcons.get(icon) ?? 0) + 1)
     }
   }
   const missingIcons = requiredIcons.filter(({ icon, n }) => (selectedIcons.get(icon) ?? 0) < n)

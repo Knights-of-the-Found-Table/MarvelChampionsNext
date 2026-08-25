@@ -372,13 +372,14 @@ func (g *Game) resourcePayChoices(p *Player, self *Card, targetDef *data.CardDef
 		}
 		out = append(out, Choice{
 			Label: S(label), Kind: ChoiceResource, CardCode: def.Code, SourceID: EntityID(c.ID),
+			Icons: def.Resources,
 		}.Msgs(ResourcePayStub{Card: c}))
 	}
 	for _, src := range g.resourceProducers(p, targetDef) {
 		ra := behavior(src.ECode()).Resource
 		out = append(out, Choice{
-			Label: Tf("m.generate", src, ra.Icon),
-			Kind:  ChoiceAbility, SourceID: src.EID(), CardCode: src.ECode(),
+			Label: Tf("m.generate", src, ra.Icon), Kind: ChoiceAbility, SourceID: src.EID(), CardCode: src.ECode(),
+			Icons: []string{ra.Icon},
 		}.Msgs(AbilityPayStub{Source: src.EID(), Icon: ra.Icon}))
 	}
 	return out
@@ -418,6 +419,7 @@ func (g *Game) abilityPaymentQuestion(p *Player, src Entity, idx int, ab Ability
 	q.Context = map[string]any{"abilitySource": src.EID().String(), "abilityIndex": idx, "player": p.ID.String()}
 	if ab.CostIcons != "" {
 		q.Context["abilityIcons"] = ab.CostIcons
+		q.PayIcons = iconReqs(ab.CostIcons)
 	}
 	return q
 }

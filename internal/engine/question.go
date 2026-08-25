@@ -3,6 +3,8 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 // Question models a prompt shown to a player. The client renders the choice
@@ -26,8 +28,37 @@ type Question struct {
 	// selection, e.g. "payment:3" (total resource icons >= 3).
 	Validate string `json:"validate,omitempty"`
 	// Context carries arbitrary JSON data needed to resolve validated
-	// selections (payment target card/ability...).
+	// selections (payment target card/ability...). payment:* questions keep
+	// their icon constraint here under "abilityIcons" ("energy:1 mental:1").
 	Context map[string]any `json:"context,omitempty"`
+
+	// PayIcons is the display twin of Context["abilityIcons"]: the per-icon
+	// requirement a payment selection must satisfy. Validation still reads
+	// the context spec; this field exists so clients never have to parse
+	// prompt or label text (see i18n.go).
+	PayIcons []IconReq `json:"payIcons,omitempty"`
+}
+
+// IconReq is one icon requirement of a payment ("1 energy").
+type IconReq struct {
+	Icon string `json:"icon"`
+	N    int    `json:"n"`
+}
+
+// iconReqs parses a CostIcons spec ("energy:1 mental:1 physical:1") into
+// structured requirements. Malformed parts are skipped; the spec is engine
+// data, never user-visible prose.
+func iconReqs(spec string) []IconReq {
+	var out []IconReq
+	for _, part := range strings.Fields(spec) {
+		icon, ns, ok := strings.Cut(part, ":")
+		n, err := strconv.Atoi(ns)
+		if !ok || err != nil || n <= 0 || icon == "" {
+			continue
+		}
+		out = append(out, IconReq{Icon: icon, N: n})
+	}
+	return out
 }
 
 // Choice kinds drive frontend styling.
@@ -52,6 +83,11 @@ type Choice struct {
 	SourceID EntityID  `json:"sourceId,omitempty"`
 	Disabled bool      `json:"disabled,omitempty"`
 	Then     *Question `json:"then,omitempty"`
+
+	// Icons lists the resource icons this choice contributes toward a
+	// payment (resource-paying choices). Display-only twin of the
+	// ResourcePayStub/AbilityPayStub payloads the server validates on.
+	Icons []string `json:"icons,omitempty"`
 
 	// msgs are enqueued when this leaf choice is picked.
 	msgs []Message `json:"-"`
@@ -128,6 +164,7 @@ func copyQuestion(q *Question) *Question {
 		Choices:    make([]Choice, len(q.Choices)),
 		N:          q.N,
 		Validate:   q.Validate,
+		PayIcons:   q.PayIcons,
 	}
 	if q.Context != nil {
 		out.Context = make(map[string]any, len(q.Context))

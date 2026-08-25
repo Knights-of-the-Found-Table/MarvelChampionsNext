@@ -888,12 +888,7 @@ func retaliateOf(g *Game, e Entity) int {
 
 // printedRetaliate reads the printed Retaliate keyword value.
 func printedRetaliate(def *data.CardDef) int {
-	for _, k := range def.Keywords {
-		if k.Name == "Retaliate" {
-			return k.Value
-		}
-	}
-	return 0
+	return def.KeywordValue("Retaliate")
 }
 
 // Defense returns the ally's printed defense (allies defend with DEF).

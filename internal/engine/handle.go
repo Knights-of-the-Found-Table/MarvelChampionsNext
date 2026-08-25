@@ -2,8 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -572,7 +570,7 @@ func (g *Game) handle(msg Message) {
 				if c.FaceDown {
 					c.FaceDown = false
 					def := c.Def()
-					if boostSpawnsMinion(def) {
+					if def.BoostEntersPlay {
 						// "Boost: put this card into play" — spawn it
 						// instead of contributing boost icons.
 						g.tlogMajorf("log.boostEnters", def.Name)
@@ -2075,7 +2073,7 @@ func (g *Game) dealMinionBoost(mn *Minion) {
 		return
 	}
 	def := c.Def()
-	if boostSpawnsMinion(def) {
+	if def.BoostEntersPlay {
 		g.tlogMajorf("log.boostEnters", def.Name)
 		g.Push(RevealEncounterCard{Player: g.boostSpawnTarget(nil), Card: c})
 		return
@@ -2888,32 +2886,19 @@ func (g *Game) advanceVillainStage(id EntityID) {
 	}
 }
 
-// boostSpawnsMinion reports the "Boost: put this card into play" rider.
-func boostSpawnsMinion(def *data.CardDef) bool {
-	if def.Type != "minion" && def.Type != "side_scheme" {
-		return false
-	}
-	return strings.Contains(def.Text, "Boost: Put") || strings.Contains(def.Text, "Boost: put")
-}
-
 // hinderTotal sums the printed Hinder values of side schemes in play
-// (per hero; parsed from the text — Hinder is not in the keyword
-// whitelist).
+// (per hero). Hinder is parsed into Keywords at data load; logic never
+// re-reads the printed text.
 func (g *Game) hinderTotal() int {
 	total := 0
 	for _, s := range g.SideSchemes {
 		if s == nil || s.PlayerSide {
 			continue
 		}
-		if m := hinderRE.FindStringSubmatch(s.EDef().Text); m != nil {
-			v, _ := strconv.Atoi(m[1])
-			total += v * len(g.Players)
-		}
+		total += s.EDef().KeywordValue("Hinder") * len(g.Players)
 	}
 	return total
 }
-
-var hinderRE = regexp.MustCompile(`Hinder (\d+)`)
 
 // handCardHolding finds the first player holding a card with one of the
 // given base codes in hand (interrupt-event windows).

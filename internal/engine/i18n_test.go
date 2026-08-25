@@ -117,16 +117,6 @@ func TestResourcePayment(t *testing.T) {
 	}
 }
 
-func TestPaymentIconSpecFromLegacyPrompt(t *testing.T) {
-	got := paymentIconSpec("Sonic Boom: pay [energy] [mental] [physical] or exhaust all your characters")
-	if got != "energy:1 mental:1 physical:1" {
-		t.Fatalf("paymentIconSpec = %q", got)
-	}
-	if got := paymentIconSpec("Pay 2 resources"); got != "" {
-		t.Fatalf("generic prompt should not create an icon spec: %q", got)
-	}
-}
-
 // TestI18nFallback 缺失的键回退键名本身（gettext 惯例）。
 func TestI18nFallback(t *testing.T) {
 	if got := Tf("no.such.key"); got.Text != "no.such.key" {

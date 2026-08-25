@@ -326,7 +326,7 @@ func registerRemainingEncounterCards() {
 	engine.RegisterBehavior("01123", &engine.Behavior{
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			pay := g.CustomPaymentQuestion(p, 3, engine.S("Sonic Boom: pay [energy] [mental] [physical] or exhaust all your characters"),
-				map[string]any{"player": p.ID.String(), "sonicBoomExhaust": true})
+				map[string]any{"player": p.ID.String(), "abilityIcons": "energy:1 mental:1 physical:1"})
 			exhaustAll := func() []engine.Message {
 				var msgs []engine.Message
 				msgs = append(msgs, engine.ExhaustEntity{ID: p.ID})
