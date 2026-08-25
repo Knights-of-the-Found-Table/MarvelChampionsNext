@@ -52,6 +52,8 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("POST /api/v1/marvel/games/{id}/undo", s.auth(s.handleUndo))
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/replay", s.auth(s.handleReplay))
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/pile", s.auth(s.handlePileList))
+	mux.HandleFunc("GET /api/v1/marvel/games/{id}/chat", s.handleChatHistory)
+	mux.HandleFunc("POST /api/v1/marvel/games/{id}/chat", s.auth(s.handleChatSend))
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/stream", s.handleStream)
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {

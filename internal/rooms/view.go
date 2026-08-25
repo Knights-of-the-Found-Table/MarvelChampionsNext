@@ -232,7 +232,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			HeroName:     engine.DB.MustLookup(p.HeroCode).Name,
 			AlterEgoName: engine.DB.MustLookup(p.AlterEgoCode).Name,
 			HP: max(0, p.HP()), MaxHP: p.MaxHP,
-			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough,
+			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough > 0,
 			FirstPlayer: p.FirstPlayer, KOed: p.KOed, FormChanged: p.FormChanged,
 			HandSize: len(p.Hand), DeckCount: len(p.Deck), DiscardCount: len(p.Discard), EncounterDown: len(p.EncounterDown),
 			SenseDeckCount: len(p.SenseDeck),

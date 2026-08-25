@@ -530,6 +530,11 @@ func (g *Game) enemyChoices(dmg int) []Choice {
 	}
 	for _, id := range sortedIDs(g.Minions) {
 		mn := g.Minions[id]
+		// Venomous Whispers (62030): each Serpent Society minion cannot be
+		// attacked while the side scheme is in play.
+		if mn.EDef().HasTrait("serpent society") && g.sideSchemeInPlay("62030") {
+			continue
+		}
 		out = append(out, Choice{
 			Label: Tf("m.hp", mn.EDef().Name, mn.HP(), mn.MaxHP),
 			Kind:  ChoiceTarget, SourceID: mn.ID, CardCode: mn.Code,
@@ -579,6 +584,11 @@ func (g *Game) enemyChoicesForAlly(a *Ally) []Choice {
 	}
 	for _, id := range sortedIDs(g.Minions) {
 		mn := g.Minions[id]
+		// Venomous Whispers (62030): each Serpent Society minion cannot be
+		// attacked while the side scheme is in play.
+		if mn.EDef().HasTrait("serpent society") && g.sideSchemeInPlay("62030") {
+			continue
+		}
 		out = append(out, allyAttackChoice(
 			Tf("m.hp", mn.EDef().Name, mn.HP(), mn.MaxHP), mn.ID, mn.Code,
 			consequential(mn.ID), needsDiscard, a, p))

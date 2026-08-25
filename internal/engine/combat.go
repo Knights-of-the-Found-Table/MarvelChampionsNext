@@ -385,7 +385,7 @@ func (g *Game) eventBonusFor(n int, source EntityID, kind string) (int, bool) {
 	return n + bonus, true
 }
 
-func (g *Game) damage(id EntityID, n int, source EntityID) {
+func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 	if n <= 0 {
 		return
 	}
@@ -529,59 +529,62 @@ func (g *Game) damage(id EntityID, n int, source EntityID) {
 		if e == nil {
 			return
 		}
-		// Identity-level prevention (Groot's growth counters).
-		if hook := behavior(e.HeroCode).IdentityDamagePrevention; hook != nil {
-			if pv := hook(g, e, n); pv > 0 {
-				n -= pv
+		if !unpreventable {
+			// Identity-level prevention (Groot's growth counters).
+			if hook := behavior(e.HeroCode).IdentityDamagePrevention; hook != nil {
+				if pv := hook(g, e, n); pv > 0 {
+					n -= pv
+					if n <= 0 {
+						return
+					}
+				}
+			}
+			// Automatic damage prevention from upgrades (Energy Barrier;
+			// approximation: auto-used, reflection hits the first enemy).
+			prevented := 0
+			for _, id := range e.Upgrades {
+				u := g.Upgrades[id]
+				if u == nil {
+					continue
+				}
+				hook := behavior(u.Code).DamagePrevention
+				if hook == nil {
+					continue
+				}
+				pv, refl := hook(g, u, e, n-prevented)
+				prevented += pv
+				if refl > 0 {
+					// Prefer reflecting at the damage source, else the
+					// first enemy.
+					target := source
+					if !(source.Is(KindVillain) || source.Is(KindMinion)) {
+						if enemies := sortedIDs(g.Minions); len(enemies) > 0 {
+							target = enemies[0]
+						} else if vids := sortedIDs(g.Villains); len(vids) > 0 {
+							target = vids[0]
+						}
+					}
+					if target != "" {
+						g.Push(DamageEntity{Target: target, Damage: refl, Source: e.ID})
+					}
+				}
+				if prevented >= n {
+					break
+				}
+			}
+			if prevented > 0 {
+				n -= prevented
+				g.tlogf("log.preventsDamage", e.Name, prevented)
 				if n <= 0 {
 					return
 				}
 			}
-		}
-		// Automatic damage prevention from upgrades (Energy Barrier;
-		// approximation: auto-used, reflection hits the first enemy).
-		prevented := 0
-		for _, id := range e.Upgrades {
-			u := g.Upgrades[id]
-			if u == nil {
-				continue
-			}
-			hook := behavior(u.Code).DamagePrevention
-			if hook == nil {
-				continue
-			}
-			pv, refl := hook(g, u, e, n-prevented)
-			prevented += pv
-			if refl > 0 {
-				// Prefer reflecting at the damage source, else the
-				// first enemy.
-				target := source
-				if !(source.Is(KindVillain) || source.Is(KindMinion)) {
-					if enemies := sortedIDs(g.Minions); len(enemies) > 0 {
-						target = enemies[0]
-					} else if vids := sortedIDs(g.Villains); len(vids) > 0 {
-						target = vids[0]
-					}
-				}
-				if target != "" {
-					g.Push(DamageEntity{Target: target, Damage: refl, Source: e.ID})
-				}
-			}
-			if prevented >= n {
-				break
-			}
-		}
-		if prevented > 0 {
-			n -= prevented
-			g.tlogf("log.preventsDamage", e.Name, prevented)
-			if n <= 0 {
+			if e.Tough > 0 {
+				e.Tough--
+				g.Push(ToughDiscarded{Target: id})
+				g.tlogf("log.toughPrevents", e.Name)
 				return
 			}
-		}
-		if e.Tough {
-			e.Tough = false
-			g.tlogf("log.toughPrevents", e.Name)
-			return
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
@@ -699,6 +702,63 @@ func (g *Game) heal(id EntityID, n int) {
 
 // ---------------------------------------------------------------- status
 
+// giveTough adds a tough status card to the target. Identities with the
+// UnlimitedTough behavior (Luke Cage) may stack any number; everyone else
+// caps at one.
+func (g *Game) giveTough(id EntityID) {
+	switch e := g.Entity(id).(type) {
+	case *Player:
+		if behavior(e.HeroCode).UnlimitedTough || e.Tough == 0 {
+			e.Tough++
+		}
+	case *Villain:
+		e.Tough = true
+	case *Minion:
+		e.Tough = true
+	case *Ally:
+		e.Tough = true
+	}
+	g.emit(Evt{Type: "status", Dst: id, Status: "tough", On: true})
+	g.tlogf("log.gainsStatus", id, "tough")
+}
+
+// discardTough removes one tough status card from the target without damage
+// prevention, announcing the discard so Luke Cage's forced response and
+// other "after a tough is discarded" effects can react.
+func (g *Game) discardTough(id EntityID) {
+	switch e := g.Entity(id).(type) {
+	case *Player:
+		if e.Tough > 0 {
+			e.Tough--
+			g.Push(ToughDiscarded{Target: id})
+		}
+	case *Villain:
+		e.Tough = false
+	case *Minion:
+		e.Tough = false
+	case *Ally:
+		e.Tough = false
+	}
+}
+
+// discardAllTough removes every tough status card from the target, one
+// discard announcement per card removed.
+func (g *Game) discardAllTough(id EntityID) {
+	switch e := g.Entity(id).(type) {
+	case *Player:
+		for e.Tough > 0 {
+			e.Tough--
+			g.Push(ToughDiscarded{Target: id})
+		}
+	case *Villain:
+		e.Tough = false
+	case *Minion:
+		e.Tough = false
+	case *Ally:
+		e.Tough = false
+	}
+}
+
 func (g *Game) setStatus(id EntityID, status string, on bool) {
 	switch e := g.Entity(id).(type) {
 	case *Player:
@@ -708,7 +768,12 @@ func (g *Game) setStatus(id EntityID, status string, on bool) {
 		case "confused":
 			e.Confused = on
 		case "tough":
-			e.Tough = on
+			if on {
+				g.giveTough(id)
+			} else {
+				g.discardTough(id)
+			}
+			return
 		}
 	case *Villain:
 		switch status {

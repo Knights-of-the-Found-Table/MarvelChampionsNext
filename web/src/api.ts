@@ -188,6 +188,16 @@ export interface LogEntry {
   text: string
 }
 
+// Public table talk; separate from LogEntry and never part of game state.
+export interface ChatMessage {
+  id: number
+  at: number
+  userId: string
+  name: string
+  text: string
+  spectator: boolean
+}
+
 export interface GameView {
   id: number
   name: string

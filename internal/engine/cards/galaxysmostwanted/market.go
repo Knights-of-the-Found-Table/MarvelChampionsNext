@@ -122,7 +122,7 @@ func registerMarket() {
 				return nil
 			}
 			var picks []engine.Choice
-			if p.Tough {
+			if p.Tough > 0 {
 				picks = append(picks, engine.Choice{
 					ID: "tough", Label: "Remove your tough → 3 damage to an enemy", Kind: engine.ChoiceLabel,
 				}.Msgs())

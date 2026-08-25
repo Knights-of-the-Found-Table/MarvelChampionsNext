@@ -33,7 +33,10 @@ type Player struct {
 	Exhausted bool `json:"exhausted"`
 	Stunned   bool `json:"stunned"`
 	Confused  bool `json:"confused"`
-	Tough     bool `json:"tough"`
+	// Tough counts the tough status cards on this identity. Identities
+	// without the UnlimitedTough behavior hold at most one; Luke Cage's
+	// Unbreakable Skin lets him stack any number.
+	Tough int `json:"tough"`
 
 	Deck    CardList `json:"deck"`
 	Hand    CardList `json:"hand"`

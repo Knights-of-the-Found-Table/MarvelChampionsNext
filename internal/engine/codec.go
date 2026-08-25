@@ -31,6 +31,7 @@ func init() {
 		AskMinionOrder{}, AskAttack{}, OtherDefenders{}, AskOtherAction{}, SchemeThreat{},
 		ThwartScheme{}, DamageEntity{}, HealEntity{}, StunEntity{},
 		ConfuseEntity{}, ToughEntity{}, ClearStun{}, ClearConfuse{}, ClearTough{},
+		ClearAllTough{}, ToughDiscarded{},
 		Defends{}, DealBoost{}, RevealBoost{}, ClearBoosts{},
 		RevealEncounterCard{}, VillainDefeated{}, AdvanceVillainStage{},
 		MinionDefeated{}, MainSchemeMaxed{}, SchemeDefeated{},

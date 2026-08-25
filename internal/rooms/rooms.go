@@ -20,6 +20,7 @@ type Room struct {
 	// owners maps player entity id -> user id ("").
 	owners map[string]string
 	subs   map[chan []byte]string // channel -> viewer user id ("" = spectator)
+	chat   []ChatMessage
 }
 
 type Manager struct {

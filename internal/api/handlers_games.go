@@ -230,7 +230,8 @@ func (s *Server) handleUndo(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view)
 }
 
-func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request) {	gameID, err := pathID(r)
+func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request) {
+	gameID, err := pathID(r)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, "invalid game id")
 		return
@@ -312,6 +313,56 @@ func (s *Server) handleStream(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+// handleChatHistory returns the room's recent public table-talk messages.
+func (s *Server) handleChatHistory(w http.ResponseWriter, r *http.Request) {
+	gameID, err := pathID(r)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid game id")
+		return
+	}
+	messages, err := s.Rooms.ChatHistory(gameID)
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "game not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"messages": messages})
+}
+
+// handleChatSend appends an authenticated message and broadcasts it through
+// the existing per-game WebSocket stream. Chat never changes game state, so
+// it bypasses answers, persistence, and undo snapshots by design.
+func (s *Server) handleChatSend(w http.ResponseWriter, r *http.Request) {
+	gameID, err := pathID(r)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid game id")
+		return
+	}
+	var req struct {
+		Text string `json:"text"`
+	}
+	if err := jsonDecode(r, &req); err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+	userID := userID(r)
+	var uid int64
+	if _, err := fmt.Sscanf(userID, "%d", &uid); err != nil {
+		writeErr(w, http.StatusUnauthorized, "invalid user")
+		return
+	}
+	user, err := s.Store.UserByID(uid)
+	if err != nil {
+		writeErr(w, http.StatusUnauthorized, "invalid user")
+		return
+	}
+	msg, err := s.Rooms.Chat(gameID, userID, user.Username, req.Text)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"message": msg})
 }
 
 // handlePileList serves the contents of a deck or discard pile for the pile

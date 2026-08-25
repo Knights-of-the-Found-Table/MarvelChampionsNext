@@ -131,6 +131,10 @@ type Behavior struct {
 	// Identity: damage prevention from identity counters (Groot's
 	// growth counters); returns the amount prevented.
 	IdentityDamagePrevention func(g *Game, p *Player, n int) int
+	// UnlimitedTough lets the identity hold any number of tough status
+	// cards (Luke Cage's Unbreakable Skin). Identities without it cap at
+	// a single tough status card, the classic boolean semantics.
+	UnlimitedTough bool
 	// Upgrade: offered in the defense prompt as a substitute defense
 	// (Bamf! — defend without exhausting); returns the Defends payload
 	// (Via is filled in by the engine) plus extra messages.

@@ -159,6 +159,10 @@ type (
 		Target EntityID
 		Damage int
 		Source EntityID
+		// Unpreventable deals the damage ignoring tough status cards and
+		// damage-prevention effects (Luke Cage's forced response, Internal
+		// Injury).
+		Unpreventable bool
 	}
 	HealEntity struct {
 		Target EntityID
@@ -172,6 +176,13 @@ type (
 	// ClearTough discards a tough status card without treating it as damage
 	// prevention (The Bellerophon and similar effects).
 	ClearTough struct{ Target EntityID }
+	// ClearAllTough discards every tough status card from a character
+	// (Augmented Jaws).
+	ClearAllTough struct{ Target EntityID }
+	// ToughDiscarded announces that a tough status card left a character
+	// (consumed by damage or discarded), the window Luke Cage's Unbreakable
+	// Skin forced response reacts to.
+	ToughDiscarded struct{ Target EntityID }
 
 	// Defend selection resolved: Defender may be a player or ally.
 	Defends struct {
@@ -501,6 +512,8 @@ type (
 		Target EntityID
 		Damage int
 		Source EntityID
+		// Unpreventable bypasses tough and prevention (mirrors DamageEntity).
+		Unpreventable bool
 	}
 	// CancelBoostIcons removes N boost icons from a villain's pending
 	// activation (Foiled!).
@@ -773,6 +786,8 @@ func (ToughEntity) msg()              {}
 func (ClearStun) msg()                {}
 func (ClearConfuse) msg()             {}
 func (ClearTough) msg()               {}
+func (ClearAllTough) msg()            {}
+func (ToughDiscarded) msg()           {}
 func (Defends) msg()                  {}
 func (DealBoost) msg()                {}
 func (RevealBoost) msg()              {}

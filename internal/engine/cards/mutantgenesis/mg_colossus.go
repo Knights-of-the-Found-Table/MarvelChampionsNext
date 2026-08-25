@@ -56,7 +56,7 @@ func registerColossusPack() {
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			m, ok := msg.(engine.DamageEntity)
 			p := g.Player(e.EOwner())
-			if !ok || p == nil || m.Target != p.ID || m.Damage <= 0 || !p.Tough {
+			if !ok || p == nil || m.Target != p.ID || m.Damage <= 0 || p.Tough == 0 {
 				return nil
 			}
 			return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
@@ -80,7 +80,7 @@ func registerColossusPack() {
 			m, ok := msg.(engine.DamageEntity)
 			u := g.Upgrades[e.EID()]
 			p := g.Player(e.EOwner())
-			if !ok || u == nil || p == nil || m.Target != p.ID || m.Damage <= 0 || !p.Tough {
+			if !ok || u == nil || p == nil || m.Target != p.ID || m.Damage <= 0 || p.Tough == 0 {
 				return nil
 			}
 			if u.Exhausted || u.Counters <= 0 {
@@ -102,10 +102,10 @@ func registerColossusPack() {
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			m, ok := msg.(engine.BasicAttack)
 			p := g.Player(e.EOwner())
-			if !ok || p == nil || m.Player != p.ID || !p.Tough || !p.IsHero() {
+			if !ok || p == nil || m.Player != p.ID || p.Tough == 0 || !p.IsHero() {
 				return nil
 			}
-			p.Tough = false
+			p.Tough = 0
 			g.Logf("Made of Rage — +6 damage for this attack")
 			return []engine.Message{engine.DamageEntity{Target: m.Target, Damage: 6, Source: p.ID}}
 		},
@@ -119,7 +119,7 @@ func registerColossusPack() {
 			if p == nil {
 				return nil
 			}
-			rider := p.Tough
+			rider := p.Tough > 0
 			var choices []engine.Choice
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				en := g.Entity(id)
@@ -149,7 +149,7 @@ func registerColossusPack() {
 	// 32009 Bulletproof Protector: discard a tough → 2 tough status cards
 	// (boolean approximation: one tough) or ready your hero.
 	engine.RegisterBehavior("32009", &engine.Behavior{
-		Playable: func(g *engine.Game, p *engine.Player, def *data.CardDef) bool { return p.Tough },
+		Playable: func(g *engine.Game, p *engine.Player, def *data.CardDef) bool { return p.Tough > 0 },
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			p := g.Player(e.EOwner())
 			if p == nil {
@@ -181,7 +181,7 @@ func registerColossusPack() {
 				ID: "exhaust", Label: "Exhaust Piotr Rasputin → remove from the game", Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true})}
 			penalty := []engine.Message{}
-			if !p.Tough {
+			if p.Tough == 0 {
 				penalty = append(penalty, engine.RevealNextEncounter{Player: p.ID})
 			}
 			penalty = append(penalty, engine.ObligationResolve{Player: p.ID, Card: card})
@@ -207,9 +207,9 @@ func registerColossusNemesis() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			n := 0
 			for _, p := range g.Players {
-				if p.Tough {
-					p.Tough = false
-					n++
+				if p.Tough > 0 {
+					n += p.Tough
+					p.Tough = 0
 				}
 				for _, id := range p.Allies {
 					if a := g.Allies[id]; a != nil && a.Tough {

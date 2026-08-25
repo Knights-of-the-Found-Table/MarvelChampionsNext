@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { get, post, getToken, type Choice, type GameView, type Question } from '../api'
+import { get, post, getToken, type ChatMessage, type Choice, type GameView, type Question } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
 import { useChoiceLabel } from '../i18n/labels'
 import type { GameEvt } from '../board/fx'
@@ -8,6 +8,7 @@ import type { PlacedCard } from '../board/layout'
 import { initSfx, playSfx, setSfxMuted, sfxSettings } from '../audio/sfx'
 import { CardImage } from '../cards'
 import Board from '../components/Board'
+import ChatPanel from '../components/ChatPanel'
 import QuestionPanel from '../components/QuestionPanel'
 import ReportBugButton from '../components/ReportBugButton'
 import '../style/board.css'
@@ -21,6 +22,7 @@ export default function Game() {
   const zh = useZhMap()
   const [view, setView] = useState<GameView | null>(null)
   const [events, setEvents] = useState<GameEvt[]>([])
+  const [chatMessage, setChatMessage] = useState<ChatMessage | null>(null)
   const [error, setError] = useState('')
   const [sfxOn, setSfxOn] = useState(() => !sfxSettings().muted)
   const [animOn, setAnimOn] = useState(() => localStorage.getItem('mc-anim-off') !== '1')
@@ -56,6 +58,7 @@ export default function Game() {
         const data = JSON.parse(ev.data)
         if (data.type === 'state') setView(data.view)
         else if (data.type === 'events') setEvents(data.events ?? [])
+        else if (data.type === 'chat') setChatMessage(data.message)
       } catch {
         /* ignore */
       }
@@ -230,6 +233,7 @@ export default function Game() {
         onRecover={recoverChoice ? () => pick(recoverChoice) : undefined}
       />
       <div className="board-hud">
+        <ChatPanel gameId={gameId} incoming={chatMessage} />
         <div className="hud-top">
           <strong>{lname(zh, view.mainScheme?.code ?? '', view.scenario)}</strong>
           <span className="muted">· {t('game.round', { n: view.round })}</span>

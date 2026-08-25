@@ -381,7 +381,7 @@ func (g *Game) handle(msg Message) {
 		// Warning interrupt window (09021): the damaged hero's player may
 		// play Warning to reduce the damage by 1 (approximation: only the
 		// damaged player's own copy triggers).
-		if m.Damage > 0 && m.Target.Is(KindPlayer) {
+		if m.Damage > 0 && m.Target.Is(KindPlayer) && !m.Unpreventable {
 			p := g.Player(PlayerID(m.Target))
 			if p != nil && !p.KOed {
 				var warn Card
@@ -406,10 +406,10 @@ func (g *Game) handle(msg Message) {
 				}
 			}
 		}
-		g.damage(m.Target, m.Damage, m.Source)
+		g.damage(m.Target, m.Damage, m.Source, m.Unpreventable)
 
 	case ApplyDamage:
-		g.damage(m.Target, m.Damage, m.Source)
+		g.damage(m.Target, m.Damage, m.Source, m.Unpreventable)
 
 	case CancelBoostIcons:
 		if v := g.Villains[m.Enemy]; v != nil && m.N > 0 {
@@ -549,6 +549,10 @@ func (g *Game) handle(msg Message) {
 		g.setStatus(m.Target, "confused", false)
 	case ClearTough:
 		g.setStatus(m.Target, "tough", false)
+	case ClearAllTough:
+		g.discardAllTough(m.Target)
+	case ToughDiscarded:
+		// Window only: entities react via React on this message.
 
 	case Defends:
 		g.handleDefends(m)

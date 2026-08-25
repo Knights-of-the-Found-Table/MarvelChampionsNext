@@ -376,8 +376,8 @@ func registerSinister() {
 	engine.RegisterBehavior("40154", &engine.Behavior{
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			for _, o := range g.Players {
-				if o.Tough {
-					o.Tough = false
+				if o.Tough > 0 {
+					o.Tough = 0
 				}
 				for _, id := range o.Allies {
 					if a := g.Allies[id]; a != nil {
