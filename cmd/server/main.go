@@ -51,6 +51,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicajones"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicadrew"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jubilee"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/lukecage"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/madtansshadow"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/magneto"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/mojo"
