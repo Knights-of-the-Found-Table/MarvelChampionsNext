@@ -788,6 +788,33 @@
 }
 
 /* 新手教学：问号入口 + 居中步骤卡片，不改变牌桌。 */
+.payment-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.payment-icon {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8dbc2;
+  font-size: 12px;
+}
+
+.payment-icon.missing {
+  border-color: #d94a4a;
+  color: #ffb8b8;
+}
+
+.payment-icon.met {
+  border-color: rgba(96, 190, 125, 0.6);
+  color: #bdf0c9;
+}
+
+/* 新手教学：问号入口 + 居中步骤卡片，不改变牌桌。 */
 .tutorial-toggle {
   width: 36px;
   height: 36px;

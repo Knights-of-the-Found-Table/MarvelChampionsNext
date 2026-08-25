@@ -10,6 +10,25 @@ function usePromptText(prompt: string | undefined): string {
   return localizePrompt(prompt, lang)
 }
 
+function iconRequirements(prompt: string): Array<{ icon: string; n: number }> {
+  const icons = ['energy', 'mental', 'physical', 'wild']
+  const out = new Map<string, number>()
+  for (const icon of icons) {
+    const n = prompt.match(new RegExp(`\\[${icon}\\]`, 'g'))?.length ?? 0
+    if (n > 0) out.set(icon, n)
+  }
+  return [...out.entries()].map(([icon, n]) => ({ icon, n }))
+}
+
+function choiceIcons(choice: Choice): string[] {
+  const out: string[] = []
+  for (const icon of ['energy', 'mental', 'physical', 'wild']) {
+    const n = choice.label.match(new RegExp(`\\[${icon}\\]`, 'g'))?.length ?? 0
+    for (let i = 0; i < n; i++) out.push(icon)
+  }
+  return out
+}
+
 interface Props {
   current: Question
   selected: Set<string>
@@ -55,6 +74,15 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
 
   const isMulti = current.type === 'choose_n'
   const need = current.n ?? 1
+  const requiredIcons = iconRequirements(promptText)
+  const selectedIcons = new Map<string, number>()
+  if (requiredIcons.length > 0) {
+    for (const c of current.choices) {
+      if (!selected.has(c.id)) continue
+      for (const icon of choiceIcons(c)) selectedIcons.set(icon, (selectedIcons.get(icon) ?? 0) + 1)
+    }
+  }
+  const missingIcons = requiredIcons.filter(({ icon, n }) => (selectedIcons.get(icon) ?? 0) < n)
 
   // 折叠条：提示 + 选项数，点击展开完整清单
   if (!open) {
@@ -90,6 +118,20 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
               {t('q.selected', { n: selected.size })}
               {need > 1 ? ` ${t('q.need', { n: need })}` : ''}
             </span>
+          )}
+          {requiredIcons.length > 0 && (
+            <div className={`payment-icons ${missingIcons.length > 0 ? 'missing' : ''}`}>
+              {requiredIcons.map(({ icon, n }) => {
+                const got = selectedIcons.get(icon) ?? 0
+                const wild = selectedIcons.get('wild') ?? 0
+                const met = got >= n || got + wild >= n
+                return (
+                  <span key={icon} className={`payment-icon ${met ? 'met' : 'missing'}`}>
+                    {t(`res.${icon}`)} {Math.min(got + wild, n)}/{n}
+                  </span>
+                )
+              })}
+            </div>
           )}
         </div>
       </div>
