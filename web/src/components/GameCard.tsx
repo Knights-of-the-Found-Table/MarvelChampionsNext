@@ -2,7 +2,7 @@
 // 外层节点只做位移（transition 自动补间移动动画），内层处理横置旋转与
 // hover 缩放。标志物（状态芯片、血量/威胁徽章、计数器等）以绝对定位
 // 覆盖在卡面上，数值同时写入 data-* 供 diff 动画层定位飘字。
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type PointerEvent as ReactPointerEvent } from 'react'
 import { cardUrl, fallbackDataUrl, useCardZoom } from '../cards'
 import { lname, useLang, useT, useZhMap } from '../i18n'
 import type { CardFx } from '../board/fx'
@@ -20,11 +20,70 @@ interface Props {
   selOrder?: number
 }
 
+// 数值徽章的语义提示：桌面端 hover/focus，触屏长按 450ms。长按触发后
+// 吞掉同一次 click，避免玩家只是看标签却误打出/选择了卡牌。
+function TaggedNumber({ className, label, children }: { className: string; label: string; children: ReactNode }) {
+  const [touchVisible, setTouchVisible] = useState(false)
+  const timer = useRef<number | null>(null)
+  const longPressed = useRef(false)
+
+  function clearTimer() {
+    if (timer.current !== null) {
+      window.clearTimeout(timer.current)
+      timer.current = null
+    }
+  }
+
+  function pointerDown(e: ReactPointerEvent<HTMLSpanElement>) {
+    if (e.pointerType !== 'touch') return
+    clearTimer()
+    longPressed.current = false
+    timer.current = window.setTimeout(() => {
+      longPressed.current = true
+      setTouchVisible(true)
+    }, 450)
+  }
+
+  function pointerEnd() {
+    clearTimer()
+    if (longPressed.current) window.setTimeout(() => setTouchVisible(false), 1400)
+  }
+
+  useEffect(() => clearTimer, [])
+
+  return (
+    <span
+      className={`${className} number-tag`}
+      data-tag={label}
+      data-tag-visible={touchVisible ? 'true' : undefined}
+      aria-label={label}
+      tabIndex={0}
+      onPointerDown={pointerDown}
+      onPointerUp={pointerEnd}
+      onPointerCancel={pointerEnd}
+      onPointerLeave={pointerEnd}
+      onContextMenu={(e) => {
+        if (longPressed.current) e.preventDefault()
+      }}
+      onClick={(e) => {
+        if (!longPressed.current) return
+        e.preventDefault()
+        e.stopPropagation()
+        longPressed.current = false
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
 export default function GameCard({ card, onClick, className = '', zoom = true, fx, selOrder }: Props) {
   const lang = useLang()
+  const t = useT()
   const zh = useZhMap()
   const safeCode = card.code && card.code !== 'undefined' && card.code !== 'null' ? card.code : ''
   const displayTitle = lname(zh, safeCode, card.title)
+  const counterTag = safeCode === '50018' ? t('stat.missileCounter') : t('stat.counter')
   const imgRef = useRef<HTMLDivElement | null>(null)
   const cardZoom = useCardZoom(safeCode, imgRef)
   // 挂载时短暂附加入场动画类，之后移除，避免与后续动效在 animation
@@ -119,38 +178,38 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
 
         {/* 阶段/计数/强化徽章 */}
         <div className="gcard-topright">
-          {card.stageLabel && <span className="chip chip-stage">{card.stageLabel}</span>}
+          {card.stageLabel && <TaggedNumber className="chip chip-stage" label={t('stat.stage')}>{card.stageLabel}</TaggedNumber>}
           {card.counters !== undefined && card.counters > 0 && (
-            <span className="chip chip-count">{card.counters}</span>
+            <TaggedNumber className="chip chip-count" label={counterTag}>{card.counters}</TaggedNumber>
           )}
           {card.boosts !== undefined && card.boosts > 0 && (
-            <span className="chip chip-boost">+{card.boosts}</span>
+            <TaggedNumber className="chip chip-boost" label={t('stat.boost')}>+{card.boosts}</TaggedNumber>
           )}
         </div>
 
         {/* 血量徽章 */}
         {card.hp !== undefined && card.maxHp ? (
-          <span className={`hp-badge ${card.hp <= card.maxHp / 3 ? 'low' : ''}`}>
+          <TaggedNumber className={`hp-badge ${card.hp <= card.maxHp / 3 ? 'low' : ''}`} label={t('stat.hp')}>
             <span className="badge-icon">✚</span>
             <span>{card.hp}</span>
-          </span>
+          </TaggedNumber>
         ) : null}
 
         {/* 威胁条 */}
         {card.threat !== undefined && (
-          <span className={`threat-bar ${card.maxThreat && card.threat >= card.maxThreat - 2 ? 'high' : ''}`}>
+          <TaggedNumber className={`threat-bar ${card.maxThreat && card.threat >= card.maxThreat - 2 ? 'high' : ''}`} label={t('stat.threat')}>
             <span className="badge-icon">◆</span>
             <strong>{card.threat}</strong>
             {card.maxThreat ? <small>/{card.maxThreat}</small> : null}
-          </span>
+          </TaggedNumber>
         )}
 
         {/* 攻击/密谋/化解数值 */}
         {(card.attack !== undefined || card.thwart !== undefined) && (
           <div className="gcard-stats">
-            {card.attack !== undefined && <span className="stat stat-atk"><span className="stat-icon">⚔</span>{card.attack}</span>}
-            {card.thwart !== undefined && <span className="stat stat-thw"><span className="stat-icon">◎</span>{card.thwart}</span>}
-            {card.scheme !== undefined && <span className="stat stat-sch"><span className="stat-icon">◆</span>{card.scheme}</span>}
+            {card.attack !== undefined && <TaggedNumber className="stat stat-atk" label={t('stat.attack')}><span className="stat-icon">⚔</span>{card.attack}</TaggedNumber>}
+            {card.thwart !== undefined && <TaggedNumber className="stat stat-thw" label={t('stat.thwart')}><span className="stat-icon">◎</span>{card.thwart}</TaggedNumber>}
+            {card.scheme !== undefined && <TaggedNumber className="stat stat-sch" label={t('stat.scheme')}><span className="stat-icon">◆</span>{card.scheme}</TaggedNumber>}
           </div>
         )}
 
@@ -158,7 +217,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
         {(card.crisis || (card.hazard ?? 0) > 0) && (
           <div className="gcard-schemetags">
             {card.crisis && <span className="tag tag-crisis">危</span>}
-            {(card.hazard ?? 0) > 0 && <span className="tag tag-hazard">☠{card.hazard}</span>}
+            {(card.hazard ?? 0) > 0 && <TaggedNumber className="tag tag-hazard" label={t('stat.hazard')}>☠{card.hazard}</TaggedNumber>}
           </div>
         )}
         </div>
@@ -235,7 +294,7 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
             ) : null}
           </>
         )}
-        {(count > 0 || card.label === 'discard') && <span className="pile-count">{count}</span>}
+        {(count > 0 || card.label === 'discard') && <TaggedNumber className="pile-count" label={t('stat.pileCount')}>{count}</TaggedNumber>}
       </div>
     </div>
   )
