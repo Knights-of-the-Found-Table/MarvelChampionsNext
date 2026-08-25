@@ -710,6 +710,22 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 			}
 		}
 		paid := CostPaid{CardIDs: paidIDs, Icons: icons}
+		if q.Context["sonicBoomExhaust"] == true {
+			// Sonic Boom (01123): this custom payment is the alternative cost;
+			// success simply pays the selected cards/abilities and declines the
+			// exhaust-all fallback. It intentionally has no card target.
+			var paidCards []Card
+			for _, id := range paidIDs {
+				if c, ok := p.Hand.Find(id); ok {
+					paidCards = append(paidCards, c)
+				}
+			}
+			out := exhausts
+			if len(paidCards) > 0 {
+				out = append(out, ResourcePay{Player: playerID, Cards: paidCards})
+			}
+			return out, nil
+		}
 		if invID, ok := q.Context["invocationCard"].(string); ok {
 			card, found := p.SenseDeck.Find(invID)
 			if !found {
