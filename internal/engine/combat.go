@@ -514,6 +514,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		}
 		if e.Tough {
 			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
 			return
 		}
 		if src, ok := g.eventBonusFor(n, source, "damage"); ok {
@@ -733,11 +734,20 @@ func (g *Game) discardTough(id EntityID) {
 			g.Push(ToughDiscarded{Target: id})
 		}
 	case *Villain:
-		e.Tough = false
+		if e.Tough {
+			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
+		}
 	case *Minion:
-		e.Tough = false
+		if e.Tough {
+			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
+		}
 	case *Ally:
-		e.Tough = false
+		if e.Tough {
+			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
+		}
 	}
 }
 
@@ -751,11 +761,20 @@ func (g *Game) discardAllTough(id EntityID) {
 			g.Push(ToughDiscarded{Target: id})
 		}
 	case *Villain:
-		e.Tough = false
+		if e.Tough {
+			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
+		}
 	case *Minion:
-		e.Tough = false
+		if e.Tough {
+			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
+		}
 	case *Ally:
-		e.Tough = false
+		if e.Tough {
+			e.Tough = false
+			g.Push(ToughDiscarded{Target: id})
+		}
 	}
 }
 

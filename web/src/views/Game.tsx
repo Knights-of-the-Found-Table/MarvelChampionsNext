@@ -11,6 +11,7 @@ import Board from '../components/Board'
 import ChatPanel from '../components/ChatPanel'
 import QuestionPanel from '../components/QuestionPanel'
 import ReportBugButton from '../components/ReportBugButton'
+import TutorialOverlay from '../components/TutorialOverlay'
 import '../style/board.css'
 
 export default function Game() {
@@ -248,6 +249,7 @@ export default function Game() {
         {/* 错误 toast：独立于顶栏，右下角显示 */}
         {error && <div className="error-toast">{error}</div>}
         <div className="hud-controls">
+          <TutorialOverlay view={view} />
           <ReportBugButton className="hud-report-bug" />
           <button
             className={`hud-toggle ${sfxOn ? 'on' : ''}`}

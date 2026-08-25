@@ -1407,6 +1407,11 @@ func (g *Game) handle(msg Message) {
 					return
 				}
 			}
+			// A save effect (e.g. Valkyrie) may have healed the ally back
+			// above 0 between the defeat announcement and its resolution.
+			if a.HP() > 0 {
+				return
+			}
 			destroy()
 		}
 

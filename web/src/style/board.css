@@ -787,6 +787,58 @@
   border-radius: 3px;
 }
 
+/* 新手教学：问号入口 + 居中步骤卡片，不改变牌桌。 */
+.tutorial-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 162, 63, 0.45);
+  background: rgba(22, 32, 42, 0.86);
+  color: #f2dcae;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.36);
+  pointer-events: auto;
+}
+
+.tutorial-card {
+  width: min(520px, calc(100vw - 32px));
+  border: 1px solid rgba(224, 162, 63, 0.42);
+  border-radius: 14px;
+  background: rgba(11, 20, 29, 0.94);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.58);
+  padding: 18px;
+}
+
+.tutorial-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.tutorial-card p {
+  line-height: 1.7;
+  color: #eadfc8;
+}
+
+.tutorial-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 /* 聊天挂件：右下气泡与面板，独立于牌桌状态/操作日志。 */
 .chat-widget {
   position: absolute;
