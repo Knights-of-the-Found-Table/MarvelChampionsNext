@@ -93,9 +93,11 @@ func registerKlaw() {
 		},
 	})
 
-	// Stage 2A: discard encounter cards until a minion shows up; it enters
-	// play engaged with the first player.
-	engine.RegisterBehavior("01117a", &engine.Behavior{
+	// Stage 1B & 2A "When Revealed": discard encounter cards until a
+	// minion is discarded; it enters play engaged with the first player.
+	// 1B resolves via the FlipMainScheme b-face dispatch; 2A resolves at
+	// the stage-2 spawn.
+	discardToMinion := &engine.Behavior{
 		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			for len(g.EncounterDeck) > 0 {
 				c := g.EncounterDeck[0]
@@ -108,7 +110,9 @@ func registerKlaw() {
 			}
 			return nil
 		},
-	})
+	}
+	engine.RegisterBehavior("01116b", discardToMinion)
+	engine.RegisterBehavior("01117a", discardToMinion)
 
 	// Klaw II: When Revealed: search for The "Immortal" Klaw side scheme.
 	engine.RegisterBehavior("01114", &engine.Behavior{

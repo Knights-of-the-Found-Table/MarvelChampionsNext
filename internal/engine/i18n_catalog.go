@@ -200,6 +200,7 @@ var messages = map[string]map[Lang]string{
 	"q.discardBeforeDraw":              {LangEn: "Discard cards before drawing up?", LangZh: "抽牌前先弃牌吗?"},
 	"q.discardCardForAttack":           {LangEn: "Discard a card for %s to attack", LangZh: "弃一张牌让 %s 攻击"},
 	"q.discardToHandSize":              {LangEn: "Discard down to hand size %d (discard at least %d)", LangZh: "手牌将超出上限 %d,至少弃置 %d 张"},
+	"q.removeNThreatFromWhichScheme":   {LangEn: "Remove %d threat from which scheme?", LangZh: "从哪个密谋移除 %d 点威胁？"},
 	"q.foiledPrompt":                   {LangEn: "%s: play Foiled!? Cancel the +%d boost icons", LangZh: "%s:打出「挫败！」?取消 +%d 个增效图标"},
 	"q.grPrompt":                       {LangEn: "%s: play Great Responsibility? Take %d damage instead of the threat", LangZh: "%s:打出「重任在肩」?受到 %d 点伤害以代替威胁"},
 	"q.emergencyPrompt":                {LangEn: "Play Emergency? (reduce the scheme's threat by 1)", LangZh: "打出「紧急呼叫」?（该密谋的威胁减少 1）"},

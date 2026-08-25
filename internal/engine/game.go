@@ -602,6 +602,46 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 			return nil, fmt.Errorf("must discard at least %d card(s), selected %d", need, n)
 		}
 		return msgs, nil
+	case strings.HasPrefix(q.Validate, "threatPerDiscard:"):
+		// "Choose and discard up to N cards → remove 1 threat from a
+		// scheme for each card discarded this way" (Legal Practice).
+		// Fires the selected discards, then asks which scheme loses
+		// threat equal to the discarded-card count.
+		var maxN int
+		fmt.Sscanf(q.Validate, "threatPerDiscard:%d", &maxN)
+		pid := PlayerID(fmt.Sprint(q.Context["player"]))
+		p := g.Player(pid)
+		if p == nil {
+			return nil, fmt.Errorf("unknown player in discard context")
+		}
+		var msgs []Message
+		n := 0
+		for _, c := range choices {
+			for _, msg := range c.msgs {
+				if d, ok := msg.(DiscardCards); ok {
+					msgs = append(msgs, msg)
+					n += len(d.Cards)
+				}
+			}
+		}
+		if n > maxN {
+			return nil, fmt.Errorf("discarded %d card(s), at most %d allowed", n, maxN)
+		}
+		if n == 0 {
+			return msgs, nil
+		}
+		var picks []Choice
+		for _, id := range g.Schemes() {
+			s := g.Entity(id)
+			picks = append(picks, Choice{
+				Label: S(s.EDef().Name), Kind: ChoiceTarget,
+				SourceID: id, CardCode: s.ECode(),
+			}.Msgs(ThwartScheme{Scheme: id, N: n, Source: pid}))
+		}
+		if len(picks) == 0 {
+			return msgs, nil
+		}
+		return append(msgs, AskQuestion{Player: pid, Question: Ask(Tf("q.removeNThreatFromWhichScheme", n), picks...)}), nil
 	case strings.HasPrefix(q.Validate, "payment:"):
 		var cost int
 		fmt.Sscanf(q.Validate, "payment:%d", &cost)
@@ -1250,10 +1290,15 @@ func (g *Game) spawnVillain(stages []string, stage int) *Villain {
 	return v
 }
 
-// spawnMainScheme brings a scheme stage in on its a face ("01097a"),
-// queues the a face's reveal effects and then the flip to the b face —
-// the stage codes registered in scenarios are b codes carrying the
-// gameplay stats, which are read up front.
+// spawnMainScheme brings a scheme stage in on its a face ("01097a") and
+// queues the a face's reveal effects; the stage codes registered in
+// scenarios are b codes carrying the gameplay stats, which are read up
+// front. Queuing the FlipMainScheme (whose handler resolves the b face's
+// When Revealed) is the caller's job: at game start the flip must wait
+// until StartGame has shuffled and ID-assigned the encounter deck (1A
+// setups read "… Shuffle the encounter deck. Advance to stage 1B"), so
+// handleStartGame queues it; ReplaceMainScheme queues it right after the
+// spawn.
 func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 	code := stages[stage-1]
 	def := DB.MustLookup(code)
@@ -1271,6 +1316,5 @@ func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 	if b := behavior(s.Code); b.MainSchemeRevealed != nil {
 		g.Push(b.MainSchemeRevealed(g, s)...)
 	}
-	g.Push(FlipMainScheme{Scheme: s.ID})
 	return s
 }

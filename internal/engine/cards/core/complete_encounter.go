@@ -460,13 +460,6 @@ func registerRemainingEncounterCards() {
 		},
 	})
 
-	// Secret Rendezvous: discard until a minion engages the first player.
-	engine.RegisterBehavior("01117", &engine.Behavior{
-		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
-			return discardUntilMinionEncounter(g, cardutil.FirstPlayerID(g))
-		},
-	})
-
 	// Ultron Drones environment: drone stats already covered by spawn.
 	engine.RegisterBehavior("01140", &engine.Behavior{})
 
@@ -1009,18 +1002,6 @@ func discardUntilMinion(trait string) func(g *engine.Game, e engine.Entity) []en
 		}
 		return nil
 	}
-}
-
-func discardUntilMinionEncounter(g *engine.Game, pid engine.PlayerID) []engine.Message {
-	for len(g.EncounterDeck) > 0 {
-		c := g.EncounterDeck[0]
-		g.EncounterDeck = g.EncounterDeck[1:]
-		if c.Def().Type == "minion" {
-			return []engine.Message{engine.RevealEncounterCard{Player: pid, Card: c}}
-		}
-		g.EncounterDiscard = append(g.EncounterDiscard, c)
-	}
-	return nil
 }
 
 func findAndSpawnMinion(g *engine.Game, code string) []engine.Message {

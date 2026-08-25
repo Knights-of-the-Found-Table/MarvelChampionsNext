@@ -191,10 +191,18 @@ type Modifier struct {
 // implemented is filled by the cards packages via RegisterBehavior.
 var behaviorRegistry = map[string]*Behavior{}
 
-// Implemented reports whether the card has hand-written game logic.
+// Implemented reports whether the card has hand-written game logic. A
+// registration on any face counts: base-code registrations are the norm,
+// but main-scheme reveals live on face codes (e.g. Klaw 01117a setup /
+// 01116b when-revealed).
 func Implemented(code string) bool {
-	_, ok := behaviorRegistry[data.BaseCode(code)]
-	return ok
+	base := data.BaseCode(code)
+	if _, ok := behaviorRegistry[base]; ok {
+		return true
+	}
+	_, a := behaviorRegistry[base+"a"]
+	_, b := behaviorRegistry[base+"b"]
+	return a || b
 }
 
 // RegisterBehavior installs hand-written behavior for a card code. Intended

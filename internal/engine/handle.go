@@ -709,7 +709,8 @@ func (g *Game) handle(msg Message) {
 			stages := old.StageCodes
 			next := old.Stage + 1
 			if next-1 < len(stages) {
-				g.spawnMainScheme(stages, next)
+				s := g.spawnMainScheme(stages, next)
+				g.Push(FlipMainScheme{Scheme: s.ID})
 			}
 		}
 
@@ -719,6 +720,17 @@ func (g *Game) handle(msg Message) {
 			s.Code = s.StageCodes[s.Stage-1]
 			g.tlogMajorf("log.mainSchemeFlips",
 				s.EDef().StageLabel, s.Threat, s.MaxThreat)
+			// b-face "When Revealed" effects resolve at the flip. Exact-key
+			// lookup, and only for true b-face codes: single-code stages
+			// ("04061") already fired their base registration at the spawn
+			// via behavior()'s base-code fallback, so dispatching them
+			// again here would double-trigger. Distinct a-face (setup) and
+			// b-face (reveal) registrations both firing is correct.
+			if strings.HasSuffix(s.Code, "b") {
+				if b, ok := behaviorRegistry[s.Code]; ok && b.MainSchemeRevealed != nil {
+					g.Push(b.MainSchemeRevealed(g, s)...)
+				}
+			}
 		}
 
 	case GameOver:
@@ -1677,6 +1689,14 @@ func (g *Game) handleStartGame() {
 	}
 	g.EncounterDeck = g.assignCardIDs(g.EncounterDeck, "")
 	g.shuffle(&g.EncounterDeck)
+	// Flip stage 1 to its b face (resolving 1B When Revealed effects)
+	// before opening hands: 1A setups read "… Shuffle the encounter deck.
+	// Advance to stage 1B", so the b face must see the shuffled,
+	// ID-assigned deck. Only schemes still on their a face flip (queue
+	// replayed on resumed saves must not re-trigger the reveal).
+	if s := g.MainScheme; s != nil && s.Code != s.StageCodes[s.Stage-1] {
+		g.Push(FlipMainScheme{Scheme: s.ID})
+	}
 	scen := g.Scenario()
 	if scen.Setup != nil {
 		g.Push(scen.Setup(g)...)

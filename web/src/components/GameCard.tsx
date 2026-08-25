@@ -280,6 +280,8 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
             {safeCode && !card.faceDown ? (
               <img
                 className="gcard-img pile-top"
+                // 顶牌盖在最上层背面上：跟随层堆的逐层平移，避免与堆错位
+                style={{ translate: `${(layers - 1) * 2}px ${-(layers - 1) * 2.5}px` } as React.CSSProperties}
                 src={cardUrl(safeCode, lang)}
                 alt={card.title}
                 draggable={false}

@@ -310,17 +310,26 @@ func registerRemainingPlayerCards() {
 		},
 	})
 
-	// Legal Practice: discard up to 5 → remove 1 threat per card.
+	// Legal Practice: choose and discard up to 5 cards from your hand →
+	// remove 1 threat from a scheme for each card discarded this way.
+	// The scaled follow-up is the generic threatPerDiscard validation
+	// rule (see validateSelection).
 	engine.RegisterBehavior("01023", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			p := g.Player(e.EOwner())
 			if p == nil || len(p.Hand) == 0 {
 				return nil
 			}
-			return []engine.Message{
-				engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.legalPracticeRemove1ThreatFromWhichSchemePerDiscardedCard"),
-					schemePickChoices(g, 1, p.ID)...)},
+			var choices []engine.Choice
+			for _, c := range p.Hand {
+				choices = append(choices, engine.Choice{
+					Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 			}
+			q := engine.AskN(engine.Tf("c.legalPracticeChooseAndDiscardUpTo5"), 0, choices...)
+			q.Validate = "threatPerDiscard:5"
+			q.Context = map[string]any{"player": p.ID.String()}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 		},
 	})
 

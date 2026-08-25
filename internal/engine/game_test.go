@@ -67,6 +67,16 @@ func pickDefault(q *engine.Question) []string {
 		return out
 	}
 	if len(q.Choices) > 0 {
+		// choose_one: skip branches chaining into a choose_n payment
+		// subtree — answering those needs the full subtree selection set
+		// ({"0.0","0.1",…}), which this helper cannot compute; take the
+		// first plain branch instead (e.g. Sonic Boom's "exhaust").
+		for _, c := range q.Choices {
+			if c.Then != nil && c.Then.Type == "choose_n" {
+				continue
+			}
+			return []string{c.ID}
+		}
 		return []string{q.Choices[0].ID}
 	}
 	return nil
