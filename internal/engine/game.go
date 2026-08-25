@@ -838,6 +838,11 @@ func powerOfBonus(paying, target *data.CardDef) int {
 			return 1
 		}
 		return 0
+	case "The Power of Leadership":
+		if target.Aspect == "leadership" {
+			return 1
+		}
+		return 0
 	case "The Power of Flight":
 		if target.HasTrait("Aerial") {
 			return 1

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
 
 var verbRe = regexp.MustCompile(`%\[(\d+)\]([a-zA-Z])|%([a-zA-Z])`)
@@ -136,6 +138,21 @@ func TestMessageArgConsistency(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestResourcePayment(t *testing.T) {
+	leadership := &data.CardDef{Code: "leadership-target", Name: "Leadership Card", Type: "event", Aspect: "leadership"}
+	justice := &data.CardDef{Code: "justice-target", Name: "Justice Card", Type: "event", Aspect: "justice"}
+	power := &data.CardDef{Code: "62017", Name: "The Power of Leadership", Type: "resource", Resources: []string{"wild"}}
+	if got := iconCount(power) + powerOfBonus(power, leadership); got != 2 {
+		t.Fatalf("The Power of Leadership should pay 2 for Leadership, got %d", got)
+	}
+	if got := iconCount(power) + powerOfBonus(power, justice); got != 1 {
+		t.Fatalf("The Power of Leadership should pay 1 for Justice, got %d", got)
+	}
+	if got := iconCount(power) + powerOfBonus(power, nil); got != 1 {
+		t.Fatalf("The Power of Leadership should pay 1 without a card target, got %d", got)
 	}
 }
 

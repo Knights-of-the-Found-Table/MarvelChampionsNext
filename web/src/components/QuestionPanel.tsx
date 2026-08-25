@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import type { Choice, Question } from '../api'
-import { CardImage } from '../cards'
+import { CardImage, useCardZoom } from '../cards'
 import { useLang, useT } from '../i18n'
 import { localizePrompt, useChoiceLabel } from '../i18n/labels'
 
@@ -20,10 +21,37 @@ interface Props {
   onToggle: () => void
 }
 
+function ChoiceButton({
+  choice,
+  selected,
+  onPick,
+}: {
+  choice: Choice
+  selected: boolean
+  onPick: (c: Choice) => void
+}) {
+  const ref = useRef<HTMLButtonElement | null>(null)
+  const zoom = useCardZoom(choice.cardCode ?? '', ref)
+  const choiceLabel = useChoiceLabel()
+  return (
+    <button
+      ref={ref}
+      className={`choice ${kindClass(choice.kind)} ${selected ? 'selected' : ''}`}
+      disabled={choice.disabled}
+      onClick={() => onPick(choice)}
+      onMouseEnter={choice.cardCode ? zoom.onEnter : undefined}
+      onMouseLeave={choice.cardCode ? zoom.hide : undefined}
+    >
+      {choice.cardCode && <CardImage code={choice.cardCode} size="xs" zoom={false} />}
+      <span>{choiceLabel(choice)}</span>
+      {choice.cardCode && zoom.overlay}
+    </button>
+  )
+}
+
 export default function QuestionPanel({ current, selected, onPick, onBack, onConfirm, open, onToggle }: Props) {
   const t = useT()
   const promptText = usePromptText(current.prompt)
-  const choiceLabel = useChoiceLabel()
 
   const isMulti = current.type === 'choose_n'
   const need = current.n ?? 1
@@ -69,15 +97,7 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
         <>
           <div className="choices wrap">
             {current.choices.map((c) => (
-              <button
-                key={c.id}
-                className={`choice ${selected.has(c.id) ? 'selected' : ''}`}
-                disabled={c.disabled}
-                onClick={() => onPick(c)}
-              >
-                {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
-                <span>{choiceLabel(c)}</span>
-              </button>
+              <ChoiceButton key={c.id} choice={c} selected={selected.has(c.id)} onPick={onPick} />
             ))}
           </div>
           <button className="primary" onClick={onConfirm} disabled={selected.size === 0}>
@@ -87,15 +107,7 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
       ) : (
         <div className="choices wrap">
           {current.choices.map((c) => (
-            <button
-              key={c.id}
-              className={`choice ${kindClass(c.kind)}`}
-              disabled={c.disabled}
-              onClick={() => onPick(c)}
-            >
-              {c.cardCode && <CardImage code={c.cardCode} size="xs" zoom={false} />}
-              <span>{choiceLabel(c)}</span>
-            </button>
+            <ChoiceButton key={c.id} choice={c} selected={selected.has(c.id)} onPick={onPick} />
           ))}
         </div>
       )}
