@@ -48,6 +48,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hulk"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/iceman"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ironheart"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicajones"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicadrew"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jubilee"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/madtansshadow"
