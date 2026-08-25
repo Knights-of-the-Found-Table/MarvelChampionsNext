@@ -722,16 +722,17 @@ func (g *Game) handle(msg Message) {
 	case GameOver:
 		g.Over = true
 		g.Won = m.Won
-		g.Reason = m.Reason
+		g.Reason = localizeLegacyRenderedText(m.Reason)
 		g.pending = nil
 		g.queue = nil
 		if m.Won {
-			g.tlogMajorf("log.victory", m.Reason)
+			g.tlogMajorf("log.victory", g.Reason)
 		} else {
-			g.tlogMajorf("log.defeat", m.Reason)
+			g.tlogMajorf("log.defeat", g.Reason)
 		}
 
 	case AskQuestion:
+		localizeQuestionTree(m.Question)
 		g.pending = &PendingQuestion{Player: m.Player, Question: m.Question}
 
 	case WindowAfterEnemyAttacked:

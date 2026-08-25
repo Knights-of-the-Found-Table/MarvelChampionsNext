@@ -1035,6 +1035,10 @@ func (g *Game) UnmarshalJSON(b []byte) error {
 	}
 	g.queue = queue
 	g.pending = in.Pending
+	if g.pending != nil {
+		localizeQuestionTree(g.pending.Question)
+	}
+	g.Reason = localizeLegacyRenderedText(g.Reason)
 	g.scenario = nil
 	g.migrateMainSchemeCodes()
 	return nil

@@ -146,6 +146,7 @@ func clearChoiceIDs(q *Question) {
 
 // Ask builds a choose_one question.
 func Ask(prompt string, choices ...Choice) *Question {
+	prompt, choices = localizeLegacyQuestion(prompt, choices)
 	q := &Question{Type: "choose_one", Prompt: prompt, Choices: choices}
 	q.assignIDs("")
 	return q
@@ -153,6 +154,7 @@ func Ask(prompt string, choices ...Choice) *Question {
 
 // AskN builds a choose_n question.
 func AskN(prompt string, n int, choices ...Choice) *Question {
+	prompt, choices = localizeLegacyQuestion(prompt, choices)
 	q := &Question{Type: "choose_n", Prompt: prompt, Choices: choices, N: n}
 	q.assignIDs("")
 	return q

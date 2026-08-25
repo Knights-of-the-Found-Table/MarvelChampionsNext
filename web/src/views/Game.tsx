@@ -147,9 +147,7 @@ export default function Game() {
   // 结束回合/恢复：场景快捷按钮的可用性（根菜单层）
   const endTurnChoice = stack.length === 0 ? current?.choices.find((c) => c.kind === 'end_turn' && !c.disabled) : undefined
   const recoverChoice =
-    stack.length === 0
-      ? current?.choices.find((c) => !c.disabled && (c.id === 'basic-recover' || (c.kind === 'basic_power' && c.label.startsWith('Recover'))))
-      : undefined
+    stack.length === 0 ? current?.choices.find((c) => !c.disabled && c.id === 'basic-recover') : undefined
 
   // 点场上卡牌：牌堆 → 打开卡牌列表查看器；实体有多个可用选项（英雄牌的
   // 翻面/技能等）→ 弹选择菜单；唯一选项直接执行。
@@ -169,7 +167,7 @@ export default function Game() {
     if (!current) return
     // 恢复有专门按钮（英雄牌左侧），不再占用英雄牌点击
     const matches = current.choices.filter(
-      (ch) => ch.sourceId === card.id && !ch.disabled && !(ch.kind === 'basic_power' && ch.label.startsWith('Recover'))
+      (ch) => ch.sourceId === card.id && !ch.disabled && ch.id !== 'basic-recover'
     )
     if (matches.length === 0) return
     if (matches.length === 1) {

@@ -35,7 +35,7 @@ func (l *LogEntries) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &legacy); err == nil {
 		out := make(LogEntries, len(legacy))
 		for i, s := range legacy {
-			out[i] = LogEntry{Level: LogInfo, Text: s}
+			out[i] = LogEntry{Level: LogInfo, Text: localizeLegacyRenderedText(s)}
 		}
 		*l = out
 		return nil
@@ -48,6 +48,7 @@ func (l *LogEntries) UnmarshalJSON(b []byte) error {
 		if entries[i].Level == "" {
 			entries[i].Level = LogInfo
 		}
+		entries[i].Text = localizeLegacyRenderedText(entries[i].Text)
 	}
 	*l = entries
 	return nil
@@ -61,20 +62,20 @@ func (g *Game) addLog(level, text string) {
 }
 
 func (g *Game) logf(format string, args ...any) {
-	g.addLog(LogInfo, fmt.Sprintf(format, args...))
+	g.addLog(LogInfo, fmt.Sprintf(localizeLegacyFormat(format), args...))
 }
 
 func (g *Game) logMinorf(format string, args ...any) {
-	g.addLog(LogMinor, fmt.Sprintf(format, args...))
+	g.addLog(LogMinor, fmt.Sprintf(localizeLegacyFormat(format), args...))
 }
 
 func (g *Game) logMajorf(format string, args ...any) {
-	g.addLog(LogMajor, fmt.Sprintf(format, args...))
+	g.addLog(LogMajor, fmt.Sprintf(localizeLegacyFormat(format), args...))
 }
 
-// tlogf/tlogMinorf/tlogMajorf log a message-catalog entry (i18n): the key
-// is resolved and formatted by Tf in the current UI language. Plain logf
-// remains for ad-hoc strings (card-package text not yet migrated).
+// tlogf/tlogMinorf/tlogMajorf log a keyed message-catalog entry. Plain logf
+// remains for legacy card packages, but its format now passes through the
+// audited compatibility catalog before formatting.
 func (g *Game) tlogf(key string, args ...any) {
 	g.addLog(LogInfo, Tf(key, args...))
 }
