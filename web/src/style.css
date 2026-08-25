@@ -139,6 +139,27 @@ button.linklike {
   text-decoration: underline;
 }
 
+button.bug-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-height: 30px;
+  padding: 0.3rem 0.62rem;
+  color: #ffd6d2;
+  background: rgba(122, 35, 42, 0.2);
+  border: 1px solid rgba(224, 91, 96, 0.7);
+  border-radius: 6px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+button.bug-report-btn:hover {
+  color: #fff;
+  background: rgba(174, 49, 58, 0.38);
+  border-color: #ef777a;
+  box-shadow: 0 0 14px rgba(219, 68, 75, 0.25);
+}
+
 a.button {
   display: inline-block;
   background: var(--accent);

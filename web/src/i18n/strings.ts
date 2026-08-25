@@ -8,6 +8,8 @@ export const en = {
   'nav.games': 'Games',
   'nav.new': 'New Game',
   'nav.decks': 'Decks',
+  'nav.reportBug': 'Report Bug',
+  'nav.reportBugHint': 'Open a pre-filled GitHub issue',
   'nav.logout': 'Log out',
 
   'login.title': 'Log in',
@@ -127,6 +129,8 @@ export const zh: Record<MsgKey, string> = {
   'nav.games': '对局',
   'nav.new': '新建对局',
   'nav.decks': '牌组',
+  'nav.reportBug': '报告 Bug',
+  'nav.reportBugHint': '打开预填好的 GitHub Issue',
   'nav.logout': '退出登录',
 
   'login.title': '登录',

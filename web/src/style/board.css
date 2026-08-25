@@ -1706,6 +1706,15 @@ body.fx-off *::after {
   right: 18px;
 }
 
+.hud-report-bug {
+  min-height: 32px;
+  padding: 4px 10px;
+  color: #ffd9d2;
+  background: linear-gradient(180deg, rgba(119, 38, 45, 0.94), rgba(55, 20, 27, 0.96));
+  border-color: rgba(222, 92, 95, 0.76);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.38);
+}
+
 .hud-undo,
 .hud-toggle {
   min-height: 32px;
@@ -1820,6 +1829,7 @@ body.fx-off *::after {
 @media (max-width: 1450px) {
   .hud-top { top: 10px; max-width: 52vw; overflow: hidden; text-overflow: ellipsis; }
   .hud-controls { top: 10px; right: 12px; }
+  .hud-report-bug .bug-report-label { display: none; }
   .hud-log { top: 50px; right: 12px; width: 276px; max-height: 46vh; }
   .question-collapsed { bottom: 10px; min-width: 320px; max-width: 64vw; }
   .board-hud .question { bottom: 10px; max-height: 42vh; }

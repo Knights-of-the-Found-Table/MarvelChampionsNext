@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { setToken } from './api'
 import { useLang, useSetLang, useT } from './i18n'
+import ReportBugButton from './components/ReportBugButton'
 
 export default function App() {
   const navigate = useNavigate()
@@ -15,6 +16,7 @@ export default function App() {
           <NavLink to="/">{t('nav.games')}</NavLink>
           <NavLink to="/new">{t('nav.new')}</NavLink>
           <NavLink to="/decks">{t('nav.decks')}</NavLink>
+          <ReportBugButton />
           <select
             aria-label="Language"
             value={lang}
