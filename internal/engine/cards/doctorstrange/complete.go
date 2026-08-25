@@ -27,7 +27,7 @@ func registerRemainingDRS() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust The Night Nurse + counter → heal 1 + clear a status", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTheNightNurseCounterHeal1ClearAStatus"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -39,20 +39,20 @@ func registerRemainingDRS() {
 						msgs := []engine.Message{engine.AddEntityCounter{ID: self, N: -1}, engine.HealEntity{Target: q.ID, N: 1}}
 						var status []engine.Choice
 						if q.Stunned {
-							status = append(status, engine.Choice{Label: "clear stunned", Kind: engine.ChoiceLabel}.
+							status = append(status, engine.Choice{Label: engine.Tf("c.clearStunned"), Kind: engine.ChoiceLabel}.
 								Msgs(append(append([]engine.Message{}, msgs...), engine.ClearStun{Target: q.ID})...))
 						}
 						if q.Confused {
-							status = append(status, engine.Choice{Label: "clear confused", Kind: engine.ChoiceLabel}.
+							status = append(status, engine.Choice{Label: engine.Tf("c.clearConfused"), Kind: engine.ChoiceLabel}.
 								Msgs(append(append([]engine.Message{}, msgs...), engine.ClearConfuse{Target: q.ID})...))
 						}
-						status = append(status, engine.Choice{Label: "no status", Kind: engine.ChoicePass}.Msgs(msgs...))
+						status = append(status, engine.Choice{Label: engine.Tf("c.noStatus"), Kind: engine.ChoicePass}.Msgs(msgs...))
 						picks = append(picks, engine.Choice{
-							Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID,
-						}.WithThen(engine.Ask("Clear which status from "+q.Name+"?", status...)))
+							Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID,
+						}.WithThen(engine.Ask(engine.S("Clear which status from "+q.Name+"?"), status...)))
 					}
 					return []engine.Message{engine.AskQuestion{Player: s.Owner,
-						Question: engine.Ask("The Night Nurse: heal which hero?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.theNightNurseHealWhichHero"), picks...)}}
 				},
 			}}
 		},

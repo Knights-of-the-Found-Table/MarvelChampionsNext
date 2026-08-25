@@ -45,7 +45,7 @@ func registerRemainingRogue() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Control " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.control", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.ConvertMinionToAlly{MinionID: id, Owner: p.ID, Consequential: 2}))
 			}
 			if len(choices) == 0 {
@@ -53,7 +53,7 @@ func registerRemainingRogue() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Karma — take control of a non-Elite minion", choices...),
+				Question: engine.Ask(engine.Tf("c.karmaTakeControlOfANonEliteMinion"), choices...),
 			}}
 		},
 	})
@@ -93,7 +93,7 @@ func registerRemainingRogue() {
 				return nil
 			}
 			u.Counters--
-			g.Logf("Judoka Skill — %s turns the attack aside (−2 ATK)", g.Entity(m.Defender).EDef().Name)
+			g.TLogf("c.judokaSkillTurnsTheAttackAside2Atk", g.Entity(m.Defender).EDef().Name)
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.BoostEnemyAttack{Enemy: m.Against, N: -2},
@@ -166,7 +166,7 @@ func registerRemainingRogue() {
 			}
 			return append(msgs, engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Beauty and the Thief — deal 4 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.beautyAndTheThiefDeal4Damage"), choices...),
 			})
 		},
 	})
@@ -216,7 +216,7 @@ func registerRemainingRogue() {
 						p := g.Player(m.Player)
 						if p != nil {
 							p.Deck = append(p.Deck, c)
-							g.Logf("Misled hides in %s's deck", p.Name)
+							g.TLogf("c.misledHidesInSDeck", p.Name)
 						}
 						return nil
 					}
@@ -280,7 +280,7 @@ func registerRemainingRogue() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Med Lab — return the tucked ally to hand", Type: engine.AbilityAction,
+				Label: engine.Tf("c.medLabReturnTheTuckedAllyToHand"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]

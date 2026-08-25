@@ -147,7 +147,7 @@ func TestDeck63988VersusRhino(t *testing.T) {
 	if !g.Over {
 		t.Fatalf("game did not end, round=%d", g.Round)
 	}
-	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason, g.Round)
+	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason.Text, g.Round)
 }
 
 func TestDeck63988VersusMutagenFormula(t *testing.T) {
@@ -156,7 +156,7 @@ func TestDeck63988VersusMutagenFormula(t *testing.T) {
 	if !g.Over {
 		t.Fatalf("game did not end, round=%d", g.Round)
 	}
-	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason, g.Round)
+	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason.Text, g.Round)
 }
 
 // TestSenseCardsCycle: after a Sense upgrade triggers, it returns to the

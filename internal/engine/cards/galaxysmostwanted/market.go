@@ -26,11 +26,11 @@ func registerMarket() {
 					removal = append([]engine.Message{engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 3, Source: e.EID()}}, removal...)
 				}
 				picks = append(picks, engine.Choice{
-					ID: typ, Label: "Name: " + typ, Kind: engine.ChoiceLabel,
+					ID: typ, Label: engine.S("Name: " + typ), Kind: engine.ChoiceLabel,
 				}.Msgs(removal...))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Brainstorm: name a card type (top card: "+top.Def().Name+")", picks...)}}
+				Question: engine.Ask(engine.S("Brainstorm: name a card type (top card: "+top.Def().Name+")"), picks...)}}
 		},
 	})
 
@@ -70,7 +70,7 @@ func registerMarket() {
 			if n == 0 {
 				return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 			}
-			return cardutil.ChooseEnemy("Contingency Plan: deal damage equal to distinct resource types",
+			return cardutil.ChooseEnemy(engine.Tf("c.contingencyPlanDealDamageEqualToDistinctResourceTypes"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					return n, []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 				})(g, e)
@@ -104,12 +104,12 @@ func registerMarket() {
 					inner = append(inner, engine.DiscardCards{Player: tp.ID, Cards: engine.CardList{tp.Hand[0]}})
 				}
 				picks = append(picks, engine.Choice{
-					ID: string(tp.ID), Label: tp.Name, Kind: engine.ChoiceLabel,
+					ID: string(tp.ID), Label: engine.S(tp.Name), Kind: engine.ChoiceLabel,
 				}.Msgs(inner...))
 			}
 			return []engine.Message{
 				engine.DrawCards{Player: p.ID, N: 1},
-				engine.AskQuestion{Player: p.ID, Question: engine.Ask("Calculate the Odds: who draws and discards?", picks...)},
+				engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.calculateTheOddsWhoDrawsAndDiscards"), picks...)},
 			}
 		},
 	})
@@ -124,28 +124,28 @@ func registerMarket() {
 			var picks []engine.Choice
 			if p.Tough > 0 {
 				picks = append(picks, engine.Choice{
-					ID: "tough", Label: "Remove your tough → 3 damage to an enemy", Kind: engine.ChoiceLabel,
+					ID: "tough", Label: engine.Tf("c.removeYourTough3DamageToAnEnemy"), Kind: engine.ChoiceLabel,
 				}.Msgs())
 			}
 			if p.Stunned {
-				picks = append(picks, engine.Choice{ID: "stun", Label: "Remove your stunned", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "stun", Label: engine.Tf("c.removeYourStunned"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ClearStun{Target: p.ID}))
 			}
 			if p.Confused {
-				picks = append(picks, engine.Choice{ID: "confused", Label: "Remove your confused", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "confused", Label: engine.Tf("c.removeYourConfused"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ClearConfuse{Target: p.ID}))
 			}
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				if m := g.Minions[id]; m != nil {
 					if m.Tough {
-						picks = append(picks, engine.Choice{ID: "mt" + id.String(), Label: "Remove a minion's tough → 3 damage", Kind: engine.ChoiceLabel})
+						picks = append(picks, engine.Choice{ID: "mt" + id.String(), Label: engine.Tf("c.removeAMinionSTough3Damage"), Kind: engine.ChoiceLabel})
 					}
 					if m.Stunned {
-						picks = append(picks, engine.Choice{ID: "ms" + id.String(), Label: "Remove a minion's stunned → 3 threat", Kind: engine.ChoiceLabel}.
+						picks = append(picks, engine.Choice{ID: "ms" + id.String(), Label: engine.Tf("c.removeAMinionSStunned3Threat"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.ClearStun{Target: id}))
 					}
 					if m.Confused {
-						picks = append(picks, engine.Choice{ID: "mc" + id.String(), Label: "Remove a minion's confused → heal 3", Kind: engine.ChoiceLabel}.
+						picks = append(picks, engine.Choice{ID: "mc" + id.String(), Label: engine.Tf("c.removeAMinionSConfusedHeal3"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.ClearConfuse{Target: id}))
 					}
 				}
@@ -153,7 +153,7 @@ func registerMarket() {
 			msgs := []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 			if len(picks) > 0 {
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID,
-					Question: engine.Ask("Creative Solution: remove which status card?", picks...)})
+					Question: engine.Ask(engine.Tf("c.creativeSolutionRemoveWhichStatusCard"), picks...)})
 			}
 			return msgs
 		},
@@ -162,7 +162,7 @@ func registerMarket() {
 	// 16156 Grapple: 1 damage + stun enemy, stun self, draw 1.
 	engine.RegisterBehavior("16156", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			return cardutil.ChooseEnemy("Grapple: stun which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.grappleStunWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					return 1, []engine.Message{
 						engine.StunEntity{Target: tgt.EID()},
@@ -176,7 +176,7 @@ func registerMarket() {
 	// 16157 Wing It: 1 damage + confuse enemy, confuse self, draw 1.
 	engine.RegisterBehavior("16157", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			return cardutil.ChooseEnemy("Wing It: confuse which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.wingItConfuseWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					return 1, []engine.Message{
 						engine.ConfuseEntity{Target: tgt.EID()},
@@ -207,7 +207,7 @@ func registerMarket() {
 				}
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
 			}
-			msgs := cardutil.ChooseEnemy("Defy Danger: deal 5 damage",
+			msgs := cardutil.ChooseEnemy(engine.Tf("c.defyDangerDeal5Damage"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 5, nil })(g, e)
 			return append(msgs,
 				engine.DamageEntity{Target: e.EOwner(), Damage: stars, Source: e.EID()},
@@ -237,7 +237,7 @@ func registerMarket() {
 			for i := 0; i < n; i++ {
 				names = append(names, (", " + g.EncounterDeck[i].Def().Name)...)
 			}
-			g.Logf("Take the Fight to Them reveals:%s", string(names))
+			g.TLogf("c.takeTheFightToThemReveals", string(names))
 			return []engine.Message{engine.DrawCards{Player: e.EOwner(), N: 1}}
 		},
 	})
@@ -251,10 +251,10 @@ func registerMarket() {
 			}
 			u.Exhausted = true
 			if _, mil := findMilano(g); mil != nil && mil.EOwner() == p.ID {
-				g.Logf("Armor Plating prevents 2 damage")
+				g.TLogf("c.armorPlatingPrevents2Damage")
 				return 2, 0
 			}
-			g.Logf("Armor Plating prevents 1 damage")
+			g.TLogf("c.armorPlatingPrevents1Damage")
 			return 1, 0
 		},
 	})
@@ -264,7 +264,7 @@ func registerMarket() {
 	engine.RegisterBehavior("16163", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Heavy Cannon → 1 damage to each enemy", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustHeavyCannon1DamageToEachEnemy"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var msgs []engine.Message
@@ -289,7 +289,7 @@ func registerMarket() {
 	engine.RegisterBehavior("16164", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Hyper Thrusters → remove 1 threat from each scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustHyperThrustersRemove1ThreatFromEachScheme"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var msgs []engine.Message
@@ -318,7 +318,7 @@ func registerMarket() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Reactor Core + discard top 2 of your deck → next event costs 1 less", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustReactorCoreDiscardTop2OfYourDeckNextEventCosts1Less"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					n := 2
@@ -343,19 +343,19 @@ func registerMarket() {
 			}
 			var picks []engine.Choice
 			if p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "self", Label: p.Name, Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "self", Label: engine.S(p.Name), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ReadyEntity{ID: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Exhausted {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
 			msgs := []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 			if len(picks) > 0 {
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID,
-					Question: engine.Ask("Ardent Resolve: ready which friendly character?", picks...)})
+					Question: engine.Ask(engine.Tf("c.ardentResolveReadyWhichFriendlyCharacter"), picks...)})
 			}
 			return msgs
 		},
@@ -373,17 +373,17 @@ func registerMarket() {
 				return nil
 			}
 			var picks []engine.Choice
-			picks = append(picks, engine.Choice{ID: "self", Label: p.Name, Kind: engine.ChoiceLabel}.
+			picks = append(picks, engine.Choice{ID: "self", Label: engine.S(p.Name), Kind: engine.ChoiceLabel}.
 				Msgs(engine.ToughEntity{Target: p.ID}))
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
 			return []engine.Message{
 				engine.AskQuestion{Player: p.ID,
-					Question: engine.AskN("Safeguard: give tough status cards (up to 2)", 2, picks...)},
+					Question: engine.AskN(engine.Tf("c.safeguardGiveToughStatusCardsUpTo2"), 2, picks...)},
 				engine.DrawCards{Player: p.ID, N: 1},
 			}
 		},
@@ -405,12 +405,12 @@ func registerMarket() {
 			}
 			var picks []engine.Choice
 			if p.Damage > 0 {
-				picks = append(picks, engine.Choice{ID: "self", Label: p.Name, Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "self", Label: engine.S(p.Name), Kind: engine.ChoiceLabel}.
 					Msgs(engine.HealEntity{Target: p.ID, N: 1}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Damage > 0 {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.HealEntity{Target: id, N: 1}))
 				}
 			}
@@ -418,11 +418,11 @@ func registerMarket() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Cargo Hold → heal 1 damage from a friendly character", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustCargoHoldHeal1DamageFromAFriendlyCharacter"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					msgs := []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Cargo Hold: heal which friendly character?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.cargoHoldHealWhichFriendlyCharacter"), picks...)}}
 					if _, mil := findMilano(g); mil != nil && mil.EOwner() == p.ID {
 						msgs = append(msgs, engine.HealEntity{Target: p.ID, N: 1})
 					}
@@ -436,14 +436,14 @@ func registerMarket() {
 	engine.RegisterBehavior("16171", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Mounted Laser → deal 2 damage to an enemy", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustMountedLaserDeal2DamageToAnEnemy"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					dmg := 2
 					if _, mil := findMilano(g); mil != nil && mil.EOwner() == e.EOwner() {
 						dmg = 3
 					}
-					return cardutil.ChooseEnemy("Mounted Laser: deal damage",
+					return cardutil.ChooseEnemy(engine.Tf("c.mountedLaserDealDamage"),
 						func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return dmg, nil })(g, g.Entity(self))
 				},
 			}}
@@ -458,7 +458,7 @@ func registerMarket() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Navigation Column + discard 1 card → draw 1 card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustNavigationColumnDiscard1CardDraw1Card"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if _, mil := findMilano(g); mil != nil && mil.EOwner() == p.ID {
@@ -466,14 +466,14 @@ func registerMarket() {
 					}
 					var picks []engine.Choice
 					for _, c := range p.Hand {
-						picks = append(picks, engine.Choice{Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 					}
 					if len(picks) == 0 {
 						return nil
 					}
 					return []engine.Message{
-						engine.AskQuestion{Player: p.ID, Question: engine.Ask("Navigation Column: discard which card?", picks...)},
+						engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.navigationColumnDiscardWhichCard"), picks...)},
 						engine.DrawCards{Player: p.ID, N: 1},
 					}
 				},
@@ -486,14 +486,14 @@ func registerMarket() {
 	engine.RegisterBehavior("16173", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Targeting Screen → remove 2 threat from a scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTargetingScreenRemove2ThreatFromAScheme"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					n := 2
 					if _, mil := findMilano(g); mil != nil && mil.EOwner() == e.EOwner() {
 						n = 3
 					}
-					return cardutil.ChooseScheme("Targeting Screen", func(g *engine.Game, s engine.Entity) int { return n })(g, g.Entity(self))
+					return cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Targeting Screen"), func(g *engine.Game, s engine.Entity) int { return n })(g, g.Entity(self))
 				},
 			}}
 		},
@@ -510,7 +510,7 @@ func registerMarket() {
 			if n <= 0 {
 				return nil
 			}
-			g.Logf("Grand Strategy is removed from the game")
+			g.TLogf("c.grandStrategyIsRemovedFromTheGame")
 			return []engine.Message{engine.DrawCards{Player: p.ID, N: n}}
 		},
 	})
@@ -527,7 +527,7 @@ func registerMarket() {
 			if g.MainScheme != nil {
 				msgs = append(msgs, engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 5, Source: e.EID()})
 			}
-			g.Logf("Power Unleashed is removed from the game")
+			g.TLogf("c.powerUnleashedIsRemovedFromTheGame")
 			return msgs
 		},
 	})
@@ -544,22 +544,22 @@ func registerMarket() {
 			for _, tp := range g.Players {
 				var subs []engine.Choice
 				for _, c := range tp.Discard {
-					subs = append(subs, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+					subs = append(subs, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: tp.ID, CardID: c.ID}))
 				}
 				if len(subs) == 0 {
 					continue
 				}
 				picks = append(picks, engine.Choice{
-					ID: string(tp.ID), Label: tp.Name, Kind: engine.ChoiceLabel,
-				}.WithThen(engine.AskN("Tried and True: add up to 3 cards to hand", 3, subs...)))
+					ID: string(tp.ID), Label: engine.S(tp.Name), Kind: engine.ChoiceLabel,
+				}.WithThen(engine.AskN(engine.Tf("c.triedAndTrueAddUpTo3CardsToHand"), 3, subs...)))
 			}
 			if len(picks) == 0 {
 				return nil
 			}
-			g.Logf("Tried and True is removed from the game")
+			g.TLogf("c.triedAndTrueIsRemovedFromTheGame")
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Tried and True: which player recovers cards?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.triedAndTrueWhichPlayerRecoversCards"), picks...)}}
 		},
 	})
 
@@ -572,21 +572,21 @@ func registerMarket() {
 			}
 			var picks []engine.Choice
 			if p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "self", Label: p.Name, Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "self", Label: engine.S(p.Name), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ReadyEntity{ID: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Exhausted {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
 			var msgs []engine.Message
 			if len(picks) > 0 {
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID,
-					Question: engine.AskN("Triple Threat: ready up to 3 characters", 3, picks...)})
+					Question: engine.AskN(engine.Tf("c.tripleThreatReadyUpTo3Characters"), 3, picks...)})
 			}
-			g.Logf("Triple Threat is removed from the game")
+			g.TLogf("c.tripleThreatIsRemovedFromTheGame")
 			return msgs
 		},
 	})

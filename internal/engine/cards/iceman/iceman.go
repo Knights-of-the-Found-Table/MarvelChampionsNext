@@ -185,7 +185,7 @@ func registerIcemanSignatures() {
 			}
 			// Stun is applied at attachment time as an approximation for
 			// cancelling the next activation; no activation-cancel hook exists.
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Frozen Solid — choose an enemy", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.frozenSolidChooseAnEnemy"), choices...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			u := g.Upgrades[e.EID()]
@@ -243,12 +243,12 @@ func registerIcemanSignatures() {
 				msgs = append(msgs, engine.AddEntityCounter{ID: id, N: 0})
 			}
 			msgs = append([]engine.Message{engine.DamageEntity{Target: id, Damage: damage, Source: p.ID}}, msgs...)
-			choices = append(choices, engine.Choice{Label: target.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: target.ECode()}.Msgs(msgs...))
+			choices = append(choices, engine.Choice{Label: engine.S(target.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: target.ECode()}.Msgs(msgs...))
 		}
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Arctic Attack — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.arcticAttackChooseAnEnemy"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("46010", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -269,9 +269,9 @@ func registerIcemanSignatures() {
 				msgs = append(msgs, engine.AddEntityCounter{ID: id, N: 0})
 				msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 3, Source: p.ID})
 			}
-			choices = append(choices, engine.Choice{Label: targetPlayer.Name, Kind: engine.ChoiceTarget, SourceID: targetPlayer.ID}.Msgs(msgs...))
+			choices = append(choices, engine.Choice{Label: engine.S(targetPlayer.Name), Kind: engine.ChoiceTarget, SourceID: targetPlayer.ID}.Msgs(msgs...))
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Ice Blast — choose a player", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.iceBlastChooseAPlayer"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("46011", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -281,7 +281,7 @@ func registerIcemanSignatures() {
 		})
 		var follow *engine.Question
 		if len(enemies) > 0 {
-			follow = engine.Ask("Chill Out! — attach Frostbite", enemies...)
+			follow = engine.Ask(engine.Tf("c.chillOutAttachFrostbite"), enemies...)
 		}
 		choices := cardutil.SchemeChoices(g, func(id engine.EntityID) []engine.Message {
 			return []engine.Message{engine.ThwartScheme{Scheme: id, N: 3, Source: p.ID}}
@@ -294,7 +294,7 @@ func registerIcemanSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Chill Out! — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.chillOutChooseAScheme"), choices...)}}
 	}})
 }
 

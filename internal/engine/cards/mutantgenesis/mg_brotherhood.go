@@ -93,7 +93,7 @@ func registerMansionAttack() {
 			if remaining == 0 {
 				return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.xMansionStands")}}
 			}
-			g.Logf("Another Brotherhood villain reveals themselves!")
+			g.TLogf("c.anotherBrotherhoodVillainRevealsThemselves")
 			return nil
 		},
 	})
@@ -257,7 +257,7 @@ func registerBrotherhoodModular() {
 			c := p.Hand[i]
 			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 			p.Discard = append(p.Discard, c)
-			g.Logf("Toad makes %s discard %s", p.Name, c.Def().Name)
+			g.TLogf("c.toadMakesDiscard", p.Name, c)
 			return nil
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {

@@ -20,7 +20,7 @@ func registerAoaScenarios() {
 				MaxThreat: 99,
 			}
 			g.SideSchemes[s.ID] = s
-			g.Logf("Gene Pool enters play")
+			g.TLogf("c.genePoolEntersPlay")
 			return nil
 		},
 	})
@@ -44,7 +44,7 @@ func registerAoaScenarios() {
 			g.Delete(v.ID)
 			for _, o := range g.Villains {
 				if o != nil && o.HP() >= 1 {
-					g.Logf("%s remains standing", o.EDef().Name)
+					g.TLogf("c.remainsStanding", o)
 					return nil
 				}
 			}

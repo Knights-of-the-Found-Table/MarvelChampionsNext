@@ -41,9 +41,9 @@ func evidenceChoices(g *engine.Game, p *engine.Player, n int, prompt string, ext
 	if s == nil || s.Counters < n || s.Exhausted {
 		return nil
 	}
-	choices := []engine.Choice{engine.Choice{ID: "keep", Label: "Do not spend evidence", Kind: engine.ChoicePass}}
-	choices = append(choices, engine.Choice{ID: "spend", Label: fmt.Sprintf("Spend %d evidence", n), Kind: engine.ChoiceLabel}.Msgs(append([]engine.Message{engine.ExhaustEntity{ID: s.ID}, engine.AddEntityCounter{ID: s.ID, N: -n}}, extra()...)...))
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(prompt, choices...)}}
+	choices := []engine.Choice{engine.Choice{ID: "keep", Label: engine.S("Do not spend evidence"), Kind: engine.ChoicePass}}
+	choices = append(choices, engine.Choice{ID: "spend", Label: engine.S(fmt.Sprintf("Spend %d evidence", n)), Kind: engine.ChoiceLabel}.Msgs(append([]engine.Message{engine.ExhaustEntity{ID: s.ID}, engine.AddEntityCounter{ID: s.ID, N: -n}}, extra()...)...))
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S(prompt), choices...)}}
 }
 
 func registerIdentity() {
@@ -102,7 +102,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Luke Cage — take 1 damage to gain tough", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.S("Luke Cage — take 1 damage to gain tough"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DamageEntity{Target: self, Damage: 1, Source: self}, engine.ToughEntity{Target: self}}
 				},
@@ -121,7 +121,7 @@ func registerSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Big Mistake — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.S("Big Mistake — choose an enemy"), choices...)}}
 	}})
 	engine.RegisterBehavior("61005", &engine.Behavior{React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 		_, ok := msg.(engine.AddEntityCounter)
@@ -144,7 +144,7 @@ func registerSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		msgs := []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Snooping Around — remove 4 threat", choices...)}}
+		msgs := []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.S("Snooping Around — remove 4 threat"), choices...)}}
 		if len(g.EncounterDeck) > 0 {
 			c := g.EncounterDeck[0]
 			msgs = append(msgs, engine.DiscardEncounterCard{Card: c})
@@ -165,7 +165,7 @@ func registerSignatures() {
 			if s == nil || p == nil || p.IsHero() || s.Exhausted || a == nil || a.Counters < 2 {
 				return nil
 			}
-			return []engine.Ability{{Label: "Calling in Favors — spend 2 evidence for an ally", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
+			return []engine.Ability{{Label: engine.S("Calling in Favors — spend 2 evidence for an ally"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					for i, c := range p.Deck {
 						if c.Def().Type == "ally" {
@@ -193,14 +193,14 @@ func registerSignatures() {
 					if n < 0 {
 						n = 0
 					}
-					cs = append(cs, engine.Choice{Label: m.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id}.Msgs(engine.ExhaustEntity{ID: u.ID}, engine.AddEntityCounter{ID: a.ID, N: -n}, engine.DiscardControlled{Player: p.ID, ID: id}))
+					cs = append(cs, engine.Choice{Label: engine.S(m.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.Msgs(engine.ExhaustEntity{ID: u.ID}, engine.AddEntityCounter{ID: a.ID, N: -n}, engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			if len(cs) == 0 {
 				return nil
 			}
-			return []engine.Ability{{Label: "4K Digital Camcorder — discard a minion", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
-				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("4K Digital Camcorder — choose a minion", cs...)}}
+			return []engine.Ability{{Label: engine.S("4K Digital Camcorder — discard a minion"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S("4K Digital Camcorder — choose a minion"), cs...)}}
 			}}}
 		},
 	})
@@ -298,14 +298,14 @@ func registerSignatures() {
 			if a == nil || a.Counters < 1 {
 				return nil
 			}
-			return []engine.Ability{{Label: "Squirrel Girl — remove 1 threat", Type: engine.AbilityAction, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+			return []engine.Ability{{Label: engine.S("Squirrel Girl — remove 1 threat"), Type: engine.AbilityAction, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				cs := cardutil.SchemeChoices(g, func(id engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AddEntityCounter{ID: self, N: -1}, engine.ThwartScheme{Scheme: id, N: 1, Source: self}}
 				})
 				if len(cs) == 0 {
 					return nil
 				}
-				return []engine.Message{engine.AskQuestion{Player: a.Owner, Question: engine.Ask("Squirrel Girl — choose a scheme", cs...)}}
+				return []engine.Message{engine.AskQuestion{Player: a.Owner, Question: engine.Ask(engine.S("Squirrel Girl — choose a scheme"), cs...)}}
 			}}}
 		},
 	})

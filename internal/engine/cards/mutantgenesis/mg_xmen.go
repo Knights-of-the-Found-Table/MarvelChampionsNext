@@ -4,8 +4,6 @@
 package mutantgenesis
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -41,13 +39,13 @@ func registerXMenShared() {
 			var choices []engine.Choice
 			if xMenControlled(g, p) {
 				choices = append(choices, engine.Choice{
-					Label: "Tough on " + p.Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.S("Tough on " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.ToughEntity{Target: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: "Tough on " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.S("Tough on " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -56,7 +54,7 @@ func registerXMenShared() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Polaris — give an X-Men character a tough status card", choices...),
+				Question: engine.Ask(engine.Tf("c.polarisGiveAnXMenCharacterAToughStatusCard"), choices...),
 			}}
 		},
 	})
@@ -109,7 +107,7 @@ func registerXMenShared() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Defend with " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Defend with " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.AllyEntersPlayFree{Player: p.ID, Card: c}))
 			}
 			if len(choices) == 0 {
@@ -118,7 +116,7 @@ func registerXMenShared() {
 			return engine.Defends{Defender: p.ID, Against: against},
 				[]engine.Message{engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.Ask("Mutant Protectors — put an X-Men ally into play as the defender (it must be exhausted and declared the defender manually)", append(choices, cardutil.Skip())...),
+					Question: engine.Ask(engine.Tf("c.mutantProtectorsPutAnXMenAllyIntoPlayAsTheDefenderItMustBeEx"), append(choices, cardutil.Skip())...),
 				}}, true
 		},
 	})
@@ -138,20 +136,20 @@ func registerXMenShared() {
 			var choices []engine.Choice
 			if v := activeOrFirstVillain(g); v != nil {
 				choices = append(choices, engine.Choice{
-					Label: "Confuse " + v.EDef().Name, Kind: engine.ChoiceTarget, SourceID: v.ID,
+					Label: engine.S("Confuse " + v.EDef().Name), Kind: engine.ChoiceTarget, SourceID: v.ID,
 				}.Msgs(engine.ConfuseEntity{Target: v.ID}))
 			}
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				if mn := g.Minions[id]; mn != nil {
 					choices = append(choices, engine.Choice{
-						Label: "Stun " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.stun2", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.StunEntity{Target: id}))
 				}
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: "Ready " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -160,7 +158,7 @@ func registerXMenShared() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Professor X — choose one", choices...),
+				Question: engine.Ask(engine.Tf("c.professorXChooseOne"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -173,7 +171,7 @@ func registerXMenShared() {
 				if p != nil {
 					p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: a.Code, Owner: p.ID})
 				}
-				g.Logf("Professor X leaves play at the end of the round")
+				g.TLogf("c.professorXLeavesPlayAtTheEndOfTheRound")
 			}
 			return nil
 		},
@@ -226,7 +224,7 @@ func registerXMenShared() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Shuffle " + cardutil.EnemyLabel(mn) + " into the encounter deck", Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.shuffleIntoTheEncounterDeck", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.ShuffleMinionIntoDeck{MinionID: id}))
 			}
 			if len(choices) == 0 {
@@ -234,7 +232,7 @@ func registerXMenShared() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Magik — shuffle a non-Elite minion engaged with you into the encounter deck", append(choices, cardutil.Skip())...),
+				Question: engine.Ask(engine.Tf("c.magikShuffleANonEliteMinionEngagedWithYouIntoTheEncounterDec"), append(choices, cardutil.Skip())...),
 			}}
 		},
 	})
@@ -259,7 +257,7 @@ func registerXMenShared() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.attachTo2", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 2}))
 			}
 			if len(choices) == 0 {
@@ -267,7 +265,7 @@ func registerXMenShared() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   e.EOwner(),
-				Question: engine.Ask("Gatekeeper — attach to a minion", choices...),
+				Question: engine.Ask(engine.Tf("c.gatekeeperAttachToAMinion"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -311,7 +309,7 @@ func registerXMenShared() {
 			}
 			return append(msgs, engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask(fmt.Sprintf("Team Strike — deal %d damage", total), choices...),
+				Question: engine.Ask(engine.Tf("c.teamStrikeDealDamage", total), choices...),
 			})
 		},
 	})
@@ -331,7 +329,7 @@ func registerXMenShared() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Toe to Toe — choose an enemy (it attacks you; deal it 5 damage)", choices...),
+				Question: engine.Ask(engine.Tf("c.toeToToeChooseAnEnemyItAttacksYouDealIt5Damage"), choices...),
 			}}
 		},
 	})
@@ -356,7 +354,7 @@ func registerXMenShared() {
 	engine.RegisterBehavior("32049", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "X-Mansion — heal 1 damage from a MUTANT or X-Men character", Type: engine.AbilityAction,
+				Label: engine.Tf("c.xMansionHeal1DamageFromAMutantOrXMenCharacter"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -367,7 +365,7 @@ func registerXMenShared() {
 					add := func(id engine.EntityID, label string, mutant bool) {
 						if mutant {
 							choices = append(choices, engine.Choice{
-								Label: "Heal " + label, Kind: engine.ChoiceTarget, SourceID: id,
+								Label: engine.S("Heal " + label), Kind: engine.ChoiceTarget, SourceID: id,
 							}.Msgs(engine.HealEntity{Target: id, N: 1}))
 						}
 					}
@@ -382,7 +380,7 @@ func registerXMenShared() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("X-Mansion — heal 1 damage", choices...),
+						Question: engine.Ask(engine.Tf("c.xMansionHeal1Damage"), choices...),
 					}}
 				},
 			}}
@@ -451,7 +449,7 @@ func registerXMenShared() {
 					return nil
 				}
 				g.MutantBombCounters++
-				g.Logf("Boom Boom plants a bomb counter (%d in play)", g.MutantBombCounters)
+				g.TLogf("c.boomBoomPlantsABombCounterInPlay", g.MutantBombCounters)
 			case engine.EndPhase:
 				if m.Phase != engine.PhasePlayer || g.MutantBombCounters <= 0 {
 					return nil
@@ -469,7 +467,7 @@ func registerXMenShared() {
 						msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 2 * n, Source: a.ID})
 					}
 				}
-				g.Logf("Boom Boom's %d bombs detonate", n)
+				g.TLogf("c.boomBoomSBombsDetonate", n)
 				return msgs
 			}
 			return nil
@@ -490,15 +488,15 @@ func registerXMenShared() {
 			var choices []engine.Choice
 			if !p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "exhaust", Label: "Exhaust your identity → discard Warn the Others", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustYourIdentityDiscardWarnTheOthers"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 			}
 			choices = append(choices, engine.Choice{
-				ID: "tuck", Label: "Place facedown under Operation Zero Tolerance", Kind: engine.ChoiceLabel,
+				ID: "tuck", Label: engine.Tf("c.placeFacedownUnderOperationZeroTolerance"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card}))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Warn the Others — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.warnTheOthersChoose"), choices...),
 			}}
 		},
 	})
@@ -534,7 +532,7 @@ func registerTraining(code string, atk, hp int) {
 					continue // max 1 Training upgrade per ally
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+					Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, ATK: atk, MaxHP: hp}))
 			}
 			if len(choices) == 0 {
@@ -542,7 +540,7 @@ func registerTraining(code string, atk, hp int) {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask(u.EDef().Name + " — attach to an X-Men ally", choices...),
+				Question: engine.Ask(engine.S(u.EDef().Name+" — attach to an X-Men ally"), choices...),
 			}}
 		},
 	})

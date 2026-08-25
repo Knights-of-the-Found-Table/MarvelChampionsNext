@@ -38,7 +38,7 @@ func (g *Game) drawEncounter() (Card, bool) {
 		g.shuffle(&g.EncounterDeck)
 		if g.MainScheme != nil {
 			g.MainScheme.AccelerationTokens++
-			g.tlogf("log.encounterReshuffledAccel", g.MainScheme.EDef().Name)
+			g.tlogf("log.encounterReshuffledAccel", g.MainScheme)
 		} else {
 			g.tlogf("log.encounterReshuffled")
 		}
@@ -77,7 +77,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 	if s := g.SideSchemes[schemeID]; s != nil {
 		s.Threat += n
 		g.emit(Evt{Type: "threat", Src: source, Dst: schemeID, N: n})
-		g.tlogf("log.gainsThreat", s.EDef().Name, n, s.Threat)
+		g.tlogf("log.gainsThreat", s, n, s.Threat)
 		return
 	}
 	if g.MainScheme != nil && schemeID == g.MainScheme.ID {
@@ -100,7 +100,7 @@ func (g *Game) addThreat(schemeID EntityID, n int, source EntityID) {
 		}
 		s.Threat += n
 		g.emit(Evt{Type: "threat", Src: source, Dst: schemeID, N: n})
-		g.tlogf("log.gainsThreatMax", s.EDef().Name, n, s.Threat, s.MaxThreat)
+		g.tlogf("log.gainsThreatMax", s, n, s.Threat, s.MaxThreat)
 		if s.Threat >= s.MaxThreat {
 			g.Push(MainSchemeMaxed{Scheme: s.ID})
 		}
@@ -181,7 +181,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 		if d := before - s.Threat; d > 0 {
 			g.emit(Evt{Type: "thwart", Src: source, Dst: schemeID, N: d})
 		}
-		g.tlogf("log.losesThreat", s.EDef().Name, n, s.Threat)
+		g.tlogf("log.losesThreat", s, n, s.Threat)
 		if s.Threat == 0 {
 			g.Push(SchemeDefeated{Scheme: s.ID})
 		}
@@ -197,7 +197,7 @@ func (g *Game) removeThreat(schemeID EntityID, n int, source EntityID) {
 		if d := before - s.Threat; d > 0 {
 			g.emit(Evt{Type: "thwart", Src: source, Dst: schemeID, N: d})
 		}
-		g.tlogf("log.losesThreatMax", s.EDef().Name, before-s.Threat, s.Threat, s.MaxThreat)
+		g.tlogf("log.losesThreatMax", s, before-s.Threat, s.Threat, s.MaxThreat)
 		if before > 0 && s.Threat == 0 {
 			g.Push(SchemeDefeated{Scheme: s.ID})
 		}
@@ -354,7 +354,7 @@ func (g *Game) destroyAlly(id EntityID) {
 	code := a.Code
 	g.Delete(id)
 	g.cardLeavesPlay(owner, code, a.EDef().Name)
-	g.tlogMajorf("log.destroyed", a.EDef().Name)
+	g.tlogMajorf("log.destroyed", a)
 }
 
 // eventBonusFor applies a pending Embiggen!/Shrink bonus to a value
@@ -396,7 +396,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		}
 		scen := g.Scenario()
 		if scen.VillainUndamageable[e.Stage] {
-			g.tlogf("log.cannotBeDamaged", e.EDef().Name)
+			g.tlogf("log.cannotBeDamaged", e)
 			return
 		}
 		if b := behavior(e.Code); b.VillainDamageable != nil && !b.VillainDamageable(g, e, n) {
@@ -413,7 +413,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 			if a == nil || a.Code != "40034" {
 				continue
 			}
-			g.tlogf("log.takesNoDamageTFF", e.EDef().Name)
+			g.tlogf("log.takesNoDamageTFF", e)
 			if n >= 2 {
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
@@ -423,7 +423,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		}
 		if e.Tough {
 			e.Tough = false
-			g.tlogf("log.toughPrevents", e.EDef().Name)
+			g.tlogf("log.toughPrevents", e)
 			return
 		}
 		if adj, ok := g.eventBonusFor(n, source, "damage"); ok {
@@ -431,7 +431,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.tlogf("log.takesDamage", e.EDef().Name, n, e.Damage, e.MaxHP)
+		g.tlogf("log.takesDamage", e, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(VillainDefeated{VillainID: e.ID})
 		}
@@ -443,7 +443,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		// take damage.
 		for _, aid := range e.Attachments {
 			if a := g.Attachments[aid]; a != nil && a.Code == "38035" {
-				g.tlogf("log.cannotTakeDamageCyb", e.EDef().Name)
+				g.tlogf("log.cannotTakeDamageCyb", e)
 				return
 			}
 		}
@@ -453,7 +453,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 			if a == nil || a.Code != "40034" {
 				continue
 			}
-			g.tlogf("log.takesNoDamageTFF", e.EDef().Name)
+			g.tlogf("log.takesNoDamageTFF", e)
 			if n >= 2 {
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
@@ -490,13 +490,13 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 				e.Damage = 0
 				g.Delete(aid)
 				g.EncounterDiscard = append(g.EncounterDiscard, Card{ID: g.nextCardID(), Code: a.Code})
-				g.tlogMajorf("log.healsAllBiomech", e.EDef().Name)
+				g.tlogMajorf("log.healsAllBiomech", e)
 				return
 			}
 		}
 		if e.Tough {
 			e.Tough = false
-			g.tlogf("log.toughPrevents", e.EDef().Name)
+			g.tlogf("log.toughPrevents", e)
 			return
 		}
 		if adj, ok := g.eventBonusFor(n, source, "damage"); ok {
@@ -504,7 +504,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.tlogf("log.takesDamage", e.EDef().Name, n, e.Damage, e.MaxHP)
+		g.tlogf("log.takesDamage", e, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(MinionDefeated{MinionID: e.ID})
 		}
@@ -522,7 +522,7 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 		}
 		e.Damage += n
 		g.emit(Evt{Type: "damage", Src: source, Dst: id, N: n})
-		g.tlogf("log.takesDamage", e.EDef().Name, n, e.Damage, e.MaxHP)
+		g.tlogf("log.takesDamage", e, n, e.Damage, e.MaxHP)
 		if e.HP() <= 0 {
 			g.Push(AllyDefeated{AllyID: e.ID})
 		}
@@ -695,7 +695,7 @@ func (g *Game) heal(id EntityID, n int) {
 		if d := before - e.Damage; d > 0 {
 			g.emit(Evt{Type: "heal", Dst: id, N: d})
 		}
-		g.tlogf("log.heals", e.EDef().Name, before-e.Damage)
+		g.tlogf("log.heals", e, before-e.Damage)
 	case *Villain:
 		// villains do not heal via generic HealEntity
 	}

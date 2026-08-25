@@ -56,7 +56,7 @@ func registerGoblinEncounterCards() {
 				def := c.Def()
 				if def.Type == "minion" && def.HasTrait("goblin") {
 					g.EncounterDeck = append(g.EncounterDeck[:i], g.EncounterDeck[i+1:]...)
-					g.Logf("Goblin Knight summons %s", def.Name)
+					g.TLogf("c.goblinKnightSummons", def.Name)
 					return []engine.Message{engine.RevealEncounterCard{Player: mn.EngagedWith, Card: c}}
 				}
 			}
@@ -85,7 +85,7 @@ func registerGoblinEncounterCards() {
 				}
 				if n > 0 {
 					s.Threat += n
-					g.Logf("Goblin Reinforcements: +%d threat", n)
+					g.TLogf("c.goblinReinforcementsThreat", n)
 				}
 			}
 			return nil
@@ -163,7 +163,7 @@ func attachHighestHP(code string) {
 			}
 			t.Target = best
 			if e := g.Entity(best); e != nil {
-				g.Logf("%s attaches to %s", t.EDef().Name, e.EDef().Name)
+				g.TLogf("log.attachesTo", t, e)
 			}
 			return []engine.Message{engine.BoostEnemyAttack{Enemy: best, N: 1}}
 		},

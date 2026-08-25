@@ -35,7 +35,7 @@ func registerRemainingPhoenix() {
 				pv = room
 			}
 			u.Counters += pv
-			g.Logf("Telekinetic Shield absorbs %d damage (%d/5)", pv, u.Counters)
+			g.TLogf("c.telekineticShieldAbsorbsDamage5", pv, u.Counters)
 			if u.Counters >= 5 {
 				g.Delete(u.ID)
 				if p != nil {
@@ -61,7 +61,7 @@ func registerRemainingPhoenix() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.attachTo2", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			if len(choices) == 0 {
@@ -69,13 +69,13 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   e.EOwner(),
-				Question: engine.Ask("Mental Paralysis — attach to a non-Elite minion", choices...),
+				Question: engine.Ask(engine.Tf("c.mentalParalysisAttachToANonEliteMinion"), choices...),
 			}}
 		},
 		MinionActivate: func(g *engine.Game, mn *engine.Minion, p *engine.Player) []engine.Message {
 			for _, uid := range g.Upgrades {
 				if uid != nil && uid.Code == "34008" && uid.AttachTo == mn.ID {
-					g.Logf("%s is paralyzed and cannot activate", mn.EDef().Name)
+					g.TLogf("c.isParalyzedAndCannotActivate", mn)
 					return nil
 				}
 			}
@@ -92,7 +92,7 @@ func registerRemainingPhoenix() {
 			if p := g.Player(m.Player); p != nil && !p.IsHero() {
 				g.Delete(u.ID)
 				p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
-				g.Logf("Mental Paralysis is discarded")
+				g.TLogf("c.mentalParalysisIsDiscarded")
 			}
 			return nil
 		},
@@ -113,7 +113,7 @@ func registerRemainingPhoenix() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Control " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.control", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.ConvertMinionToAlly{MinionID: id, Owner: p.ID, Consequential: 1}))
 			}
 			if len(choices) == 0 {
@@ -121,7 +121,7 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Mind Control — take control of a non-Elite minion", choices...),
+				Question: engine.Ask(engine.Tf("c.mindControlTakeControlOfANonEliteMinion"), choices...),
 			}}
 		},
 	})
@@ -145,7 +145,7 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Telekinetic Attack", choices...),
+				Question: engine.Ask(engine.Tf("c.telekineticAttack"), choices...),
 			}}
 		},
 	})
@@ -179,7 +179,7 @@ func registerRemainingPhoenix() {
 			if p == nil {
 				return nil
 			}
-			base := cardutil.ChooseScheme("Telepathic Trickery", func(g *engine.Game, e engine.Entity) int { return 4 })
+			base := cardutil.ChooseScheme(engine.Tf("c.telepathicTrickeryChooseAScheme"), func(g *engine.Game, e engine.Entity) int { return 4 })
 			msgs := base(g, e)
 			if g.EntityHasTrait(p.ID, "unleashed") {
 				if v := firstVillainEntity(g); v != nil {
@@ -199,12 +199,12 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Phoenix Firebird — choose:", []engine.Choice{
+				Question: engine.Ask(engine.Tf("c.phoenixFirebirdChoose"), []engine.Choice{
 					engine.Choice{
-						ID: "ready", Label: "Remove 1 power counter → ready Phoenix", Kind: engine.ChoiceLabel,
+						ID: "ready", Label: engine.Tf("c.remove1PowerCounterReadyPhoenix"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.AddEntityCounter{ID: p.ID, N: -1}, engine.ReadyEntity{ID: p.ID}),
 					engine.Choice{
-						ID: "charge", Label: "Place 2 power counters on Phoenix Force", Kind: engine.ChoiceLabel,
+						ID: "charge", Label: engine.Tf("c.place2PowerCountersOnPhoenixForce"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.AddEntityCounter{ID: p.ID, N: 2}),
 				}...),
 			}}
@@ -321,7 +321,7 @@ func registerRemainingPhoenix() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: "Move 2 threat to " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.S("Move 2 threat to " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.ThwartScheme{Scheme: m.Scheme, N: 2, Source: a.Owner},
 					engine.SchemeThreat{Scheme: id, N: 2, Source: a.Owner}))
 			}
@@ -330,7 +330,7 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   a.Owner,
-				Question: engine.Ask("Storm — move 2 threat to another scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.stormMove2ThreatToAnotherScheme"), choices...),
 			}}
 		},
 	})
@@ -343,7 +343,7 @@ func registerRemainingPhoenix() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Cerebro — search for an X-Men ally", Type: engine.AbilityAction,
+				Label: engine.Tf("c.cerebroSearchForAnXMenAlly"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -360,7 +360,7 @@ func registerRemainingPhoenix() {
 							p.Deck = append(p.Deck[:i], p.Deck[i+1:]...)
 							c.Owner = p.ID
 							p.Hand = append(p.Hand, c)
-							g.Logf("Cerebro finds %s", c.Def().Name)
+							g.TLogf("c.cerebroFinds", c)
 							return nil
 						}
 					}
@@ -459,7 +459,7 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Psychic Assault", choices...),
+				Question: engine.Ask(engine.Tf("c.psychicAssault"), choices...),
 			}}
 		},
 	})
@@ -493,7 +493,7 @@ func registerRemainingPhoenix() {
 				if a := g.Allies[id]; a != nil {
 					aid := id
 					choices = append(choices, engine.Choice{
-						Label: "Ready " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
+						Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
 					}.Msgs(engine.ReadyEntity{ID: aid}, engine.AllyStatBonus{Ally: aid, THW: 2, ATK: 2}))
 				}
 			}
@@ -502,7 +502,7 @@ func registerRemainingPhoenix() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Psychic Kicker — ready an ally (+2 THW / +2 ATK)", choices...),
+				Question: engine.Ask(engine.Tf("c.psychicKickerReadyAnAlly2Thw2Atk"), choices...),
 			}}
 		},
 	})
@@ -544,7 +544,7 @@ func attachTrainingPHX(bonus func() (thw, atk, hp int)) func(g *engine.Game, e e
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: "Attach to " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+				Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 			}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, THW: thw, ATK: atk, MaxHP: hp}))
 		}
 		if len(choices) == 0 {
@@ -552,7 +552,7 @@ func attachTrainingPHX(bonus func() (thw, atk, hp int)) func(g *engine.Game, e e
 		}
 		return []engine.Message{engine.AskQuestion{
 			Player:   p.ID,
-			Question: engine.Ask(u.EDef().Name+" — attach to an X-Men ally", choices...),
+			Question: engine.Ask(engine.S(u.EDef().Name+" — attach to an X-Men ally"), choices...),
 		}}
 	}
 }

@@ -104,7 +104,7 @@ func registerKlaw() {
 					return []engine.Message{engine.RevealEncounterCard{Player: firstPlayer(g), Card: c}}
 				}
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
-				g.Logf("%s is discarded", c.Def().Name)
+				g.TLogf("log.discarded", c)
 			}
 			return nil
 		},

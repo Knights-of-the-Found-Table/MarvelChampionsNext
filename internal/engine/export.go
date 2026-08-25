@@ -19,7 +19,8 @@ func LookupScenarioName(id string) string {
 }
 
 // Logf appends a human-readable line to the game log (exported for card
-// behavior packages).
+// behavior packages). It takes a raw format string and stays untranslated;
+// prefer TLogf with a message-catalog key.
 func (g *Game) Logf(format string, args ...any) { g.logf(format, args...) }
 
 // LogMinorf appends a minor (bookkeeping) line to the game log.
@@ -27,6 +28,17 @@ func (g *Game) LogMinorf(format string, args ...any) { g.logMinorf(format, args.
 
 // LogMajorf appends a major (pivotal moment) line to the game log.
 func (g *Game) LogMajorf(format string, args ...any) { g.logMajorf(format, args...) }
+
+// TLogf appends a keyed, catalog-backed log line (exported for card behavior
+// packages). args are stored structurally so the client can render them in
+// the viewer's language; see the i18n notes in i18n.go.
+func (g *Game) TLogf(key string, args ...any) { g.tlogf(key, args...) }
+
+// TLogMinorf appends a keyed minor (bookkeeping) catalog line.
+func (g *Game) TLogMinorf(key string, args ...any) { g.tlogMinorf(key, args...) }
+
+// TLogMajorf appends a keyed major (pivotal moment) catalog line.
+func (g *Game) TLogMajorf(key string, args ...any) { g.tlogMajorf(key, args...) }
 
 // DrawEncounter pops the top encounter card, reshuffling when empty
 // (exported for card behavior packages).
@@ -70,11 +82,9 @@ func (g *Game) AttackQuestion(attackerID EntityID, atk int, p *Player, trigger s
 // CustomPaymentQuestion builds a validated payment prompt for card-defined
 // flows (Make the Call). Context key "makeCallFrom"/"makeCallCard" routes
 // the payment to an AllyEntersPlayFree message.
-func (g *Game) CustomPaymentQuestion(p *Player, cost int, prompt string, ctx map[string]any) *Question {
-	q := &Question{
-		Type:   "choose_n",
-		Prompt: prompt,
-	}
+func (g *Game) CustomPaymentQuestion(p *Player, cost int, prompt Msg, ctx map[string]any) *Question {
+	q := &Question{Type: "choose_n"}
+	q.SetPrompt(prompt)
 	q.Choices = g.resourcePayChoices(p, nil, nil)
 	q.Validate = fmt.Sprintf("payment:%d", cost)
 	if ctx == nil {
@@ -82,7 +92,7 @@ func (g *Game) CustomPaymentQuestion(p *Player, cost int, prompt string, ctx map
 	}
 	ctx["player"] = p.ID.String()
 	if ctx["abilityIcons"] == nil {
-		if icons := paymentIconSpec(prompt); icons != "" {
+		if icons := paymentIconSpec(prompt.Text); icons != "" {
 			ctx["abilityIcons"] = icons
 		}
 	}

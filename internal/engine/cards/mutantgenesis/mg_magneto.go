@@ -135,7 +135,7 @@ func registerMagneto() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Wrapped in Metal — exhaust + spend [physical] → discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.wrappedInMetalExhaustSpendPhysicalDiscard"), Type: engine.AbilityAction,
 				Cost: 1, CostIcons: "physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					t := g.Attachments[self]
@@ -164,7 +164,7 @@ func registerMagneto() {
 				if c.Def().HasTrait("magnetic") {
 					g.EncounterDiscard = append(g.EncounterDiscard[:i], g.EncounterDiscard[i+1:]...)
 					v.BoostCount += cardutil.BoostOf(c)
-					g.Logf("%s becomes Magneto's facedown boost card", c.Def().Name)
+					g.TLogf("c.becomesMagnetoSFacedownBoostCard", c)
 					break
 				}
 			}
@@ -322,7 +322,7 @@ func registerMagneto() {
 					s.StoredCards = append(s.StoredCards, top)
 				}
 			}
-			g.Logf("Seized! — each player's top 6 cards are trapped")
+			g.TLogf("c.seizedEachPlayerSTop6CardsAreTrapped")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -459,7 +459,7 @@ func registerAcolytes() {
 				i++
 			}
 			if shuffled > 0 {
-				g.Logf("The Acolytes shuffle %d members back into the deck", shuffled)
+				g.TLogf("c.theAcolytesShuffleMembersBackIntoTheDeck", shuffled)
 			}
 			return nil
 		},

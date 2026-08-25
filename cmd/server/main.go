@@ -48,8 +48,8 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/hulk"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/iceman"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/ironheart"
-	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicajones"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicadrew"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jessicajones"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/jubilee"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/lukecage"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/madtansshadow"
@@ -106,34 +106,21 @@ func main() {
 	staticDir := envOr("MC_STATIC_DIR", "web/dist")
 	cacheDir := envOr("MC_CACHE_DIR", "cache")
 
-	// Simplified Chinese output (default): MC_LANG=zh overlays the card
-	// database with the community translations (tools/zh/out by default,
-	// override with MC_ZH_DIR) and makes the engine emit Chinese logs,
-	// prompts, and choice labels via the i18n message catalog. MC_LANG=en
-	// serves English; an explicitly set MC_ZH_DIR still applies the
-	// card-name overlay alone.
-	lang := engine.Lang(os.Getenv("MC_LANG"))
-	if lang == "" {
-		lang = engine.LangZh
-	}
-	zhDir := os.Getenv("MC_ZH_DIR")
-	if zhDir == "" && lang == engine.LangZh {
-		zhDir = "tools/zh/out"
-	}
-	if zhDir != "" {
+	// The API is language-neutral: logs, prompts and labels travel as
+	// message keys + structured args and are rendered by each client in its
+	// own locale (GET /api/v1/locales/{lang} serves the catalog). The
+	// engine therefore always renders its canonical English text.
+	// MC_ZH_DIR opts a deployment into a server-wide Simplified-Chinese
+	// card-DATA overlay (names/traits on card definitions) — a single-locale
+	// convenience; multi-locale sites leave it off and let clients resolve
+	// names by card code.
+	if zhDir := os.Getenv("MC_ZH_DIR"); zhDir != "" {
 		n, err := engine.ApplyChinese(engine.DB, zhDir)
 		if err != nil {
-			if os.Getenv("MC_ZH_DIR") != "" {
-				logx.Fatal("zh translations", "error", err)
-			}
-			slog.Warn("zh translations unavailable; serving English", "error", err)
-		} else {
-			engine.RelabelScenarios(engine.DB)
-			slog.Info("zh translations overlaid", "cards", n, "dir", zhDir)
-			if lang == engine.LangZh {
-				engine.SetLang(engine.LangZh)
-			}
+			logx.Fatal("zh translations", "error", err)
 		}
+		engine.RelabelScenarios(engine.DB)
+		slog.Info("zh card data overlaid (server-wide locale override)", "cards", n, "dir", zhDir)
 	}
 
 	secret := os.Getenv("MC_JWT_SECRET")

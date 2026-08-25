@@ -33,7 +33,7 @@ func registerMagik() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Play the top card of your deck with cost reduced by 1",
+				Label: engine.Tf("c.playTheTopCardOfYourDeckWithCostReducedBy1"),
 				Type:  engine.AbilityAction, HeroOnly: true, OncePerTurn: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					pl := g.Player(self)
@@ -60,7 +60,7 @@ func registerMagik() {
 				if c.Def().HasTrait("spell") {
 					// No discard-to-deck-top message exists. ShuffleIntoDeck
 					// preserves the zone change but randomizes its final position.
-					choices = append(choices, engine.Choice{Label: "Return " + c.Def().Name + " to your deck", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.S("Return " + c.Def().Name + " to your deck"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -68,7 +68,7 @@ func registerMagik() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Illyana Rasputin — return a Spell to your deck", choices...)}}
+				Question: engine.Ask(engine.Tf("c.illyanaRasputinReturnASpellToYourDeck"), choices...)}}
 		},
 	})
 }
@@ -79,7 +79,7 @@ func registerMagikSignatures() {
 	engine.RegisterBehavior("45031", &engine.Behavior{})
 
 	engine.RegisterBehavior("45032", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Limbo — swap a hand card with the top of your deck", Type: engine.AbilityAction, Exhaust: true,
+		return []engine.Ability{{Label: engine.Tf("c.limboSwapAHandCardWithTheTopOfYourDeck"), Type: engine.AbilityAction, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				s := g.Supports[self]
 				if s == nil {
@@ -88,13 +88,13 @@ func registerMagikSignatures() {
 				p := g.Player(s.Owner)
 				var choices []engine.Choice
 				for _, c := range p.Hand {
-					choices = append(choices, engine.Choice{Label: "Put " + c.Def().Name + " on top", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.S("Put " + c.Def().Name + " on top"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.SwapHandWithDeckTop{Player: p.ID, CardID: c.ID}))
 				}
 				if len(choices) == 0 || len(p.Deck) == 0 {
 					return nil
 				}
-				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Limbo — choose a hand card", choices...)}}
+				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.limboChooseAHandCard"), choices...)}}
 			}}}
 	}})
 
@@ -126,12 +126,12 @@ func registerMagikSignatures() {
 		n := min(3, len(p.Deck))
 		var choices []engine.Choice
 		for _, c := range p.Deck[:n] {
-			choices = append(choices, engine.Choice{Label: "Draw " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+			choices = append(choices, engine.Choice{Label: engine.S("Draw " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 				Msgs(engine.TopDeckPick{Player: p.ID, CardID: c.ID}))
 		}
 		// TopDeckPick draws one and bottoms the others. This approximates
 		// Scrying's separate discard-one / return-one ordering decisions.
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Scrying — choose a card to draw", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.scryingChooseACardToDraw"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("45037", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -139,14 +139,14 @@ func registerMagikSignatures() {
 		var choices []engine.Choice
 		for _, c := range p.Discard {
 			if c.Code != "45037" && c.Def().CardSet == "magik" {
-				choices = append(choices, engine.Choice{Label: "Return " + c.Def().Name + " to your deck", Kind: engine.ChoiceCard, CardCode: c.Code}.
+				choices = append(choices, engine.Choice{Label: engine.S("Return " + c.Def().Name + " to your deck"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 					Msgs(engine.ReadyEntity{ID: p.ID}, engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 			}
 		}
 		if len(choices) == 0 {
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Stepping Disc — choose a Magik card", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.steppingDiscChooseAMagikCard"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("45038", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -164,7 +164,7 @@ func registerMagikSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Exorcism — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.exorcismChooseAScheme"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("45039", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -179,7 +179,7 @@ func registerMagikSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Soul Strike — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.soulStrikeChooseAnEnemy"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("45040", &engine.Behavior{DefenseEvent: func(g *engine.Game, p *engine.Player, e *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
@@ -198,12 +198,12 @@ func registerMagikObligation() {
 			penalty = append(penalty, engine.DamageEntity{Target: id, Damage: 1, Source: p.ID})
 		}
 		penalty = append(penalty, engine.ObligationResolve{Player: p.ID, Card: card})
-		choices := []engine.Choice{engine.Choice{ID: "darkchilde", Label: "Deal 1 damage to each character you control", Kind: engine.ChoiceLabel}.Msgs(penalty...)}
+		choices := []engine.Choice{engine.Choice{ID: "darkchilde", Label: engine.Tf("c.deal1DamageToEachCharacterYouControl"), Kind: engine.ChoiceLabel}.Msgs(penalty...)}
 		if !p.IsHero() && !p.Exhausted {
-			choices = append(choices, engine.Choice{ID: "remove", Label: "Exhaust Illyana Rasputin and remove Darkchilde", Kind: engine.ChoiceLabel}.
+			choices = append(choices, engine.Choice{ID: "remove", Label: engine.Tf("c.exhaustIllyanaRasputinAndRemoveDarkchilde"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Darkchilde — choose", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.darkchildeChoose"), choices...)}}
 	}})
 }
 

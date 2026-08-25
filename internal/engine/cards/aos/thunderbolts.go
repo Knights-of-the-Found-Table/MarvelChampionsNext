@@ -70,7 +70,7 @@ func registerThunderbolts() {
 			if thunderboltVictories(g) >= len(g.Players) {
 				return true
 			}
-			g.Logf("Citizen V cannot be defeated yet (%d/%d Thunderbolts in the victory display)",
+			g.TLogf("c.citizenVCannotBeDefeatedYetThunderboltsInTheVictoryDisplay",
 				thunderboltVictories(g), len(g.Players))
 			v.Damage = v.MaxHP - 1
 			return false
@@ -89,7 +89,7 @@ func registerThunderbolts() {
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			if v := g.Villains[target]; v != nil {
 				v.AttackVal++
-				g.Logf("Citizen V draws his sword (+1 ATK)")
+				g.TLogf("c.citizenVDrawsHisSword1Atk")
 			}
 			return nil
 		},
@@ -106,7 +106,7 @@ func registerThunderbolts() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Jolt — exhaust your hero to add a parley counter (3+ removes her)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.joltExhaustYourHeroToAddAParleyCounter3RemovesHer"), Type: engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					mn := g.Minions[self]
@@ -115,10 +115,10 @@ func registerThunderbolts() {
 						return nil
 					}
 					mn.Counters++
-					g.Logf("Jolt gains a parley counter (%d)", mn.Counters)
+					g.TLogf("c.joltGainsAParleyCounter", mn.Counters)
 					if mn.Counters >= 3 {
 						g.Delete(mn.ID)
-						g.Logf("Jolt stands down and leaves the fight")
+						g.TLogf("c.joltStandsDownAndLeavesTheFight")
 					}
 					return []engine.Message{engine.ExhaustEntity{ID: p.ID}}
 				},
@@ -130,7 +130,7 @@ func registerThunderbolts() {
 	// clash costs a resource or threat.
 	engine.RegisterBehavior("50134", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			g.Logf("Innocent Bystanders: 4 bystander counters")
+			g.TLogf("c.innocentBystanders4BystanderCounters")
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})
@@ -139,7 +139,7 @@ func registerThunderbolts() {
 	// modeled beyond a log).
 	engine.RegisterBehavior("50135", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			g.Logf("The Coming Storm shifts the battlefield")
+			g.TLogf("c.theComingStormShiftsTheBattlefield")
 			return nil
 		},
 	})
@@ -157,7 +157,7 @@ func registerThunderbolts() {
 							if rem := mn.MaxHP - 5; rem > mn.Damage {
 								mn.Damage = rem
 							}
-							g.Logf("%s returns from the victory display", mn.EDef().Name)
+							g.TLogf("c.returnsFromTheVictoryDisplay", mn)
 						}
 					}
 					return out
@@ -197,7 +197,7 @@ func registerThunderbolts() {
 			if !ok || m.Enemy != e.EID() {
 				return nil
 			}
-			g.Logf("Moonstone hardens into a tough card")
+			g.TLogf("c.moonstoneHardensIntoAToughCard")
 			return []engine.Message{engine.ToughEntity{Target: e.EID()}}
 		},
 	})
@@ -297,7 +297,7 @@ func registerThunderbolts() {
 	engine.RegisterBehavior("50158", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Counters = 4
-			g.Logf("Heat-Seeking Missiles arm with 4 missile counters")
+			g.TLogf("c.heatSeekingMissilesArmWith4MissileCounters")
 			return nil
 		},
 	})

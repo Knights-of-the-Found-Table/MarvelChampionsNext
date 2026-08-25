@@ -1,8 +1,6 @@
 package nextevolution
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -65,7 +63,7 @@ func registerStryfe() {
 			if p := g.Player(engine.PlayerID(m.Source)); p != nil {
 				x := mostCommonHandType(p)
 				if x > 0 {
-					g.Logf("Stryfe lashes out — %s takes %d damage", p.Name, x)
+					g.TLogf("c.stryfeLashesOutTakesDamage", p.Name, x)
 					return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: x, Source: e.EID()}}
 				}
 			}
@@ -93,7 +91,7 @@ func registerStryfe() {
 			for _, p := range g.Players {
 				n := mostCommonHandType(p)
 				if n > 0 {
-					g.Logf("%s places %d threat (Uncontrollable Power)", p.Name, n)
+					g.TLogf("c.placesThreatUncontrollablePower", p.Name, n)
 					msgs = append(msgs, engine.SchemeThreat{Scheme: g.MainScheme.ID, N: n, Source: p.ID})
 				}
 			}
@@ -109,7 +107,7 @@ func registerStryfe() {
 	// its threat).
 	engine.RegisterBehavior("40168", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
-			g.Logf("Stryfe's Grasp flips — Living Bomb is revealed!")
+			g.TLogf("c.stryfeSGraspFlipsLivingBombIsRevealed")
 			return nil
 		},
 	})
@@ -146,7 +144,7 @@ func registerStryfe() {
 			}
 			g.Delete(t.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: t.Code})
-			g.Logf("Mental Transferal mirrors %d damage", m.Damage)
+			g.TLogf("c.mentalTransferalMirrorsDamage", m.Damage)
 			return []engine.Message{engine.DamageEntity{Target: t.Target, Damage: m.Damage, Source: t.ID}}
 		},
 	})
@@ -219,7 +217,7 @@ func registerStryfe() {
 			if handTypeMax(g) >= 3 {
 				return true
 			}
-			g.Logf("Zero shuffles back into the encounter deck instead of being defeated")
+			g.TLogf("c.zeroShufflesBackIntoTheEncounterDeckInsteadOfBeingDefeated")
 			m.Damage = m.MaxHP - 1
 			return false
 		},
@@ -277,7 +275,7 @@ func registerStryfe() {
 					s.Threat += n
 				}
 			}
-			g.Logf("%s starts with %d threat", s.EDef().Name, s.Threat)
+			g.TLogf("c.startsWithThreat", s, s.Threat)
 			return nil
 		},
 	})
@@ -294,7 +292,7 @@ func registerStryfe() {
 				}
 				if c.Def().HasTrait("Psionic") {
 					p.EncounterDown = append(p.EncounterDown, c)
-					g.Logf("Psionic Surge: %s is dealt to %s facedown", c.Def().Name, p.Name)
+					g.TLogf("c.psionicSurgeIsDealtToFacedown", c, p.Name)
 				} else {
 					g.EncounterDiscard = append(g.EncounterDiscard, c)
 				}
@@ -329,12 +327,12 @@ func registerStryfe() {
 					msgs = append(msgs, engine.SchemeThreat{Scheme: g.MainScheme.ID, N: kept, Source: t.ID})
 				}
 				choices = append(choices, engine.Choice{
-					ID: "type-" + typ, Label: fmt.Sprintf("%s (discard %d, threat %d)", typ, len(discarded), kept), Kind: engine.ChoiceLabel,
+					ID: "type-" + typ, Label: engine.Tf("c.discardThreat", typ, len(discarded), kept), Kind: engine.ChoiceLabel,
 				}.Msgs(msgs...))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Psychic Override — choose a card type:", choices...),
+				Question: engine.Ask(engine.Tf("c.psychicOverrideChooseACardType"), choices...),
 			}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -402,7 +400,7 @@ func bounceToHand(g *engine.Game, p *engine.Player, kind string, id engine.Entit
 	}
 	g.Delete(id)
 	p.Hand = append(p.Hand, engine.Card{ID: g.NextCardID(), Code: code, Owner: p.ID})
-	g.Logf("%s returns to %s's hand", engine.DB.MustLookup(code).Name, p.Name)
+	g.TLogf("c.returnsToSHand", engine.DB.MustLookup(code).Name, p.Name)
 	return nil
 }
 
@@ -417,10 +415,10 @@ func registerExtremeMeasures() {
 			p := g.Player(mn.EngagedWith)
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Strobe — choose:",
-					engine.Choice{ID: "stun", Label: "Stun each character you control", Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.strobeChoose"),
+					engine.Choice{ID: "stun", Label: engine.Tf("c.stunEachCharacterYouControl"), Kind: engine.ChoiceLabel}.
 						Msgs(stunAllOwn(p)...),
-					engine.Choice{ID: "dmg", Label: "Deal 1 damage to each character you control", Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "dmg", Label: engine.Tf("c.deal1DamageToEachCharacterYouControl"), Kind: engine.ChoiceLabel}.
 						Msgs(chipAllOwn(p)...),
 				),
 			}}
@@ -492,9 +490,9 @@ func registerExtremeMeasures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Wildside — choose:",
-					engine.Choice{ID: "attack", Label: "Wildside attacks you", Kind: engine.ChoiceLabel}.Msgs(atkMsgs...),
-					engine.Choice{ID: "bounce", Label: "Return your highest-cost support to hand", Kind: engine.ChoiceLabel}.Msgs(bounce...),
+				Question: engine.Ask(engine.Tf("c.wildsideChoose"),
+					engine.Choice{ID: "attack", Label: engine.Tf("c.wildsideAttacksYou"), Kind: engine.ChoiceLabel}.Msgs(atkMsgs...),
+					engine.Choice{ID: "bounce", Label: engine.Tf("c.returnYourHighestCostSupportToHand"), Kind: engine.ChoiceLabel}.Msgs(bounce...),
 				),
 			}}
 		},
@@ -521,7 +519,7 @@ func registerExtremeMeasures() {
 			if owner == "" || cost <= 0 {
 				return nil
 			}
-			g.Logf("Extreme Measures — %s takes %d indirect damage", g.Player(owner).Name, cost)
+			g.TLogf("c.extremeMeasuresTakesIndirectDamage", g.Player(owner).Name, cost)
 			return []engine.Message{engine.IndirectDamage{Player: owner, N: cost}}
 		},
 	})
@@ -592,13 +590,13 @@ func registerMutantInsurrection() {
 			}
 			mn.Counters++
 			n := mn.Counters
-			g.Logf("Samurai gains a charge counter (%d)", n)
+			g.TLogf("c.samuraiGainsAChargeCounter", n)
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask(fmt.Sprintf("Samurai — %d charge counters:", n),
-					engine.Choice{ID: "dmg", Label: fmt.Sprintf("Take %d damage", n), Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.samuraiChargeCounters", n),
+					engine.Choice{ID: "dmg", Label: engine.Tf("c.takeDamage", n), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: n, Source: mn.ID}),
-					engine.Choice{ID: "disc", Label: fmt.Sprintf("Discard a card you control with cost >= %d", n), Kind: engine.ChoiceLabel},
+					engine.Choice{ID: "disc", Label: engine.Tf("c.discardACardYouControlWithCost", n), Kind: engine.ChoiceLabel},
 				),
 			}}
 		},
@@ -623,7 +621,7 @@ func registerMutantInsurrection() {
 			}
 			if n > 0 {
 				s.Threat += 2 * n
-				g.Logf("%s gains %d extra threat", s.EDef().Name, 2*n)
+				g.TLogf("c.gainsExtraThreat", s, 2*n)
 				return nil
 			}
 			// No additional threat: surge.

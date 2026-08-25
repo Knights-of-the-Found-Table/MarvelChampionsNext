@@ -17,8 +17,6 @@
 package wolv
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -56,7 +54,7 @@ func registerWolverine() {
 			if p.Damage == 0 {
 				return nil
 			}
-			g.Logf("Healing Factor — %s heals 2 damage", p.Name)
+			g.TLogf("c.healingFactorHeals2Damage", p.Name)
 			return []engine.Message{engine.HealEntity{Target: p.ID, N: 2}}
 		},
 	})
@@ -106,7 +104,7 @@ func registerWolverinesClaws() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Wolverine's Claws — exhaust: play an Attack event, take damage = its cost",
+				Label:    engine.Tf("c.wolverineSClawsExhaustPlayAnAttackEventTakeDamageItsCost"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -122,8 +120,8 @@ func registerWolverinesClaws() {
 						if c.Def().HasTrait("attack") {
 							c := c
 							opts = append(opts, engine.Choice{
-								Label: fmt.Sprintf("Play %s (take %d damage)", c.Def().Name, cardCost(c.Code)),
-								Kind:  engine.ChoiceCard,
+								Label:    engine.Tf("c.playTakeDamage", c, cardCost(c.Code)),
+								Kind:     engine.ChoiceCard,
 								CardCode: c.Code,
 							}.Msgs(
 								engine.ExhaustEntity{ID: self},
@@ -137,7 +135,7 @@ func registerWolverinesClaws() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pid,
-						Question: engine.Ask("Wolverine's Claws — play which Attack event?", opts...),
+						Question: engine.Ask(engine.Tf("c.wolverineSClawsPlayWhichAttackEvent"), opts...),
 					}}
 				},
 			}}
@@ -175,7 +173,7 @@ func registerJubilee() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Jubilee — choose the enemy Wolverine/Jubilee gets +2 ATK against this phase", choices...),
+				Question: engine.Ask(engine.Tf("c.jubileeChooseTheEnemyWolverineJubileeGets2AtkAgainstThisPhas"), choices...),
 			}}
 		},
 	})
@@ -193,7 +191,7 @@ func registerAdamantiumSkeleton() {
 				return nil
 			}
 			p.MaxHP += 4
-			g.Logf("Adamantium Skeleton grants +4 HP to %s (now %d)", p.Name, p.MaxHP)
+			g.TLogf("c.adamantiumSkeletonGrants4HpToNow", p.Name, p.MaxHP)
 			return nil
 		},
 		IdentityStats: func(p *engine.Player) engine.StatBonus {
@@ -253,7 +251,7 @@ func registerIGotBetter() {
 			p.Exhausted = false
 			delete(g.Upgrades, e.EID())
 			p.Upgrades = removeID(p.Upgrades, e.EID())
-			g.Logf("\"I Got Better!\" — %s survives at 5 HP and discards the upgrade", p.Name)
+			g.TLogf("c.iGotBetterSurvivesAt5HpAndDiscardsTheUpgrade", p.Name)
 			return nil
 		},
 	})
@@ -276,7 +274,7 @@ func registerLogansCabin() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "Logan's Cabin — shuffle a Wolverine card from your discard into your deck",
+				Label:        engine.Tf("c.loganSCabinShuffleAWolverineCardFromYourDiscardIntoYourDeck"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -285,7 +283,7 @@ func registerLogansCabin() {
 					for _, c := range p.Discard {
 						if c.Def().CardSet == "wolverine" {
 							opts = append(opts, engine.Choice{
-								Label: "Shuffle in " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ExhaustEntity{ID: self},
 								engine.ShuffleIntoDeck{Player: s.Owner, CardID: c.ID},
@@ -294,12 +292,12 @@ func registerLogansCabin() {
 						}
 					}
 					if len(opts) == 0 {
-						g.Logf("Logan's Cabin — no Wolverine card in discard")
+						g.TLogf("c.loganSCabinNoWolverineCardInDiscard")
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   s.Owner,
-						Question: engine.Ask("Logan's Cabin — shuffle which Wolverine card into your deck?", opts...),
+						Question: engine.Ask(engine.Tf("c.loganSCabinShuffleWhichWolverineCardIntoYourDeck"), opts...),
 					}}
 				},
 			}}
@@ -324,7 +322,7 @@ func registerBerserkerBarrage() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Berserker Barrage — deal 4 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.berserkerBarrageDeal4DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -341,8 +339,8 @@ func registerSliceAndDice() {
 			choices := cardutil.EnemyChoices(g, 3, pid, func(target engine.EntityID) []engine.Message {
 				// The second 3 damage: pick any other enemy.
 				return []engine.Message{engine.AskQuestion{
-					Player:   pid,
-					Question: engine.Ask("Slice and Dice — pick the second target", cardutil.EnemyChoices(g, 3, pid, func(t2 engine.EntityID) []engine.Message {
+					Player: pid,
+					Question: engine.Ask(engine.Tf("c.sliceAndDicePickTheSecondTarget"), cardutil.EnemyChoices(g, 3, pid, func(t2 engine.EntityID) []engine.Message {
 						return []engine.Message{
 							engine.DamageEntity{Target: target, Damage: 3, Source: pid},
 							engine.DamageEntity{Target: t2, Damage: 3, Source: pid},
@@ -355,7 +353,7 @@ func registerSliceAndDice() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Slice and Dice — first attack: deal 3 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.sliceAndDiceFirstAttackDeal3DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -377,7 +375,7 @@ func registerLungingStrike() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Lunging Strike — deal 8 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.lungingStrikeDeal8DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -399,7 +397,7 @@ func registerTrackByScent() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Track by Scent — remove 3 threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.trackByScentRemove3ThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -417,7 +415,7 @@ func registerRegenerativeHealing() {
 				return nil
 			}
 			opts := []engine.Choice{
-				engine.Choice{ID: "heal", Label: "Heal 4 damage from your identity", Kind: engine.ChoiceLabel}.Msgs(engine.HealEntity{Target: pid, N: 4}),
+				engine.Choice{ID: "heal", Label: engine.Tf("c.heal4DamageFromYourIdentity"), Kind: engine.ChoiceLabel}.Msgs(engine.HealEntity{Target: pid, N: 4}),
 			}
 			if p.Stunned || p.Confused {
 				var cleanup []engine.Message
@@ -427,11 +425,11 @@ func registerRegenerativeHealing() {
 				if p.Confused {
 					cleanup = append(cleanup, engine.ClearConfuse{Target: pid})
 				}
-				opts = append(opts, engine.Choice{ID: "cleanse", Label: "Discard each stunned/confused status card", Kind: engine.ChoiceLabel}.Msgs(cleanup...))
+				opts = append(opts, engine.Choice{ID: "cleanse", Label: engine.Tf("c.discardEachStunnedConfusedStatusCard"), Kind: engine.ChoiceLabel}.Msgs(cleanup...))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Regenerative Healing — choose", opts...),
+				Question: engine.Ask(engine.Tf("c.regenerativeHealingChoose"), opts...),
 			}}
 		},
 	})
@@ -513,7 +511,7 @@ func registerObligation() {
 	// stunned and confused. Discard this card.
 	engine.RegisterBehavior("35027", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			return cardutil.ExhaustOrPenalty(g, p, card, "You are stunned and confused",
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.Tf("c.youAreStunnedAndConfused"),
 				engine.StunEntity{Target: p.ID},
 				engine.ConfuseEntity{Target: p.ID},
 			)

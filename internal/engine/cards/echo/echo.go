@@ -46,7 +46,7 @@ func registerEcho() {
 			}
 			if _, ok := p.Discard.Remove(m.Card.ID); ok {
 				echo.SenseDeck = append(echo.SenseDeck, m.Card)
-				g.Logf("Echo tucks %s (%d tucked)", def.Name, len(echo.SenseDeck))
+				g.TLogf("c.echoTucksTucked", def.Name, len(echo.SenseDeck))
 			}
 			return nil
 		},
@@ -67,13 +67,13 @@ func registerSignatures() {
 			var choices []engine.Choice
 			for _, c := range p.SenseDeck {
 				choices = append(choices, engine.Choice{
-					Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.SideDeckToHand{Player: pid, CardID: c.ID}))
 			}
 			choices = append(choices, cardutil.Skip())
 			return []engine.Message{engine.AskQuestion{
 				Player: pid,
-				Question: engine.Ask("Photographic Reflexes — take a tucked event to hand (its cost is reduced by 2)",
+				Question: engine.Ask(engine.Tf("c.photographicReflexesTakeATuckedEventToHandItsCostIsReducedBy"),
 					choices...),
 			}}
 		},
@@ -92,14 +92,14 @@ func registerSignatures() {
 						continue
 					}
 					choices = append(choices, engine.Choice{
-						Label: def.Name + " (" + pl.Name + ")", Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.S(def.Name + " (" + pl.Name + ")"), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.RecycleFromDiscard{Player: pid, From: pl.ID, CardID: c.ID}))
 				}
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Study the Tape — take an event", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.studyTheTapeTakeAnEvent"), choices...)}}
 		},
 	})
 
@@ -112,7 +112,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "The Rez — heal 1 per the highest tucked cost",
+				Label:        engine.Tf("c.theRezHeal1PerTheHighestTuckedCost"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -154,7 +154,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Choreography — shuffle an event into your deck",
+				Label:   engine.Tf("c.choreographyShuffleAnEventIntoYourDeck"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -168,13 +168,13 @@ func registerSignatures() {
 							msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Shuffle in " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Choreography — which event?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.choreographyWhichEvent"), choices...)}}
 				},
 			}}
 		},
@@ -205,10 +205,10 @@ func registerSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Echo's Katana — deal damage equal to the event's cost?",
-					engine.Choice{ID: "hit", Label: "Hit", Kind: engine.ChoiceLabel}.WithThen(
+				Question: engine.Ask(engine.Tf("c.echoSKatanaDealDamageEqualToTheEventSCost"),
+					engine.Choice{ID: "hit", Label: engine.Tf("c.hit"), Kind: engine.ChoiceLabel}.WithThen(
 						engine.Ask(engine.Tf("q.chooseEnemy"), choices...)),
-					engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+					engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 				),
 			}}
 		},
@@ -251,20 +251,20 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Muscle Memory — take a tucked event to hand",
+				Label:   engine.Tf("c.muscleMemoryTakeATuckedEventToHand"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var choices []engine.Choice
 					for _, c := range p.SenseDeck {
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.SideDeckToHand{Player: p.ID, CardID: c.ID}))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Muscle Memory — which event?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.muscleMemoryWhichEvent"), choices...)}}
 				},
 			}}
 		},

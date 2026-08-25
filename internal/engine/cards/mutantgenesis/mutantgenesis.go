@@ -26,7 +26,7 @@ func registerColossus() {
 			if p == nil || !p.IsHero() {
 				return nil
 			}
-			g.Logf("Steel Skin: Colossus gains a tough status card")
+			g.TLogf("c.steelSkinColossusGainsAToughStatusCard")
 			return []engine.Message{engine.ToughEntity{Target: p.ID}}
 		},
 	})
@@ -64,7 +64,7 @@ func registerScenarios() {
 		},
 		OnMainSchemeMaxed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			if s.Stage == 1 {
-				g.Logf("Sabretooth corners his prey — the main scheme advances")
+				g.TLogf("c.sabretoothCornersHisPreyTheMainSchemeAdvances")
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
 			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.injuredSenator")}}

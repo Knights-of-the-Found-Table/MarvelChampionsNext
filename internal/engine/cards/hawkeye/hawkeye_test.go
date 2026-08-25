@@ -58,7 +58,7 @@ func TestWeaponOfChoiceSearchesBow(t *testing.T) {
 	var weapon *engine.Ability
 	for i := range b.HeroAbilities(g, p) {
 		abs := b.HeroAbilities(g, p)
-		if strings.Contains(abs[i].Label, "Weapon of Choice") {
+		if strings.Contains(abs[i].Label.Text, "Weapon of Choice") {
 			weapon = &abs[i]
 			break
 		}
@@ -79,7 +79,7 @@ func TestWeaponOfChoiceSearchesBow(t *testing.T) {
 	}
 	hasTake := false
 	for _, c := range ask.Question.Choices {
-		if strings.Contains(c.Label, "Take") {
+		if strings.Contains(c.Label.Text, "Take") {
 			hasTake = true
 		}
 	}

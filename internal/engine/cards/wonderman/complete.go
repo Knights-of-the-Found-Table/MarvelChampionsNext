@@ -51,7 +51,7 @@ func registerWonderManComplete() {
 				if c.Def().Type == "treachery" {
 					card := c
 					g.EncounterDeck = append(g.EncounterDeck[:i:i], g.EncounterDeck[i+1:]...)
-					g.Logf("Scarlet Witch reveals %s", card.Def().Name)
+					g.TLogf("c.scarletWitchReveals", card)
 					return []engine.Message{engine.RevealEncounterCard{Player: e.EOwner(), Card: card}}
 				}
 			}
@@ -146,7 +146,7 @@ func registerWonderManComplete() {
 	engine.RegisterBehavior("58024", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Jarvis — tend an alter-ego: heal 2 and clear a status", Type: engine.AbilityAction,
+				Label: engine.Tf("c.jarvisTendAnAlterEgoHeal2AndClearAStatus"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -184,7 +184,7 @@ func registerWonderManComplete() {
 			}
 			if len(s.AttachedCards) == 0 {
 				return []engine.Ability{{
-					Label: "Avengers Compound — tuck an ally from your hand", Type: engine.AbilityAction, Exhaust: true,
+					Label: engine.Tf("c.avengersCompoundTuckAnAllyFromYourHand"), Type: engine.AbilityAction, Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
 						p := g.Player(s.Owner)
@@ -205,7 +205,7 @@ func registerWonderManComplete() {
 				}}
 			}
 			return []engine.Ability{{
-				Label: "Avengers Compound — deploy the tucked ally", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.avengersCompoundDeployTheTuckedAlly"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(s.Owner)

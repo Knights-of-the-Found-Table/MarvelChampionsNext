@@ -26,7 +26,7 @@ func registerRemainingGambit() {
 			case engine.WindowAfterEnemyAttacked:
 				if m.Player == a.Owner {
 					a.Counters++
-					g.Logf("Bishop absorbs an energy charge (%d)", a.Counters)
+					g.TLogf("c.bishopAbsorbsAnEnergyCharge", a.Counters)
 				}
 			case engine.AllyAttackWindow:
 				if m.Ally != e.EID() || a.Counters <= 0 {
@@ -37,7 +37,7 @@ func registerRemainingGambit() {
 					bonus = 6
 				}
 				a.Counters = 0
-				g.Logf("Bishop unleashes +%d ATK", bonus)
+				g.TLogf("c.bishopUnleashesAtk", bonus)
 				return []engine.Message{engine.DamageEntity{Target: m.Target, Damage: bonus, Source: a.Owner}}
 			}
 			return nil
@@ -53,7 +53,7 @@ func registerRemainingGambit() {
 				en := g.Entity(id)
 				if en != nil {
 					choices = append(choices, engine.Choice{
-						Label: "Confuse " + cardutil.EnemyLabel(en), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.confuse2", cardutil.EnemyLabel(en)), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ConfuseEntity{Target: id}))
 				}
 			}
@@ -62,7 +62,7 @@ func registerRemainingGambit() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Dazzler — confuse an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.dazzlerConfuseAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -119,7 +119,7 @@ func registerRemainingGambit() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Stealth Strike", choices...),
+				Question: engine.Ask(engine.Tf("c.stealthStrike"), choices...),
 			}}
 		},
 	})
@@ -129,7 +129,7 @@ func registerRemainingGambit() {
 		Playable: func(g *engine.Game, p *engine.Player, def *data.CardDef) bool {
 			return g.EntityHasTrait(p.ID, "spy") || g.EntityHasTrait(p.ID, "thief")
 		},
-		OnPlay: cardutil.ChooseScheme("Breaking and Entering", func(g *engine.Game, e engine.Entity) int { return 3 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Breaking and Entering"), func(g *engine.Game, e engine.Entity) int { return 3 }),
 	})
 
 	// 37016 Passion for Justice: rider in handlePlayCard.
@@ -147,7 +147,7 @@ func registerRemainingGambit() {
 			for _, id := range cardutil.SortedIDs(g.Villains) {
 				if v := g.Villains[id]; v != nil {
 					choices = append(choices, engine.Choice{
-						Label: "Confuse " + v.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S("Confuse " + v.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ConfuseEntity{Target: id}))
 					break
 				}
@@ -155,7 +155,7 @@ func registerRemainingGambit() {
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				if mn := g.Minions[id]; mn != nil {
 					choices = append(choices, engine.Choice{
-						Label: "Stun " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.stun2", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.StunEntity{Target: id}))
 					break
 				}
@@ -163,7 +163,7 @@ func registerRemainingGambit() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: "Ready " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ReadyEntity{ID: id}))
 					break
 				}
@@ -173,7 +173,7 @@ func registerRemainingGambit() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Professor X — choose one", choices...),
+				Question: engine.Ask(engine.Tf("c.professorXChooseOne"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -185,7 +185,7 @@ func registerRemainingGambit() {
 				if p := g.Player(a.Owner); p != nil {
 					p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: a.Code, Owner: p.ID})
 				}
-				g.Logf("Professor X leaves play at the end of the round")
+				g.TLogf("c.professorXLeavesPlayAtTheEndOfTheRound")
 			}
 			return nil
 		},
@@ -213,7 +213,7 @@ func registerRemainingGambit() {
 			}
 			return append(msgs, engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Beauty and the Thief — deal 4 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.beautyAndTheThiefDeal4Damage"), choices...),
 			})
 		},
 	}
@@ -238,7 +238,7 @@ func registerRemainingGambit() {
 			}
 			return append(msgs, engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Hit and Run — deal 2 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.hitAndRunDeal2Damage"), choices...),
 			})
 		},
 	})
@@ -284,16 +284,16 @@ func registerRemainingGambit() {
 	engine.RegisterBehavior("37025", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep Guild Business in play", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepGuildBusinessInPlay"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if !p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "exhaust", Label: "Exhaust Remy LeBeau (spend [energy]) → remove from the game", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustRemyLebeauSpendEnergyRemoveFromTheGame"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Guild Business — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.guildBusinessChoose"), choices...),
 			}}
 		},
 	})

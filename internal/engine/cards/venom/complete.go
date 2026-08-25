@@ -34,7 +34,7 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Symbiotic Bond — take 1 damage → wild resource", Type: engine.AbilityAction,
+				Label: engine.Tf("c.symbioticBondTake1DamageWildResource"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					g.UsedThisTurn["venom-bond"] = true
 					return []engine.Message{
@@ -56,10 +56,10 @@ func registerVenom() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			p := g.Player(e.EOwner())
 			msgs := []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Behind Enemy Lines: remove 3 threat from which scheme?", schemePicks(g, 3, e.EOwner())...)}}
+				engine.Tf("c.behindEnemyLinesRemove3ThreatFromWhichScheme"), schemePicks(g, 3, e.EOwner())...)}}
 			if ec, ok := e.(*engine.EventCard); ok && paidOnlyWith(ec, "mental") && p != nil {
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Confuse which enemy?", enemyStatusChoices(g, p.ID,
+					engine.Tf("c.confuseWhichEnemy"), enemyStatusChoices(g, p.ID,
 						func(id engine.EntityID) engine.Message { return engine.ConfuseEntity{Target: id} })...)})
 			}
 			return msgs
@@ -91,7 +91,7 @@ func registerVenom() {
 				def := c.Def()
 				if def.Type == "upgrade" && def.HasTrait("weapon") && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 							engine.ShufflePlayerDeck{Player: p.ID}))
 				}
@@ -100,7 +100,7 @@ func registerVenom() {
 				return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Add which weapon to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.addWhichWeaponToHand"), picks...)}}
 		},
 	})
 
@@ -123,7 +123,7 @@ func registerVenom() {
 
 	// Savage Attack: 5 damage (pure-energy overkill skipped).
 	engine.RegisterBehavior("20006", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Savage Attack: deal 5 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.savageAttackDeal5DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 5, nil }),
 	})
 
@@ -131,7 +131,7 @@ func registerVenom() {
 	engine.RegisterBehavior("20007", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Project Rebirth 2.0 → draw 1 or heal 3", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustProjectRebirth20Draw1OrHeal3"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -140,10 +140,10 @@ func registerVenom() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-						"Project Rebirth 2.0:",
-						engine.Choice{ID: "draw", Label: "Draw 1 card", Kind: engine.ChoiceLabel}.
+						engine.Tf("c.projectRebirth20"),
+						engine.Choice{ID: "draw", Label: engine.Tf("c.draw1Card"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.DrawCards{Player: p.ID, N: 1}),
-						engine.Choice{ID: "heal", Label: "Heal 3 damage", Kind: engine.ChoiceLabel}.
+						engine.Choice{ID: "heal", Label: engine.Tf("c.heal3Damage"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.HealEntity{Target: p.ID, N: 3}),
 					)}}
 				},
@@ -155,7 +155,7 @@ func registerVenom() {
 	engine.RegisterBehavior("20008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Multi-Gun → 2 damage, splash 1, or 2 threat", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustMultiGun2DamageSplash1Or2Threat"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -167,7 +167,7 @@ func registerVenom() {
 					for _, id := range cardutil.SortedEnemyIDs(g) {
 						enemy := g.Entity(id)
 						if enemy != nil {
-							opts = append(opts, engine.Choice{Label: "2 damage — " + cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+							opts = append(opts, engine.Choice{Label: engine.Tf("c.damage2Dash", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 								Msgs(engine.DamageEntity{Target: id, Damage: 2, Source: p.ID}))
 						}
 					}
@@ -180,20 +180,20 @@ func registerVenom() {
 							}
 						}
 						if len(msgs) > 0 {
-							opts = append(opts, engine.Choice{Label: "Splash 1 — " + q.Name + "'s minions", Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							opts = append(opts, engine.Choice{Label: engine.S("Splash 1 — " + q.Name + "'s minions"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(msgs...))
 						}
 					}
 					for _, sid := range g.Schemes() {
 						s := g.Entity(sid)
-						opts = append(opts, engine.Choice{Label: "2 threat — " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
+						opts = append(opts, engine.Choice{Label: engine.S("2 threat — " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
 							Msgs(engine.ThwartScheme{Scheme: sid, N: 2, Source: p.ID}))
 					}
 					if len(opts) == 0 {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Multi-Gun: choose one", opts...)}}
+						Question: engine.Ask(engine.Tf("c.multiGunChooseOne"), opts...)}}
 				},
 			}}
 		},
@@ -217,7 +217,7 @@ func registerVenom() {
 	engine.RegisterBehavior("20010", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Venom's Pistol → +1 THW/ATK/DEF this phase", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustVenomSPistol1ThwAtkDefThisPhase"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -245,11 +245,11 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Jack Flag + counter → deal 2 damage", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustJackFlagCounterDeal2Damage"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return append([]engine.Message{engine.AddEntityCounter{ID: self, N: -1}},
-						cardutil.ChooseEnemy("Jack Flag: deal 2 damage to which enemy?",
+						cardutil.ChooseEnemy(engine.Tf("c.jackFlagDeal2DamageToWhichEnemy"),
 							func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(
 							g, g.Entity(self))...)
 				},
@@ -279,7 +279,7 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Scare Tactic: damage which confused enemy?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.scareTacticDamageWhichConfusedEnemy"), picks...)}}
 		},
 	})
 
@@ -319,7 +319,7 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Sonic Rifle + counter → confuse (3 damage if confused)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustSonicRifleCounterConfuse3DamageIfConfused"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var picks []engine.Choice
@@ -329,23 +329,23 @@ func registerVenom() {
 							continue
 						}
 						var msg engine.Message = engine.ConfuseEntity{Target: id}
-						label := "Confuse"
+						label := engine.Tf("c.confuse")
 						if mn := g.Minions[id]; mn != nil && mn.Confused {
 							msg = engine.DamageEntity{Target: id, Damage: 3, Source: u.Owner}
-							label = "3 damage"
+							label = engine.Tf("c.3Damage")
 						}
 						if v := g.Villains[id]; v != nil && v.Confused {
 							msg = engine.DamageEntity{Target: id, Damage: 3, Source: u.Owner}
-							label = "3 damage"
+							label = engine.Tf("c.damageN", 3)
 						}
-						picks = append(picks, engine.Choice{Label: label + " — " + cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.dash", label, cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 							Msgs(engine.AddEntityCounter{ID: self, N: -1}, msg))
 					}
 					if len(picks) == 0 {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: u.Owner,
-						Question: engine.Ask("Sonic Rifle: target which enemy?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.sonicRifleTargetWhichEnemy"), picks...)}}
 				},
 			}}
 		},
@@ -377,11 +377,11 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Plasma Pistol + counter → deal 1 damage", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustPlasmaPistolCounterDeal1Damage"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return append([]engine.Message{engine.AddEntityCounter{ID: self, N: -1}},
-						cardutil.ChooseEnemy("Plasma Pistol: deal 1 damage to which enemy?",
+						cardutil.ChooseEnemy(engine.Tf("c.plasmaPistolDeal1DamageToWhichEnemy"),
 							func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 1, nil })(
 							g, g.Entity(self))...)
 				},
@@ -395,16 +395,16 @@ func registerVenom() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust Flash + take 2 damage", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustFlashTake2Damage"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.DamageEntity{Target: p.ID, Damage: 2, Source: engine.EntityID("20023")},
 						engine.ObligationResolve{Player: p.ID, Card: card}))
 			}
-			picks = append(picks, engine.Choice{ID: "symbiote", Label: "Put an Enraged Symbiote into play", Kind: engine.ChoiceLabel}.
+			picks = append(picks, engine.Choice{ID: "symbiote", Label: engine.Tf("c.putAnEnragedSymbioteIntoPlay"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.SpawnSymbiote{},
 					engine.ObligationResolve{Player: p.ID, Card: card}))
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Struggle for Control:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.struggleForControl"), picks...)}}
 		},
 	})
 
@@ -418,7 +418,7 @@ func registerVenom() {
 			var weapons []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.EDef().HasTrait("weapon") && !u.Exhausted {
-					weapons = append(weapons, engine.Choice{Label: "Exhaust " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+					weapons = append(weapons, engine.Choice{Label: engine.S("Exhaust " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.ExhaustEntity{ID: id}))
 				}
 			}
@@ -426,9 +426,9 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Fusillade: exhaust which weapon?", weapons...)},
+				engine.Tf("c.fusilladeExhaustWhichWeapon"), weapons...)},
 				engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Fusillade: deal 5 damage to which enemy?", cardutil.EnemyChoices(g, 5, p.ID,
+					engine.Tf("c.fusilladeDeal5DamageToWhichEnemy"), cardutil.EnemyChoices(g, 5, p.ID,
 						func(t engine.EntityID) []engine.Message {
 							return []engine.Message{engine.DamageEntity{Target: t, Damage: 5, Source: p.ID}}
 						})...)}}
@@ -465,14 +465,14 @@ func registerVenom() {
 						}
 					}
 					if isG || hasG {
-						picks = append(picks, engine.Choice{Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID}.
+						picks = append(picks, engine.Choice{Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 							Msgs(engine.ToughEntity{Target: q.ID}))
 					}
 				}
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && a.Damage > 0 && a.EDef().HasTrait("guardian") {
-						picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ToughEntity{Target: a.ID}))
 					}
 				}
@@ -481,7 +481,7 @@ func registerVenom() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Shake it Off: tough on which damaged guardian?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.shakeItOffToughOnWhichDamagedGuardian"), picks...)}}
 		},
 	})
 
@@ -489,7 +489,7 @@ func registerVenom() {
 	engine.RegisterBehavior("20029", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Crew Quarters → heal 1 from an alter-ego", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustCrewQuartersHeal1FromAnAlterEgo"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -500,7 +500,7 @@ func registerVenom() {
 					var picks []engine.Choice
 					for _, q := range g.Players {
 						if q.Damage > 0 {
-							picks = append(picks, engine.Choice{Label: q.Name + " (alter-ego)", Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							picks = append(picks, engine.Choice{Label: engine.S(q.Name + " (alter-ego)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(engine.HealEntity{Target: q.ID, N: 1}))
 						}
 					}
@@ -508,7 +508,7 @@ func registerVenom() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Heal which alter-ego?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.healWhichAlterEgo"), picks...)}}
 				},
 			}}
 		},

@@ -16,7 +16,7 @@ func registerMagnetoExtras() {
 			}
 			for _, mn := range g.Minions {
 				if mn != nil && mn.HP() < a.MaxHP {
-					g.Logf("M obliterates %s", mn.EDef().Name)
+					g.TLogf("c.mObliterates", mn)
 					return []engine.Message{engine.MinionDefeated{MinionID: mn.ID}}
 				}
 			}
@@ -50,7 +50,7 @@ func registerMagnetoExtras() {
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 1, Source: p.ID})
 				}
-				choices = append(choices, engine.Choice{ID: "energy", Label: "Spend " + energy.Def().Name + " — 1 damage to each enemy", Kind: engine.ChoiceLabel}.Msgs(msgs...))
+				choices = append(choices, engine.Choice{ID: "energy", Label: engine.S("Spend " + energy.Def().Name + " — 1 damage to each enemy"), Kind: engine.ChoiceLabel}.Msgs(msgs...))
 			}
 			if mental != nil {
 				var msgs []engine.Message
@@ -58,12 +58,12 @@ func registerMagnetoExtras() {
 				for _, id := range g.Schemes() {
 					msgs = append(msgs, engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID})
 				}
-				choices = append(choices, engine.Choice{ID: "mental", Label: "Spend " + mental.Def().Name + " — 1 threat from each scheme", Kind: engine.ChoiceLabel}.Msgs(msgs...))
+				choices = append(choices, engine.Choice{ID: "mental", Label: engine.S("Spend " + mental.Def().Name + " — 1 threat from each scheme"), Kind: engine.ChoiceLabel}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Kid Omega — choose:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.kidOmegaChoose"), choices...)}}
 		},
 	})
 
@@ -95,7 +95,7 @@ func registerMagnetoExtras() {
 				return nil
 			}
 			g.EventDamageBonus[p.ID] += 1
-			g.Logf("Cyclops paints a target (+1 damage this phase)")
+			g.TLogf("c.cyclopsPaintsATarget1DamageThisPhase")
 			return nil
 		},
 	})
@@ -116,7 +116,7 @@ func registerMagnetoExtras() {
 				if d.Type == "ally" && (d.HasTrait("X-Force") || d.HasTrait("X-Men")) {
 					card := c
 					return []engine.Ability{{
-						Label: "Won't Stay Down — return " + card.Def().Name, Type: engine.AbilityAction,
+						Label: engine.S("Won't Stay Down — return " + card.Def().Name), Type: engine.AbilityAction,
 						AlterEgoOnly: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
@@ -128,7 +128,7 @@ func registerMagnetoExtras() {
 								p.Hand = append(p.Hand, card)
 							}
 							g.Delete(s.ID)
-							g.Logf("Won't Stay Down is discarded")
+							g.TLogf("c.wonTStayDownIsDiscarded")
 							return nil
 						},
 					}}
@@ -151,7 +151,7 @@ func registerMagnetoExtras() {
 					return nil
 				}
 				if c.Def().Type == "minion" {
-					g.Logf("Squared Off drags %s into the fight", c.Def().Name)
+					g.TLogf("c.squaredOffDragsIntoTheFight", c)
 					return []engine.Message{
 						engine.RevealEncounterCard{Player: p.ID, Card: c},
 						engine.CostDiscountApply{Player: p.ID, Amount: 3},
@@ -177,13 +177,13 @@ func registerMagnetoExtras() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AllyDestroyed{AllyID: id},
 					engine.HealEntity{Target: p.ID, N: a.MaxHP},
 					engine.ToughEntity{Target: p.ID}))
 			}
 			return []engine.Message{engine.AskQuestion{
-				Player: p.ID, Question: engine.Ask("Noble Sacrifice — give up:", choices...),
+				Player: p.ID, Question: engine.Ask(engine.Tf("c.nobleSacrificeGiveUp"), choices...),
 			}}
 		},
 	})
@@ -202,11 +202,11 @@ func registerMagnetoExtras() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AllyDestroyed{AllyID: id}, engine.ReadyEntity{ID: p.ID}))
 			}
 			return []engine.Message{engine.AskQuestion{
-				Player: p.ID, Question: engine.Ask("You Got This! — sacrifice:", choices...),
+				Player: p.ID, Question: engine.Ask(engine.Tf("c.youGotThisSacrifice"), choices...),
 			}}
 		},
 	})
@@ -223,7 +223,7 @@ func registerMagnetoExtras() {
 				}); ok {
 					take(p, c, zone)
 					p.Hand = append(p.Hand, c)
-					g.Logf("%s recruits %s", p.Name, c.Def().Name)
+					g.TLogf("c.recruits", p.Name, c)
 				}
 			}
 			return nil
@@ -239,18 +239,18 @@ func registerMagnetoExtras() {
 			for _, p := range g.Players {
 				if p.Stunned {
 					p.Stunned = false
-					g.Logf("White Queen clears a stun")
+					g.TLogf("c.whiteQueenClearsAStun")
 					return nil
 				}
 				if p.Confused {
 					p.Confused = false
-					g.Logf("White Queen clears a confuse")
+					g.TLogf("c.whiteQueenClearsAConfuse")
 					return nil
 				}
 				for _, mn := range g.Minions {
 					if mn != nil && (mn.Stunned || mn.Confused || mn.Tough) {
 						mn.Stunned, mn.Confused, mn.Tough = false, false, false
-						g.Logf("White Queen clears %s's status", mn.EDef().Name)
+						g.TLogf("c.whiteQueenClearsSStatus", mn)
 						return nil
 					}
 				}
@@ -287,7 +287,7 @@ func registerMagnetoExtras() {
 	engine.RegisterBehavior("49023", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Deft Focus — next superpower costs 1 less", Type: engine.AbilityAction,
+				Label: engine.Tf("c.deftFocusNextSuperpowerCosts1Less"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -353,7 +353,7 @@ func registerMagnetoExtras() {
 					}
 				}
 			}
-			g.Logf("Children of the Atom unites the X-family")
+			g.TLogf("c.childrenOfTheAtomUnitesTheXFamily")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -393,7 +393,7 @@ func registerHellfire() {
 				return nil
 			}
 			mn.Counters++
-			g.Logf("Sebastian Shaw absorbs the blow (+%d ATK)", mn.Counters)
+			g.TLogf("c.sebastianShawAbsorbsTheBlowAtk", mn.Counters)
 			return nil
 		},
 		EnemyStatBonus: func(g *engine.Game, e engine.Entity) (atk, sch int) {

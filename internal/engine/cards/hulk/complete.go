@@ -4,8 +4,6 @@ package hulk
 // are noted inline.
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -47,14 +45,14 @@ func registerRemaining() {
 			for _, sid := range g.Schemes() {
 				s := g.Entity(sid)
 				picks = append(picks, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: sid, N: 1, Source: e.EOwner()}))
 			}
 			if len(picks) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Brawn: remove 1 threat from which scheme?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.brawnRemove1ThreatFromWhichScheme"), picks...)}}
 		},
 	})
 
@@ -89,7 +87,7 @@ func registerRemaining() {
 	// Drop Kick: 4 damage; physical-only payment stuns and draws.
 	engine.RegisterBehavior("10014", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			msgs := cardutil.ChooseEnemy("Drop Kick: choose an enemy", func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
+			msgs := cardutil.ChooseEnemy(engine.Tf("c.dropKickChooseAnEnemy"), func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 				return 4, nil
 			})(g, e)
 			if ec, ok := e.(*engine.EventCard); ok && paidOnlyWith(ec, "physical") {
@@ -131,7 +129,7 @@ func registerRemaining() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Toe to Toe: which enemy attacks you?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.toeToToeWhichEnemyAttacksYou"), picks...)}}
 		},
 	})
 
@@ -149,14 +147,14 @@ func registerRemaining() {
 			for _, sid := range g.Schemes() {
 				s := g.Entity(sid)
 				picks = append(picks, engine.Choice{
-					Label: engine.Tf("m.threat", s.EDef().Name, n), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
+					Label: engine.Tf("m.threat", s, n), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: sid, N: n, Source: e.EOwner()}))
 			}
 			if len(picks) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask(fmt.Sprintf("You'll Pay for That!: remove %d threat from which scheme?", n), picks...)}}
+				Question: engine.Ask(engine.Tf("c.youLlPayForThatRemoveThreatFromWhichScheme", n), picks...)}}
 		},
 	})
 
@@ -170,7 +168,7 @@ func registerRemaining() {
 
 	// To the Rescue!: remove 2 threat.
 	engine.RegisterBehavior("10019", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("To the Rescue!", func(g *engine.Game, e engine.Entity) int { return 2 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "To the Rescue!"), func(g *engine.Game, e engine.Entity) int { return 2 }),
 	})
 
 	// Basic resource reprints.
@@ -198,14 +196,14 @@ func registerRemaining() {
 				return nil
 			}
 			ab := []engine.Ability{{
-				Label: "Exhaust Beat Cop → move 1 threat from a scheme to here", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustBeatCopMove1ThreatFromASchemeToHere"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var picks []engine.Choice
 					for _, sid := range g.Schemes() {
 						s := g.Entity(sid)
 						picks = append(picks, engine.Choice{
-							Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
+							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: sid, N: 1, Source: e.EOwner()},
 							engine.AddEntityCounter{ID: self, N: 1}))
 					}
@@ -213,12 +211,12 @@ func registerRemaining() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-						Question: engine.Ask("Move 1 threat from which scheme?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.move1ThreatFromWhichScheme"), picks...)}}
 				},
 			}}
 			if s.Counters > 0 {
 				ab = append(ab, engine.Ability{
-					Label: fmt.Sprintf("Exhaust + discard Beat Cop → %d damage to a minion (1 per threat)", s.Counters),
+					Label: engine.Tf("c.exhaustDiscardBeatCopDamageToAMinion1PerThreat", s.Counters),
 					Type:  engine.AbilityAction, Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
@@ -227,7 +225,7 @@ func registerRemaining() {
 						}
 						dmg := s.Counters
 						return append([]engine.Message{engine.DiscardControlled{Player: s.Owner, ID: self}},
-							cardutil.ChooseMinion(fmt.Sprintf("Beat Cop: %d damage to which minion?", dmg), dmg)(g, g.Entity(self))...)
+							cardutil.ChooseMinion(engine.Tf("c.beatCopDamageToWhichMinion", dmg), dmg)(g, g.Entity(self))...)
 					},
 				})
 			}
@@ -246,7 +244,7 @@ func registerRemaining() {
 						continue
 					}
 					picks = append(picks, engine.Choice{
-						Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
+						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
 					}.Msgs(engine.HealEntity{Target: a.ID, N: 1}, engine.ReadyEntity{ID: a.ID}))
 				}
 			}
@@ -254,7 +252,7 @@ func registerRemaining() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Heal 1 and ready which ally?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.heal1AndReadyWhichAlly"), picks...)}}
 		},
 	})
 

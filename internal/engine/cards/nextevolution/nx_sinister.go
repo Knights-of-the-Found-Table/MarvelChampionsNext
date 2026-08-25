@@ -58,7 +58,7 @@ func attachToSinister(g *engine.Game, code string) *engine.Attachment {
 	t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: code, Target: v.ID}
 	g.Attachments[t.ID] = t
 	v.Attachments = append(v.Attachments, t.ID)
-	g.Logf("%s attaches to Mister Sinister", t.EDef().Name)
+	g.TLogf("c.attachesToMisterSinister", t)
 	return t
 }
 
@@ -90,7 +90,7 @@ func registerSinister() {
 		// unless two mental resources are spent.
 		VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 			if g.SideSchemeInPlay("40146") {
-				g.Logf("Mister Sinister cannot take damage (Teleported Away)")
+				g.TLogf("c.misterSinisterCannotTakeDamageTeleportedAway")
 				return false
 			}
 			for _, aid := range v.Attachments {
@@ -115,7 +115,7 @@ func registerSinister() {
 							g.Delete(aid)
 							g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
 							g.Push(engine.DiscardCards{Player: p.ID, Cards: mental[:2]})
-							g.Logf("Sinister Disguise: %s spends two mental resources; the attachment discards", p.Name)
+							g.TLogf("c.sinisterDisguiseSpendsTwoMentalResourcesTheAttachmentDiscard", p.Name)
 							return true
 						}
 					}
@@ -131,7 +131,7 @@ func registerSinister() {
 						}
 					}
 					if weakest != "" {
-						g.Logf("Sinister Disguise redirects %d damage", damage)
+						g.TLogf("c.sinisterDisguiseRedirectsDamage", damage)
 						g.Push(engine.DamageEntity{Target: weakest, Damage: damage, Source: v.ID})
 					}
 					return false
@@ -141,7 +141,7 @@ func registerSinister() {
 		},
 		VillainActivate: func(g *engine.Game, v *engine.Villain, p *engine.Player) []engine.Message {
 			if g.SideSchemeInPlay("40146") {
-				g.Logf("Mister Sinister schemes instead of attacking (Teleported Away)")
+				g.TLogf("c.misterSinisterSchemesInsteadOfAttackingTeleportedAway")
 				return []engine.Message{
 					engine.DealBoost{Enemy: v.ID},
 					engine.RevealBoost{Enemy: v.ID},
@@ -151,7 +151,7 @@ func registerSinister() {
 			if p.IsHero() {
 				if v.Stunned {
 					v.Stunned = false
-					g.Logf("Mister Sinister is stunned; attack canceled")
+					g.TLogf("c.misterSinisterIsStunnedAttackCanceled")
 					return nil
 				}
 				return []engine.Message{
@@ -183,7 +183,7 @@ func registerSinister() {
 				base++
 			}
 			n := base * len(g.Players)
-			g.Logf("Mister Sinister reveals stage %s — %d threat", v.EDef().StageLabel, n)
+			g.TLogf("c.misterSinisterRevealsStageThreat", v.EDef().StageLabel, n)
 			return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: n, Source: v.ID}}
 		},
 	})
@@ -200,7 +200,7 @@ func registerSinister() {
 				return nil
 			}
 			i := 1 + g.Random(3)
-			g.Logf("Sinister Intent removes %s from the game", engine.DB.MustLookup(s.StageCodes[i]).Name)
+			g.TLogf("c.sinisterIntentRemovesFromTheGame", engine.DB.MustLookup(s.StageCodes[i]).Name)
 			s.StageCodes = append(s.StageCodes[:i:i], s.StageCodes[i+1:]...)
 			return nil
 		},
@@ -441,7 +441,7 @@ func registerSinister() {
 			}
 			g.Delete(t.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: t.Code})
-			g.Logf("Thrown Object is discarded after the attack")
+			g.TLogf("c.thrownObjectIsDiscardedAfterTheAttack")
 			return nil
 		},
 	})
@@ -544,7 +544,7 @@ func registerSinister() {
 				p.Hand = append(p.Hand[:idx:idx], p.Hand[idx+1:]...)
 			}
 			if len(discarded) > 0 {
-				g.Logf("One Step Ahead discards %d random card(s)", len(discarded))
+				g.TLogf("c.oneStepAheadDiscardsRandomCardS", len(discarded))
 				return []engine.Message{engine.DiscardCards{Player: p.ID, Cards: discarded}}
 			}
 			return nil

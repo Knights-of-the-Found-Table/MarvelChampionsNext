@@ -243,7 +243,7 @@ func TestPastDemonsStunAndConfuse(t *testing.T) {
 	}
 	var hasExhaust, hasPenalty bool
 	for _, c := range ask.Question.Choices {
-		if strings.Contains(c.Label, "Exhaust") {
+		if strings.Contains(c.Label.Text, "Exhaust") {
 			hasExhaust = true
 		}
 		if c.ID == "penalty" {
@@ -261,11 +261,11 @@ func TestPastDemonsStunAndConfuse(t *testing.T) {
 	// in the label.
 	for _, c := range ask.Question.Choices {
 		if c.ID == "penalty" {
-			if !strings.Contains(c.Label, "stunned") {
-				t.Fatalf("Past Demons penalty should mention 'stunned', got %q", c.Label)
+			if !strings.Contains(c.Label.Text, "stunned") {
+				t.Fatalf("Past Demons penalty should mention 'stunned', got %q", c.Label.Text)
 			}
-			if !strings.Contains(c.Label, "confused") {
-				t.Fatalf("Past Demons penalty should mention 'confused', got %q", c.Label)
+			if !strings.Contains(c.Label.Text, "confused") {
+				t.Fatalf("Past Demons penalty should mention 'confused', got %q", c.Label.Text)
 			}
 		}
 	}

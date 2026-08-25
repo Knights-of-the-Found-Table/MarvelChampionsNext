@@ -23,7 +23,7 @@ func registerNebulaScenario() {
 					def := m.Card.Def()
 					if def.Type == "attachment" && def.HasTrait("technique") && !g.UsedThisRound["nebula-tech-surge"] {
 						g.UsedThisRound["nebula-tech-surge"] = true
-						g.Logf("The first Technique of the round gains surge")
+						g.TLogf("c.theFirstTechniqueOfTheRoundGainsSurge")
 						if c, ok := g.DrawEncounter(); ok {
 							return []engine.Message{engine.RevealEncounterCard{Player: m.Player, Card: c}}
 						}
@@ -47,7 +47,7 @@ func registerNebulaScenario() {
 						if len(p.Deck) > 0 {
 							c := p.Deck[0]
 							p.Deck = p.Deck[1:]
-							g.Logf("%s removes %s from the game", p.Name, c.Def().Name)
+							g.TLogf("c.removesFromTheGame", p.Name, c)
 						}
 						msgs = append(msgs, discardTechniques(g, false)...)
 					}
@@ -59,7 +59,7 @@ func registerNebulaScenario() {
 				// Cutthroat Ambition caps single-attack damage at 5.
 				if techniqueAttached(g, "16094") && damage > 5 {
 					v.Damage += 5
-					g.Logf("Cutthroat Ambition caps the damage at 5")
+					g.TLogf("c.cutthroatAmbitionCapsTheDamageAt5")
 					return false
 				}
 				return true
@@ -111,7 +111,7 @@ func registerNebulaScenario() {
 				return nil
 			}
 			ship.Counters += 2
-			g.Logf("Nebula's Ship gains 2 evasion counters (%d total)", ship.Counters)
+			g.TLogf("c.nebulaSShipGains2EvasionCountersTotal", ship.Counters)
 			var msgs []engine.Message
 			for i := 0; i < ship.Counters; i++ {
 				for _, p := range g.Players {
@@ -136,7 +136,7 @@ func registerNebulaScenario() {
 				return nil
 			}
 			env.Counters++
-			g.Logf("Nebula's Ship gains an evasion counter (%d total)", env.Counters)
+			g.TLogf("c.nebulaSShipGainsAnEvasionCounterTotal", env.Counters)
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -149,7 +149,7 @@ func registerNebulaScenario() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust the Milano + spend 2 resources → remove 2 evasion counters", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTheMilanoSpend2ResourcesRemove2EvasionCounters"), Type: engine.AbilityAction,
 				Cost: 2,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{
@@ -190,14 +190,14 @@ func registerNebulaScenario() {
 			}
 			if ship := g.EnvironmentByCode("16093"); ship != nil {
 				ship.Counters++
-				g.Logf("Barrel Roll: evasion counter placed (%d total)", ship.Counters)
+				g.TLogf("c.barrelRollEvasionCounterPlacedTotal", ship.Counters)
 			}
 			return msgs
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
 			if ship := g.EnvironmentByCode("16093"); ship != nil {
 				ship.Counters++
-				g.Logf("Barrel Roll boost: evasion counter placed (%d total)", ship.Counters)
+				g.TLogf("c.barrelRollBoostEvasionCounterPlacedTotal", ship.Counters)
 			}
 			return nil
 		},
@@ -248,7 +248,7 @@ func registerTechniques() {
 				for id := range g.Villains {
 					if v := g.Villains[id]; v != nil && v.Code[:5] == "16088" {
 						t.Target = id
-						g.Logf("%s attaches to Nebula", t.EDef().Name)
+						g.TLogf("c.attachesToNebula", t)
 						return nil
 					}
 				}

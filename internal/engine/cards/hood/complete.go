@@ -36,10 +36,10 @@ func foulPlay(g *engine.Game, pid engine.PlayerID, n int) []engine.Message {
 		}
 		if c.Def().CardSet == "the_hood" {
 			g.EncounterDiscard = append(g.EncounterDiscard, c)
-			g.Logf("Foul Play discards %s (Hood set)", c.Def().Name)
+			g.TLogf("c.foulPlayDiscardsHoodSet", c)
 		} else {
 			p.EncounterDown = append(p.EncounterDown, c)
-			g.Logf("Foul Play deals %s to %s facedown", c.Def().Name, p.Name)
+			g.TLogf("c.foulPlayDealsToFacedown", c, p.Name)
 		}
 	}
 	return nil
@@ -69,7 +69,7 @@ func shuffleRandomModular(g *engine.Game) {
 		g.EncounterDeck = append(g.EncounterDeck, card)
 	}
 	g.ShuffleEncounterDeck()
-	g.Logf("The %s modular set shuffles into the encounter deck", pick)
+	g.TLogf("c.theModularSetShufflesIntoTheEncounterDeck", pick)
 }
 
 func registerScenario() {
@@ -107,10 +107,10 @@ func registerVillains() {
 				if p.IsHero() {
 					if v.Stunned {
 						v.Stunned = false
-						g.Logf("%s is stunned; attack canceled", v.EDef().Name)
+						g.TLogf("log.stunnedCanceled", v)
 						return nil
 					}
-					g.Logf("%s attacks %s", v.EDef().Name, p.Name)
+					g.TLogf("log.attacks", v, p.Name)
 					g.Push(engine.DealBoost{Enemy: v.ID})
 					g.Push(engine.RevealBoost{Enemy: v.ID})
 					g.Push(engine.AskAttack{Enemy: v.ID, Player: p.ID, Trigger: engine.TriggerVillainAttacksYou})
@@ -120,7 +120,7 @@ func registerVillains() {
 					v.Confused = false
 					return nil
 				}
-				g.Logf("%s schemes against %s", v.EDef().Name, p.Name)
+				g.TLogf("log.schemesAgainst", v, p.Name)
 				g.Push(engine.DealBoost{Enemy: v.ID})
 				g.Push(engine.RevealBoost{Enemy: v.ID})
 				return []engine.Message{engine.ApplyVillainScheme{VillainID: v.ID, Player: p.ID}}
@@ -185,7 +185,7 @@ func registerHoodSet() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust your identity + 2 threat → discard Established Dominance", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustYourIdentity2ThreatDiscardEstablishedDominance"), Type: engine.AbilityAction,
 				AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -401,7 +401,7 @@ func registerModulars() {
 				p.Deck = p.Deck[1:]
 				p.Discard = append(p.Discard, c)
 				if c.Def().Type == "ally" {
-					g.Logf("%s discards %s (Mister Fear)", p.Name, c.Def().Name)
+					g.TLogf("c.discardsMisterFear", p.Name, c)
 					break
 				}
 			}
@@ -617,7 +617,7 @@ func registerModulars() {
 			c := p.Hand[i]
 			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 			p.Discard = append(p.Discard, c)
-			g.Logf("%s discards %s at random (White Rabbit)", p.Name, c.Def().Name)
+			g.TLogf("c.discardsAtRandomWhiteRabbit", p.Name, c)
 			return nil
 		},
 	})
@@ -1041,7 +1041,7 @@ func settingEnvironment(code string) *engine.Behavior {
 			case "24063":
 				// steady for everything — not modeled.
 			}
-			g.Logf("%s enters play", e.EDef().Name)
+			g.TLogf("c.entersPlay", e)
 			return nil
 		},
 	}
@@ -1111,7 +1111,7 @@ func discardHighestCostPermanent(g *engine.Game, p *engine.Player) bool {
 func iconRemoval(label, icons string, cost int) func(g *engine.Game, e engine.Entity) []engine.Ability {
 	return func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: label, Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
+			Label: engine.S(label), Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				a := g.Attachments[self]
 				if a == nil {

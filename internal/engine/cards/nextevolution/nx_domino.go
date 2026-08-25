@@ -1,7 +1,6 @@
 package nextevolution
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
@@ -23,7 +22,7 @@ func registerDominoCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Diamondback — luck shot at every enemy", Type: engine.AbilityAction,
+				Label: engine.Tf("c.diamondbackLuckShotAtEveryEnemy"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -40,7 +39,7 @@ func registerDominoCards() {
 					for _, id := range cardutil.SortedEnemyIDs(g) {
 						msgs = append(msgs, engine.DamageEntity{Target: id, Damage: n, Source: p.ID})
 					}
-					g.Logf("Diamondbank discards %s (%d icons)", c.Def().Name, n)
+					g.TLogf("c.diamondbankDiscardsIcons", c, n)
 					return msgs
 				},
 			}}
@@ -62,7 +61,7 @@ func registerDominoCards() {
 			c, _, _ := deckTopIcons(p)
 			n := iconCountOf(c)
 			a.BonusATK += n
-			g.Logf("Outlaw discards %s — +%d ATK for this attack", c.Def().Name, n)
+			g.TLogf("c.outlawDiscardsAtkForThisAttack", c, n)
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 1}}
 		},
 	})
@@ -88,7 +87,7 @@ func registerDominoCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask(fmt.Sprintf("A Good Workout — deal %d damage to:", n), choices...),
+				Question: engine.Ask(engine.Tf("c.aGoodWorkoutDealDamageTo", n), choices...),
 			}}
 		},
 	})
@@ -117,7 +116,7 @@ func registerDominoCards() {
 					wild++
 				}
 			}
-			g.Logf("Luck Be a Lady discards %s (energy %d / mental %d / physical %d / wild %d)", c.Def().Name, energy, mental, physical, wild)
+			g.TLogf("c.luckBeALadyDiscardsEnergyMentalPhysicalWild", c, energy, mental, physical, wild)
 			if energy > 0 {
 				msgs = append(msgs, engine.HealEntity{Target: p.ID, N: 2 * energy})
 			}
@@ -126,11 +125,11 @@ func registerDominoCards() {
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					choices = append(choices, engine.Choice{
-						Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 2 * mental, Source: p.ID}))
 				}
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					fmt.Sprintf("Luck Be a Lady — remove %d threat from:", 2*mental), choices...)})
+					engine.Tf("c.luckBeALadyRemoveThreatFrom", 2*mental), choices...)})
 			}
 			if physical > 0 && len(g.Enemies()) > 0 {
 				var choices []engine.Choice
@@ -142,24 +141,24 @@ func registerDominoCards() {
 					}.Msgs(engine.DamageEntity{Target: id, Damage: 3 * physical, Source: p.ID}))
 				}
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					fmt.Sprintf("Luck Be a Lady — deal %d damage to:", 3*physical), choices...)})
+					engine.Tf("c.luckBeALadyDealDamageTo", 3*physical), choices...)})
 			}
 			if wild > 0 {
 				var wildChoices []engine.Choice
 				wildChoices = append(wildChoices,
-					engine.Choice{ID: "w-heal", Label: fmt.Sprintf("Wild icons: heal %d damage", 2*wild), Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "w-heal", Label: engine.Tf("c.wildIconsHealDamage", 2*wild), Kind: engine.ChoiceLabel}.
 						Msgs(engine.HealEntity{Target: p.ID, N: 2 * wild}))
 				if len(g.Schemes()) > 0 {
 					var choices []engine.Choice
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 2 * wild, Source: p.ID}))
 					}
-					wildChoices = append(wildChoices, engine.Choice{ID: "w-thw", Label: fmt.Sprintf("Wild icons: remove %d threat", 2*wild), Kind: engine.ChoiceLabel}.
+					wildChoices = append(wildChoices, engine.Choice{ID: "w-thw", Label: engine.Tf("c.wildIconsRemoveThreat", 2*wild), Kind: engine.ChoiceLabel}.
 						Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-							fmt.Sprintf("Luck Be a Lady — remove %d threat from:", 2*wild), choices...)}))
+							engine.Tf("c.luckBeALadyRemoveThreatFrom", 2*wild), choices...)}))
 				}
 				if len(g.Enemies()) > 0 {
 					var choices []engine.Choice
@@ -170,11 +169,11 @@ func registerDominoCards() {
 							SourceID: id, CardCode: enemy.ECode(),
 						}.Msgs(engine.DamageEntity{Target: id, Damage: 3 * wild, Source: p.ID}))
 					}
-					wildChoices = append(wildChoices, engine.Choice{ID: "w-dmg", Label: fmt.Sprintf("Wild icons: deal %d damage", 3*wild), Kind: engine.ChoiceLabel}.
+					wildChoices = append(wildChoices, engine.Choice{ID: "w-dmg", Label: engine.Tf("c.wildIconsDealDamage", 3*wild), Kind: engine.ChoiceLabel}.
 						Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-							fmt.Sprintf("Luck Be a Lady — deal %d damage to:", 3*wild), choices...)}))
+							engine.Tf("c.luckBeALadyDealDamageTo", 3*wild), choices...)}))
 				}
-				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Luck Be a Lady — wild icons:", wildChoices...)})
+				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.luckBeALadyWildIcons"), wildChoices...)})
 			}
 			return msgs
 		},
@@ -189,8 +188,8 @@ func registerDominoCards() {
 			}
 			c, _, _ := deckTopIcons(p)
 			n := 3 + iconCountOf(c)
-			g.Logf("Right Place, Right Time discards %s — removes %d threat", c.Def().Name, n)
-			return cardutil.ChooseScheme("Right Place, Right Time", func(g *engine.Game, e engine.Entity) int {
+			g.TLogf("c.rightPlaceRightTimeDiscardsRemovesThreat", c, n)
+			return cardutil.ChooseScheme(engine.Tf("c.rightPlaceRightTimeChooseAScheme"), func(g *engine.Game, e engine.Entity) int {
 				return n
 			})(g, e)
 		},
@@ -208,7 +207,7 @@ func registerDominoCards() {
 				return nil
 			}
 			if _, ok := p.Discard.Remove(m.Card.ID); ok {
-				g.Logf("Jackpot! shuffles itself back into the deck")
+				g.TLogf("c.jackpotShufflesItselfBackIntoTheDeck")
 				return []engine.Message{engine.ShuffleIntoDeck{Player: p.ID, CardID: m.Card.ID}}
 			}
 			return nil
@@ -229,7 +228,7 @@ func registerDominoCards() {
 				if d.HasTrait("Posse") || strings.Contains(d.Name, "Domino") {
 					card := c
 					return []engine.Ability{{
-						Label: "Pip the Pug — put " + card.Def().Name + " on top of your deck", Type: engine.AbilityAction,
+						Label: engine.S("Pip the Pug — put " + card.Def().Name + " on top of your deck"), Type: engine.AbilityAction,
 						AlterEgoOnly: true, Exhaust: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
@@ -239,7 +238,7 @@ func registerDominoCards() {
 							}
 							if _, ok := p.Discard.Remove(card.ID); ok {
 								p.Deck = append(engine.CardList{card}, p.Deck...)
-								g.Logf("%s puts %s on top of their deck", p.Name, card.Def().Name)
+								g.TLogf("c.putsOnTopOfTheirDeck", p.Name, card)
 							}
 							return nil
 						},
@@ -271,7 +270,7 @@ func registerDominoCards() {
 				c.FaceDown = true
 				s.AttachedCards = append(s.AttachedCards, c)
 				s.Counters = len(s.AttachedCards)
-				g.Logf("The Painted Lady stores %s facedown (%d stored)", c.Def().Name, s.Counters)
+				g.TLogf("c.thePaintedLadyStoresFacedownStored", c, s.Counters)
 			}
 			return nil
 		},
@@ -281,7 +280,7 @@ func registerDominoCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "The Painted Lady — retrieve a stored card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.thePaintedLadyRetrieveAStoredCard"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -293,7 +292,7 @@ func registerDominoCards() {
 					s.AttachedCards = s.AttachedCards[1:]
 					s.Counters = len(s.AttachedCards)
 					p.Hand = append(p.Hand, c)
-					g.Logf("%s retrieves a card from The Painted Lady", p.Name)
+					g.TLogf("c.retrievesACardFromThePaintedLady", p.Name)
 					return nil
 				},
 			}}
@@ -308,7 +307,7 @@ func registerDominoCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Domino's Pistol — luck shot", Type: engine.AbilityAction,
+				Label: engine.Tf("c.dominoSPistolLuckShot"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -329,7 +328,7 @@ func registerDominoCards() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask(fmt.Sprintf("Domino's Pistol — deal %d damage to:", n), choices...),
+						Question: engine.Ask(engine.Tf("c.dominoSPistolDealDamageTo", n), choices...),
 					}}
 				},
 			}}
@@ -407,7 +406,7 @@ func registerDominoCards() {
 				return nil
 			}
 			c, _, _ := deckTopIcons(p)
-			g.Logf("Probability Field discards %s for the basic power", c.Def().Name)
+			g.TLogf("c.probabilityFieldDiscardsForTheBasicPower", c)
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 1}, base}
 		},
 	})
@@ -418,10 +417,10 @@ func registerDominoCards() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Memories of Armageddon — exhaust your identity in alter-ego form to discard it?",
-					engine.Choice{ID: "discard", Label: "Exhaust " + p.AlterEgoDef().Name + " → discard", Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.memoriesOfArmageddonExhaustYourIdentityInAlterEgoFormToDisca"),
+					engine.Choice{ID: "discard", Label: engine.S("Exhaust " + p.AlterEgoDef().Name + " → discard"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}),
-					engine.Choice{ID: "keep", Label: "Keep it in play", Kind: engine.ChoicePass}),
+					engine.Choice{ID: "keep", Label: engine.Tf("c.keepItInPlay"), Kind: engine.ChoicePass}),
 			}}
 		},
 	})
@@ -438,7 +437,7 @@ func registerDominoCards() {
 					g.EncounterDeck.Remove(c.ID)
 					t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: "40069", Target: engine.EntityID(mn.EngagedWith)}
 					g.Attachments[t.ID] = t
-					g.Logf("Superpower Feedback attaches to %s", g.Player(mn.EngagedWith).Name)
+					g.TLogf("c.superpowerFeedbackAttachesTo", g.Player(mn.EngagedWith).Name)
 					return nil
 				}
 			}
@@ -447,7 +446,7 @@ func registerDominoCards() {
 					g.EncounterDiscard.Remove(c.ID)
 					t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: "40069", Target: engine.EntityID(mn.EngagedWith)}
 					g.Attachments[t.ID] = t
-					g.Logf("Superpower Feedback attaches to %s", g.Player(mn.EngagedWith).Name)
+					g.TLogf("c.superpowerFeedbackAttachesTo", g.Player(mn.EngagedWith).Name)
 					return nil
 				}
 			}
@@ -466,10 +465,10 @@ func registerDominoCards() {
 				}
 				msgs = append(msgs, engine.AskQuestion{
 					Player: p.ID,
-					Question: engine.Ask("Not My Lucky Day — choose:",
-						engine.Choice{ID: "dmg", Label: "Take 1 damage", Kind: engine.ChoiceLabel}.
+					Question: engine.Ask(engine.Tf("c.notMyLuckyDayChoose"),
+						engine.Choice{ID: "dmg", Label: engine.Tf("c.take1Damage"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.DamageEntity{Target: p.ID, Damage: 1, Source: s.ID}),
-						engine.Choice{ID: "threat", Label: "Place 2 threat on this scheme", Kind: engine.ChoiceLabel}.
+						engine.Choice{ID: "threat", Label: engine.Tf("c.place2ThreatOnThisScheme"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.ApplySchemeThreat{Scheme: s.ID, N: 2, Source: s.ID}),
 					),
 				})
@@ -489,7 +488,7 @@ func registerDominoCards() {
 			if p := g.Player(mn.EngagedWith); p != nil {
 				mn.Counters = p.Damage
 				mn.MaxHP += p.Damage
-				g.Logf("Prototype gains %d luck counters (HP %d)", mn.Counters, mn.MaxHP)
+				g.TLogf("c.prototypeGainsLuckCountersHp", mn.Counters, mn.MaxHP)
 			}
 			return nil
 		},
@@ -510,7 +509,7 @@ func registerDominoCards() {
 			if t == nil || t.Target == "" {
 				return nil
 			}
-			g.Logf("Superpower Feedback — 1 damage after the ability")
+			g.TLogf("c.superpowerFeedback1DamageAfterTheAbility")
 			return []engine.Message{engine.DamageEntity{Target: t.Target, Damage: 1, Source: t.ID}}
 		},
 	})

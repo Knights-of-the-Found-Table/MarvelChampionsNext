@@ -4,8 +4,6 @@
 package daredevil
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -30,7 +28,7 @@ func registerDaredevil() {
 					p.SenseDeck = append(p.SenseDeck, engine.Card{ID: g.NextCardID(), Code: def.Code, Owner: p.ID})
 				}
 			}
-			g.Logf("%s begins the game with a Sense deck of %d cards", p.Name, len(p.SenseDeck))
+			g.TLogf("c.beginsTheGameWithASenseDeckOfCards", p.Name, len(p.SenseDeck))
 			return nil
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
@@ -40,7 +38,7 @@ func registerDaredevil() {
 			return []engine.Ability{{
 				// Superhuman Senses — Action: play the top card of the
 				// Sense deck as if it were in your hand (paying its cost).
-				Label:    fmt.Sprintf("Superhuman Senses — play the top Sense card (%s)", p.SenseDeck[0].Def().Name),
+				Label:    engine.Tf("c.superhumanSensesPlayTheTopSenseCard", p.SenseDeck[0].Def().Name),
 				Type:     engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -51,19 +49,19 @@ func registerDaredevil() {
 					top := p.SenseDeck[0]
 					cost := cardutil.Cost(top.Def())
 					play := engine.Choice{
-						ID: "play", Label: fmt.Sprintf("Play %s (cost %d)", top.Def().Name, cost),
+						ID: "play", Label: engine.Tf("c.playCost", top, cost),
 						Kind: engine.ChoiceCard, CardCode: top.Code,
 					}
 					if cost > 0 {
 						play = play.WithThen(g.CustomPaymentQuestion(p, cost,
-							engine.Tf("q.payGeneric", cost, top.Def().Name),
+							engine.Tf("q.payGeneric", cost, top),
 							map[string]any{"senseCard": top.ID}))
 					} else {
 						play = play.Msgs(engine.SenseEnterPlay{Player: p.ID, Card: top})
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Superhuman Senses", play, cardutil.Skip()),
+						Question: engine.Ask(engine.Tf("c.superhumanSenses"), play, cardutil.Skip()),
 					}}
 				},
 			}}
@@ -91,7 +89,7 @@ func registerSenses() {
 		OnPlay: senseAttach(true, true),
 		React: senseDefeatTrigger("60003", func(g *engine.Game, p *engine.Player, u *engine.Upgrade) []engine.Message {
 			p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{Amount: 2})
-			g.Logf("%s's next card this phase costs 2 less", p.Name)
+			g.TLogf("c.sNextCardThisPhaseCosts2Less", p.Name)
 			return nil
 		}),
 	})
@@ -113,7 +111,7 @@ func registerSenses() {
 			if !ok || !ok2 || d.Target != u.AttachTo || d.Source != u.Owner {
 				return nil
 			}
-			g.Logf("Radar Sense: +3 damage")
+			g.TLogf("c.radarSense3Damage")
 			return []engine.Message{
 				engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 				engine.DamageEntity{Target: u.AttachTo, Damage: 3, Source: u.ID},
@@ -131,7 +129,7 @@ func registerSenses() {
 			if !ok || !ok2 || w.Scheme != u.AttachTo || w.Player != u.Owner {
 				return nil
 			}
-			g.Logf("Superior Taste: 2 additional threat removed")
+			g.TLogf("c.superiorTaste2AdditionalThreatRemoved")
 			return []engine.Message{
 				engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 				engine.ThwartScheme{Scheme: u.AttachTo, N: 2, Source: u.Owner},
@@ -158,7 +156,7 @@ func senseAttach(enemies, schemes bool) func(g *engine.Game, e engine.Entity) []
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
@@ -169,7 +167,7 @@ func senseAttach(enemies, schemes bool) func(g *engine.Game, e engine.Entity) []
 		}
 		return []engine.Message{engine.AskQuestion{
 			Player:   pid,
-			Question: engine.Ask(e.EDef().Name+" — attach to", choices...),
+			Question: engine.Ask(engine.S(e.EDef().Name+" — attach to"), choices...),
 		}}
 	}
 }
@@ -204,11 +202,11 @@ func senseDefeatTrigger(code string, effect func(g *engine.Game, p *engine.Playe
 		effectMsgs = append(effectMsgs, effect(g, p, u)...)
 		return []engine.Message{engine.AskQuestion{
 			Player: u.Owner,
-			Question: engine.Ask(name+" — discard it for its effect?",
+			Question: engine.Ask(engine.S(name+" — discard it for its effect?"),
 				engine.Choice{
-					ID: "use", Label: "Discard " + name + " → use its effect", Kind: engine.ChoiceLabel,
+					ID: "use", Label: engine.S("Discard " + name + " → use its effect"), Kind: engine.ChoiceLabel,
 				}.Msgs(effectMsgs...),
-				engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+				engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 			),
 		}}
 	}
@@ -243,19 +241,19 @@ func registerNemesis() {
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil && s.EDef().HasTrait("persona") {
 					discard = append(discard, engine.Choice{
-						Label: "Discard " + s.EDef().Name, Kind: engine.ChoiceCard, CardCode: s.Code,
+						Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			attack := engine.Choice{
-				ID: "attack", Label: "Bullseye attacks you", Kind: engine.ChoiceLabel,
+				ID: "attack", Label: engine.Tf("c.bullseyeAttacksYou"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.MinionActivates{MinionID: mn.ID, Player: p.ID})
 			if len(discard) == 0 {
 				return []engine.Message{engine.MinionActivates{MinionID: mn.ID, Player: p.ID}}
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Bullseye — discard a Persona support or take the attack?",
+				Question: engine.Ask(engine.Tf("c.bullseyeDiscardAPersonaSupportOrTakeTheAttack"),
 					append(discard, attack)...),
 			}}
 		},
@@ -269,7 +267,7 @@ func registerNemesis() {
 			g.Delete(t.ID)
 			for id, mn := range g.Minions {
 				if mn.Code == "60033" {
-					g.Logf("Deadliest Man Alive: Bullseye gets +1 ATK")
+					g.TLogf("c.deadliestManAliveBullseyeGets1Atk")
 					return []engine.Message{engine.BoostEnemyAttack{Enemy: id, N: 1}}
 				}
 			}
@@ -296,7 +294,7 @@ func registerNemesis() {
 			if best != "" {
 				t.Target = best
 				if e := g.Entity(best); e != nil {
-					g.Logf("Stolen Sai attaches to %s (piercing not modeled)", e.EDef().Name)
+					g.TLogf("c.stolenSaiAttachesToPiercingNotModeled", e)
 				}
 			}
 			return nil
@@ -323,14 +321,14 @@ func registerNemesis() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					rfg = append(rfg, engine.Choice{
-						Label: "Remove " + a.EDef().Name, Kind: engine.ChoiceCard, CardCode: a.Code,
+						Label: engine.S("Remove " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			for _, id := range p.Supports {
 				if sp := g.Supports[id]; sp != nil && sp.EDef().HasTrait("persona") {
 					rfg = append(rfg, engine.Choice{
-						Label: "Remove " + sp.EDef().Name, Kind: engine.ChoiceCard, CardCode: sp.Code,
+						Label: engine.S("Remove " + sp.EDef().Name), Kind: engine.ChoiceCard, CardCode: sp.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -346,11 +344,11 @@ func registerNemesis() {
 				return attack
 			}
 			rfg = append(rfg, engine.Choice{
-				ID: "attack", Label: "Bullseye attacks you instead", Kind: engine.ChoiceLabel,
+				ID: "attack", Label: engine.Tf("c.bullseyeAttacksYouInstead"), Kind: engine.ChoiceLabel,
 			}.Msgs(attack...))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Eye on the Target — remove an ally or Persona support from the game?", rfg...),
+				Question: engine.Ask(engine.Tf("c.eyeOnTheTargetRemoveAnAllyOrPersonaSupportFromTheGame"), rfg...),
 			}}
 		},
 	})

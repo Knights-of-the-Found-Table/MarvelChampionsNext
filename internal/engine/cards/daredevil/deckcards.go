@@ -41,7 +41,7 @@ func registerContingencyPlanning() {
 			}
 			if hasUpgrade {
 				abs = append(abs, engine.Ability{
-					Label:   "Contingency Planning — tuck an upgrade from your hand",
+					Label:   engine.Tf("c.contingencyPlanningTuckAnUpgradeFromYourHand"),
 					Type:    engine.AbilityAction,
 					Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -51,7 +51,7 @@ func registerContingencyPlanning() {
 								continue
 							}
 							choices = append(choices, engine.Choice{
-								Label: "Tuck " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(engine.SupportStoreCard{ID: s.ID, Card: c}))
 						}
 						if len(choices) == 0 {
@@ -59,14 +59,14 @@ func registerContingencyPlanning() {
 						}
 						return []engine.Message{engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("Contingency Planning — tuck which upgrade?", choices...),
+							Question: engine.Ask(engine.Tf("c.contingencyPlanningTuckWhichUpgrade"), choices...),
 						}}
 					},
 				})
 			}
 			if s.Counters > 0 {
 				abs = append(abs, engine.Ability{
-					Label:   "Contingency Planning — take the tucked upgrade back to hand",
+					Label:   engine.Tf("c.contingencyPlanningTakeTheTuckedUpgradeBackToHand"),
 					Type:    engine.AbilityAction,
 					Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -131,7 +131,7 @@ func registerInHarmsWay() {
 				for _, sid := range g.Schemes() {
 					s := g.Entity(sid)
 					inner = append(inner, engine.Choice{
-						Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 						SourceID: sid, CardCode: s.ECode(),
 					}.Msgs(
 						engine.DamageEntity{Target: id, Damage: x, Source: pid},
@@ -141,11 +141,11 @@ func registerInHarmsWay() {
 				first = append(first, engine.Choice{
 					Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: enemy.ECode(),
-				}.WithThen(engine.Ask("In Harm's Way — choose a scheme", inner...)))
+				}.WithThen(engine.Ask(engine.Tf("c.inHarmSWayChooseAScheme"), inner...)))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("In Harm's Way — choose an enemy", first...),
+				Question: engine.Ask(engine.Tf("c.inHarmSWayChooseAnEnemy"), first...),
 			}}
 		},
 	})
@@ -194,7 +194,7 @@ func registerStandAlone() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Stand Alone — ready your hero",
+				Label:    engine.Tf("c.standAloneReadyYourHero"),
 				Type:     engine.AbilityTrigger,
 				Trigger:  engine.TriggerVillainAttacksYou,
 				Exhaust:  true,

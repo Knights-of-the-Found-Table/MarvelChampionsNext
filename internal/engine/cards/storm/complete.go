@@ -28,7 +28,7 @@ func registerRemainingStorm() {
 			g.EncounterDiscard = append(g.EncounterDiscard, top)
 			boost := cardutil.BoostOf(top)
 			if boost > 0 {
-				g.Logf("Havok overcharges (+%d)", boost)
+				g.TLogf("c.havokOvercharges", boost)
 				return []engine.Message{engine.DamageEntity{Target: m.Target, Damage: boost, Source: a.Owner}}
 			}
 			return nil
@@ -48,7 +48,7 @@ func registerRemainingStorm() {
 				mn := g.Minions[id]
 				if mn != nil && mn.SchemeVal < a.ThwartVal {
 					choices = append(choices, engine.Choice{
-						Label: "Stun " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.stun2", cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.StunEntity{Target: id}))
 				}
 			}
@@ -57,7 +57,7 @@ func registerRemainingStorm() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Mirage — stun an enemy with lower SCH", choices...),
+				Question: engine.Ask(engine.Tf("c.mirageStunAnEnemyWithLowerSch"), choices...),
 			}}
 		},
 	})
@@ -77,7 +77,7 @@ func registerRemainingStorm() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "ally" && c.Def().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: "Return " + c.Def().Name + " to hand", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Return " + c.Def().Name + " to hand"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -86,7 +86,7 @@ func registerRemainingStorm() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Pixie — return an X-Men ally to hand", choices...),
+				Question: engine.Ask(engine.Tf("c.pixieReturnAnXMenAllyToHand"), choices...),
 			}}
 		},
 	})
@@ -154,7 +154,7 @@ func registerRemainingStorm() {
 					p.Deck = append(p.Deck[:i], p.Deck[i+1:]...)
 					c.Owner = p.ID
 					p.Hand = append(p.Hand, c)
-					g.Logf("\"To Me, My X-Men!\" — %s answers the call", c.Def().Name)
+					g.TLogf("c.toMeMyXMenAnswersTheCall", c)
 					return nil
 				}
 			}
@@ -176,7 +176,7 @@ func registerRemainingStorm() {
 			for _, c := range p.Deck {
 				if c.Def().Type == "support" && (c.Def().HasTrait("x-men") || c.Def().HasTrait("x-force")) {
 					choices = append(choices, engine.Choice{
-						Label: "Take " + c.Def().Name + " (deck)", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Take " + c.Def().Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}))
 					break
 				}
@@ -184,7 +184,7 @@ func registerRemainingStorm() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "support" && (c.Def().HasTrait("x-men") || c.Def().HasTrait("x-force")) {
 					choices = append(choices, engine.Choice{
-						Label: "Take " + c.Def().Name + " (discard)", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Take " + c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					break
 				}
@@ -194,7 +194,7 @@ func registerRemainingStorm() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Forge — take a support card", choices...),
+				Question: engine.Ask(engine.Tf("c.forgeTakeASupportCard"), choices...),
 			}}
 		},
 	})
@@ -204,7 +204,7 @@ func registerRemainingStorm() {
 	engine.RegisterBehavior("36025", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "X-Mansion — heal 1 damage from a MUTANT or X-Men character", Type: engine.AbilityAction,
+				Label: engine.Tf("c.xMansionHeal1DamageFromAMutantOrXMenCharacter"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -215,7 +215,7 @@ func registerRemainingStorm() {
 					add := func(id engine.EntityID, label string, ok bool) {
 						if ok {
 							choices = append(choices, engine.Choice{
-								Label: "Heal " + label, Kind: engine.ChoiceTarget, SourceID: id,
+								Label: engine.S("Heal " + label), Kind: engine.ChoiceTarget, SourceID: id,
 							}.Msgs(engine.HealEntity{Target: id, N: 1}))
 						}
 					}
@@ -230,7 +230,7 @@ func registerRemainingStorm() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("X-Mansion — heal 1 damage", choices...),
+						Question: engine.Ask(engine.Tf("c.xMansionHeal1Damage"), choices...),
 					}}
 				},
 			}}
@@ -256,13 +256,13 @@ func registerRemainingStorm() {
 			var choices []engine.Choice
 			if g.EntityHasTrait(p.ID, "x-men") {
 				choices = append(choices, engine.Choice{
-					Label: "Ready " + p.Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.S("Ready " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.ExhaustEntity{ID: s.ID}, engine.ReadyEntity{ID: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if x := g.Allies[id]; x != nil && x.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: "Ready " + x.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S("Ready " + x.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: s.ID}, engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -271,7 +271,7 @@ func registerRemainingStorm() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Utopia — ready an X-Men character", choices...),
+				Question: engine.Ask(engine.Tf("c.utopiaReadyAnXMenCharacter"), choices...),
 			}}
 		},
 	})
@@ -281,7 +281,7 @@ func registerRemainingStorm() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if p := g.Player(e.EOwner()); p != nil {
 				p.MaxHP += 3
-				g.Logf("%s gets +3 hit points (Endurance)", p.Name)
+				g.TLogf("c.gets3HitPointsEndurance", p.Name)
 			}
 			return nil
 		},
@@ -296,20 +296,20 @@ func registerRemainingStorm() {
 	engine.RegisterBehavior("36030", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep Claustrophobia in play (no form change)", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepClaustrophobiaInPlayNoFormChange"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if !p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "exhaust", Label: "Exhaust Ororo Munroe → remove from the game", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustOroroMunroeRemoveFromTheGame"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			} else if p.IsHero() && !p.FormChanged && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "flip", Label: "Flip to alter-ego form (exhaust to remove next)", Kind: engine.ChoiceLabel,
+					ID: "flip", Label: engine.Tf("c.flipToAlterEgoFormExhaustToRemoveNext"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ChangeForm{Player: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Claustrophobia — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.claustrophobiaChoose"), choices...),
 			}}
 		},
 	})
@@ -492,7 +492,7 @@ func registerRemainingStorm() {
 				MaxHP: hp, AttackVal: atk, SchemeVal: thw, EngagedWith: pid,
 			}
 			g.Minions[mn.ID] = mn
-			g.Logf("Possessed — %s turns against %s!", best.EDef().Name, g.Player(pid).Name)
+			g.TLogf("c.possessedTurnsAgainst", best, g.Player(pid).Name)
 			return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: pid}}
 		},
 	})
@@ -526,7 +526,7 @@ func registerRemainingStorm() {
 				i++
 			}
 			if shuffled > 0 {
-				g.Logf("The Shadow King reclaims %d cards", shuffled)
+				g.TLogf("c.theShadowKingReclaimsCards", shuffled)
 			}
 			return nil
 		},

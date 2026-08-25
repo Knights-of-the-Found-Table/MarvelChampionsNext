@@ -49,7 +49,7 @@ func registerChallenge() {
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
 			if ship := g.EnvironmentByCode("16093"); ship != nil {
 				ship.Counters += 2
-				g.Logf("Nebula's Ship gains 2 evasion counters (%d total)", ship.Counters)
+				g.TLogf("c.nebulaSShipGains2EvasionCountersTotal", ship.Counters)
 			}
 			return nil
 		},
@@ -70,15 +70,15 @@ func registerChallenge() {
 			g.Delete(t.ID)
 			var opts []engine.Choice
 			opts = append(opts, engine.Choice{
-				ID: "dmg", Label: "Take 2 damage", Kind: engine.ChoiceLabel,
+				ID: "dmg", Label: engine.Tf("c.take2Damage"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.DamageEntity{Target: p.ID, Damage: 2, Source: t.ID}))
 			if len(p.Hand) > 0 {
 				opts = append(opts, engine.Choice{
-					ID: "discard", Label: "Discard 1 card at random", Kind: engine.ChoiceLabel,
+					ID: "discard", Label: engine.Tf("c.discard1CardAtRandom"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{p.Hand[0]}}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("On the Hunt: choose one", opts...)}}
+				Question: engine.Ask(engine.Tf("c.onTheHuntChooseOne"), opts...)}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
 			for id := range g.Villains {

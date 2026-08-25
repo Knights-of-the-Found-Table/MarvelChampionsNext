@@ -84,9 +84,9 @@ type Game struct {
 	EventThreatBonus map[PlayerID]int `json:"eventThreatBonus,omitempty"`
 
 	nextID int
-	Over   bool   `json:"over"`
-	Won    bool   `json:"won"`
-	Reason string `json:"reason,omitempty"`
+	Over   bool `json:"over"`
+	Won    bool `json:"won"`
+	Reason Msg  `json:"reason,omitempty"`
 
 	Log LogEntries `json:"log"`
 
@@ -123,7 +123,7 @@ func (g *Game) nextCardID() string {
 func (g *Game) SpawnSupport(code string, owner PlayerID) *Support {
 	s := &Support{ID: g.nextEntityID(KindSupport), Code: code, Owner: owner}
 	g.Supports[s.ID] = s
-	g.tlogMajorf("log.entersControl", s.EDef().Name, g.Player(owner).Name)
+	g.tlogMajorf("log.entersControl", s, g.Player(owner).Name)
 	return s
 }
 
@@ -170,7 +170,7 @@ func (g *Game) SpawnAttachment(code string, target EntityID) *Attachment {
 func (g *Game) SpawnEnvironment(code string) *Environment {
 	e := &Environment{ID: g.nextEntityID(KindEnvironment), Code: code}
 	g.Environments[e.ID] = e
-	g.tlogMajorf("log.environmentEnters", e.EDef().Name)
+	g.tlogMajorf("log.environmentEnters", e)
 	return e
 }
 
@@ -737,14 +737,14 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 				for _, eid := range sortedIDs(g.Villains) {
 					v := g.Villains[eid]
 					picks = append(picks, Choice{
-						Label: Tf("m.hp", v.EDef().Name, v.HP(), v.MaxHP),
+						Label: Tf("m.hp", v, v.HP(), v.MaxHP),
 						Kind:  ChoiceTarget, SourceID: eid, CardCode: v.Code,
 					}.Msgs(DamageEntity{Target: eid, Damage: dmg, Source: playerID}))
 				}
 				for _, eid := range sortedIDs(g.Minions) {
 					mn := g.Minions[eid]
 					picks = append(picks, Choice{
-						Label: Tf("m.hp", mn.EDef().Name, mn.HP(), mn.MaxHP),
+						Label: Tf("m.hp", mn, mn.HP(), mn.MaxHP),
 						Kind:  ChoiceTarget, SourceID: eid, CardCode: mn.Code,
 					}.Msgs(DamageEntity{Target: eid, Damage: dmg, Source: playerID}))
 				}
@@ -1040,10 +1040,6 @@ func (g *Game) UnmarshalJSON(b []byte) error {
 	}
 	g.queue = queue
 	g.pending = in.Pending
-	if g.pending != nil {
-		localizeQuestionTree(g.pending.Question)
-	}
-	g.Reason = localizeLegacyRenderedText(g.Reason)
 	g.scenario = nil
 	g.migrateMainSchemeCodes()
 	return nil

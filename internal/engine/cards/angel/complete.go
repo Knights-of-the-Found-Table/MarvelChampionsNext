@@ -125,10 +125,10 @@ func registerAngelExtras() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Containment Strategy — attach to:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.containmentStrategyAttachTo"), choices...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			w, ok := msg.(engine.WindowDefended)
@@ -166,7 +166,7 @@ func registerAngelExtras() {
 			if c.Def().Type == "event" && c.Def().CardSet == heroSet {
 				if _, ok := p.Discard.Remove(c.ID); ok {
 					p.Hand = append(p.Hand, c)
-					g.Logf("Soaring Hearts recovers %s", c.Def().Name)
+					g.TLogf("c.soaringHeartsRecovers", c)
 				}
 				break
 			}
@@ -271,13 +271,13 @@ func registerAngelExtras() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 1, GrantTrait: "X-Force"}))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("X-Force Recruit — attach to:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.xForceRecruitAttachTo"), choices...)}}
 		},
 	})
 }

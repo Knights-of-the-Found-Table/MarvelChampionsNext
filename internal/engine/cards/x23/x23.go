@@ -57,7 +57,7 @@ func registerX23() {
 				return nil
 			}
 			g.UsedThisTurn["x23-living-weapon"] = true
-			g.Logf("Living Weapon — %s readies", p.Name)
+			g.TLogf("c.livingWeaponReadies", p.Name)
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
@@ -65,7 +65,7 @@ func registerX23() {
 				// Laura Kinney — Action: shuffle Honey Badger or
 				// Sisterly Bond from your discard into your deck →
 				// draw 1 card (once per round).
-				Label:        "Shuffle Honey Badger or Sisterly Bond from your discard into your deck → draw 1 card",
+				Label:        engine.Tf("c.shuffleHoneyBadgerOrSisterlyBondFromYourDiscardIntoYourDeckD"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -78,7 +78,7 @@ func registerX23() {
 					for _, c := range pl.Discard {
 						if c.Code == "43003" || c.Code == "43007" {
 							choices = append(choices, engine.Choice{
-								Label: "Shuffle in " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ShuffleIntoDeck{Player: pl.ID, CardID: c.ID},
 								engine.DrawCards{Player: pl.ID, N: 1},
@@ -90,7 +90,7 @@ func registerX23() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Laura Kinney — shuffle which card into your deck?", choices...),
+						Question: engine.Ask(engine.Tf("c.lauraKinneyShuffleWhichCardIntoYourDeck"), choices...),
 					}}
 				},
 			}}
@@ -125,7 +125,7 @@ func registerClaws() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "X-23's Claws — exhaust and take 2 damage: +2 ATK",
+				Label:    engine.Tf("c.x23SClawsExhaustAndTake2Damage2Atk"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -134,7 +134,7 @@ func registerClaws() {
 					if p == nil {
 						return nil
 					}
-					g.Logf("X-23's Claws — %s takes 2 damage for +2 ATK", p.Name)
+					g.TLogf("c.x23SClawsTakes2DamageFor2Atk", p.Name)
 					return []engine.Message{
 						engine.DamageEntity{Target: p.ID, Damage: 2, Source: u.ID},
 						engine.ApplyStatBonus{Target: p.ID, ATK: 2},
@@ -158,7 +158,7 @@ func registerHoneyBadger() {
 			if p == nil || !p.IsHero() || !p.Exhausted {
 				return nil
 			}
-			g.Logf("Honey Badger — %s readies", p.Name)
+			g.TLogf("c.honeyBadgerReadies", p.Name)
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		},
 	})
@@ -179,7 +179,7 @@ func registerAnimalInstinct() {
 			if atk < 0 {
 				atk = 0
 			}
-			g.Logf("Animal Instinct — +%d THW this phase", atk)
+			g.TLogf("c.animalInstinctThwThisPhase", atk)
 			return []engine.Message{engine.ApplyStatBonus{Target: p.ID, THW: atk}}
 		},
 	})
@@ -209,15 +209,15 @@ func registerRegenerativeLongevity() {
 			hb := honeyBadger(g, p)
 			var choices []engine.Choice
 			choices = append(choices, engine.Choice{
-				ID: "self-4", Label: "Heal 4 from " + p.Name, Kind: engine.ChoiceLabel,
+				ID: "self-4", Label: engine.S("Heal 4 from " + p.Name), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.HealEntity{Target: pid, N: 4}))
 			if hb != nil {
 				choices = append(choices,
 					engine.Choice{
-						ID: "hb-4", Label: "Heal 4 from Honey Badger", Kind: engine.ChoiceLabel,
+						ID: "hb-4", Label: engine.Tf("c.heal4FromHoneyBadger"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.HealEntity{Target: hb.ID, N: 4}),
 					engine.Choice{
-						ID: "split", Label: "Heal 2 from each", Kind: engine.ChoiceLabel,
+						ID: "split", Label: engine.Tf("c.heal2FromEach"), Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.HealEntity{Target: pid, N: 2},
 						engine.HealEntity{Target: hb.ID, N: 2},
@@ -225,7 +225,7 @@ func registerRegenerativeLongevity() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Regenerative Longevity — heal a total of 4 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.regenerativeLongevityHealATotalOf4Damage"), choices...),
 			}}
 		},
 	})
@@ -244,7 +244,7 @@ func registerSisterlyBond() {
 			}
 			hb := honeyBadger(g, p)
 			if hb == nil {
-				g.Logf("Sisterly Bond — Honey Badger is not in play")
+				g.TLogf("c.sisterlyBondHoneyBadgerIsNotInPlay")
 				return nil
 			}
 			atk, thw := p.AttackStat(g), p.ThwartStat(g)
@@ -254,7 +254,7 @@ func registerSisterlyBond() {
 			if thw < 0 {
 				thw = 0
 			}
-			g.Logf("Sisterly Bond — Honey Badger gets +%d ATK / +%d THW this phase", atk, thw)
+			g.TLogf("c.sisterlyBondHoneyBadgerGetsAtkThwThisPhase", atk, thw)
 			return []engine.Message{engine.AllyStatBonus{Ally: hb.ID, ATK: atk, THW: thw}}
 		},
 	})
@@ -285,7 +285,7 @@ func registerSisterhood() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Sisterhood — discard an X-23 card: search for Honey Badger",
+				Label:   engine.Tf("c.sisterhoodDiscardAnX23CardSearchForHoneyBadger"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -314,7 +314,7 @@ func registerSisterhood() {
 						}
 					}
 					if found == nil {
-						g.Logf("Sisterhood — Honey Badger is not available")
+						g.TLogf("c.sisterhoodHoneyBadgerIsNotAvailable")
 						return nil
 					}
 					hb := found
@@ -336,7 +336,7 @@ func registerSisterhood() {
 								engine.ShufflePlayerDeck{Player: pl.ID})
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(fetch...))
 					}
 					if len(choices) == 0 {
@@ -344,7 +344,7 @@ func registerSisterhood() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Sisterhood — discard an X-23 card to fetch Honey Badger", choices...),
+						Question: engine.Ask(engine.Tf("c.sisterhoodDiscardAnX23CardToFetchHoneyBadger"), choices...),
 					}}
 				},
 			}}
@@ -359,7 +359,7 @@ func registerAdamantiumLacing() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if p := g.Player(e.EOwner()); p != nil {
 				p.MaxHP += 2
-				g.Logf("Adamantium Lacing grants +2 HP to %s (now %d)", p.Name, p.MaxHP)
+				g.TLogf("c.adamantiumLacingGrants2HpToNow", p.Name, p.MaxHP)
 			}
 			return nil
 		},
@@ -424,7 +424,7 @@ func registerPunctureWound() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Puncture Wound — attach to which enemy?", choices...),
+				Question: engine.Ask(engine.Tf("c.punctureWoundAttachToWhichEnemy"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -436,7 +436,7 @@ func registerPunctureWound() {
 			if u == nil || u.AttachTo == "" || g.Entity(u.AttachTo) == nil {
 				return nil
 			}
-			g.Logf("Puncture Wound — 3 damage to the attached enemy")
+			g.TLogf("c.punctureWound3DamageToTheAttachedEnemy")
 			return []engine.Message{
 				engine.DamageEntity{Target: u.AttachTo, Damage: 3, Source: u.ID},
 				engine.DiscardControlled{Player: u.Owner, ID: u.ID},
@@ -475,7 +475,7 @@ func registerNemesis() {
 			}
 			g.EncounterDiscard = append(g.EncounterDiscard, card)
 			n := cardutil.BoostOf(card)
-			g.Logf("Lady Deathstrike — %s discards %s and takes %d damage", p.Name, card.Def().Name, n)
+			g.TLogf("c.ladyDeathstrikeDiscardsAndTakesDamage", p.Name, card, n)
 			if n == 0 {
 				return nil
 			}
@@ -504,7 +504,7 @@ func registerNemesis() {
 			if !ok2 || t.Target != m.Player {
 				return nil
 			}
-			g.Logf("Critical Wound — 4 damage at the end of the turn")
+			g.TLogf("c.criticalWound4DamageAtTheEndOfTheTurn")
 			return []engine.Message{
 				engine.DamageEntity{Target: t.Target, Damage: 4, Source: t.ID},
 				engine.DiscardAttachmentMsg{ID: t.ID},
@@ -538,7 +538,7 @@ func hackAndSlash(g *engine.Game, p *engine.Player, src engine.EntityID) []engin
 	c := p.Hand[g.Random(len(p.Hand))]
 	p.Hand.Remove(c.ID)
 	n := len(c.Def().Resources)
-	g.Logf("Hack 'n' Slash — %s discards %s and takes %d damage", p.Name, c.Def().Name, n)
+	g.TLogf("c.hackNSlashDiscardsAndTakesDamage", p.Name, c, n)
 	msgs := []engine.Message{engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}}
 	if n > 0 {
 		msgs = append(msgs, engine.DamageEntity{Target: p.ID, Damage: n, Source: src})
@@ -558,7 +558,7 @@ func registerObligation() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Code == "43003" {
 					g.Delete(id)
-					g.Logf("Self-Isolation — Honey Badger is locked away")
+					g.TLogf("c.selfIsolationHoneyBadgerIsLockedAway")
 					return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 				}
 			}
@@ -566,12 +566,12 @@ func registerObligation() {
 				for _, c := range *z {
 					if c.Code == "43003" {
 						z.Remove(c.ID)
-						g.Logf("Self-Isolation — Honey Badger is locked away")
+						g.TLogf("c.selfIsolationHoneyBadgerIsLockedAway")
 						return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 					}
 				}
 			}
-			g.Logf("Self-Isolation — Honey Badger not found; a facedown encounter card is dealt")
+			g.TLogf("c.selfIsolationHoneyBadgerNotFoundAFacedownEncounterCardIsDeal")
 			return []engine.Message{
 				engine.ObligationResolve{Player: p.ID, Card: card},
 				engine.DealEncounterToPlayer{Player: p.ID},

@@ -32,7 +32,7 @@ func registerValkyrie() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Death Perception — attach Death-Glow to an enemy", Type: engine.AbilityAction, HeroOnly: true,
+				Label: engine.Tf("c.deathPerceptionAttachDeathGlowToAnEnemy"), Type: engine.AbilityAction, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(self)
 					if p == nil {
@@ -45,7 +45,7 @@ func registerValkyrie() {
 					}
 					g.Upgrades[u.ID] = u
 					p.Upgrades = append(p.Upgrades, u.ID)
-					g.Logf("Death-Glow enters play attached by Death Perception")
+					g.TLogf("c.deathGlowEntersPlayAttachedByDeathPerception")
 					return []engine.Message{engine.AttachUpgrade{ID: u.ID, Target: engine.EntityID("")}}
 				},
 			}}
@@ -72,7 +72,7 @@ func registerValkyrie() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Attach Death-Glow to which enemy?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.attachDeathGlowToWhichEnemy"), picks...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			u := g.Upgrades[e.EID()]
@@ -92,7 +92,7 @@ func registerValkyrie() {
 				return nil
 			}
 			g.Delete(u.ID) // set aside, out of play
-			g.Logf("Death-Glow is set aside as its enemy is defeated")
+			g.TLogf("c.deathGlowIsSetAsideAsItsEnemyIsDefeated")
 			return []engine.Message{engine.ReadyEntity{ID: u.Owner}}
 		},
 	})
@@ -101,7 +101,7 @@ func registerValkyrie() {
 	engine.RegisterBehavior("25003", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Annabelle Riggs → search top 5 for a Valkyrie card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustAnnabelleRiggsSearchTop5ForAValkyrieCard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -113,7 +113,7 @@ func registerValkyrie() {
 					for i := 0; i < 5 && i < len(p.Deck); i++ {
 						c := p.Deck[i]
 						if c.Def().Code[:2] == "25" && c.Def().Type != "obligation" {
-							picks = append(picks, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 								Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 									engine.ShufflePlayerDeck{Player: p.ID}))
 						}
@@ -122,7 +122,7 @@ func registerValkyrie() {
 						return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Add which card to hand?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.addWhichCardToHand"), picks...)}}
 				},
 			}}
 		},
@@ -202,7 +202,7 @@ func registerValkyrie() {
 			return []engine.Message{
 				engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 				engine.AskQuestion{Player: u.Owner, Question: engine.Ask(
-					"Flight of the Valkyrior: remove 5 threat from which scheme?", schemePicks(g, 5, u.Owner)...)},
+					engine.Tf("c.flightOfTheValkyriorRemove5ThreatFromWhichScheme"), schemePicks(g, 5, u.Owner)...)},
 			}
 		},
 	})
@@ -220,7 +220,7 @@ func registerValkyrie() {
 				def := c.Def()
 				if def.Code[:2] == "25" && def.Type != "obligation" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -228,7 +228,7 @@ func registerValkyrie() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Return which Valkyrie card to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.returnWhichValkyrieCardToHand"), picks...)}}
 		},
 	})
 
@@ -261,7 +261,7 @@ func registerValkyrie() {
 
 	// Have at Thee!: 7 damage (glow overkill skipped).
 	engine.RegisterBehavior("25012", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Have at Thee!: deal 7 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.haveAtTheeDeal7DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 7, nil }),
 	})
 
@@ -311,7 +311,7 @@ func registerValkyrie() {
 			if n <= 0 {
 				return nil
 			}
-			return cardutil.ChooseEnemy("Quick Strike: deal damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.quickStrikeDealDamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)
 		},
 	})
@@ -330,7 +330,7 @@ func registerValkyrie() {
 			return []engine.Message{
 				engine.ExhaustEntity{ID: p.ID},
 				engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Smash the Problem: remove threat from which scheme?", schemePicks(g, n, p.ID)...)},
+					engine.Tf("c.smashTheProblemRemoveThreatFromWhichScheme"), schemePicks(g, n, p.ID)...)},
 			}
 		},
 	})
@@ -356,7 +356,7 @@ func registerValkyrie() {
 	engine.RegisterBehavior("25023", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust The Bifrost → search your deck for an asgard ally", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTheBifrostSearchYourDeckForAnAsgardAlly"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -368,7 +368,7 @@ func registerValkyrie() {
 					for _, c := range p.Deck {
 						def := c.Def()
 						if def.Type == "ally" && def.HasTrait("asgard") {
-							picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 									engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}},
 									engine.ShufflePlayerDeck{Player: p.ID}))
@@ -378,7 +378,7 @@ func registerValkyrie() {
 						return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Play which asgard ally?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.playWhichAsgardAlly"), picks...)}}
 				},
 			}}
 		},
@@ -397,11 +397,11 @@ func registerValkyrie() {
 	engine.RegisterBehavior("25028", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Trouble in Otherworld: spend [energy][mental] to remove it?",
-				engine.Choice{ID: "pay", Label: "Spend [energy] [mental]", Kind: engine.ChoiceLabel}.
-					WithThen(g.CustomPaymentQuestion(p, 2, "Spend 1 [energy] and 1 [mental]",
+				engine.Tf("c.troubleInOtherworldSpendEnergyMentalToRemoveIt"),
+				engine.Choice{ID: "pay", Label: engine.Tf("c.spendEnergyMental"), Kind: engine.ChoiceLabel}.
+					WithThen(g.CustomPaymentQuestion(p, 2, engine.S("Spend 1 [energy] and 1 [mental]"),
 						map[string]any{"player": p.ID.String(), "obligationIcons": "energy:1 mental:1", "obligationCard": card.ID})),
-				engine.Choice{ID: "keep", Label: "Keep it in play", Kind: engine.ChoicePass},
+				engine.Choice{ID: "keep", Label: engine.Tf("c.keepItInPlay"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -412,7 +412,7 @@ func registerValkyrie() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			n := 4
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Problem Solvers: remove threat from which scheme?", schemePicks(g, n, e.EOwner())...)}}
+				engine.Tf("c.problemSolversRemoveThreatFromWhichScheme"), schemePicks(g, n, e.EOwner())...)}}
 		},
 	})
 
@@ -427,7 +427,7 @@ func registerValkyrie() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust + counter → shuffle a leadership event from discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustCounterShuffleALeadershipEventFromDiscard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -439,7 +439,7 @@ func registerValkyrie() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "leadership" {
-							picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -448,7 +448,7 @@ func registerValkyrie() {
 					}
 					return append([]engine.Message{engine.AddEntityCounter{ID: self, N: -1}},
 						engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-							"Shuffle which leadership event into your deck?", picks...)})
+							engine.Tf("c.shuffleWhichLeadershipEventIntoYourDeck"), picks...)})
 				},
 			}}
 		},
@@ -477,19 +477,19 @@ func registerValkyrie() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && a.Exhausted && (a.EDef().HasTrait("avenger") || a.EDef().HasTrait("guardian")) {
-						picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ReadyEntity{ID: a.ID}))
 					}
 				}
 				if q.Exhausted && (g.EntityHasTrait(q.ID, "avenger") || g.EntityHasTrait(q.ID, "guardian")) {
-					picks = append(picks, engine.Choice{Label: q.Name + " (identity)", Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					picks = append(picks, engine.Choice{Label: engine.S(q.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 						Msgs(engine.ReadyEntity{ID: q.ID}))
 				}
 			}
 			if len(picks) == 0 {
 				return nil
 			}
-			q := engine.AskN("Cosmic Alliance: ready which characters?", 2, picks...)
+			q := engine.AskN(engine.Tf("c.cosmicAllianceReadyWhichCharacters"), 2, picks...)
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: q}}
 		},
 	})
@@ -571,7 +571,7 @@ func registerNemesis() {
 					owner.Discard = append(owner.Discard, engine.Card{ID: g.NextCardID(), Code: a.Code, Owner: a.Owner})
 				}
 			}
-			g.Logf("Beguiled enthralls the highest-cost ally")
+			g.TLogf("c.beguiledEnthrallsTheHighestCostAlly")
 			return nil
 		},
 	})
@@ -587,7 +587,7 @@ func registerNemesis() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [energy][mental] → discard Seduced", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendEnergyMentalDiscardSeduced"), Type: engine.AbilityAction,
 				Cost: 2, CostIcons: "energy:1 mental:1", AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]

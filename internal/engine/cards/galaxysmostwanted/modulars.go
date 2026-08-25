@@ -38,7 +38,7 @@ func registerBandOfBadoon() {
 			if m == nil {
 				return nil
 			}
-			g.Logf("Badoon Assassin strikes %s with +2 ATK", p.Name)
+			g.TLogf("c.badoonAssassinStrikesWith2Atk", p.Name)
 			return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: m.AttackVal + 2, Source: e.EID()}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -81,7 +81,7 @@ func registerBandOfBadoon() {
 						return []engine.Message{engine.BoostActivation{Enemy: id, N: 2}}
 					}
 					v.Tough = true
-					g.Logf("%s gains a tough status card", v.EDef().Name)
+					g.TLogf("c.gainsAToughStatusCard", v)
 					return nil
 				}
 			}
@@ -103,7 +103,7 @@ func registerGalacticArtifacts() {
 	engine.RegisterBehavior("16122", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Target = lowestATKEnemy(g, true)
-			g.Logf("Cloak of Hercules attaches to %s", g.Entity(t.Target).EDef().Name)
+			g.TLogf("c.cloakOfHerculesAttachesTo", g.Entity(t.Target).EDef().Name)
 			return nil
 		},
 		Abilities: artifactBuyoff("16122", "Spend [physical][physical][physical] → discard Cloak of Hercules", "physical:3"),
@@ -123,13 +123,13 @@ func registerGalacticArtifacts() {
 				p.BonusTHW--
 				p.BonusATK--
 				p.BonusDEF--
-				g.Logf("Obedience Potion weakens %s", p.Name)
+				g.TLogf("c.obediencePotionWeakens", p.Name)
 			}
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Take 1 damage + spend [mental][mental] → discard Obedience Potion", Type: engine.AbilityAction,
+				Label: engine.Tf("c.take1DamageSpendMentalMentalDiscardObediencePotion"), Type: engine.AbilityAction,
 				CostIcons: "mental:2",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -150,12 +150,12 @@ func registerGalacticArtifacts() {
 	engine.RegisterBehavior("16124", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Target = highestSCHEnemy(g)
-			g.Logf("The Beyonder's Blazer attaches to %s", g.Entity(t.Target).EDef().Name)
+			g.TLogf("c.theBeyonderSBlazerAttachesTo", g.Entity(t.Target).EDef().Name)
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Place 2 threat on the main scheme + spend 2 resources → discard The Beyonder's Blazer", Type: engine.AbilityAction,
+				Label: engine.Tf("c.place2ThreatOnTheMainSchemeSpend2ResourcesDiscardTheBeyonder"), Type: engine.AbilityAction,
 				Cost: 2,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					msgs := []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -188,12 +188,12 @@ func registerGalacticArtifacts() {
 				return nil
 			}
 			a.Counters++
-			g.Logf("The Poison's counters: %d", a.Counters)
+			g.TLogf("c.thePoisonSCounters", a.Counters)
 			return []engine.Message{engine.DamageEntity{Target: ts.Player, Damage: a.Counters, Source: e.EID()}}
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 3 resources of different types → discard The Poison", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend3ResourcesOfDifferentTypesDiscardThePoison"), Type: engine.AbilityAction,
 				Cost: 3,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -206,7 +206,7 @@ func registerGalacticArtifacts() {
 	engine.RegisterBehavior("16126", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Target = lowestSCHEnemy(g)
-			g.Logf("Vandarian Power Stone attaches to %s", g.Entity(t.Target).EDef().Name)
+			g.TLogf("c.vandarianPowerStoneAttachesTo", g.Entity(t.Target).EDef().Name)
 			return nil
 		},
 		Abilities: artifactBuyoff("16126", "Spend [energy][energy][energy] → discard Vandarian Power Stone", "energy:3"),
@@ -240,7 +240,7 @@ func registerKreeMilitant() {
 	engine.RegisterBehavior("16131", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Target = highestATKEnemy(g, false)
-			g.Logf("Kree Combat Armor attaches to %s", g.Entity(t.Target).EDef().Name)
+			g.TLogf("c.kreeCombatArmorAttachesTo", g.Entity(t.Target).EDef().Name)
 			return nil
 		},
 		Abilities: artifactBuyoff("16131", "Spend 3 resources of the same type → discard Kree Combat Armor", ""),
@@ -296,7 +296,7 @@ func registerSpacePirates() {
 			}
 			c := p.Hand[0]
 			p.Hand.Remove(c.ID)
-			g.Logf("Pirate Commander removes %s from the game", c.Def().Name)
+			g.TLogf("c.pirateCommanderRemovesFromTheGame", c)
 			return nil
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -320,7 +320,7 @@ func registerSpacePirates() {
 			}
 			c := p.Deck[0]
 			p.Deck = p.Deck[1:]
-			g.Logf("Pirate Lackey removes %s from the game", c.Def().Name)
+			g.TLogf("c.pirateLackeyRemovesFromTheGame", c)
 			return nil
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -343,7 +343,7 @@ func registerSpacePirates() {
 					t.AttackVal++
 				}
 			}
-			g.Logf("Each enemy gets +1 ATK while Sound the Alarms is in play")
+			g.TLogf("c.eachEnemyGets1AtkWhileSoundTheAlarmsIsInPlay")
 			return nil
 		},
 	})
@@ -397,11 +397,11 @@ func registerShipCommand() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust the Milano + spend 2 resources → discard Rogue Vessel", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTheMilanoSpend2ResourcesDiscardRogueVessel"), Type: engine.AbilityAction,
 				Cost: 2,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					g.Delete(self)
-					g.Logf("Rogue Vessel is discarded")
+					g.TLogf("c.rogueVesselIsDiscarded")
 					return []engine.Message{engine.ExhaustEntity{ID: milID}}
 				},
 			}}
@@ -420,19 +420,19 @@ func registerShipCommand() {
 				var opts []engine.Choice
 				if milID, mil := findMilano(g); mil != nil && !mil.Exhausted {
 					opts = append(opts, engine.Choice{
-						ID: "milano", Label: "Exhaust the Milano", Kind: engine.ChoiceLabel,
+						ID: "milano", Label: engine.Tf("c.exhaustTheMilano"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.ExhaustEntity{ID: milID}))
 				}
 				if len(p.Hand) > 0 {
 					opts = append(opts, engine.Choice{
-						ID: "pay", Label: label, Kind: engine.ChoiceLabel,
+						ID: "pay", Label: engine.S(label), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{p.Hand[0]}}))
 				}
 				opts = append(opts, engine.Choice{
-					ID: "penalty", Label: "Suffer the penalty", Kind: engine.ChoiceLabel,
+					ID: "penalty", Label: engine.Tf("c.sufferThePenalty"), Kind: engine.ChoiceLabel,
 				}.Msgs(penalty(g, p)...))
 				return []engine.Message{engine.AskQuestion{Player: p.ID,
-					Question: engine.Ask("Peril! Choose one (the first player suffers otherwise)", opts...)}}
+					Question: engine.Ask(engine.Tf("c.perilChooseOneTheFirstPlayerSuffersOtherwise"), opts...)}}
 			},
 		}
 	}
@@ -464,12 +464,12 @@ func registerShipCommand() {
 			milID, mil := findMilano(g)
 			if mil != nil && !mil.Exhausted {
 				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Special Delivery: exhaust the Milano?",
+					engine.Tf("c.specialDeliveryExhaustTheMilano"),
 					engine.Choice{
-						ID: "yes", Label: "Exhaust the Milano", Kind: engine.ChoiceLabel,
+						ID: "yes", Label: engine.Tf("c.exhaustTheMilano"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.ExhaustEntity{ID: milID}),
 					engine.Choice{
-						ID: "no", Label: "The villain schemes / attacks with +1", Kind: engine.ChoiceLabel,
+						ID: "no", Label: engine.Tf("c.theVillainSchemesAttacksWith1"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.BoostActivation{N: 1}),
 				)}}
 			}
@@ -495,7 +495,7 @@ func registerPowerStone() {
 					break
 				}
 			}
-			g.Logf("The Power Stone hums with energy")
+			g.TLogf("c.thePowerStoneHumsWithEnergy")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -514,7 +514,7 @@ func registerPowerStone() {
 				return nil // minions never claim the stone
 			}
 			a.Target = d.Source
-			g.LogMajorf("The Power Stone flies to %s", g.Entity(d.Source).EDef().Name)
+			g.TLogMajorf("c.thePowerStoneFliesTo", g.Entity(d.Source).EDef().Name)
 			return nil
 		},
 	})
@@ -525,7 +525,7 @@ func registerPowerStone() {
 func artifactBuyoff(code, label, costIcons string) func(g *engine.Game, e engine.Entity) []engine.Ability {
 	return func(g *engine.Game, e engine.Entity) []engine.Ability {
 		ab := engine.Ability{
-			Label: label, Type: engine.AbilityAction,
+			Label: engine.S(label), Type: engine.AbilityAction,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
 			},

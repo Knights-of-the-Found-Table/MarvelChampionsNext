@@ -75,13 +75,13 @@ func formChoices(g *engine.Game, p *engine.Player, prompt string, includeCurrent
 		if !includeCurrent && code == current {
 			continue
 		}
-		choices = append(choices, engine.Choice{Label: engine.DB.MustLookup(code).Name, Kind: engine.ChoiceCard, CardCode: code}.
+		choices = append(choices, engine.Choice{Label: engine.S(engine.DB.MustLookup(code).Name), Kind: engine.ChoiceCard, CardCode: code}.
 			Msgs(engine.AddEntityCounter{ID: p.ID, N: formSignal(code)}))
 	}
 	if len(choices) == 0 {
 		return nil
 	}
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(prompt, choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S(prompt), choices...)}}
 }
 
 func changeEnergyForm(g *engine.Game, p *engine.Player, code string) []engine.Message {
@@ -97,7 +97,7 @@ func changeEnergyForm(g *engine.Game, p *engine.Player, code string) []engine.Me
 	if u := ownedForm(g, p, code); u != nil {
 		u.Counters = 1
 	}
-	g.Logf("%s changes to %s energy form", p.Name, engine.DB.MustLookup(code).Name)
+	g.TLogf("c.changesToEnergyForm", p.Name, engine.DB.MustLookup(code).Name)
 	var msgs []engine.Message
 	switch code {
 	case "21002":
@@ -105,14 +105,14 @@ func changeEnergyForm(g *engine.Game, p *engine.Player, code string) []engine.Me
 			return []engine.Message{engine.DamageEntity{Target: id, Damage: 1, Source: p.ID}}
 		})
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Gamma — deal 1 damage", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.gammaDeal1Damage"), choices...)})
 		}
 	case "21003":
 		choices := cardutil.SchemeChoices(g, func(id engine.EntityID) []engine.Message {
 			return []engine.Message{engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID}}
 		})
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Photon — remove 1 threat", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.photonRemove1Threat"), choices...)})
 		}
 	case "21004":
 		msgs = append(msgs, engine.HealEntity{Target: p.ID, N: 1})
@@ -201,7 +201,7 @@ func registerSignatures() {
 			return []engine.Message{engine.DamageEntity{Target: id, Damage: 7, Source: p.ID}}
 		})
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Gamma Blast — deal 7 damage", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.gammaBlastDeal7Damage"), choices...)})
 		}
 		_ = already
 		return msgs
@@ -215,7 +215,7 @@ func registerSignatures() {
 			return []engine.Message{engine.ThwartScheme{Scheme: id, N: 4, Source: p.ID}}
 		})
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Photon Speed — remove 4 threat", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.photonSpeedRemove4Threat"), choices...)})
 		}
 		return msgs
 	}})

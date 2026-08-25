@@ -5,8 +5,6 @@ package core
 // reveals). Approximations are noted inline.
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -32,7 +30,7 @@ func registerRemainingEncounterCards() {
 			}
 			g.Delete(a.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
-			g.Logf("Charge is discarded after the attack")
+			g.TLogf("c.chargeIsDiscardedAfterTheAttack")
 			return nil
 		},
 	})
@@ -41,7 +39,7 @@ func registerRemainingEncounterCards() {
 	engine.RegisterBehavior("01100", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [physical] [physical] [physical] → discard Enhanced Ivory Horn", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendPhysicalPhysicalPhysicalDiscardEnhancedIvoryHorn"), Type: engine.AbilityAction,
 				Cost: 3, CostIcons: "physical:3", HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -104,7 +102,7 @@ func registerRemainingEncounterCards() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			for _, v := range g.Villains {
 				v.MaxHP += 10
-				g.Logf("%s gets +10 hit points (The \"Immortal\" Klaw)", v.EDef().Name)
+				g.TLogf("c.gets10HitPointsTheImmortalKlaw", v)
 			}
 			return nil
 		},
@@ -166,7 +164,7 @@ func registerRemainingEncounterCards() {
 		MinionDamageable: func(g *engine.Game, m *engine.Minion, n int) bool {
 			for _, s := range g.SideSchemes {
 				if s.Code == "01180" {
-					g.Logf("%s cannot take damage while Legions of Hydra is in play", m.EDef().Name)
+					g.TLogf("c.cannotTakeDamageWhileLegionsOfHydraIsInPlay", m)
 					return false
 				}
 			}
@@ -208,7 +206,7 @@ func registerRemainingEncounterCards() {
 				c := p.Hand[i]
 				p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 				s.StoredCards = append(s.StoredCards, c)
-				g.Logf("%s tucks a random card under Highway Robbery", p.Name)
+				g.TLogf("c.tucksARandomCardUnderHighwayRobbery", p.Name)
 			}
 			return nil
 		},
@@ -224,7 +222,7 @@ func registerRemainingEncounterCards() {
 					}
 				}
 				s.StoredCards = nil
-				g.Logf("Highway Robbery returns its stored cards")
+				g.TLogf("c.highwayRobberyReturnsItsStoredCards")
 			}
 			return nil
 		},
@@ -262,10 +260,10 @@ func registerRemainingEncounterCards() {
 			for _, p := range g.Players {
 				p := p
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Under Attack: place 2 threat here or take 3 damage?",
-					engine.Choice{Label: "Place 2 threat here", Kind: engine.ChoiceLabel}.
+					engine.Tf("c.underAttackPlace2ThreatHereOrTake3Damage"),
+					engine.Choice{Label: engine.Tf("c.place2ThreatHere"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.SchemeThreat{Scheme: e.EID(), N: 2, Source: p.ID}),
-					engine.Choice{Label: "Take 3 damage", Kind: engine.ChoiceLabel}.
+					engine.Choice{Label: engine.Tf("c.take3Damage"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: 3, Source: e.EID()}),
 				)})
 			}
@@ -327,7 +325,7 @@ func registerRemainingEncounterCards() {
 	// Sonic Boom: pay 3 mixed or exhaust everything you control.
 	engine.RegisterBehavior("01123", &engine.Behavior{
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
-			pay := g.CustomPaymentQuestion(p, 3, "Sonic Boom: pay [energy] [mental] [physical] or exhaust all your characters",
+			pay := g.CustomPaymentQuestion(p, 3, engine.S("Sonic Boom: pay [energy] [mental] [physical] or exhaust all your characters"),
 				map[string]any{"player": p.ID.String(), "sonicBoomExhaust": true})
 			exhaustAll := func() []engine.Message {
 				var msgs []engine.Message
@@ -338,9 +336,9 @@ func registerRemainingEncounterCards() {
 				return msgs
 			}
 			q := engine.Ask(
-				"Sonic Boom: pay 3 resources (1 of each type) or exhaust your characters?",
-				engine.Choice{Label: "Pay 3 resources", Kind: engine.ChoiceLabel}.WithThen(pay),
-				engine.Choice{ID: "exhaust", Label: "Exhaust each character you control", Kind: engine.ChoiceLabel}.
+				engine.Tf("c.sonicBoomPay3Resources1OfEachTypeOrExhaustYourCharacters"),
+				engine.Choice{Label: engine.Tf("c.pay3Resources"), Kind: engine.ChoiceLabel}.WithThen(pay),
+				engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustEachCharacterYouControl"), Kind: engine.ChoiceLabel}.
 					Msgs(exhaustAll()...),
 			)
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
@@ -355,7 +353,7 @@ func registerRemainingEncounterCards() {
 					if v.Damage > 0 {
 						d := min(n, v.Damage)
 						v.Damage -= d
-						g.Logf("%s heals %d damage", v.EDef().Name, d)
+						g.TLogf("log.heals", v, d)
 					}
 				}
 			}
@@ -489,7 +487,7 @@ func registerRemainingEncounterCards() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust your hero + spend [mental] [mental] → discard Program Transmitter",
+				Label: engine.Tf("c.exhaustYourHeroSpendMentalMentalDiscardProgramTransmitter"),
 				Type:  engine.AbilityAction, Cost: 2, CostIcons: "mental:2", HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -598,7 +596,7 @@ func registerRemainingEncounterCards() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust your hero + spend [physical] [physical] → discard Vibranium Armor",
+				Label: engine.Tf("c.exhaustYourHeroSpendPhysicalPhysicalDiscardVibraniumArmor"),
 				Type:  engine.AbilityAction, Cost: 2, CostIcons: "physical:2", HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					discardAttachment(g, self)
@@ -620,7 +618,7 @@ func registerRemainingEncounterCards() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust your hero + spend [energy] [energy] → discard Concussion Blasters",
+				Label: engine.Tf("c.exhaustYourHeroSpendEnergyEnergyDiscardConcussionBlasters"),
 				Type:  engine.AbilityAction, Cost: 2, CostIcons: "energy:2", HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					discardAttachment(g, self)
@@ -683,7 +681,7 @@ func registerRemainingEncounterCards() {
 			t.Target = best.ID
 			best.MaxHP += 3
 			best.Attachments = append(best.Attachments, t.ID)
-			g.Logf("%s attaches to %s (+3 hit points)", t.EDef().Name, best.EDef().Name)
+			g.TLogf("c.attachesTo3HitPoints", t, best)
 			return nil
 		},
 	})
@@ -731,7 +729,7 @@ func registerRemainingEncounterCards() {
 				c := q.Hand[i]
 				q.Hand = append(q.Hand[:i], q.Hand[i+1:]...)
 				q.Discard = append(q.Discard, c)
-				g.Logf("%s discards %s at random", q.Name, c.Def().Name)
+				g.TLogf("c.discardsAtRandom", q.Name, c)
 				for _, r := range c.Def().Resources {
 					types[r] = true
 				}
@@ -812,13 +810,13 @@ func registerRemainingEncounterCards() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			n := len(p.Upgrades)
 			var picks []engine.Choice
-			picks = append(picks, engine.Choice{Label: fmt.Sprintf("Take %d damage (1 per upgrade)", n), Kind: engine.ChoiceLabel}.
+			picks = append(picks, engine.Choice{Label: engine.Tf("c.takeDamage1PerUpgrade", n), Kind: engine.ChoiceLabel}.
 				Msgs(engine.DamageEntity{Target: p.ID, Damage: n, Source: t.ID}))
 			for _, id := range p.Upgrades {
-				picks = append(picks, engine.Choice{Label: "Discard " + g.Upgrades[id].EDef().Name, Kind: engine.ChoiceCard, CardCode: g.Upgrades[id].Code}.
+				picks = append(picks, engine.Choice{Label: engine.S("Discard " + g.Upgrades[id].EDef().Name), Kind: engine.ChoiceCard, CardCode: g.Upgrades[id].Code}.
 					Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Electric Whip Attack:", picks...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.electricWhipAttack"), picks...)}}
 		},
 	})
 
@@ -878,10 +876,10 @@ func registerRemainingEncounterCards() {
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				fmt.Sprintf("Ritual Combat (X=%d): take X damage or place X threat?", x),
-				engine.Choice{Label: fmt.Sprintf("Take %d damage", x), Kind: engine.ChoiceLabel}.
+				engine.Tf("c.ritualCombatXTakeXDamageOrPlaceXThreat", x),
+				engine.Choice{Label: engine.Tf("c.takeDamage", x), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DamageEntity{Target: p.ID, Damage: x, Source: t.ID}),
-				engine.Choice{Label: fmt.Sprintf("Place %d threat", x), Kind: engine.ChoiceLabel}.
+				engine.Choice{Label: engine.Tf("c.placeThreat", x), Kind: engine.ChoiceLabel}.
 					Msgs(engine.SchemeThreat{Scheme: mainSchemeID(g), N: x, Source: t.ID}),
 			)}}
 		},
@@ -917,7 +915,7 @@ func registerRemainingEncounterCards() {
 			}
 			t.Target = best.ID
 			best.Attachments = append(best.Attachments, t.ID)
-			g.Logf("%s attaches to %s", t.EDef().Name, best.EDef().Name)
+			g.TLogf("log.attachesTo", t, best)
 			return nil
 		},
 	})
@@ -971,7 +969,7 @@ func registerRemainingEncounterCards() {
 	engine.RegisterBehavior("01157", &engine.Behavior{
 		MinionDamageableSrc: func(g *engine.Game, m *engine.Minion, n int, src engine.EntityID) bool {
 			if u := g.Upgrades[src]; u != nil && u.EDef().HasTrait("black_panther") {
-				g.Logf("%s cannot take damage from Black Panther upgrades", m.EDef().Name)
+				g.TLogf("c.cannotTakeDamageFromBlackPantherUpgrades", m)
 				return false
 			}
 			return true
@@ -993,7 +991,7 @@ func discardRandom(g *engine.Game, p *engine.Player, n int) {
 		c := p.Hand[j]
 		p.Hand = append(p.Hand[:j], p.Hand[j+1:]...)
 		p.Discard = append(p.Discard, c)
-		g.Logf("%s discards %s at random", p.Name, c.Def().Name)
+		g.TLogf("c.discardsAtRandom", p.Name, c)
 	}
 }
 
@@ -1082,7 +1080,7 @@ func healVillains(g *engine.Game, n int) {
 		if v.Damage > 0 {
 			d := min(n, v.Damage)
 			v.Damage -= d
-			g.Logf("%s heals %d damage", v.EDef().Name, d)
+			g.TLogf("log.heals", v, d)
 		}
 	}
 }
@@ -1094,7 +1092,7 @@ func discardAttachment(g *engine.Game, id engine.EntityID) {
 	}
 	g.Delete(id)
 	g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
-	g.Logf("%s is discarded", a.EDef().Name)
+	g.TLogf("log.discarded", a)
 }
 
 // removalAbility builds a hero-action ability that discards the attachment
@@ -1102,7 +1100,7 @@ func discardAttachment(g *engine.Game, id engine.EntityID) {
 func removalAbility(label, icons string, cost int) func(g *engine.Game, e engine.Entity) []engine.Ability {
 	return func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: label, Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
+			Label: engine.S(label), Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				discardAttachment(g, self)
 				return nil

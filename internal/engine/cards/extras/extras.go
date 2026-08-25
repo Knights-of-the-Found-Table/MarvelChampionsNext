@@ -57,14 +57,14 @@ func registerUnflappable() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Unflappable — exhaust to draw 1 card?",
+				Question: engine.Ask(engine.Tf("c.unflappableExhaustToDraw1Card"),
 					engine.Choice{
-						ID: "draw", Label: "Exhaust Unflappable — draw 1", Kind: engine.ChoiceLabel,
+						ID: "draw", Label: engine.Tf("c.exhaustUnflappableDraw1"), Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.ExhaustEntity{ID: s.ID},
 						engine.DrawCards{Player: p.ID, N: 1},
 					),
-					engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+					engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 				),
 			}}
 		},
@@ -77,14 +77,14 @@ func registerDeftFocus() {
 	engine.RegisterBehavior("16024", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:    "Deft Focus — the next superpower card costs 1 less",
+				Label:    engine.Tf("c.deftFocusTheNextSuperpowerCardCosts1Less"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if p := g.Player(e.EOwner()); p != nil {
 						p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{Trait: "superpower", Amount: 1})
-						g.Logf("%s's next superpower card this phase costs 1 less", p.Name)
+						g.TLogf("c.sNextSuperpowerCardThisPhaseCosts1Less", p.Name)
 					}
 					return nil
 				},
@@ -171,14 +171,14 @@ func registerChangeOfFortune() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Change of Fortune — exhaust to draw 2 cards?",
+				Question: engine.Ask(engine.Tf("c.changeOfFortuneExhaustToDraw2Cards"),
 					engine.Choice{
-						ID: "draw", Label: "Exhaust Change of Fortune — draw 2", Kind: engine.ChoiceLabel,
+						ID: "draw", Label: engine.Tf("c.exhaustChangeOfFortuneDraw2"), Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.ExhaustEntity{ID: s.ID},
 						engine.DrawCards{Player: p.ID, N: 2},
 					),
-					engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+					engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 				),
 			}}
 		},
@@ -199,7 +199,7 @@ func registerUnderControl() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Under Control — attach to a minion", choices...),
+				Question: engine.Ask(engine.Tf("c.underControlAttachToAMinion"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -211,7 +211,7 @@ func registerUnderControl() {
 			if !w.Defender.Is(engine.KindPlayer) {
 				return nil
 			}
-			g.Logf("Under Control: 4 damage to %s", g.Entity(u.AttachTo).EDef().Name)
+			g.TLogf("c.underControl4DamageTo", g.Entity(u.AttachTo).EDef().Name)
 			return []engine.Message{engine.DamageEntity{Target: u.AttachTo, Damage: 4, Source: u.ID}}
 		},
 	})
@@ -227,7 +227,7 @@ func registerDefensiveConditioning() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if p := g.Player(e.EOwner()); p != nil {
 				p.MaxHP += 3
-				g.Logf("%s gets +3 max hit points (Defensive Conditioning)", p.Name)
+				g.TLogf("c.gets3MaxHitPointsDefensiveConditioning", p.Name)
 			}
 			return nil
 		},

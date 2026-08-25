@@ -20,7 +20,7 @@ func registerNightcrawlerExtras() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Rogue — absorb another friendly character", Type: engine.AbilityAction,
+				Label: engine.Tf("c.rogueAbsorbAnotherFriendlyCharacter"), Type: engine.AbilityAction,
 				OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -67,7 +67,7 @@ func registerNightcrawlerExtras() {
 			if add <= 0 {
 				return nil
 			}
-			g.Logf("Northstar blurs the boost cards away (-%d)", add)
+			g.TLogf("c.northstarBlursTheBoostCardsAway", add)
 			return []engine.Message{
 				engine.DamageEntity{Target: a.ID, Damage: 1, Source: a.Owner},
 				engine.CancelBoostIcons{Enemy: m.Enemy, N: add},
@@ -159,7 +159,7 @@ func registerNightcrawlerExtras() {
 				}
 				a.PermATK += b
 				a.PermTHW += b
-				g.Logf("Gambit charges up with %s (+%d)", c.Def().Name, b)
+				g.TLogf("c.gambitChargesUpWith", c, b)
 			}
 			return nil
 		},
@@ -215,7 +215,7 @@ func registerNightcrawlerExtras() {
 				mn := g.Minions[id]
 				if mn != nil && !mn.EDef().HasTrait("Elite") {
 					targets = append(targets, engine.Choice{
-						ID: "mn-" + id.String(), Label: mn.EDef().Name, Kind: engine.ChoiceTarget,
+						ID: "mn-" + id.String(), Label: engine.S(mn.EDef().Name), Kind: engine.ChoiceTarget,
 					}.Msgs(engine.MinionDefeated{MinionID: id}))
 				}
 			}
@@ -237,7 +237,7 @@ func registerNightcrawlerExtras() {
 				return nil
 			}
 			return append([]engine.Message{engine.AskQuestion{
-				Player: p.ID, Question: engine.Ask("Combine Forces — defeat:", targets...),
+				Player: p.ID, Question: engine.Ask(engine.Tf("c.combineForcesDefeat"), targets...),
 			}}, exhausted...)
 		},
 	})

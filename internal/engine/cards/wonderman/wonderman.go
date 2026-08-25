@@ -85,7 +85,7 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Active Altruism — choose a scheme", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.activeAltruismChooseAScheme"), ch...)}}
 	}})
 	engine.RegisterBehavior("58004", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -95,7 +95,7 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Ionic Blast — choose an enemy", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.ionicBlastChooseAnEnemy"), ch...)}}
 	}})
 	engine.RegisterBehavior("58005", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -106,24 +106,24 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Starstruck — choose an enemy", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.starstruckChooseAnEnemy"), ch...)}}
 	}})
 	// Resource cards have no spend hook; Energy Siphon's self-damage scaling
 	// cannot be represented without engine changes.
 	engine.RegisterBehavior("58006", &engine.Behavior{})
 	engine.RegisterBehavior("58007", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Wonder Fans — tuck an energy event or draw", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+		return []engine.Ability{{Label: engine.Tf("c.wonderFansTuckAnEnergyEventOrDraw"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			s := g.Supports[self]
 			p := g.Player(s.Owner)
 			var ch []engine.Choice
 			for _, c := range p.Discard {
 				if c.Def().Type == "event" && hasEnergy(c) && len(p.SenseDeck) < 3 {
 					card := c
-					ch = append(ch, engine.Choice{Label: "Tuck " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: card.ID}))
+					ch = append(ch, engine.Choice{Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: card.ID}))
 				}
 			}
-			ch = append(ch, engine.Choice{ID: "draw", Label: "Draw 1 card", Kind: engine.ChoiceLabel}.Msgs(engine.DrawCards{Player: p.ID, N: 1}))
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Wonder Fans — choose", ch...)}}
+			ch = append(ch, engine.Choice{ID: "draw", Label: engine.Tf("c.draw1Card"), Kind: engine.ChoiceLabel}.Msgs(engine.DrawCards{Player: p.ID, N: 1}))
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.wonderFansChoose"), ch...)}}
 		}}}
 	}})
 	engine.RegisterBehavior("58008", &engine.Behavior{Resource: &engine.ResourceAbility{Icon: "energy", HeroOnly: true, EventOnly: true}})
@@ -138,16 +138,16 @@ func registerSignatures() {
 		var ch []engine.Choice
 		for _, c := range p.Discard {
 			if (c.Def().Type == "event" || c.Def().Type == "resource") && hasEnergy(c) && len(p.SenseDeck) < 3 {
-				ch = append(ch, engine.Choice{Label: "Tuck " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
+				ch = append(ch, engine.Choice{Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 			}
 		}
 		for _, c := range p.SenseDeck {
-			ch = append(ch, engine.Choice{Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.SideDeckToHand{Player: p.ID, CardID: c.ID}))
+			ch = append(ch, engine.Choice{Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.SideDeckToHand{Player: p.ID, CardID: c.ID}))
 		}
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Signature Sunglasses — choose", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.signatureSunglassesChoose"), ch...)}}
 	}})
 	engine.RegisterBehavior("58011", &engine.Behavior{DefeatSave: func(g *engine.Game, p *engine.Player, u *engine.Upgrade) bool {
 		p.Damage = max(0, p.MaxHP-4)
@@ -169,15 +169,15 @@ func registerObligation() {
 	engine.RegisterBehavior("58025", &engine.Behavior{ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 		var ch []engine.Choice
 		if !p.IsHero() && !p.Exhausted {
-			ch = append(ch, engine.Choice{ID: "exhaust", Label: "Exhaust Simon Williams", Kind: engine.ChoiceLabel}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
+			ch = append(ch, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustSimonWilliams"), Kind: engine.ChoiceLabel}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 		}
 		if len(p.SenseDeck) >= 3 {
-			ch = append(ch, engine.Choice{ID: "discard", Label: "Discard 3 tucked cards", Kind: engine.ChoiceLabel}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card}))
+			ch = append(ch, engine.Choice{ID: "discard", Label: engine.Tf("c.discard3TuckedCards"), Kind: engine.ChoiceLabel}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card}))
 		}
 		if len(ch) == 0 {
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Pacifism — choose", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.pacifismChoose"), ch...)}}
 	}})
 }
 func grim(g *engine.Game) *engine.Minion {

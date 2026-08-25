@@ -35,7 +35,7 @@ func registerIdentity() {
 			var choices []engine.Choice
 			for _, c := range append(append(engine.CardList(nil), p.Deck...), p.Discard...) {
 				if c.Code == "62008" {
-					choices = append(choices, engine.Choice{Label: "Take Burstein Process", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.S("Take Burstein Process"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -43,7 +43,7 @@ func registerIdentity() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Burstein Process — search your deck and discard pile",
+				Label: engine.S("Burstein Process — search your deck and discard pile"),
 				Type:  engine.AbilityAction, AlterEgoOnly: true, OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					g.UsedThisRound["62001-burstein"] = true
@@ -91,8 +91,8 @@ func registerCards() {
 		msgs = append(msgs, engine.ReadyEntity{ID: p.ID})
 		return msgs
 	}})
-	engine.RegisterBehavior("62004", &engine.Behavior{OnPlay: cardutil.ChooseEnemy("Knuckle Sandwich — choose an enemy", func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 3, nil })})
-	engine.RegisterBehavior("62005", &engine.Behavior{OnPlay: cardutil.ChooseScheme("Stand with Me! — choose a scheme", func(g *engine.Game, e engine.Entity) int {
+	engine.RegisterBehavior("62004", &engine.Behavior{OnPlay: cardutil.ChooseEnemy(engine.S("Knuckle Sandwich — choose an enemy"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 3, nil })})
+	engine.RegisterBehavior("62005", &engine.Behavior{OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Stand with Me! — choose a scheme"), func(g *engine.Game, e engine.Entity) int {
 		p := g.Player(e.EOwner())
 		if p == nil {
 			return 0
@@ -129,7 +129,7 @@ func registerCards() {
 		if p == nil || p.IsHero() {
 			return nil
 		}
-		return []engine.Ability{{Label: "Burstein Process — give Luke Cage tough", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+		return []engine.Ability{{Label: engine.S("Burstein Process — give Luke Cage tough"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			p := g.Player(u.Owner)
 			n := 1
 			if p.Tough == 0 {
@@ -170,7 +170,7 @@ func registerCards() {
 		if s.Counters <= 0 || s.Exhausted {
 			return nil
 		}
-		return []engine.Ability{{Label: "Defensive Formation — give a Defender ally tough", Type: engine.AbilityAction, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+		return []engine.Ability{{Label: engine.S("Defensive Formation — give a Defender ally tough"), Type: engine.AbilityAction, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			s := g.Supports[self]
 			s.Counters--
 			for _, id := range g.Player(s.Owner).Allies {
@@ -197,7 +197,7 @@ func registerCards() {
 	engine.RegisterBehavior("62028", &engine.Behavior{ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 		return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: 3, Source: p.ID, Unpreventable: true}, engine.ObligationResolve{Player: p.ID, Card: card}}
 	}})
-	engine.RegisterBehavior("62034", &engine.Behavior{OnPlay: cardutil.ChooseEnemy("Size Advantage — choose an enemy", func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 3, nil })})
+	engine.RegisterBehavior("62034", &engine.Behavior{OnPlay: cardutil.ChooseEnemy(engine.S("Size Advantage — choose an enemy"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 3, nil })})
 	engine.RegisterBehavior("62035", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
 		if p == nil {

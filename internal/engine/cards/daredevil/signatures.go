@@ -1,8 +1,6 @@
 package daredevil
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -46,7 +44,7 @@ func registerCrossExamination() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Cross-Examination — deal 3 damage (+1 per attached upgrade)", choices...),
+				Question: engine.Ask(engine.Tf("c.crossExaminationDeal3Damage1PerAttachedUpgrade"), choices...),
 			}}
 		},
 	})
@@ -61,11 +59,11 @@ func chooseSenseFree(g *engine.Game, p *engine.Player, prompt string) []engine.M
 	var choices []engine.Choice
 	for _, c := range p.SenseDeck {
 		choices = append(choices, engine.Choice{
-			Label: "Play " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.S("Play " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.Msgs(engine.SenseEnterPlay{Player: p.ID, Card: c}))
 	}
 	choices = append(choices, cardutil.Skip())
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(prompt, choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S(prompt), choices...)}}
 }
 
 // 60009 Deposition: alter-ego action — choose any upgrade from the Sense
@@ -80,7 +78,7 @@ func registerDeposition() {
 			}
 			var msgs []engine.Message
 			msgs = append(msgs, chooseSenseFree(g, p, "Deposition — play a Sense card for free")...)
-			msgs = append(msgs, cardutil.ChooseScheme("Deposition", func(g *engine.Game, e engine.Entity) int {
+			msgs = append(msgs, cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Deposition"), func(g *engine.Game, e engine.Entity) int {
 				return 2
 			})(g, e)...)
 			return msgs
@@ -99,7 +97,7 @@ func registerLivingLieDetector() {
 				s := g.Entity(id)
 				n := 2 + upgradesAttachedTo(g, id)
 				choices = append(choices, engine.Choice{
-					Label: fmt.Sprintf("%s (%d threat)", s.EDef().Name, n), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("c.threat", s, n), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: pid}))
 			}
@@ -108,7 +106,7 @@ func registerLivingLieDetector() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Living Lie Detector — remove 2 threat (+1 per attached upgrade)", choices...),
+				Question: engine.Ask(engine.Tf("c.livingLieDetectorRemove2Threat1PerAttachedUpgrade"), choices...),
 			}}
 		},
 	})
@@ -166,7 +164,7 @@ func registerFocusTheSenses() {
 			var choices []engine.Choice
 			for _, c := range p.SenseDeck {
 				choices = append(choices, engine.Choice{
-					Label: "Play " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Play " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.SenseEnterPlay{Player: p.ID, Card: c}))
 			}
 			out := recall
@@ -174,7 +172,7 @@ func registerFocusTheSenses() {
 				n := min(2, len(choices))
 				out = append(out, engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.AskN("Focus the Senses — deploy Sense upgrades for free", n, choices...),
+					Question: engine.AskN(engine.Tf("c.focusTheSensesDeploySenseUpgradesForFree"), n, choices...),
 				})
 			}
 			return out
@@ -187,7 +185,7 @@ func registerFoggyNelson() {
 	engine.RegisterBehavior("60013", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Foggy Nelson — remove 2 threat from a scheme",
+				Label:        engine.Tf("c.foggyNelsonRemove2ThreatFromAScheme"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -197,7 +195,7 @@ func registerFoggyNelson() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 							SourceID: id, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 2, Source: pid}))
 					}
@@ -206,7 +204,7 @@ func registerFoggyNelson() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pid,
-						Question: engine.Ask("Foggy Nelson — choose a scheme", choices...),
+						Question: engine.Ask(engine.Tf("c.foggyNelsonChooseAScheme"), choices...),
 					}}
 				},
 			}}
@@ -234,7 +232,7 @@ func registerKarenPage() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Karen Page — shuffle a Daredevil card from your discard into your deck",
+				Label:   engine.Tf("c.karenPageShuffleADaredevilCardFromYourDiscardIntoYourDeck"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -248,7 +246,7 @@ func registerKarenPage() {
 							msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 						}
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
@@ -256,7 +254,7 @@ func registerKarenPage() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Karen Page — shuffle which Daredevil card into your deck?", choices...),
+						Question: engine.Ask(engine.Tf("c.karenPageShuffleWhichDaredevilCardIntoYourDeck"), choices...),
 					}}
 				},
 			}}
@@ -308,7 +306,7 @@ func registerNelsonAndMurdock() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Nelson and Murdock — confuse an enemy?", append(choices, cardutil.Skip())...),
+				Question: engine.Ask(engine.Tf("c.nelsonAndMurdockConfuseAnEnemy"), append(choices, cardutil.Skip())...),
 			}}
 		},
 	})
@@ -356,24 +354,24 @@ func registerBillyClub() {
 				return nil
 			}
 			damage := engine.Choice{
-				ID: "damage", Label: "Deal 1 damage to an enemy", Kind: engine.ChoiceLabel,
+				ID: "damage", Label: engine.Tf("c.deal1DamageToAnEnemy"), Kind: engine.ChoiceLabel,
 			}
 			if enemies := cardutil.EnemyChoices(g, 1, p.ID, func(target engine.EntityID) []engine.Message {
 				return []engine.Message{engine.DamageEntity{Target: target, Damage: 1, Source: p.ID}}
 			}); len(enemies) > 0 {
-				damage = damage.WithThen(engine.Ask("Billy Club — choose an enemy", enemies...))
+				damage = damage.WithThen(engine.Ask(engine.Tf("c.billyClubChooseAnEnemy"), enemies...))
 			}
 			aerial := engine.Choice{
-				ID: "aerial", Label: "Daredevil gains the Aerial trait until the end of the round", Kind: engine.ChoiceLabel,
+				ID: "aerial", Label: engine.Tf("c.daredevilGainsTheAerialTraitUntilTheEndOfTheRound"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.GrantTrait{Target: p.ID, Trait: "aerial"})
 			return []engine.Ability{{
-				Label:    "Billy Club — return to hand: 1 damage or gain Aerial",
+				Label:    engine.Tf("c.billyClubReturnToHand1DamageOrGainAerial"),
 				Type:     engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AskQuestion{
 						Player: p.ID,
-						Question: engine.Ask("Billy Club — choose",
+						Question: engine.Ask(engine.Tf("c.billyClubChoose"),
 							damage,
 							aerial,
 						),
@@ -416,7 +414,7 @@ func registerManWithoutFear() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "The Man Without Fear — 1 damage: free Sense card or ready Daredevil",
+				Label:    engine.Tf("c.theManWithoutFear1DamageFreeSenseCardOrReadyDaredevil"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -428,21 +426,21 @@ func registerManWithoutFear() {
 					var choices []engine.Choice
 					for _, c := range p.SenseDeck {
 						choices = append(choices, engine.Choice{
-							Label: "Play " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Play " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DamageEntity{Target: p.ID, Damage: 1, Source: p.ID},
 							engine.SenseEnterPlay{Player: p.ID, Card: c},
 						))
 					}
 					choices = append(choices, engine.Choice{
-						ID: "ready", Label: "Ready Daredevil", Kind: engine.ChoiceLabel,
+						ID: "ready", Label: engine.Tf("c.readyDaredevil"), Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.DamageEntity{Target: p.ID, Damage: 1, Source: p.ID},
 						engine.ReadyEntity{ID: p.ID},
 					))
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("The Man Without Fear — choose", choices...),
+						Question: engine.Ask(engine.Tf("c.theManWithoutFearChoose"), choices...),
 					}}
 				},
 			}}

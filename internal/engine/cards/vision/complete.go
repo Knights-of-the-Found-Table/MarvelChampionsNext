@@ -55,7 +55,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Density Manipulation — flip your mass form", Type: engine.AbilityAction,
+				Label: engine.Tf("c.densityManipulationFlipYourMassForm"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					g.UsedThisRound["vision-flip"] = true
 					return []engine.Message{flipMass(self)}
@@ -106,7 +106,7 @@ func registerVision() {
 	engine.RegisterBehavior("26004", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust 616 Hickory Branch Lane → search for an Android ally", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaust616HickoryBranchLaneSearchForAnAndroidAlly"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -122,10 +122,10 @@ func registerVision() {
 							seen[c.Code] = true
 							inDeck := func() bool { _, ok := p.Deck.Find(c.ID); return ok }()
 							if inDeck {
-								picks = append(picks, engine.Choice{Label: def.Name + " (deck)", Kind: engine.ChoiceCard, CardCode: def.Code}.
+								picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
 									Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 							} else {
-								picks = append(picks, engine.Choice{Label: def.Name + " (discard)", Kind: engine.ChoiceCard, CardCode: def.Code}.
+								picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
 									Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 							}
 						}
@@ -134,7 +134,7 @@ func registerVision() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Add which Android ally to hand?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.addWhichAndroidAllyToHand"), picks...)}}
 				},
 			}}
 		},
@@ -177,7 +177,7 @@ func registerVision() {
 				def := c.Def()
 				if def.Type == "event" && def.Code[:2] == "26" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: u.ID},
 							engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
@@ -186,7 +186,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Density Control: return which Vision event?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.densityControlReturnWhichVisionEvent"), picks...)}}
 		},
 	})
 
@@ -199,11 +199,11 @@ func registerVision() {
 			}
 			switch massForm(p) {
 			case "dense":
-				return cardutil.ChooseEnemy("Solar Beam (dense): deal 7 damage to which enemy?",
+				return cardutil.ChooseEnemy(engine.Tf("c.solarBeamDenseDeal7DamageToWhichEnemy"),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 7, nil })(g, e)
 			case "intangible":
 				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Solar Beam (intangible): remove 5 threat from which scheme?", schemePicks(g, 5, p.ID)...)}}
+					engine.Tf("c.solarBeamIntangibleRemove5ThreatFromWhichScheme"), schemePicks(g, 5, p.ID)...)}}
 			}
 			return nil
 		},
@@ -211,7 +211,7 @@ func registerVision() {
 
 	// Superdense Strike: dense 5 damage.
 	engine.RegisterBehavior("26009", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Superdense Strike: deal 5 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.superdenseStrikeDeal5DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 5, nil }),
 	})
 
@@ -221,7 +221,7 @@ func registerVision() {
 	engine.RegisterBehavior("26010", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Just Passing Through: remove 3 threat from which scheme?", schemePicks(g, 3, e.EOwner())...)}}
+				engine.Tf("c.justPassingThroughRemove3ThreatFromWhichScheme"), schemePicks(g, 3, e.EOwner())...)}}
 		},
 	})
 
@@ -248,7 +248,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Phase Disruption: confuse which enemy?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.phaseDisruptionConfuseWhichEnemy"), picks...)}}
 		},
 	})
 
@@ -272,7 +272,7 @@ func registerVision() {
 			for _, c := range p.Discard {
 				def := c.Def()
 				if def.Type == "event" && def.HasTrait("defense") {
-					picks = append(picks, engine.Choice{Label: "Attach " + def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Attach " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.SupportStoreCard{ID: e.EID(), Card: c}))
 				}
 			}
@@ -280,7 +280,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Jocasta: attach which Defense event?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.jocastaAttachWhichDefenseEvent"), picks...)}}
 		},
 	})
 
@@ -346,7 +346,7 @@ func registerVision() {
 	engine.RegisterBehavior("26022", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 1 resource → Machine Man +1 THW/+1 ATK this phase", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1ResourceMachineMan1Thw1AtkThisPhase"), Type: engine.AbilityAction,
 				Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AllyStatBonus{Ally: self, THW: 1, ATK: 1}}
@@ -372,7 +372,7 @@ func registerVision() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && a.EDef().HasTrait("android") {
-						picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ReadyEntity{ID: a.ID}, engine.HealEntity{Target: a.ID, N: 1}))
 					}
 				}
@@ -381,7 +381,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Reboot: ready which Android character?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.rebootReadyWhichAndroidCharacter"), picks...)}}
 		},
 	})
 
@@ -414,7 +414,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust + counter → shuffle an aggression event from discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustCounterShuffleAnAggressionEventFromDiscard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -426,7 +426,7 @@ func registerVision() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "aggression" {
-							picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -435,7 +435,7 @@ func registerVision() {
 					}
 					return append([]engine.Message{engine.AddEntityCounter{ID: self, N: -1}},
 						engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-							"Shuffle which aggression event into your deck?", picks...)})
+							engine.Tf("c.shuffleWhichAggressionEventIntoYourDeck"), picks...)})
 				},
 			}}
 		},
@@ -451,11 +451,11 @@ func registerVision() {
 			var picks []engine.Choice
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
 				s := g.SideSchemes[id]
-				picks = append(picks, engine.Choice{Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code}.
+				picks = append(picks, engine.Choice{Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code}.
 					Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Attach Chance Encounter to which side scheme?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.attachChanceEncounterToWhichSideScheme"), picks...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			d, ok := msg.(engine.SchemeDefeated)
@@ -474,10 +474,10 @@ func registerVision() {
 				if def.Type == "ally" && !seen[c.Code] {
 					seen[c.Code] = true
 					if _, ok := p.Deck.Find(c.ID); ok {
-						picks = append(picks, engine.Choice{Label: def.Name + " (deck)", Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 					} else {
-						picks = append(picks, engine.Choice{Label: def.Name + " (discard)", Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 				}
@@ -486,7 +486,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Chance Encounter: add which ally to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.chanceEncounterAddWhichAllyToHand"), picks...)}}
 		},
 	})
 
@@ -505,7 +505,7 @@ func registerVision() {
 					def := c.Def()
 					if def.Type == "ally" && (def.HasTrait("avenger") || def.HasTrait("guardian")) && !seen[c.Code] {
 						seen[c.Code] = true
-						picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.PlayCard{Player: e.EOwner(), Card: c, Paid: engine.CostPaid{}}))
 					}
 				}
@@ -513,7 +513,7 @@ func registerVision() {
 			if len(picks) == 0 {
 				return nil
 			}
-			q := engine.AskN("Joining Forces: put which allies into play (free)?", 2, picks...)
+			q := engine.AskN(engine.Tf("c.joiningForcesPutWhichAlliesIntoPlayFree"), 2, picks...)
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 		},
 	})
@@ -529,7 +529,7 @@ func registerVision() {
 			for _, c := range p.Hand {
 				def := c.Def()
 				if def.Cost != nil && *def.Cost > 0 {
-					picks = append(picks, engine.Choice{Label: def.Name + " (-3)", Kind: engine.ChoicePlay, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (-3)"), Kind: engine.ChoicePlay, CardCode: def.Code}.
 						Msgs(engine.ExhaustEntity{ID: p.ID},
 							engine.CostDiscountApply{Player: p.ID, Amount: 3}))
 				}
@@ -538,7 +538,7 @@ func registerVision() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Meditation: discount which card?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.meditationDiscountWhichCard"), picks...)}}
 		},
 	})
 }

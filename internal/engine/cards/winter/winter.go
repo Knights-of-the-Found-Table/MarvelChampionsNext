@@ -36,7 +36,7 @@ func thwartTwo(g *engine.Game, p *engine.Player, prompt string) []engine.Message
 	if len(ch) == 0 {
 		return nil
 	}
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(prompt, ch...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S(prompt), ch...)}}
 }
 
 func registerIdentity() {
@@ -59,13 +59,13 @@ func registerSignatures() {
 		var ch []engine.Choice
 		for _, c := range p.Discard {
 			if c.Def().Type == "event" && c.Def().HasTrait("attack") {
-				ch = append(ch, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
+				ch = append(ch, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 			}
 		}
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Black Widow — return an Attack event", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.blackWidowReturnAnAttackEvent"), ch...)}}
 	}})
 	engine.RegisterBehavior("54004", &engine.Behavior{DefenseEvent: func(g *engine.Game, p *engine.Player, e *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
 		prevent := false
@@ -86,7 +86,7 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Metal Punch — choose an enemy", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.metalPunchChooseAnEnemy"), ch...)}}
 	}})
 	engine.RegisterBehavior("54006", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -96,22 +96,22 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Electrical Discharge — choose an enemy", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.electricalDischargeChooseAnEnemy"), ch...)}}
 	}})
 	engine.RegisterBehavior("54007", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Safe House #30 — find a minion and draw", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+		return []engine.Ability{{Label: engine.Tf("c.safeHouse30FindAMinionAndDraw"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			s := g.Supports[self]
 			p := g.Player(s.Owner)
 			var ch []engine.Choice
 			for _, c := range g.EncounterDeck {
 				if c.Def().Type == "minion" {
-					ch = append(ch, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.RevealEncounterCard{Player: p.ID, Card: c}, engine.DrawCards{Player: p.ID, N: 1}, engine.ShufflePlayerDeck{Player: p.ID}))
+					ch = append(ch, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.RevealEncounterCard{Player: p.ID, Card: c}, engine.DrawCards{Player: p.ID, N: 1}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
 			if len(ch) == 0 {
 				return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Safe House #30 — choose a minion", ch...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.safeHouse30ChooseAMinion"), ch...)}}
 		}}}
 	}})
 	engine.RegisterBehavior("54008", &engine.Behavior{React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -127,7 +127,7 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return []engine.Message{engine.DiscardControlled{Player: p.ID, ID: u.ID}, engine.ReadyEntity{ID: p.ID}}
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Silent Infiltration — confuse an enemy", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.silentInfiltrationConfuseAnEnemy"), ch...)}}
 	}})
 	engine.RegisterBehavior("54009", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -161,7 +161,7 @@ func registerObligation() {
 	engine.RegisterBehavior("54027", &engine.Behavior{ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 		var choices []engine.Choice
 		if !p.IsHero() && !p.Exhausted {
-			choices = append(choices, engine.Choice{ID: "remove", Label: "Exhaust Bucky Barnes and remove", Kind: engine.ChoiceLabel}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
+			choices = append(choices, engine.Choice{ID: "remove", Label: engine.Tf("c.exhaustBuckyBarnesAndRemove"), Kind: engine.ChoiceLabel}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 		}
 		if len(p.Hand) > 0 {
 			best := p.Hand[0]
@@ -172,9 +172,9 @@ func registerObligation() {
 					cost = n
 				}
 			}
-			choices = append(choices, engine.Choice{ID: "discard", Label: "Discard " + best.Def().Name + " and take damage", Kind: engine.ChoiceCard, CardCode: best.Code}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{best}}, engine.DamageEntity{Target: p.ID, Damage: cost, Source: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
+			choices = append(choices, engine.Choice{ID: "discard", Label: engine.S("Discard " + best.Def().Name + " and take damage"), Kind: engine.ChoiceCard, CardCode: best.Code}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{best}}, engine.DamageEntity{Target: p.ID, Damage: cost, Source: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Red Room Programming — choose", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.redRoomProgrammingChoose"), choices...)}}
 	}})
 }
 func registerNemesis() {

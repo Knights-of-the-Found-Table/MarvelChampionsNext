@@ -1,8 +1,6 @@
 package daredevil
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -57,7 +55,7 @@ func registerBlindspot() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Blindspot — confuse an enemy with an upgrade attached?", append(choices, cardutil.Skip())...),
+				Question: engine.Ask(engine.Tf("c.blindspotConfuseAnEnemyWithAnUpgradeAttached"), append(choices, cardutil.Skip())...),
 			}}
 		},
 	})
@@ -87,7 +85,7 @@ func registerCloak() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:     "Cloak — exhaust and spend 2 [energy]: find Dagger",
+				Label:     engine.Tf("c.cloakExhaustAndSpend2EnergyFindDagger"),
 				Type:      engine.AbilityAction,
 				Exhaust:   true,
 				Cost:      2,
@@ -161,7 +159,7 @@ func registerGhostRider() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: fmt.Sprintf("Spend %s (%d [energy] needed)", c.Def().Name, need),
+					Label: engine.Tf("c.spendEnergyNeeded", c, need),
 					Kind:  engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(
 					engine.ConsumeHandCard{Player: p.ID, CardID: c.ID},
@@ -173,7 +171,7 @@ func registerGhostRider() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask(fmt.Sprintf("Ghost Rider — spend %d [energy] to confuse the %s?", need, target),
+				Question: engine.Ask(engine.Tf("c.ghostRiderSpendEnergyToConfuseThe", need, target),
 					append(choices, cardutil.Skip())...),
 			}}
 		},
@@ -201,14 +199,14 @@ func registerKnowYourEnemy() {
 		for _, id := range g.Schemes() {
 			s := g.Entity(id)
 			choices = append(choices, engine.Choice{
-				Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+				Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(engine.ThwartScheme{Scheme: id, N: 1, Source: pid}))
 		}
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Know Your Enemy — remove 1 threat", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.knowYourEnemyRemove1Threat"), choices...)}}
 	}
 	engine.RegisterBehavior("60023", &engine.Behavior{
 		CardCost: traitDiscount("martial artist"),
@@ -231,9 +229,9 @@ func registerDeEscalation() {
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
 			if g.MainScheme != nil && g.MainScheme.AccelerationTokens > 0 {
 				g.MainScheme.AccelerationTokens--
-				g.Logf("De-escalation removes an acceleration token from %s", g.MainScheme.EDef().Name)
+				g.TLogf("c.deEscalationRemovesAnAccelerationTokenFrom", g.MainScheme)
 			} else {
-				g.Logf("De-escalation finds no acceleration token in play")
+				g.TLogf("c.deEscalationFindsNoAccelerationTokenInPlay")
 			}
 			return nil
 		},
@@ -253,7 +251,7 @@ func registerChanceEncounter() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
@@ -262,7 +260,7 @@ func registerChanceEncounter() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Chance Encounter — attach to which side scheme?", choices...),
+				Question: engine.Ask(engine.Tf("c.chanceEncounterAttachToWhichSideScheme"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -299,7 +297,7 @@ func registerChanceEncounter() {
 				}
 			}
 			if found {
-				g.Logf("Chance Encounter: %s takes an ally to hand", p.Name)
+				g.TLogf("c.chanceEncounterTakesAnAllyToHand", p.Name)
 			}
 			return append(out, engine.DiscardControlled{Player: u.Owner, ID: u.ID})
 		},
@@ -310,7 +308,7 @@ func registerChanceEncounter() {
 // minion, which gets -2 SCH.
 func registerLegalTrouble() {
 	engine.RegisterBehavior("60026", &engine.Behavior{
-		CardCost: traitDiscount("attorney", "police"),
+		CardCost:               traitDiscount("attorney", "police"),
 		AttachedEnemySchemeMod: -2,
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			pid := e.EOwner()
@@ -329,7 +327,7 @@ func registerLegalTrouble() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Legal Trouble — attach to which minion?", choices...),
+				Question: engine.Ask(engine.Tf("c.legalTroubleAttachToWhichMinion"), choices...),
 			}}
 		},
 	})
@@ -411,12 +409,12 @@ func registerStealthTraining() {
 				return nil
 			}
 			use := engine.Choice{
-				ID: "use", Label: "Exhaust Stealth Training — stun an enemy", Kind: engine.ChoiceLabel,
+				ID: "use", Label: engine.Tf("c.exhaustStealthTrainingStunAnEnemy"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ExhaustEntity{ID: u.ID}).WithThen(
-				engine.Ask("Stealth Training — stun which enemy?", choices...))
+				engine.Ask(engine.Tf("c.stealthTrainingStunWhichEnemy"), choices...))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Stealth Training — stun an enemy?", use, cardutil.Skip()),
+				Question: engine.Ask(engine.Tf("c.stealthTrainingStunAnEnemy"), use, cardutil.Skip()),
 			}}
 		},
 	})
@@ -459,11 +457,11 @@ func registerStick() {
 				return nil
 			}
 			use := engine.Choice{
-				ID: "use", Label: "Exhaust Stick — +1 to that power", Kind: engine.ChoiceLabel,
+				ID: "use", Label: engine.Tf("c.exhaustStick1ToThatPower"), Kind: engine.ChoiceLabel,
 			}.Msgs(append([]engine.Message{engine.ExhaustEntity{ID: s.ID}}, extra...)...)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Stick — +1 to that basic power?", use, cardutil.Skip()),
+				Question: engine.Ask(engine.Tf("c.stick1ToThatBasicPower"), use, cardutil.Skip()),
 			}}
 		},
 	})
@@ -487,7 +485,7 @@ func registerDanceWithDevil() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Dance with the Devil — attach to which enemy?", choices...),
+				Question: engine.Ask(engine.Tf("c.danceWithTheDevilAttachToWhichEnemy"), choices...),
 			}}
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -496,7 +494,7 @@ func registerDanceWithDevil() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Dance with the Devil — discard: deal 3 damage to attached enemy",
+				Label:    engine.Tf("c.danceWithTheDevilDiscardDeal3DamageToAttachedEnemy"),
 				Type:     engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -525,7 +523,7 @@ func registerSensoryOverload() {
 			}
 			msgs := []engine.Message{}
 			if n > 0 {
-				g.Logf("Sensory Overload: %s takes %d damage (%d Sense upgrades in play)", p.Name, n, n)
+				g.TLogf("c.sensoryOverloadTakesDamageSenseUpgradesInPlay", p.Name, n, n)
 				msgs = append(msgs, engine.DamageEntity{Target: p.ID, Damage: n, Source: engine.EntityID("obligation")})
 			}
 			msgs = append(msgs, engine.ObligationResolve{Player: p.ID, Card: card})

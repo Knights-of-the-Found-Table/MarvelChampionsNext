@@ -4,8 +4,6 @@
 package starlord
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -27,7 +25,7 @@ func registerStarLord() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "What could go wrong? — 3 discount on your next card (you take a facedown encounter card)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.whatCouldGoWrong3DiscountOnYourNextCardYouTakeAFacedownEncou"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					g.UsedThisRound["sl-wcgw"] = true
 					pid := engine.PlayerID(self)
@@ -55,7 +53,7 @@ func registerStarLord() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Nova Prime: defeat which non-elite minion?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.novaPrimeDefeatWhichNonEliteMinion"), picks...)}}
 		},
 	})
 
@@ -79,7 +77,7 @@ func registerStarLord() {
 				n += 2 * facedownCount(p)
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Gutsy Move: remove threat from which scheme?", schemePicks(g, n, e.EOwner())...)}}
+				engine.Tf("c.gutsyMoveRemoveThreatFromWhichScheme"), schemePicks(g, n, e.EOwner())...)}}
 		},
 	})
 
@@ -91,7 +89,7 @@ func registerStarLord() {
 			if p != nil {
 				n += 2 * facedownCount(p)
 			}
-			return cardutil.ChooseEnemy(fmt.Sprintf("Sliding Shot: deal %d damage to which enemy?", n),
+			return cardutil.ChooseEnemy(engine.Tf("c.slidingShotDealDamageToWhichEnemy", n),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)
 		},
 	})
@@ -105,7 +103,7 @@ func registerStarLord() {
 				_ = id
 				g.Delete(u.ID)
 				p.Side = engine.SideAlterEgo
-				g.Logf("Bad Boy prevents all damage; %s changes to alter-ego form", p.Name)
+				g.TLogf("c.badBoyPreventsAllDamageChangesToAlterEgoForm", p.Name)
 				g.Push(engine.DrawCards{Player: p.ID, N: 2})
 				return n, 0
 			}
@@ -117,10 +115,10 @@ func registerStarLord() {
 	engine.RegisterBehavior("17007", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Element Gun + 1 resource → deal 3 damage", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustElementGun1ResourceDeal3Damage"), Type: engine.AbilityAction,
 				Exhaust: true, Cost: 1, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
-					return cardutil.ChooseEnemy("Element Gun: deal 3 damage to which enemy?",
+					return cardutil.ChooseEnemy(engine.Tf("c.elementGunDeal3DamageToWhichEnemy"),
 						func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 3, nil })(g, g.Entity(self))
 				},
 			}}
@@ -153,7 +151,7 @@ func registerStarLord() {
 					a.PermTHW++
 				}
 			}
-			g.Logf("Leader of the Guardians: each guardian ally gets +1 THW")
+			g.TLogf("c.leaderOfTheGuardiansEachGuardianAllyGets1Thw")
 			return nil
 		},
 	})
@@ -200,22 +198,22 @@ func registerStarLord() {
 			switch res {
 			case "physical":
 				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Adam Warlock: remove 3 threat from which scheme?", schemePicks(g, 3, p.ID)...)}}
+					engine.Tf("c.adamWarlockRemove3ThreatFromWhichScheme"), schemePicks(g, 3, p.ID)...)}}
 			case "energy":
 				var picks []engine.Choice
 				for _, q := range g.Players {
 					if q.Damage > 0 {
-						picks = append(picks, engine.Choice{Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID}.
+						picks = append(picks, engine.Choice{Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 							Msgs(engine.HealEntity{Target: q.ID, N: 3}))
 					}
 				}
 				if len(picks) > 0 {
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Adam Warlock: heal which identity?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.adamWarlockHealWhichIdentity"), picks...)}}
 				}
 				return nil
 			case "mental":
-				return cardutil.ChooseEnemy("Adam Warlock: deal 3 damage to which enemy?",
+				return cardutil.ChooseEnemy(engine.Tf("c.adamWarlockDeal3DamageToWhichEnemy"),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 3, nil })(
 					g, &engine.EventCard{Code: "17011", Owner: p.ID})
 			}
@@ -269,7 +267,7 @@ func registerStarLord() {
 			if len(picks) == 0 {
 				return nil
 			}
-			q := engine.AskN("Air Supremacy: hit which enemies?", min(x, len(picks)), picks...)
+			q := engine.AskN(engine.Tf("c.airSupremacyHitWhichEnemies"), min(x, len(picks)), picks...)
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: q}}
 		},
 	})
@@ -316,7 +314,7 @@ func registerStarLord() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil && a.EDef().HasTrait("guardian") {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, ATK: 1}))
 				}
 			}
@@ -324,7 +322,7 @@ func registerStarLord() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Attach Laser Blaster to which guardian ally?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.attachLaserBlasterToWhichGuardianAlly"), picks...)}}
 		},
 	})
 
@@ -335,7 +333,7 @@ func registerStarLord() {
 	engine.RegisterBehavior("17021", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust C.I.T.T. + 2 resources → ready a guardian character", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustCITT2ResourcesReadyAGuardianCharacter"), Type: engine.AbilityAction,
 				Exhaust: true, Cost: 2, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -346,19 +344,19 @@ func registerStarLord() {
 					var picks []engine.Choice
 					for _, id := range p.Allies {
 						if a := g.Allies[id]; a != nil && a.Exhausted && a.EDef().HasTrait("guardian") {
-							picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 								Msgs(engine.ReadyEntity{ID: a.ID}))
 						}
 					}
 					if p.Exhausted && g.EntityHasTrait(p.ID, "guardian") {
-						picks = append(picks, engine.Choice{Label: p.Name + " (identity)", Kind: engine.ChoiceTarget, SourceID: p.ID}.
+						picks = append(picks, engine.Choice{Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID}.
 							Msgs(engine.ReadyEntity{ID: p.ID}))
 					}
 					if len(picks) == 0 {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Ready which guardian character?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.readyWhichGuardianCharacter"), picks...)}}
 				},
 			}}
 		},
@@ -373,7 +371,7 @@ func registerStarLord() {
 	engine.RegisterBehavior("17023", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard Pulse Grenade → mill 2, damage per boost icon", Type: engine.AbilityAction, HeroOnly: true,
+				Label: engine.Tf("c.discardPulseGrenadeMill2DamagePerBoostIcon"), Type: engine.AbilityAction, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					if u == nil {
@@ -391,7 +389,7 @@ func registerStarLord() {
 						g.EncounterDiscard = append(g.EncounterDiscard, c)
 					}
 					return append([]engine.Message{engine.DiscardControlled{Player: u.Owner, ID: self}},
-						cardutil.ChooseEnemy(fmt.Sprintf("Pulse Grenade: deal %d damage to which enemy?", n),
+						cardutil.ChooseEnemy(engine.Tf("c.pulseGrenadeDealDamageToWhichEnemy", n),
 							func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(
 							g, &engine.EventCard{Code: "17023", Owner: u.Owner})...)
 				},
@@ -404,13 +402,13 @@ func registerStarLord() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust Peter Quill → remove from the game", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustPeterQuillRemoveFromTheGame"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.Code[:5] == "17007" {
-					picks = append(picks, engine.Choice{ID: "discard-gun", Label: "Discard Element Gun", Kind: engine.ChoiceLabel}.
+					picks = append(picks, engine.Choice{ID: "discard-gun", Label: engine.Tf("c.discardElementGun"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id},
 							engine.ObligationResolve{Player: p.ID, Card: card}))
 					break
@@ -424,14 +422,14 @@ func registerStarLord() {
 				return msgs
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Banishment:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.banishment"), picks...)}}
 		},
 	})
 
 	// Dive Bomb: 7 damage + 1 to each other enemy.
 	engine.RegisterBehavior("17028", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			msgs := cardutil.ChooseEnemy("Dive Bomb: deal 7 damage to which enemy?",
+			msgs := cardutil.ChooseEnemy(engine.Tf("c.diveBombDeal7DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 7, nil })(g, e)
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 1, Source: e.EOwner()})
@@ -445,7 +443,7 @@ func registerStarLord() {
 	engine.RegisterBehavior("17029", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Agile Flight: remove threat from which scheme?", schemePicks(g, 5, e.EOwner())...)}}
+				engine.Tf("c.agileFlightRemoveThreatFromWhichScheme"), schemePicks(g, 5, e.EOwner())...)}}
 		},
 	})
 

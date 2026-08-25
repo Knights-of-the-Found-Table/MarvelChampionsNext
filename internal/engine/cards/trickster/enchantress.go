@@ -47,13 +47,13 @@ func addCharm(g *engine.Game, pid engine.PlayerID, n int) {
 		return
 	}
 	a.Counters += n
-	g.Logf("%s's Enchantment holds %d charm counters", g.Player(pid).Name, a.Counters)
+	g.TLogf("c.sEnchantmentHoldsCharmCounters", g.Player(pid).Name, a.Counters)
 	if a.Counters >= 5 && data.BaseCode(a.Code) == a.Code {
 		a.Code = a.Code + "b"
 		a.Counters = 0
 		p := g.Player(pid)
 		p.ExtraTraits = append(p.ExtraTraits, "enthralled")
-		g.LogMajorf("%s falls into a Trance — Enthralled!", p.Name)
+		g.TLogMajorf("c.fallsIntoATranceEnthralled", p.Name)
 	}
 }
 
@@ -75,7 +75,7 @@ func registerEnchantress() {
 			React: charmOnAttack,
 			VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 				if g.SideSchemeInPlay("55006") {
-					g.Logf("Enchantress is shielded by Future of Despair")
+					g.TLogf("c.enchantressIsShieldedByFutureOfDespair")
 					return false
 				}
 				return true
@@ -164,7 +164,7 @@ func registerEnchantress() {
 			if mn == nil || g.Villains[m.Target] == nil {
 				return nil
 			}
-			g.Logf("Ulik lashes out at %s", g.Player(mn.EngagedWith).Name)
+			g.TLogf("c.ulikLashesOutAt", g.Player(mn.EngagedWith).Name)
 			return []engine.Message{engine.DamageEntity{Target: mn.EngagedWith, Damage: mn.AttackVal, Source: e.EID()}}
 		},
 	})
@@ -252,7 +252,7 @@ func ttRevealDespair(perHero int) func(g *engine.Game, v *engine.Villain, nextSt
 					Threat: 2 + perHero*len(g.Players), MaxThreat: 6 + 2*len(g.Players),
 				}
 				g.SideSchemes[s.ID] = s
-				g.LogMajorf("Future of Despair enters play")
+				g.TLogMajorf("c.futureOfDespairEntersPlay")
 				return nil
 			}
 		}

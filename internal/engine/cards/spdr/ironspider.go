@@ -38,7 +38,7 @@ func registerIronSpiderPlayers() {
 				return nil
 			}
 			a.Damage--
-			g.Logf("Daredevil moves 1 damage to the attacker")
+			g.TLogf("c.daredevilMoves1DamageToTheAttacker")
 			return []engine.Message{engine.DamageEntity{Target: m.Against, Damage: 1, Source: a.ID}}
 		},
 	})
@@ -71,7 +71,7 @@ func registerIronSpiderPlayers() {
 			a.Counters++
 			a.BonusATK++
 			a.BonusTHW++
-			g.Logf("Spider-Man Noir tucks %s facedown (X=%d)", m.Card.Def().Name, a.Counters)
+			g.TLogf("c.spiderManNoirTucksFacedownX", m.Card, a.Counters)
 			return nil
 		},
 	})
@@ -107,13 +107,13 @@ func registerIronSpiderPlayers() {
 				if d := u.EDef(); d.Cost != nil {
 					x = *d.Cost
 				}
-				stats := engine.Ask("Repurpose — choose a power (+"+fmt.Sprint(x)+" until end of round)",
-					engine.Choice{Label: "+THW", Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, THW: x}),
-					engine.Choice{Label: "+ATK", Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, ATK: x}),
-					engine.Choice{Label: "+DEF", Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, DEF: x}),
+				stats := engine.Ask(engine.S("Repurpose — choose a power (+"+fmt.Sprint(x)+" until end of round)"),
+					engine.Choice{Label: engine.S("+THW"), Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, THW: x}),
+					engine.Choice{Label: engine.S("+ATK"), Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, ATK: x}),
+					engine.Choice{Label: engine.S("+DEF"), Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, DEF: x}),
 				)
 				choices = append(choices, engine.Choice{
-					Label: "Discard " + u.EDef().Name + " (+" + fmt.Sprint(x) + ")", Kind: engine.ChoiceTarget,
+					Label: engine.S("Discard " + u.EDef().Name + " (+" + fmt.Sprint(x) + ")"), Kind: engine.ChoiceTarget,
 					SourceID: u.ID, CardCode: u.Code,
 				}.Msgs(engine.DiscardControlled{Player: p.ID, ID: u.ID}, engine.ReadyEntity{ID: p.ID}).WithThen(stats))
 			}
@@ -122,7 +122,7 @@ func registerIronSpiderPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Repurpose — discard a Tech upgrade", choices...),
+				Question: engine.Ask(engine.Tf("c.repurposeDiscardATechUpgrade"), choices...),
 			}}
 		},
 	})
@@ -139,18 +139,18 @@ func registerIronSpiderPlayers() {
 				var picks []engine.Choice
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					picks = append(picks, engine.Choice{
-						Label: "Stun " + cardutil.EnemyLabel(g.Entity(id)), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.stun2", cardutil.EnemyLabel(g.Entity(id))), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.StunEntity{Target: id}))
 				}
 				return append(picks, cardutil.Skip())
 			}
-			second := engine.Ask("Thwip Thwip! — stun a second enemy", stunPicks()...)
+			second := engine.Ask(engine.Tf("c.thwipThwipStunASecondEnemy"), stunPicks()...)
 			var choices []engine.Choice
 			addPick := func(label string, pid engine.EntityID) {
 				choices = append(choices, engine.Choice{
-					Label: "Deal 1 damage to " + label, Kind: engine.ChoiceTarget, SourceID: pid,
+					Label: engine.S("Deal 1 damage to " + label), Kind: engine.ChoiceTarget, SourceID: pid,
 				}.Msgs(engine.DamageEntity{Target: pid, Damage: 1, Source: p.ID}).WithThen(
-					engine.Ask("Thwip Thwip! — stun the first enemy", stunPicks()...)).WithThen(second))
+					engine.Ask(engine.Tf("c.thwipThwipStunTheFirstEnemy"), stunPicks()...)).WithThen(second))
 			}
 			if p.IsHero() && g.EntityHasTrait(p.ID, "web-warrior") {
 				addPick(p.Name, p.ID)
@@ -165,7 +165,7 @@ func registerIronSpiderPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Thwip Thwip! — deal 1 damage to a Web-Warrior you control", choices...),
+				Question: engine.Ask(engine.Tf("c.thwipThwipDeal1DamageToAWebWarriorYouControl"), choices...),
 			}}
 		},
 	})
@@ -273,10 +273,10 @@ func registerIronSpiderPlayers() {
 			g.EncounterDiscard = append(g.EncounterDiscard, top)
 			boost := cardutil.BoostOf(top)
 			if boost > 0 {
-				g.Logf("Spider-Ham discards %s (+%d boost) and takes %d damage", top.Def().Name, boost, boost)
+				g.TLogf("c.spiderHamDiscardsBoostAndTakesDamage", top, boost, boost)
 				return []engine.Message{engine.DamageEntity{Target: a.ID, Damage: boost, Source: a.ID}}
 			}
-			g.Logf("Spider-Ham discards %s (no boost icons)", top.Def().Name)
+			g.TLogf("c.spiderHamDiscardsNoBoostIcons", top)
 			return nil
 		},
 	})
@@ -302,7 +302,7 @@ func registerIronSpiderPlayers() {
 					msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Ready " + u.EDef().Name, Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+					Label: engine.S("Ready " + u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
@@ -310,7 +310,7 @@ func registerIronSpiderPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Spider-Man — ready an upgrade you control", choices...),
+				Question: engine.Ask(engine.Tf("c.spiderManReadyAnUpgradeYouControl"), choices...),
 			}}
 		},
 	})
@@ -341,12 +341,12 @@ func registerIronSpiderPlayers() {
 			switch m := msg.(type) {
 			case engine.StunEntity:
 				if m.Target == p.ID {
-					g.Logf("%s is steady — the stun is cancelled", p.Name)
+					g.TLogf("c.isSteadyTheStunIsCancelled", p.Name)
 					return []engine.Message{engine.ClearStun{Target: p.ID}}
 				}
 			case engine.ConfuseEntity:
 				if m.Target == p.ID {
-					g.Logf("%s is steady — the confusion is cancelled", p.Name)
+					g.TLogf("c.isSteadyTheConfusionIsCancelled", p.Name)
 					return []engine.Message{engine.ClearConfuse{Target: p.ID}}
 				}
 			}
@@ -367,13 +367,13 @@ func registerIronSpiderPlayers() {
 			var choices []engine.Choice
 			if !clarityAttachedTo(g, p.ID) {
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + p.Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.S("Attach to " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && !clarityAttachedTo(g, id) {
 					choices = append(choices, engine.Choice{
-						Label: "Attach to " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 				}
 			}
@@ -382,7 +382,7 @@ func registerIronSpiderPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Clarity of Purpose — attach to a friendly character", choices...),
+				Question: engine.Ask(engine.Tf("c.clarityOfPurposeAttachToAFriendlyCharacter"), choices...),
 			}}
 		},
 		Resource: &engine.ResourceAbility{Icon: "wild", HeroOnly: true, DamageAttached: 1},
@@ -443,16 +443,16 @@ func registerIronSpiderEncounter() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Attach " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Attach " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.AttachHandCard{Player: p.ID, CardID: c.ID, Enemy: e.EID()}))
 			}
 			if len(choices) == 0 {
-				g.Logf("Electro finds no [energy] card in %s's hand", p.Name)
+				g.TLogf("c.electroFindsNoEnergyCardInSHand", p.Name)
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Electro — attach a card with a printed [energy] resource", choices...),
+				Question: engine.Ask(engine.Tf("c.electroAttachACardWithAPrintedEnergyResource"), choices...),
 			}}
 		},
 	})
@@ -487,7 +487,7 @@ func registerIronSpiderEncounter() {
 				g.EncounterDiscard = append(g.EncounterDiscard, top)
 				boosts += cardutil.BoostOf(top)
 			}
-			g.Logf("Hobgoblin discards %d encounter cards — %s takes %d indirect damage", mn.AttackVal, p.Name, boosts)
+			g.TLogf("c.hobgoblinDiscardsEncounterCardsTakesIndirectDamage", mn.AttackVal, p.Name, boosts)
 			if boosts <= 0 {
 				return nil
 			}
@@ -507,7 +507,7 @@ func registerIronSpiderEncounter() {
 			if !ok || m.Target != e.EID() || !m.Source.Is(engine.KindPlayer) {
 				return nil
 			}
-			g.Logf("Sandman — discarding the top 7 encounter cards")
+			g.TLogf("c.sandmanDiscardingTheTop7EncounterCards")
 			for i := 0; i < 7 && len(g.EncounterDeck) > 0; i++ {
 				top := g.EncounterDeck[0]
 				g.EncounterDeck = g.EncounterDeck[1:]
@@ -516,7 +516,7 @@ func registerIronSpiderEncounter() {
 			return nil
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
-			g.Logf("Sandman — discarding the top 7 encounter cards")
+			g.TLogf("c.sandmanDiscardingTheTop7EncounterCards")
 			for i := 0; i < 7 && len(g.EncounterDeck) > 0; i++ {
 				top := g.EncounterDeck[0]
 				g.EncounterDeck = g.EncounterDeck[1:]
@@ -539,7 +539,7 @@ func registerIronSpiderEncounter() {
 				if c.Code == e.ECode() {
 					g.EncounterDiscard = append(g.EncounterDiscard[:i], g.EncounterDiscard[i+1:]...)
 					g.EncounterDeck = append(g.EncounterDeck, c)
-					g.Logf("Spot shuffles back into the encounter deck")
+					g.TLogf("c.spotShufflesBackIntoTheEncounterDeck")
 					break
 				}
 			}
@@ -561,7 +561,7 @@ func registerIronSpiderEncounter() {
 				}
 			}
 			return []engine.Ability{{
-				Label: "Surge in Crime — spend 2 resources → discard this scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.surgeInCrimeSpend2ResourcesDiscardThisScheme"), Type: engine.AbilityAction,
 				HeroOnly: true, Cost: 2,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.SideSchemes[self]
@@ -570,7 +570,7 @@ func registerIronSpiderEncounter() {
 					}
 					g.Delete(s.ID)
 					g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: s.Code})
-					g.Logf("%s is discarded", s.EDef().Name)
+					g.TLogf("log.discarded", s)
 					return nil
 				},
 			}}

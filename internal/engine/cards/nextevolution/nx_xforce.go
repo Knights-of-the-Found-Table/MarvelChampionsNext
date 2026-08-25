@@ -1,8 +1,6 @@
 package nextevolution
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -24,7 +22,7 @@ func spawnAllyFor(g *engine.Game, p *engine.Player, c engine.Card) {
 	}
 	g.Allies[a.ID] = a
 	p.Allies = append(p.Allies, a.ID)
-	g.Logf("%s puts %s into play", p.Name, def.Name)
+	g.TLogf("log.putsIntoPlay", p.Name, def.Name)
 	g.Push(engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID})
 	if b := engine.LookupBehavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, a)...)
@@ -37,7 +35,7 @@ func spawnUpgradeFor(g *engine.Game, p *engine.Player, c engine.Card) {
 	u := &engine.Upgrade{ID: g.NextEntityID(engine.KindUpgrade), Code: def.Code, Owner: p.ID}
 	g.Upgrades[u.ID] = u
 	p.Upgrades = append(p.Upgrades, u.ID)
-	g.Logf("%s puts %s into play", p.Name, def.Name)
+	g.TLogf("log.putsIntoPlay", p.Name, def.Name)
 	g.Push(engine.UpgradeEnterPlay{Player: p.ID, Card: c})
 	if b := engine.LookupBehavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, u)...)
@@ -50,7 +48,7 @@ func spawnSupportFor(g *engine.Game, p *engine.Player, c engine.Card) {
 	s := &engine.Support{ID: g.NextEntityID(engine.KindSupport), Code: def.Code, Owner: p.ID}
 	g.Supports[s.ID] = s
 	p.Supports = append(p.Supports, s.ID)
-	g.Logf("%s puts %s into play", p.Name, def.Name)
+	g.TLogf("log.putsIntoPlay", p.Name, def.Name)
 	if b := engine.LookupBehavior(def.Code); b.OnPlay != nil {
 		g.Push(b.OnPlay(g, s)...)
 	}
@@ -88,7 +86,7 @@ func registerXForceCards() {
 				if d.HasTrait("X-Factor") || d.HasTrait("X-Force") || d.HasTrait("X-Men") {
 					p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 					p.Hand = append(p.Hand, c)
-					g.Logf("Caliban finds %s in the deck", d.Name)
+					g.TLogf("c.calibanFindsInTheDeck", d.Name)
 					return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: i}}
 				}
 			}
@@ -146,7 +144,7 @@ func registerXForceCards() {
 	engine.RegisterBehavior("40017", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.UsedThisRound["mission-planning"] = true
-			g.Logf("Allies take no consequential damage (Mission Planning)")
+			g.TLogf("c.alliesTakeNoConsequentialDamageMissionPlanning")
 			return nil
 		},
 	})
@@ -192,7 +190,7 @@ func registerXForceCards() {
 				}
 			}
 			g.Delete(s.ID)
-			g.Logf("E.V.A. is discarded (Fantomex left play)")
+			g.TLogf("c.eVAIsDiscardedFantomexLeftPlay")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -202,7 +200,7 @@ func registerXForceCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "E.V.A. — remove 1 threat, deal 1 damage, or heal Fantomex", Type: engine.AbilityAction,
+				Label: engine.Tf("c.eVARemove1ThreatDeal1DamageOrHealFantomex"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -214,19 +212,19 @@ func registerXForceCards() {
 					for _, id := range g.Schemes() {
 						sc := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							ID: "thw-" + id.String(), Label: "Remove 1 threat from " + sc.EDef().Name, Kind: engine.ChoiceTarget,
+							ID: "thw-" + id.String(), Label: engine.S("Remove 1 threat from " + sc.EDef().Name), Kind: engine.ChoiceTarget,
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID}))
 					}
 					for _, id := range cardutil.SortedEnemyIDs(g) {
 						enemy := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							ID: "dmg-" + id.String(), Label: "Deal 1 damage to " + enemy.EDef().Name, Kind: engine.ChoiceTarget,
+							ID: "dmg-" + id.String(), Label: engine.S("Deal 1 damage to " + enemy.EDef().Name), Kind: engine.ChoiceTarget,
 						}.Msgs(engine.DamageEntity{Target: id, Damage: 1, Source: p.ID}))
 					}
 					for _, id := range p.Allies {
 						if a := g.Allies[id]; a != nil && engine.BaseCodeOf(a.Code) == "40015" {
 							choices = append(choices, engine.Choice{
-								ID: "heal", Label: "Heal 1 damage from Fantomex", Kind: engine.ChoiceTarget,
+								ID: "heal", Label: engine.Tf("c.heal1DamageFromFantomex"), Kind: engine.ChoiceTarget,
 							}.Msgs(engine.HealEntity{Target: id, N: 1}))
 						}
 					}
@@ -235,7 +233,7 @@ func registerXForceCards() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("E.V.A. — choose:", choices...),
+						Question: engine.Ask(engine.Tf("c.eVAChoose"), choices...),
 					}}
 				},
 			}}
@@ -283,7 +281,7 @@ func registerXForceCards() {
 			for _, o := range g.Players {
 				msgs = append(msgs, engine.DrawCards{Player: o.ID, N: 1})
 			}
-			g.Logf("Mission Leader — each player draws 1 card")
+			g.TLogf("c.missionLeaderEachPlayerDraws1Card")
 			return msgs
 		},
 	})
@@ -296,7 +294,7 @@ func registerXForceCards() {
 			if a.Damage < a.MaxHP-3 {
 				a.Damage = a.MaxHP - 3
 			}
-			g.Logf("Deadpool heals 3 damage instead of being defeated (acceleration token added)")
+			g.TLogf("c.deadpoolHeals3DamageInsteadOfBeingDefeatedAccelerationTokenA")
 			return []engine.Message{engine.AddAccelerationToken{}}
 		},
 	})
@@ -320,7 +318,7 @@ func registerXForceCards() {
 						if owner := g.Player(a.Owner); owner != nil {
 							owner.Upgrades = append(owner.Upgrades, u.ID)
 						}
-						g.Logf("Deathlok salvages %s", d.Name)
+						g.TLogf("c.deathlokSalvages", d.Name)
 					}
 					return nil
 				}
@@ -354,7 +352,7 @@ func registerXForceCards() {
 				}
 				sc := g.Entity(id)
 				msgs = append(msgs, engine.ThwartScheme{Scheme: id, N: 3, Source: p.ID})
-				g.Logf("Frenemies removes 3 threat from %s", sc.EDef().Name)
+				g.TLogf("c.frenemiesRemoves3ThreatFrom", sc)
 			}
 			return msgs
 		},
@@ -402,7 +400,7 @@ func registerXForceCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Psimitar — deal 2 damage to:", choices...),
+				Question: engine.Ask(engine.Tf("c.psimitarDeal2DamageTo"), choices...),
 			}}
 		},
 	})
@@ -422,13 +420,13 @@ func registerXForceCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, ATK: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Sidearm — attach to:", choices...),
+				Question: engine.Ask(engine.Tf("c.sidearmAttachTo"), choices...),
 			}}
 		},
 	})
@@ -454,7 +452,7 @@ func registerXForceCards() {
 				msgs = append(msgs, engine.DamageEntity{Target: id, Damage: n, Source: p.ID})
 				break
 			}
-			g.Logf("Feral discards %s — %d damage to the villain", c.Def().Name, n)
+			g.TLogf("c.feralDiscardsDamageToTheVillain", c, n)
 			return msgs
 		},
 	})
@@ -476,13 +474,13 @@ func registerXForceCards() {
 			var choices []engine.Choice
 			for _, typ := range []string{"ally", "event", "support", "upgrade", "resource"} {
 				choices = append(choices, engine.Choice{
-					ID: "type-" + typ, Label: typ, Kind: engine.ChoiceLabel,
+					ID: "type-" + typ, Label: engine.S(typ), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.GuessCheck{Player: p.ID, CardCode: c.Code, Guess: typ}))
 			}
-			g.Logf("Wolfsbane discards %s", c.Def().Name)
+			g.TLogf("c.wolfsbaneDiscards", c)
 			return []engine.Message{
 				engine.MillPlayerDeck{Player: p.ID, N: 1},
-				engine.AskQuestion{Player: p.ID, Question: engine.Ask("Wolfsbane — name a card type:", choices...)},
+				engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.wolfsbaneNameACardType"), choices...)},
 			}
 		},
 	})
@@ -532,7 +530,7 @@ func registerXForceCards() {
 	// 40053 Team Investigation: remove 3[per_hero] threat from a side
 	// scheme (Alliance group payment not modeled).
 	engine.RegisterBehavior("40053", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Team Investigation", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.teamInvestigationChooseAScheme"), func(g *engine.Game, e engine.Entity) int {
 			return 3 * len(g.Players)
 		}),
 	})
@@ -569,13 +567,13 @@ func registerXForceCards() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Overwatch — attach to which scheme?", choices...),
+				Question: engine.Ask(engine.Tf("c.overwatchAttachToWhichScheme"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -601,14 +599,14 @@ func registerXForceCards() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 					engine.ThwartScheme{Scheme: id, N: m.N, Source: p.ID}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask(fmt.Sprintf("Overwatch — copy the %d threat removal onto:", m.N), choices...),
+				Question: engine.Ask(engine.Tf("c.overwatchCopyTheThreatRemovalOnto", m.N), choices...),
 			}}
 		},
 	})
@@ -630,7 +628,7 @@ func registerXForceCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Atlas Bear — peek and fetch " + top.Def().Name, Type: engine.AbilityAction,
+				Label: engine.S("Atlas Bear — peek and fetch " + top.Def().Name), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -644,7 +642,7 @@ func registerXForceCards() {
 					}
 					p.Deck = p.Deck[1:]
 					p.Hand = append(p.Hand, c)
-					g.Logf("Atlas Bear fetches %s to hand (1 damage)", c.Def().Name)
+					g.TLogf("c.atlasBearFetchesToHand1Damage", c)
 					return []engine.Message{engine.DamageEntity{Target: a.ID, Damage: 1, Source: p.ID}}
 				},
 			}}
@@ -664,7 +662,7 @@ func registerXForceCards() {
 			}
 			if _, ok := p.Discard.Remove(m.Card.ID); ok {
 				spawnAllyFor(g, p, m.Card)
-				g.Logf("White Fox leaps out of the discard pile!")
+				g.TLogf("c.whiteFoxLeapsOutOfTheDiscardPile")
 			}
 			return nil
 		},
@@ -735,7 +733,7 @@ func registerXForceCards() {
 			}
 			if _, ok := p.Discard.Remove(m.Card.ID); ok {
 				p.Hand = append(p.Hand, m.Card)
-				g.Logf("Digging Deep claws its way back to hand")
+				g.TLogf("c.diggingDeepClawsItsWayBackToHand")
 			}
 			return nil
 		},
@@ -765,7 +763,7 @@ func registerXForceCards() {
 				return nil
 			}
 			g.EventDamageBonus[p.ID] += n
-			g.Logf("Sharpshooter discards %s — +%d damage on this attack", c.Def().Name, n)
+			g.TLogf("c.sharpshooterDiscardsDamageOnThisAttack", c, n)
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 1}}
 		},
 	})
@@ -797,7 +795,6 @@ func applyXForceAura(g *engine.Game, e engine.Entity) []engine.Message {
 			a.PermTHW = 1
 		}
 	}
-	g.Logf("Uncanny X-Force: allies get +1 THW")
+	g.TLogf("c.uncannyXForceAlliesGet1Thw")
 	return nil
 }
-

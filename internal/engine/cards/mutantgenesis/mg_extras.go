@@ -45,7 +45,7 @@ func registerMystique() {
 				i++
 			}
 			if shuffled > 0 {
-				g.Logf("Metamorphic Mayhem — %d Shapeshifters return", shuffled)
+				g.TLogf("c.metamorphicMayhemShapeshiftersReturn", shuffled)
 			}
 			return nil
 		},
@@ -70,7 +70,7 @@ func registerFuturePast() {
 	engine.RegisterBehavior("32166", &engine.Behavior{
 		MinionDamageable: func(g *engine.Game, mn *engine.Minion, damage int) bool {
 			if damage > 3 {
-				g.Logf("Nimrod ignores damage beyond 3")
+				g.TLogf("c.nimrodIgnoresDamageBeyond3")
 				mn.Damage += damage - 3 // apply the capped remainder here
 				return false            // the uncapped hit does not land
 			}
@@ -120,7 +120,7 @@ func registerFuturePast() {
 					s.StoredCards = append(s.StoredCards, top)
 				}
 			}
-			g.Logf("Bastion's Machinations — 9 cards tucked from each player")
+			g.TLogf("c.bastionSMachinations9CardsTuckedFromEachPlayer")
 			return nil
 		},
 	})
@@ -157,7 +157,7 @@ func registerCampaign() {
 			if p := g.Player(pid); p != nil {
 				p.Allies = append(p.Allies, a.ID)
 			}
-			g.Logf("Metro P.D. joins the fight")
+			g.TLogf("c.metroPDJoinsTheFight")
 			return nil
 		}),
 	})
@@ -169,7 +169,7 @@ func registerCampaign() {
 			if p := g.Player(pid); p != nil {
 				p.Allies = append(p.Allies, a.ID)
 			}
-			g.Logf("Magneto allies with the players!")
+			g.TLogf("c.magnetoAlliesWithThePlayers")
 			return nil
 		}),
 	})
@@ -194,7 +194,7 @@ func registerCampaign() {
 	})
 	engine.RegisterBehavior("32174", &engine.Behavior{
 		React: campaignFlip(func(g *engine.Game, pid engine.PlayerID) []engine.Message {
-			g.Logf("Reactivate Defenses enters %s's play area", g.Player(pid).Name)
+			g.TLogf("c.reactivateDefensesEntersSPlayArea", g.Player(pid).Name)
 			return nil
 		}),
 	})
@@ -225,7 +225,7 @@ func registerXForceAspects() {
 		return &engine.Behavior{
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Coup de Grâce — your attacks this phase deal +3 damage, then remove this card", Type: engine.AbilityAction,
+					Label: engine.Tf("c.coupDeGrCeYourAttacksThisPhaseDeal3DamageThenRemoveThisCard"), Type: engine.AbilityAction,
 					Trigger: "attack",
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						u := g.Upgrades[self]
@@ -273,7 +273,7 @@ func registerXForceAspects() {
 	engine.RegisterBehavior("32179", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Ferocious Attack — spend 3 resources → deal 6 damage and ready your hero", Type: engine.AbilityAction,
+				Label: engine.Tf("c.ferociousAttackSpend3ResourcesDeal6DamageAndReadyYourHero"), Type: engine.AbilityAction,
 				HeroOnly: true, Cost: 3,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -292,7 +292,7 @@ func registerXForceAspects() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   u.Owner,
-						Question: engine.Ask("Ferocious Attack — deal 6 damage", choices...),
+						Question: engine.Ask(engine.Tf("c.ferociousAttackDeal6Damage"), choices...),
 					}}
 				},
 			}}
@@ -347,7 +347,7 @@ func registerXForceAspects() {
 	engine.RegisterBehavior("32184", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Shock and Awe — spend 3 resources → deal 6 damage and ready each ally", Type: engine.AbilityAction,
+				Label: engine.Tf("c.shockAndAweSpend3ResourcesDeal6DamageAndReadyEachAlly"), Type: engine.AbilityAction,
 				HeroOnly: true, Cost: 3,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -406,7 +406,7 @@ func registerXForceAspects() {
 	engine.RegisterBehavior("32188", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Heroic Intervention — spend 3 resources → remove 5 threat and gain tough", Type: engine.AbilityAction,
+				Label: engine.Tf("c.heroicInterventionSpend3ResourcesRemove5ThreatAndGainTough"), Type: engine.AbilityAction,
 				HeroOnly: true, Cost: 3,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -450,7 +450,7 @@ func registerXForceAspects() {
 	engine.RegisterBehavior("32194", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Mentorship — spend 3 resources → remove 5 threat and ready each ally", Type: engine.AbilityAction,
+				Label: engine.Tf("c.mentorshipSpend3ResourcesRemove5ThreatAndReadyEachAlly"), Type: engine.AbilityAction,
 				HeroOnly: true, Cost: 3,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]

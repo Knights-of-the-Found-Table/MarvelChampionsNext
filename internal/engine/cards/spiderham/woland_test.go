@@ -362,7 +362,7 @@ func TestWarriorAttachesToSpider(t *testing.T) {
 		t.Fatalf("OnPlay = %d messages, want the question", len(msgs))
 	}
 	q := msgs[0].(engine.AskQuestion)
-	if len(q.Question.Choices) == 0 || !strings.Contains(q.Question.Choices[0].Label, "Spider") {
+	if len(q.Question.Choices) == 0 || !strings.Contains(q.Question.Choices[0].Label.Text, "Spider") {
 		t.Fatalf("choices = %#v, want the Spider-titled identity", q.Question.Choices)
 	}
 }

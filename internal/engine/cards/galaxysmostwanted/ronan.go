@@ -25,7 +25,7 @@ func registerRonanScenario() {
 				}
 				holder := powerStoneHolder(g)
 				if holder != "" && holder == m.Player {
-					g.Logf("Ronan draws an extra boost card against the Power Stone bearer")
+					g.TLogf("c.ronanDrawsAnExtraBoostCardAgainstThePowerStoneBearer")
 					return []engine.Message{engine.BoostActivation{Enemy: e.EID(), N: 1}}
 				}
 				return nil
@@ -68,7 +68,7 @@ func registerRonanScenario() {
 				if v := g.Villains[id]; v != nil && v.Code[:5] == "16103" {
 					if ps := findPowerStone(g); ps != nil && ps.Target != id {
 						ps.Target = id
-						g.LogMajorf("The Power Stone leaps to Ronan the Accuser")
+						g.TLogMajorf("c.thePowerStoneLeapsToRonanTheAccuser")
 					} else if ps != nil {
 						return []engine.Message{engine.DealBoost{Enemy: id}}
 					}
@@ -88,7 +88,7 @@ func registerRonanScenario() {
 			for id := range g.Villains {
 				if v := g.Villains[id]; v != nil && v.Code[:5] == "16103" {
 					t.Target = id
-					g.Logf("Universal Weapon attaches to Ronan the Accuser")
+					g.TLogf("c.universalWeaponAttachesToRonanTheAccuser")
 					return nil
 				}
 			}
@@ -100,7 +100,7 @@ func registerRonanScenario() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Take 2 damage + 1 facedown encounter card → shuffle Universal Weapon into the encounter deck", Type: engine.AbilityAction,
+				Label: engine.Tf("c.take2Damage1FacedownEncounterCardShuffleUniversalWeaponIntoT"), Type: engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -115,7 +115,7 @@ func registerRonanScenario() {
 					g.Delete(self)
 					g.EncounterDeck = append(g.EncounterDeck, engine.Card{ID: g.NextCardID(), Code: code})
 					g.ShuffleEncounterDeck()
-					g.Logf("Universal Weapon shuffles into the encounter deck")
+					g.TLogf("c.universalWeaponShufflesIntoTheEncounterDeck")
 					return []engine.Message{
 						engine.DamageEntity{Target: owner, Damage: 2, Source: self},
 						engine.DealEncounterToPlayer{Player: owner},
@@ -139,7 +139,7 @@ func registerRonanScenario() {
 	engine.RegisterBehavior("16110", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Counters = 1 + len(g.Players)
-			g.Logf("Fanaticism enters play with %d fury counters", t.Counters)
+			g.TLogf("c.fanaticismEntersPlayWithFuryCounters", t.Counters)
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -154,7 +154,7 @@ func registerRonanScenario() {
 			}
 			if v := g.Villains[m.VillainID]; v != nil && v.Code[:5] == "16103" {
 				f.Counters--
-				g.Logf("Fanaticism empowers the attack (+2 ATK, overkill, piercing)")
+				g.TLogf("c.fanaticismEmpowersTheAttack2AtkOverkillPiercing")
 				return []engine.Message{engine.BoostActivation{Enemy: m.VillainID, N: 2}}
 			}
 			return nil
@@ -172,12 +172,12 @@ func registerRonanScenario() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: cardutil.FirstPlayerID(g), Question: engine.Ask(
-				"Cut the Power: choose one",
+				engine.Tf("c.cutThePowerChooseOne"),
 				engine.Choice{
-					ID: "milano", Label: "Exhaust the Milano", Kind: engine.ChoiceLabel,
+					ID: "milano", Label: engine.Tf("c.exhaustTheMilano"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: mil.ID}),
 				engine.Choice{
-					ID: "threat", Label: "Place 2 threat on the main scheme", Kind: engine.ChoiceLabel,
+					ID: "threat", Label: engine.Tf("c.place2ThreatOnTheMainScheme"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 2}),
 			)}}
 		},
@@ -194,7 +194,7 @@ func registerRonanScenario() {
 					if ps := findPowerStone(g); ps != nil {
 						ps.Target = id
 						ps.Locked = true
-						g.LogMajorf("The Power Stone cannot be unattached from Ronan")
+						g.TLogMajorf("c.thePowerStoneCannotBeUnattachedFromRonan")
 					}
 					break
 				}
@@ -226,7 +226,7 @@ func registerRonanScenario() {
 				if v := g.Villains[id]; v != nil && v.Code[:5] == "16103" {
 					if ps := findPowerStone(g); ps != nil {
 						ps.Target = id
-						g.Logf("The Power Stone flies back to Ronan")
+						g.TLogf("c.thePowerStoneFliesBackToRonan")
 					}
 					break
 				}

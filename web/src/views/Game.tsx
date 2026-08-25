@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { get, post, getToken, type ChatMessage, type Choice, type GameView, type Question } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
-import { useChoiceLabel } from '../i18n/labels'
+import { useChoiceLabel, useEngineMsg } from '../i18n/labels'
 import type { GameEvt } from '../board/fx'
 import type { PlacedCard } from '../board/layout'
 import { initSfx, playSfx, setSfxMuted, sfxSettings } from '../audio/sfx'
@@ -20,6 +20,7 @@ export default function Game() {
   const gameId = Number(id)
   const t = useT()
   const choiceLabel = useChoiceLabel()
+  const em = useEngineMsg()
   const zh = useZhMap()
   const [view, setView] = useState<GameView | null>(null)
   const [events, setEvents] = useState<GameEvt[]>([])
@@ -275,7 +276,7 @@ export default function Game() {
             <div className="log-body">
               {(view.log ?? []).slice().reverse().map((e, i) => (
                 <div key={i} className={`log-line log-${e.level || 'info'}`}>
-                  {e.text}
+                  {em({ key: e.key, args: e.args, text: e.text })}
                 </div>
               ))}
             </div>
@@ -357,7 +358,7 @@ export default function Game() {
         ) : view.over ? (
           <div className="question game-over-panel">
             <p className={view.won ? 'victory' : 'defeat'}>
-              {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {view.reason}
+              {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {em(view.reason)}
             </p>
             <button className="primary" onClick={() => navigate('/')}>
               {t('game.backHome')}

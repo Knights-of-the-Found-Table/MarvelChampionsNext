@@ -51,19 +51,19 @@ func registerQuicksilver() {
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				enemy := g.Entity(id)
 				if enemy != nil {
-					options = append(options, engine.Choice{Label: "Deal 2 — " + cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+					options = append(options, engine.Choice{Label: engine.Tf("c.deal2", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 						Msgs(engine.DamageEntity{Target: id, Damage: 2, Source: p.ID}))
 				}
 			}
 			for _, sid := range g.Schemes() {
 				s := g.Entity(sid)
-				options = append(options, engine.Choice{Label: "Remove 2 — " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
+				options = append(options, engine.Choice{Label: engine.S("Remove 2 — " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
 					Msgs(engine.ThwartScheme{Scheme: sid, N: 2, Source: p.ID}))
 			}
 			if len(options) == 0 {
 				return nil
 			}
-			q := engine.AskN("Double Time: choose two options", 2, options...)
+			q := engine.AskN(engine.Tf("c.doubleTimeChooseTwoOptions"), 2, options...)
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 		},
 	})
@@ -84,14 +84,14 @@ func registerQuicksilver() {
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				enemy := g.Entity(id)
 				if enemy != nil {
-					picks = append(picks, engine.Choice{Label: "Stun " + cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.stun2", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 						Msgs(engine.StunEntity{Target: id}))
 				}
 			}
 			if len(picks) == 0 {
 				return nil
 			}
-			q := engine.AskN("Speed Cyclone: stun which enemies?", min(x, len(picks)), picks...)
+			q := engine.AskN(engine.Tf("c.speedCycloneStunWhichEnemies"), min(x, len(picks)), picks...)
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: q}}
 		},
 	})
@@ -100,7 +100,7 @@ func registerQuicksilver() {
 	engine.RegisterBehavior("14007", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Serval Industries → shuffle 2 Quicksilver cards back", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustServalIndustriesShuffle2QuicksilverCardsBack"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -112,14 +112,14 @@ func registerQuicksilver() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Code[:2] == "14" && def.Type != "obligation" {
-							picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
 					if len(picks) == 0 {
 						return nil
 					}
-					q := engine.AskN("Shuffle which Quicksilver cards back?", min(2, len(picks)), picks...)
+					q := engine.AskN(engine.Tf("c.shuffleWhichQuicksilverCardsBack"), min(2, len(picks)), picks...)
 					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 				},
 			}}
@@ -164,7 +164,7 @@ func registerQuicksilver() {
 			var picks []engine.Choice
 			for _, c := range p.Deck {
 				if c.Code[:5] == "14012" {
-					picks = append(picks, engine.Choice{Label: "Multiple Man (deck)", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.multipleManDeck"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 							engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}},
 							engine.ShufflePlayerDeck{Player: p.ID}))
@@ -173,7 +173,7 @@ func registerQuicksilver() {
 			}
 			for _, c := range p.Hand {
 				if c.Code[:5] == "14012" {
-					picks = append(picks, engine.Choice{Label: "Multiple Man (hand)", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.multipleManHand"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}}))
 					break
 				}
@@ -182,7 +182,7 @@ func registerQuicksilver() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Multiple Man: put a copy into play?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.multipleManPutACopyIntoPlay"), picks...)}}
 		},
 	})
 
@@ -190,7 +190,7 @@ func registerQuicksilver() {
 	engine.RegisterBehavior("14013", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [mental] → heal up to 2 damage from Warlock", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendMentalHealUpTo2DamageFromWarlock"), Type: engine.AbilityAction,
 				Cost: 1, CostIcons: "mental:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -261,7 +261,7 @@ func registerQuicksilver() {
 	engine.RegisterBehavior("14022", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard Adrenaline Rush → +1 ATK this phase", Type: engine.AbilityAction, HeroOnly: true,
+				Label: engine.Tf("c.discardAdrenalineRush1AtkThisPhase"), Type: engine.AbilityAction, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					if u == nil {
@@ -278,7 +278,7 @@ func registerQuicksilver() {
 	engine.RegisterBehavior("14023", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard Civic Duty → +1 THW this phase", Type: engine.AbilityAction, HeroOnly: true,
+				Label: engine.Tf("c.discardCivicDuty1ThwThisPhase"), Type: engine.AbilityAction, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					if u == nil {
@@ -337,12 +337,12 @@ func registerQuicksilver() {
 			var picks []engine.Choice
 			for _, q := range g.Players {
 				if q.Damage > 0 {
-					picks = append(picks, engine.Choice{Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					picks = append(picks, engine.Choice{Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 						Msgs(engine.HealEntity{Target: q.ID, N: 1}))
 				}
 				for _, id := range q.Allies {
 					if a := g.Allies[id]; a != nil && a.Damage > 0 {
-						picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.HealEntity{Target: a.ID, N: 1}))
 					}
 				}
@@ -350,7 +350,7 @@ func registerQuicksilver() {
 			if len(picks) == 0 {
 				return nil
 			}
-			q := engine.AskN("United We Stand: heal which characters?", x, picks...)
+			q := engine.AskN(engine.Tf("c.unitedWeStandHealWhichCharacters"), x, picks...)
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: q}}
 		},
 	})
@@ -394,10 +394,10 @@ func registerNemesis() {
 			for _, p := range g.Players {
 				p := p
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"Avalanche: take 2 damage or exhaust your identity?",
-					engine.Choice{ID: "dmg", Label: "Take 2 damage", Kind: engine.ChoiceLabel}.
+					engine.Tf("c.avalancheTake2DamageOrExhaustYourIdentity"),
+					engine.Choice{ID: "dmg", Label: engine.Tf("c.take2Damage"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: 2, Source: e.EID()}),
-					engine.Choice{ID: "exh", Label: "Exhaust your identity", Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "exh", Label: engine.Tf("c.exhaustYourIdentity"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.ExhaustEntity{ID: p.ID}),
 				)})
 			}
@@ -423,7 +423,7 @@ func registerNemesis() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust your hero → discard Vibration Resistance", Type: engine.AbilityAction, HeroOnly: true,
+				Label: engine.Tf("c.exhaustYourHeroDiscardVibrationResistance"), Type: engine.AbilityAction, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
 					if a == nil {

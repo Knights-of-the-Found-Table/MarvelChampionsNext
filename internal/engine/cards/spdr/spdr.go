@@ -67,13 +67,13 @@ func registerSPDRSignatures() {
 			}
 			if len(readies) > 0 {
 				choices = append(choices, engine.Choice{
-					ID: "ready", Label: "Ready each Interface upgrade you control", Kind: engine.ChoiceLabel,
+					ID: "ready", Label: engine.Tf("c.readyEachInterfaceUpgradeYouControl"), Kind: engine.ChoiceLabel,
 				}.Msgs(readies...))
 			}
 			for _, c := range p.Deck {
 				if c.Def().HasTrait("interface") {
 					choices = append(choices, engine.Choice{
-						Label: c.Def().Name + " (deck)", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S(c.Def().Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: p.ID},
@@ -83,7 +83,7 @@ func registerSPDRSignatures() {
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("interface") {
 					choices = append(choices, engine.Choice{
-						Label: c.Def().Name + " (discard)", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S(c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -92,7 +92,7 @@ func registerSPDRSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("All Systems Go! — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.allSystemsGoChoose"), choices...),
 			}}
 		},
 	})
@@ -101,13 +101,13 @@ func registerSPDRSignatures() {
 	// from a scheme. (Sync Ratio payment rider omitted, see package
 	// comment.)
 	engine.RegisterBehavior("31005", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Rapid Deployment", func(g *engine.Game, e engine.Entity) int { return 3 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.rapidDeploymentChooseAScheme"), func(g *engine.Game, e engine.Entity) int { return 3 }),
 	})
 
 	// 31006 Web-Trap: Hero Action (attack) — deal 5 damage to an enemy.
 	// (Sync Ratio stun rider omitted, see package comment.)
 	engine.RegisterBehavior("31006", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Web-Trap — deal 5 damage to an enemy",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.webTrapDeal5DamageToAnEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 5, nil }),
 	})
 
@@ -117,7 +117,7 @@ func registerSPDRSignatures() {
 	engine.RegisterBehavior("31007", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Aunt May & Uncle Ben — mill 2 (3 in alter-ego), keep the SP//dr cards", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.auntMayUncleBenMill23InAlterEgoKeepTheSpDrCards"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(e.EOwner())
@@ -148,7 +148,7 @@ func registerSPDRSignatures() {
 					}
 					p.Discard = append(p.Discard, rest...)
 					if len(kept) > 0 {
-						g.Logf("Aunt May & Uncle Ben — %s keeps %v", p.Name, kept)
+						g.TLogf("c.auntMayUncleBenKeeps", p.Name, kept)
 					}
 					return nil
 				},
@@ -162,7 +162,7 @@ func registerSPDRSignatures() {
 	engine.RegisterBehavior("31008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Ejection Protocol — eject Peni (HP to 6, tough, flip to alter-ego)", Type: engine.AbilityAction, HeroOnly: true,
+				Label: engine.Tf("c.ejectionProtocolEjectPeniHpTo6ToughFlipToAlterEgo"), Type: engine.AbilityAction, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(e.EOwner())
@@ -182,7 +182,7 @@ func registerSPDRSignatures() {
 						engine.ToughEntity{Target: p.ID},
 						engine.ChangeForm{Player: p.ID},
 					)
-					g.Logf("Ejection Protocol — %s ejects", p.Name)
+					g.TLogf("c.ejectionProtocolEjects", p.Name)
 					return msgs
 				},
 			}}
@@ -211,7 +211,7 @@ func registerSPDRSignatures() {
 			}
 			if hasReady {
 				out = append(out, engine.Ability{
-					Label: "SP//dr Command — exhaust an Interface upgrade → draw 1 card", Type: engine.AbilityAction,
+					Label: engine.Tf("c.spDrCommandExhaustAnInterfaceUpgradeDraw1Card"), Type: engine.AbilityAction,
 					HeroOnly: true, Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
@@ -222,7 +222,7 @@ func registerSPDRSignatures() {
 								continue
 							}
 							choices = append(choices, engine.Choice{
-								Label: u.EDef().Name, Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+								Label: engine.S(u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 							}.Msgs(
 								engine.ExhaustEntity{ID: u.ID},
 								engine.DrawCards{Player: p.ID, N: 1},
@@ -233,14 +233,14 @@ func registerSPDRSignatures() {
 						}
 						return []engine.Message{engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("SP//dr Command — exhaust which Interface upgrade?", choices...),
+							Question: engine.Ask(engine.Tf("c.spDrCommandExhaustWhichInterfaceUpgrade"), choices...),
 						}}
 					},
 				})
 			}
 			if hasExhausted && len(p.Hand) > 0 {
 				out = append(out, engine.Ability{
-					Label: "SP//dr Command — discard 1 card → ready an Interface upgrade", Type: engine.AbilityAction,
+					Label: engine.Tf("c.spDrCommandDiscard1CardReadyAnInterfaceUpgrade"), Type: engine.AbilityAction,
 					HeroOnly: true, Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
@@ -254,7 +254,7 @@ func registerSPDRSignatures() {
 									continue
 								}
 								ups = append(ups, engine.Choice{
-									Label: u.EDef().Name, Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+									Label: engine.S(u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 								}.Msgs(
 									engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 									engine.ReadyEntity{ID: u.ID},
@@ -262,8 +262,8 @@ func registerSPDRSignatures() {
 							}
 							if len(ups) > 0 {
 								choices = append(choices, engine.Choice{
-									Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
-								}.WithThen(engine.Ask("Ready which Interface upgrade?", ups...)))
+									Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								}.WithThen(engine.Ask(engine.Tf("c.readyWhichInterfaceUpgrade"), ups...)))
 							}
 						}
 						if len(choices) == 0 {
@@ -271,7 +271,7 @@ func registerSPDRSignatures() {
 						}
 						return []engine.Message{engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("SP//dr Command — discard 1 card", choices...),
+							Question: engine.Ask(engine.Tf("c.spDrCommandDiscard1Card"), choices...),
 						}}
 					},
 				})
@@ -286,7 +286,7 @@ func registerSPDRSignatures() {
 		Resource: &engine.ResourceAbility{Icon: "wild", HeroOnly: true},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Host Spider — ready SP//dr Suit", Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
+				Label: engine.Tf("c.hostSpiderReadySpDrSuit"), Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.ReadyEntity{ID: e.EOwner()}}
 				},
@@ -313,7 +313,7 @@ func registerSPDRSignatures() {
 			if p == nil || !p.IsHero() || m.Player != p.ID {
 				return nil
 			}
-			g.Logf("Psychic Link — +2 threat removal")
+			g.TLogf("c.psychicLink2ThreatRemoval")
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.ThwartScheme{Scheme: m.Target, N: 2, Source: u.ID},
@@ -355,7 +355,7 @@ func registerSPDRSignatures() {
 			if p == nil || !p.IsHero() || m.Player != p.ID {
 				return nil
 			}
-			g.Logf("Web-Fluid Compressor — +2 damage")
+			g.TLogf("c.webFluidCompressor2Damage")
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.DamageEntity{Target: m.Target, Damage: 2, Source: u.ID},
@@ -370,7 +370,7 @@ func registerSPDRObligation() {
 	engine.RegisterBehavior("31025", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			exhaust := engine.Choice{
-				ID: "exhaust", Label: "Exhaust Peni Parker → remove Inherited Burden from the game", Kind: engine.ChoiceLabel,
+				ID: "exhaust", Label: engine.Tf("c.exhaustPeniParkerRemoveInheritedBurdenFromTheGame"), Kind: engine.ChoiceLabel,
 			}.Msgs(
 				engine.ExhaustEntity{ID: p.ID},
 				engine.ObligationResolve{Player: p.ID, Card: card, Remove: true},
@@ -379,24 +379,24 @@ func registerSPDRObligation() {
 			var discardChoices []engine.Choice
 			for _, u := range interfaceUpgrades(g, p) {
 				discardChoices = append(discardChoices, engine.Choice{
-					Label: u.EDef().Name, Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+					Label: engine.S(u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 				}.Msgs(
 					engine.DiscardControlled{Player: p.ID, ID: u.ID},
 					engine.ObligationResolve{Player: p.ID, Card: card},
 				))
 			}
 			discard := engine.Choice{
-				ID: "discard", Label: "Discard an Interface upgrade you control", Kind: engine.ChoiceLabel,
+				ID: "discard", Label: engine.Tf("c.discardAnInterfaceUpgradeYouControl"), Kind: engine.ChoiceLabel,
 			}
 			if len(discardChoices) > 0 {
-				discard = discard.WithThen(engine.Ask("Discard which Interface upgrade?", discardChoices...))
+				discard = discard.WithThen(engine.Ask(engine.Tf("c.discardWhichInterfaceUpgrade"), discardChoices...))
 			} else {
 				discard = discard.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})
 			}
 			choices = append(choices, discard)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Inherited Burden — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.inheritedBurdenChoose"), choices...),
 			}}
 		},
 	})
@@ -436,7 +436,7 @@ func registerSPDRNemesis() {
 			if n == 0 {
 				return nil
 			}
-			g.Logf("M.O.R.B.I.U.S. — %s takes %d damage for generating resources", p.Name, n)
+			g.TLogf("c.mORBIUSTakesDamageForGeneratingResources", p.Name, n)
 			return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: n, Source: mn.ID}}
 		},
 	})

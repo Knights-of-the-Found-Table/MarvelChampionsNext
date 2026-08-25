@@ -1,8 +1,6 @@
 package x23
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -18,7 +16,7 @@ func registerX23Extras() {
 			}
 			return []engine.Ability{
 				{
-					Label: "Boom Boom — arm a boom counter (or detonate)", Type: engine.AbilityAction,
+					Label: engine.Tf("c.boomBoomArmABoomCounterOrDetonate"), Type: engine.AbilityAction,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						a := g.Allies[self]
 						p := g.Player(a.Owner)
@@ -28,7 +26,7 @@ func registerX23Extras() {
 						a.Counters++
 						n := a.Counters
 						if a.Counters < 2 || len(g.Enemies()) == 0 {
-							g.Logf("Boom Boom arms a counter (%d)", n)
+							g.TLogf("c.boomBoomArmsACounter", n)
 							return []engine.Message{engine.ExhaustEntity{ID: a.ID}}
 						}
 						var msgs []engine.Message
@@ -36,7 +34,7 @@ func registerX23Extras() {
 						for _, id := range cardutil.SortedEnemyIDs(g) {
 							msgs = append(msgs, engine.DamageEntity{Target: id, Damage: n, Source: p.ID})
 						}
-						g.Logf("Boom Boom detonates %d counters!", n)
+						g.TLogf("c.boomBoomDetonatesCounters", n)
 						return msgs
 					},
 				},
@@ -88,7 +86,7 @@ func registerX23Extras() {
 	engine.RegisterBehavior("43016", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.UsedThisRound["43016"] = true
-			g.Logf("Critical Hit armed — your next attack stuns")
+			g.TLogf("c.criticalHitArmedYourNextAttackStuns")
 			return nil
 		},
 	})
@@ -130,10 +128,10 @@ func registerX23Extras() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("The Direct Approach — attach to:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.theDirectApproachAttachTo"), choices...)}}
 		},
 	})
 
@@ -149,7 +147,7 @@ func registerX23Extras() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "IPAC — trade a facedown encounter for 2 cards", Type: engine.AbilityAction,
+				Label: engine.Tf("c.ipacTradeAFacedownEncounterFor2Cards"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -179,7 +177,7 @@ func registerX23Extras() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: fmt.Sprintf("X-Bunker — dig %d cards", n), Type: engine.AbilityAction,
+				Label: engine.Tf("c.xBunkerDigCards", n), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -194,7 +192,7 @@ func registerX23Extras() {
 					c := p.Deck[0]
 					p.Deck = p.Deck[1:]
 					p.Hand = append(p.Hand, c)
-					g.Logf("X-Bunker recovers %s", c.Def().Name)
+					g.TLogf("c.xBunkerRecovers", c)
 					return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 				},
 			}}
@@ -207,7 +205,7 @@ func registerX23Extras() {
 			u := g.Upgrades[e.EID()]
 			if p := g.Player(u.Owner); p != nil {
 				p.MaxHP += 3
-				g.Logf("%s gets +3 hit points (Endurance)", p.Name)
+				g.TLogf("c.gets3HitPointsEndurance", p.Name)
 			}
 			return nil
 		},
@@ -287,7 +285,7 @@ func registerX23Extras() {
 						u := &engine.Upgrade{ID: g.NextEntityID(engine.KindUpgrade), Code: c.Code, Owner: p.ID}
 						g.Upgrades[u.ID] = u
 						p.Upgrades = append(p.Upgrades, u.ID)
-						g.Logf("%s gains %s", p.Name, c.Def().Name)
+						g.TLogf("c.gains", p.Name, c)
 						break
 					}
 				}

@@ -16,7 +16,7 @@ func registerBellerophon() {
 				return nil
 			}
 			s.Counters = 3
-			g.Logf("The Bellerophon enters play with 3 missile counters")
+			g.TLogf("c.theBellerophonEntersPlayWith3MissileCounters")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -25,7 +25,7 @@ func registerBellerophon() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "The Bellerophon — fire a missile",
+				Label:   engine.Tf("c.theBellerophonFireAMissile"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -64,7 +64,7 @@ func registerBellerophon() {
 							)
 						}
 						choices = append(choices, engine.Choice{
-							Label: target.Name, Kind: engine.ChoiceTarget, SourceID: target.ID,
+							Label: engine.S(target.Name), Kind: engine.ChoiceTarget, SourceID: target.ID,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
@@ -72,7 +72,7 @@ func registerBellerophon() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   owner.ID,
-						Question: engine.Ask("The Bellerophon — choose a player", choices...),
+						Question: engine.Ask(engine.Tf("c.theBellerophonChooseAPlayer"), choices...),
 					}}
 				},
 			}}

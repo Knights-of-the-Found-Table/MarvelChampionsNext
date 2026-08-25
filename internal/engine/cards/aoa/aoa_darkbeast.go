@@ -25,15 +25,15 @@ func resolveSettingSpecial(g *engine.Game, p *engine.Player) []engine.Message {
 	}
 	switch engine.BaseCodeOf(env.Code) {
 	case "45127": // The Savage Land
-		g.Logf("%s resolves The Savage Land — discards 3", p.Name)
+		g.TLogf("c.resolvesTheSavageLandDiscards3", p.Name)
 		return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 3}}
 	case "45133": // Genosha
 		if g.MainScheme != nil {
-			g.Logf("%s resolves Genosha — 1 threat on the main scheme", p.Name)
+			g.TLogf("c.resolvesGenosha1ThreatOnTheMainScheme", p.Name)
 			return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: env.ID}}
 		}
 	case "45139": // Blue Area of the Moon
-		g.Logf("%s resolves the Blue Area of the Moon — 1 damage", p.Name)
+		g.TLogf("c.resolvesTheBlueAreaOfTheMoon1Damage", p.Name)
 		return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: 1, Source: env.ID}}
 	}
 	return nil
@@ -58,7 +58,7 @@ func revealRandomSetting(g *engine.Game) []engine.Message {
 			g.Delete(env.ID)
 		}
 	}
-	g.Logf("The scene shifts — %s!", c.Def().Name)
+	g.TLogf("c.theSceneShifts", c)
 	return []engine.Message{engine.RevealEncounterCard{Player: cardutil.FirstPlayerID(g), Card: c}}
 }
 
@@ -106,7 +106,7 @@ func registerDarkBeast() {
 					t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: card.Code, Target: v.ID}
 					g.Attachments[t.ID] = t
 					v.Attachments = append(v.Attachments, t.ID)
-					g.Logf("%s attaches to Dark Beast", card.Def().Name)
+					g.TLogf("c.attachesToDarkBeast", card)
 				}
 				return nil
 			},
@@ -222,7 +222,7 @@ func registerSavageLand() {
 			}
 			n := len(p.Deck[0].Def().Resources)
 			mn.BoostCount += n
-			g.Logf("Velociraptor discards a card — +%d ATK", n)
+			g.TLogf("c.velociraptorDiscardsACardAtk", n)
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 1}}
 		},
 	})
@@ -387,7 +387,7 @@ func registerGenosha() {
 func attachEscapedMutant(g *engine.Game, pid engine.PlayerID) []engine.Message {
 	t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: "45137", Target: pid}
 	g.Attachments[t.ID] = t
-	g.Logf("Escaped Mutant attaches to %s", g.Player(pid).Name)
+	g.TLogf("c.escapedMutantAttachesTo", g.Player(pid).Name)
 	return nil
 }
 
@@ -408,7 +408,7 @@ func registerBlueMoon() {
 		MinionDamageable: func(g *engine.Game, m *engine.Minion, damage int) bool {
 			for _, s := range g.SideSchemes {
 				if s != nil && s.Code == "45146" {
-					g.Logf("Gladiator cannot take damage while Trial by Combat is in play")
+					g.TLogf("c.gladiatorCannotTakeDamageWhileTrialByCombatIsInPlay")
 					return false
 				}
 			}
@@ -517,7 +517,7 @@ func registerBlueMoon() {
 			}
 			g.EncounterDiscard = kept
 			g.ShuffleEncounterDeck()
-			g.Logf("Trial by Combat — Imperial Guards shuffle back")
+			g.TLogf("c.trialByCombatImperialGuardsShuffleBack")
 			return nil
 		},
 	})

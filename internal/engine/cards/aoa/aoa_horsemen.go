@@ -32,7 +32,7 @@ func horsemanForced(g *engine.Game, base string, p *engine.Player) []engine.Mess
 	case "45082": // Famine
 		return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 10}}
 	case "45083": // Pestilence — text blanking not modeled
-		g.Logf("Pestilence's plague blanks the identity (not modeled)")
+		g.TLogf("c.pestilenceSPlagueBlanksTheIdentityNotModeled")
 	case "45084": // Death
 		var msgs []engine.Message
 		msgs = append(msgs, engine.DamageEntity{Target: p.ID, Damage: 1, Source: engine.EntityID("")})
@@ -67,7 +67,7 @@ func horsemanVillainBehavior(base string) *engine.Behavior {
 		VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 			for _, o := range g.Villains {
 				if o != nil && o.ID != v.ID && o.HP() >= 1 {
-					g.Logf("%s cannot be defeated while another Horseman lives", v.EDef().Name)
+					g.TLogf("c.cannotBeDefeatedWhileAnotherHorsemanLives", v)
 					return false
 				}
 			}
@@ -101,7 +101,7 @@ func registerHorsemen() {
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: 10}}
 		},
 		"45088": func(g *engine.Game, p *engine.Player) []engine.Message {
-			g.Logf("Plague and Pestilence blanks the identity (not modeled)")
+			g.TLogf("c.plagueAndPestilenceBlanksTheIdentityNotModeled")
 			return nil
 		},
 		"45089": func(g *engine.Game, p *engine.Player) []engine.Message {
@@ -273,7 +273,7 @@ func registerHounds() {
 			}
 			g.Delete(t.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: t.Code})
-			g.Logf("Ahab's Energy Spear is discarded")
+			g.TLogf("c.ahabSEnergySpearIsDiscarded")
 			return nil
 		},
 	})
@@ -286,7 +286,7 @@ func registerHounds() {
 					g.EncounterDeck.Remove(c.ID)
 					if p := g.Player(cardutil.FirstPlayerID(g)); p != nil {
 						p.EncounterDown = append(p.EncounterDown, c)
-						g.Logf("A Hound is dealt facedown to %s", p.Name)
+						g.TLogf("c.aHoundIsDealtFacedownTo", p.Name)
 					}
 					return nil
 				}
@@ -296,7 +296,7 @@ func registerHounds() {
 					g.EncounterDiscard.Remove(c.ID)
 					if p := g.Player(cardutil.FirstPlayerID(g)); p != nil {
 						p.EncounterDown = append(p.EncounterDown, c)
-						g.Logf("A Hound is dealt facedown to %s", p.Name)
+						g.TLogf("c.aHoundIsDealtFacedownTo", p.Name)
 					}
 					return nil
 				}

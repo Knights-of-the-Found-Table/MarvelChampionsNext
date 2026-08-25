@@ -16,6 +16,12 @@ type Question struct {
 	Choices []Choice `json:"choices"`
 	N       int      `json:"n,omitempty"` // for choose_n: number to pick
 
+	// PromptKey/PromptArgs re-render Prompt client-side in the viewer's
+	// language (see i18n.go). Prompt itself stays the canonical English
+	// text so legacy clients and old saves keep working.
+	PromptKey  string `json:"promptKey,omitempty"`
+	PromptArgs []Arg  `json:"promptArgs,omitempty"`
+
 	// Validate optionally names a server-side validation rule for the
 	// selection, e.g. "payment:3" (total resource icons >= 3).
 	Validate string `json:"validate,omitempty"`
@@ -40,7 +46,7 @@ const (
 
 type Choice struct {
 	ID       string    `json:"id"`
-	Label    string    `json:"label"`
+	Label    Msg       `json:"label"`
 	Kind     string    `json:"kind"`
 	CardCode string    `json:"cardCode,omitempty"`
 	SourceID EntityID  `json:"sourceId,omitempty"`
@@ -115,11 +121,13 @@ func copyQuestion(q *Question) *Question {
 		return nil
 	}
 	out := &Question{
-		Type:     q.Type,
-		Prompt:   q.Prompt,
-		Choices:  make([]Choice, len(q.Choices)),
-		N:        q.N,
-		Validate: q.Validate,
+		Type:       q.Type,
+		Prompt:     q.Prompt,
+		PromptKey:  q.PromptKey,
+		PromptArgs: q.PromptArgs,
+		Choices:    make([]Choice, len(q.Choices)),
+		N:          q.N,
+		Validate:   q.Validate,
 	}
 	if q.Context != nil {
 		out.Context = make(map[string]any, len(q.Context))
@@ -144,18 +152,26 @@ func clearChoiceIDs(q *Question) {
 	}
 }
 
-// Ask builds a choose_one question.
-func Ask(prompt string, choices ...Choice) *Question {
-	prompt, choices = localizeLegacyQuestion(prompt, choices)
-	q := &Question{Type: "choose_one", Prompt: prompt, Choices: choices}
+// SetPrompt sets the prompt trio (canonical text + key + structured args)
+// from one message.
+func (q *Question) SetPrompt(m Msg) {
+	q.Prompt, q.PromptKey, q.PromptArgs = m.Text, m.Key, m.Args
+}
+
+// Ask builds a choose_one question from a keyed (Tf) or passthrough (S)
+// message; Prompt carries the canonical text while PromptKey/PromptArgs let
+// the client re-render it in the viewer's language.
+func Ask(prompt Msg, choices ...Choice) *Question {
+	q := &Question{Type: "choose_one", Choices: choices}
+	q.SetPrompt(prompt)
 	q.assignIDs("")
 	return q
 }
 
 // AskN builds a choose_n question.
-func AskN(prompt string, n int, choices ...Choice) *Question {
-	prompt, choices = localizeLegacyQuestion(prompt, choices)
-	q := &Question{Type: "choose_n", Prompt: prompt, Choices: choices, N: n}
+func AskN(prompt Msg, n int, choices ...Choice) *Question {
+	q := &Question{Type: "choose_n", Choices: choices, N: n}
+	q.SetPrompt(prompt)
 	q.assignIDs("")
 	return q
 }
@@ -306,7 +322,7 @@ func legacySubtreeIDs(q *Question) bool {
 // so rebuilding is safe and only changes presentation (ids), not semantics.
 func (g *Game) RebuildTurnMenu() bool {
 	pq := g.Pending()
-	if pq == nil || !msgIs(pq.Question.Prompt, "q.yourTurn") || !legacySubtreeIDs(pq.Question) {
+	if pq == nil || pq.Question.PromptKey != "q.yourTurn" || !legacySubtreeIDs(pq.Question) {
 		return false
 	}
 	p := g.Player(pq.Player)

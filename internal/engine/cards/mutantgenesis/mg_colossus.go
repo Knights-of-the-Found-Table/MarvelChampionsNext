@@ -24,7 +24,7 @@ func registerColossusPack() {
 	engine.RegisterBehavior("32003", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Piotr's Studio — dig for a Colossus card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.piotrSStudioDigForAColossusCard"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -36,7 +36,7 @@ func registerColossusPack() {
 							p.Deck = append(p.Deck[:i], p.Deck[i+1:]...)
 							c.Owner = p.ID
 							p.Hand = append(p.Hand, c)
-							g.Logf("Piotr's Studio finds %s", c.Def().Name)
+							g.TLogf("c.piotrSStudioFinds", c)
 							return nil
 						}
 						p.Discard = append(p.Discard, c)
@@ -86,7 +86,7 @@ func registerColossusPack() {
 			if u.Exhausted || u.Counters <= 0 {
 				return nil
 			}
-			g.Logf("Organic Steel — Colossus regains his tough status card")
+			g.TLogf("c.organicSteelColossusRegainsHisToughStatusCard")
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.AddEntityCounter{ID: u.ID, N: -1},
@@ -106,7 +106,7 @@ func registerColossusPack() {
 				return nil
 			}
 			p.Tough = 0
-			g.Logf("Made of Rage — +6 damage for this attack")
+			g.TLogf("c.madeOfRage6DamageForThisAttack")
 			return []engine.Message{engine.DamageEntity{Target: m.Target, Damage: 6, Source: p.ID}}
 		},
 	})
@@ -126,10 +126,10 @@ func registerColossusPack() {
 				if en == nil {
 					continue
 				}
-				label := "Deal 5 damage to " + cardutil.EnemyLabel(en)
+				label := engine.Tf("c.dealDamageTo", 5, cardutil.EnemyLabel(en))
 				msgs := []engine.Message{engine.DamageEntity{Target: id, Damage: 5, Source: p.ID}}
 				if rider {
-					label += " (discard a tough → stun and confuse)"
+					label = engine.Tf("c.toughRider", label)
 					msgs = append(msgs, engine.StunEntity{Target: id}, engine.ConfuseEntity{Target: id})
 				}
 				choices = append(choices, engine.Choice{
@@ -141,7 +141,7 @@ func registerColossusPack() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Steel Fist", choices...),
+				Question: engine.Ask(engine.Tf("c.steelFist"), choices...),
 			}}
 		},
 	})
@@ -157,12 +157,12 @@ func registerColossusPack() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Bulletproof Protector — choose:",
+				Question: engine.Ask(engine.Tf("c.bulletproofProtectorChoose"),
 					engine.Choice{
-						ID: "tough", Label: "Gain tough status cards (boolean approximation)", Kind: engine.ChoiceLabel,
+						ID: "tough", Label: engine.Tf("c.gainToughStatusCardsBooleanApproximation"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.ToughEntity{Target: p.ID}),
 					engine.Choice{
-						ID: "ready", Label: "Ready your hero", Kind: engine.ChoiceLabel,
+						ID: "ready", Label: engine.Tf("c.readyYourHero"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.ReadyEntity{ID: p.ID}),
 				),
 			}}
@@ -178,7 +178,7 @@ func registerColossusPack() {
 	engine.RegisterBehavior("32025", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "exhaust", Label: "Exhaust Piotr Rasputin → remove from the game", Kind: engine.ChoiceLabel,
+				ID: "exhaust", Label: engine.Tf("c.exhaustPiotrRasputinRemoveFromTheGame"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true})}
 			penalty := []engine.Message{}
 			if p.Tough == 0 {
@@ -186,11 +186,11 @@ func registerColossusPack() {
 			}
 			penalty = append(penalty, engine.ObligationResolve{Player: p.ID, Card: card})
 			choices = append(choices, engine.Choice{
-				ID: "discard", Label: "Discard this card and each tough status card from your identity", Kind: engine.ChoiceLabel,
+				ID: "discard", Label: engine.Tf("c.discardThisCardAndEachToughStatusCardFromYourIdentity"), Kind: engine.ChoiceLabel,
 			}.Msgs(penalty...))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Homesick — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.homesickChoose"), choices...),
 			}}
 		},
 	})
@@ -219,7 +219,7 @@ func registerColossusNemesis() {
 				}
 			}
 			if n > 0 {
-				g.Logf("Rampaging Juggernaut discards %d tough status cards", n)
+				g.TLogf("c.rampagingJuggernautDiscardsToughStatusCards", n)
 				return []engine.Message{engine.SchemeThreat{Scheme: e.EID(), N: 2 * n, Source: e.EID()}}
 			}
 			return nil

@@ -3,8 +3,6 @@
 package adamwarlock
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -45,21 +43,21 @@ func battleMageEffect(g *engine.Game, p *engine.Player, aspect string) []engine.
 		for _, pl := range g.Players {
 			for _, id := range pl.Allies {
 				if a := g.Allies[id]; a != nil && a.Damage > 0 {
-					choices = append(choices, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
+					choices = append(choices, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
 						Msgs(engine.HealEntity{Target: id, N: 1}, engine.AddEntityCounter{ID: p.ID, N: battleMageSignal}))
 				}
 			}
 		}
 	case "leadership":
 		for _, pl := range g.Players {
-			choices = append(choices, engine.Choice{Label: pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID}.
+			choices = append(choices, engine.Choice{Label: engine.S(pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID}.
 				Msgs(engine.ApplyStatBonus{Target: pl.ID, THW: 1, ATK: 1, DEF: 1}, engine.AddEntityCounter{ID: p.ID, N: battleMageSignal}))
 		}
 	}
 	if len(choices) == 0 {
 		return []engine.Message{engine.AddEntityCounter{ID: p.ID, N: battleMageSignal}}
 	}
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Battle Mage — resolve "+aspect, choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S("Battle Mage — resolve "+aspect), choices...)}}
 }
 
 func battleMageChoices(g *engine.Game, p *engine.Player) []engine.Message {
@@ -74,12 +72,12 @@ func battleMageChoices(g *engine.Game, p *engine.Player) []engine.Message {
 		}
 		msgs := []engine.Message{engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}}
 		msgs = append(msgs, battleMageEffect(g, p, aspect)...)
-		choices = append(choices, engine.Choice{Label: fmt.Sprintf("Discard %s (%s)", c.Def().Name, aspect), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(msgs...))
+		choices = append(choices, engine.Choice{Label: engine.Tf("c.discard2", c, aspect), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(msgs...))
 	}
 	if len(choices) == 0 {
 		return nil
 	}
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Battle Mage — discard an aspect card", choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.battleMageDiscardAnAspectCard"), choices...)}}
 }
 
 func registerIdentity() {
@@ -97,7 +95,7 @@ func registerIdentity() {
 				}
 			}
 			if counts["aggression"] != counts["justice"] || counts["aggression"] != counts["protection"] || counts["aggression"] != counts["leadership"] {
-				g.Logf("Adam Warlock deckbuilding warning: aspect counts are not equal: %v", counts)
+				g.TLogf("c.adamWarlockDeckbuildingWarningAspectCountsAreNotEqual", counts)
 			}
 			return nil
 		},
@@ -105,7 +103,7 @@ func registerIdentity() {
 			if p == nil || !p.IsHero() || len(battleMageChoices(g, p)) == 0 {
 				return nil
 			}
-			return []engine.Ability{{Label: "Battle Mage — discard an aspect card", Type: engine.AbilityAction, HeroOnly: true, OncePerTurn: true,
+			return []engine.Ability{{Label: engine.Tf("c.battleMageDiscardAnAspectCard"), Type: engine.AbilityAction, HeroOnly: true, OncePerTurn: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return battleMageChoices(g, g.Player(self))
 				}}}
@@ -167,7 +165,7 @@ func registerSignatures() {
 			if s.Counters < 1 {
 				return nil
 			}
-			return []engine.Ability{{Label: "Soul World — remove a soul counter and heal all damage", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
+			return []engine.Ability{{Label: engine.Tf("c.soulWorldRemoveASoulCounterAndHealAllDamage"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(s.Owner)
@@ -198,7 +196,7 @@ func registerSignatures() {
 		if len(choices) == 0 {
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: n}}
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Karmic Blast — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.karmicBlastChooseAnEnemy"), choices...)}}
 	}})
 	engine.RegisterBehavior("21039", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -210,7 +208,7 @@ func registerSignatures() {
 		if len(choices) == 0 {
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: n}}
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Cosmic Awareness — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.cosmicAwarenessChooseAScheme"), choices...)}}
 	}})
 	engine.RegisterBehavior("21040", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -219,13 +217,13 @@ func registerSignatures() {
 			if c.ID == "" || c.Code == "21040" {
 				continue
 			}
-			choices = append(choices, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+			choices = append(choices, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 				Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 		}
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Quantum Magic — return a card", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.quantumMagicReturnACard"), choices...)}}
 	}})
 }
 
@@ -233,13 +231,13 @@ func registerObligation() {
 	engine.RegisterBehavior("21066", &engine.Behavior{ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 		var choices []engine.Choice
 		if !p.IsHero() && !p.Exhausted {
-			choices = append(choices, engine.Choice{ID: "remove", Label: "Exhaust Adam Warlock and remove Regeneration Cycle", Kind: engine.ChoiceLabel}.
+			choices = append(choices, engine.Choice{ID: "remove", Label: engine.Tf("c.exhaustAdamWarlockAndRemoveRegenerationCycle"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 		}
 		top := topCards(p, 5)
-		choices = append(choices, engine.Choice{ID: "mill", Label: "Discard 5 cards and place threat", Kind: engine.ChoiceLabel}.
+		choices = append(choices, engine.Choice{ID: "mill", Label: engine.Tf("c.discard5CardsAndPlaceThreat"), Kind: engine.ChoiceLabel}.
 			Msgs(engine.MillPlayerDeck{Player: p.ID, N: len(top)}, engine.SchemeThreat{Scheme: g.MainScheme.ID, N: aspectVariety(top), Source: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Regeneration Cycle — choose", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.regenerationCycleChoose"), choices...)}}
 	}})
 }
 

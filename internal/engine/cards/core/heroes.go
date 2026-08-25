@@ -1,8 +1,6 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -24,7 +22,7 @@ func registerCaptainMarvel() {
 				{
 					// Rechannel: Action — pay 1 resource + heal 1 → draw 1
 					// (limit once per round).
-					Label:        "Rechannel — pay 1, heal 1 damage → draw 1",
+					Label:        engine.Tf("c.rechannelPay1Heal1DamageDraw1"),
 					Type:         engine.AbilityAction,
 					Cost:         1,
 					HeroOnly:     true,
@@ -39,7 +37,7 @@ func registerCaptainMarvel() {
 				{
 					// Commander: Action — choose a player to draw 1
 					// (solo: you).
-					Label:        "Commander — a player draws 1",
+					Label:        engine.Tf("c.commanderAPlayerDraws1"),
 					Type:         engine.AbilityAction,
 					AlterEgoOnly: true,
 					OncePerRound: true,
@@ -75,16 +73,16 @@ func registerSheHulk() {
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				enemy := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: enemy.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(enemy.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: enemy.ECode(),
 				}.Msgs(engine.DamageEntity{Target: id, Damage: 2, Source: p.ID}))
 			}
 			choices = append(choices, engine.Choice{
-				ID: "skip", Label: "Skip", Kind: engine.ChoicePass,
+				ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass,
 			})
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("\"Do You Even Lift?\" — deal 2 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.doYouEvenLiftDeal2DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -110,7 +108,7 @@ func registerIronMan() {
 			return []engine.Ability{{
 				// Futurist — Action: look at top 3 of your deck, keep 1,
 				// discard the rest (limit once per round).
-				Label:        "Futurist — look at top 3, keep 1",
+				Label:        engine.Tf("c.futuristLookAtTop3Keep1"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -124,13 +122,13 @@ func registerIronMan() {
 					for i := 0; i < n; i++ {
 						c := p.Deck[i]
 						choices = append(choices, engine.Choice{
-							Label: fmt.Sprintf("Keep %s", c.Def().Name),
+							Label: engine.Tf("c.keep", c),
 							Kind:  engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.TakeDeckCard{Player: self, CardID: c.ID, FromTop: 3}))
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   self,
-						Question: engine.Ask("Futurist — keep 1 of the top 3", choices...),
+						Question: engine.Ask(engine.Tf("c.futuristKeep1OfTheTop3"), choices...),
 					}}
 				},
 			}}
@@ -149,7 +147,7 @@ func registerBlackPanther() {
 				def := c.Def()
 				if def.Type == "upgrade" && def.CardSet == "black_panther" {
 					choices = append(choices, engine.Choice{
-						Label: fmt.Sprintf("Add %s to hand", def.Name),
+						Label: engine.Tf("c.addToHand", def.Name),
 						Kind:  engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}))
 				}
@@ -158,7 +156,7 @@ func registerBlackPanther() {
 				return nil
 			}
 			choices = append(choices, engine.Choice{
-				ID: "skip", Label: "Skip", Kind: engine.ChoicePass,
+				ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass,
 			})
 			for i := range choices {
 				// shuffle after taking (or skipping)
@@ -166,7 +164,7 @@ func registerBlackPanther() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Foresight — take a Black Panther upgrade", choices...),
+				Question: engine.Ask(engine.Tf("c.foresightTakeABlackPantherUpgrade"), choices...),
 			}}
 		},
 	})

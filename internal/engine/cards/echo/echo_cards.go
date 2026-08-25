@@ -35,7 +35,7 @@ func registerDaredevilAlly() {
 			return
 		}
 		p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{Type: "event", Amount: 1})
-		g.Logf("Daredevil: %s's next event costs 1 less", p.Name)
+		g.TLogf("c.daredevilSNextEventCosts1Less", p.Name)
 	}
 	engine.RegisterBehavior("60039", &engine.Behavior{
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -67,7 +67,7 @@ func registerGetTheirAttention() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: p.ID}))
 			}
@@ -77,7 +77,7 @@ func registerGetTheirAttention() {
 			return engine.Defends{Defender: p.ID, Against: against},
 				[]engine.Message{engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.Ask("Get Their Attention — remove 3 threat from which scheme?", choices...),
+					Question: engine.Ask(engine.Tf("c.getTheirAttentionRemove3ThreatFromWhichScheme"), choices...),
 				}}, true
 		},
 	})
@@ -99,28 +99,28 @@ func registerPowerfulPunch() {
 func registerSeeNoEvil() {
 	pick := func(g *engine.Game, pid engine.PlayerID, n string) *engine.Question {
 		damage := engine.Choice{
-			ID: "damage", Label: "Deal 3 damage to an enemy", Kind: engine.ChoiceLabel,
+			ID: "damage", Label: engine.Tf("c.deal3DamageToAnEnemy"), Kind: engine.ChoiceLabel,
 		}
 		if enemies := cardutil.EnemyChoices(g, 3, pid, func(target engine.EntityID) []engine.Message {
 			return []engine.Message{engine.DamageEntity{Target: target, Damage: 3, Source: pid}}
 		}); len(enemies) > 0 {
-			damage = damage.WithThen(engine.Ask("See No Evil — choose an enemy", enemies...))
+			damage = damage.WithThen(engine.Ask(engine.Tf("c.seeNoEvilChooseAnEnemy"), enemies...))
 		}
 		threat := engine.Choice{
-			ID: "threat", Label: "Remove 3 threat from a scheme", Kind: engine.ChoiceLabel,
+			ID: "threat", Label: engine.Tf("c.remove3ThreatFromAScheme"), Kind: engine.ChoiceLabel,
 		}
 		var schemes []engine.Choice
 		for _, id := range g.Schemes() {
 			s := g.Entity(id)
 			schemes = append(schemes, engine.Choice{
-				Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+				Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 		}
 		if len(schemes) > 0 {
-			threat = threat.WithThen(engine.Ask("See No Evil — choose a scheme", schemes...))
+			threat = threat.WithThen(engine.Ask(engine.Tf("c.seeNoEvilChooseAScheme"), schemes...))
 		}
-		return engine.Ask(n, damage, threat)
+		return engine.Ask(engine.S(n), damage, threat)
 	}
 	engine.RegisterBehavior("60055", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -178,7 +178,7 @@ func registerSuperpowerTraining() {
 func findKingpin(g *engine.Game, p *engine.Player) []engine.Message {
 	for _, mn := range g.Minions {
 		if mn != nil && mn.Code == "60061" {
-			g.Logf("Kingpin is already in play")
+			g.TLogf("c.kingpinIsAlreadyInPlay")
 			return nil
 		}
 	}
@@ -203,7 +203,7 @@ func findKingpin(g *engine.Game, p *engine.Player) []engine.Message {
 		}
 	}
 	if !found {
-		g.Logf("%s cannot find Kingpin", p.Name)
+		g.TLogf("c.cannotFindKingpin", p.Name)
 		return nil
 	}
 	def := card.Def()
@@ -216,7 +216,7 @@ func findKingpin(g *engine.Game, p *engine.Player) []engine.Message {
 		EngagedWith: p.ID,
 	}
 	g.Minions[mn.ID] = mn
-	g.Logf("Kingpin enters play engaged with %s", p.Name)
+	g.TLogf("c.kingpinEntersPlayEngagedWith", p.Name)
 	return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}}
 }
 
@@ -241,7 +241,7 @@ func registerKingpinSet() {
 	engine.RegisterBehavior("60061", &engine.Behavior{
 		MinionActivate: func(g *engine.Game, mn *engine.Minion, p *engine.Player) []engine.Message {
 			if p.IsHero() && data.BaseCode(p.HeroCode) == "60037" {
-				g.Logf("Kingpin schemes against %s instead of attacking", p.Name)
+				g.TLogf("c.kingpinSchemesAgainstInsteadOfAttacking", p.Name)
 				if g.MainScheme != nil {
 					return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: mn.SchemeVal, Source: mn.ID}}
 				}
@@ -251,7 +251,7 @@ func registerKingpinSet() {
 			if p.IsHero() {
 				if mn.Stunned {
 					mn.Stunned = false
-					g.Logf("Kingpin is stunned; attack canceled")
+					g.TLogf("c.kingpinIsStunnedAttackCanceled")
 					return nil
 				}
 				return []engine.Message{engine.AskAttack{Enemy: mn.ID, Player: p.ID}}
@@ -268,13 +268,13 @@ func registerKingpinSet() {
 		MinionDamageable: func(g *engine.Game, m *engine.Minion, damage int) bool {
 			for _, s := range g.SideSchemes {
 				if s != nil && s.Code == "60062" {
-					g.Logf("Kingpin cannot take damage (Master Manipulator)")
+					g.TLogf("c.kingpinCannotTakeDamageMasterManipulator")
 					return false
 				}
 			}
 			for _, mn := range g.Minions {
 				if mn != nil && mn.Code == "60063" {
-					g.Logf("Kingpin cannot take damage (Kingpin's Henchman)")
+					g.TLogf("c.kingpinCannotTakeDamageKingpinSHenchman")
 					return false
 				}
 			}
@@ -309,7 +309,7 @@ func registerKingpinSet() {
 			}
 			if p.IsHero() {
 				n := p.AttackStat(g)
-				g.Logf("Pawn of the Kingpin: %s takes %d damage", p.Name, n)
+				g.TLogf("c.pawnOfTheKingpinTakesDamage", p.Name, n)
 				return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: n, Source: engine.EntityID("treachery")}}
 			}
 			var kingpin *engine.Minion
@@ -320,7 +320,7 @@ func registerKingpinSet() {
 				}
 			}
 			if kingpin != nil && g.MainScheme != nil {
-				g.Logf("Pawn of the Kingpin: Kingpin schemes")
+				g.TLogf("c.pawnOfTheKingpinKingpinSchemes")
 				return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: kingpin.SchemeVal, Source: kingpin.ID}}
 			}
 			return []engine.Message{engine.RevealNextEncounter{Player: p.ID}}

@@ -20,14 +20,14 @@ func registerShieldSuite() {
 			for _, s := range shieldSupports(g, p) {
 				if s.Exhausted {
 					choices = append(choices, engine.Choice{
-						Label: "Ready " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
+						Label: engine.S("Ready " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 					}.Msgs(engine.ReadyEntity{ID: s.ID}))
 				}
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Victoria Hand — ready which S.H.I.E.L.D. support?", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.victoriaHandReadyWhichSHIELDSupport"), choices...)}}
 		},
 	})
 
@@ -43,7 +43,7 @@ func registerShieldSuite() {
 	// (same approximation as Eyes in the Sky).
 	engine.RegisterBehavior("50015", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			g.Logf("Agents of S.H.I.E.L.D. coordinates the team")
+			g.TLogf("c.agentsOfSHIELDCoordinatesTheTeam")
 			return nil
 		},
 	})
@@ -52,7 +52,7 @@ func registerShieldSuite() {
 	engine.RegisterBehavior("50016", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.Supports[e.EID()].Counters = 3
-			g.Logf("Command Team enters play with 3 command counters")
+			g.TLogf("c.commandTeamEntersPlayWith3CommandCounters")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -61,7 +61,7 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Command Team — ready an ally", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.commandTeamReadyAnAlly"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.Supports[self].Owner)
 					if p == nil {
@@ -71,14 +71,14 @@ func registerShieldSuite() {
 					for _, aid := range p.Allies {
 						if a := g.Allies[aid]; a != nil && a.Exhausted {
 							choices = append(choices, engine.Choice{
-								Label: "Ready " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
+								Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
 							}.Msgs(engine.ReadyEntity{ID: aid}))
 						}
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Command Team — ready which ally?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.commandTeamReadyWhichAlly"), choices...)}}
 				},
 			}}
 		},
@@ -89,7 +89,7 @@ func registerShieldSuite() {
 	engine.RegisterBehavior("50017", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.Supports[e.EID()].Counters = 2
-			g.Logf("The Circe enters play with 2 deploy counters")
+			g.TLogf("c.theCirceEntersPlayWith2DeployCounters")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -98,7 +98,7 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "The Circe — deploy an ally from a player's hand", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.theCirceDeployAnAllyFromAPlayerSHand"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: circeDeploy,
 			}}
 		},
@@ -109,7 +109,7 @@ func registerShieldSuite() {
 	engine.RegisterBehavior("50019", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.Supports[e.EID()].Counters = 3
-			g.Logf("The Douglass enters play with 3 operation counters")
+			g.TLogf("c.theDouglassEntersPlayWith3OperationCounters")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -118,7 +118,7 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "The Douglass — remove 2 threat from each scheme", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.theDouglassRemove2ThreatFromEachScheme"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var msgs []engine.Message
 					for _, id := range g.Schemes() {
@@ -136,7 +136,7 @@ func registerShieldSuite() {
 	engine.RegisterBehavior("50020", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.Supports[e.EID()].Counters = 2
-			g.Logf("The Pericles enters play with 2 supply counters")
+			g.TLogf("c.thePericlesEntersPlayWith2SupplyCounters")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -145,7 +145,7 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "The Pericles — give out status cards", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.thePericlesGiveOutStatusCards"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.Supports[self].Owner)
 					if p == nil {
@@ -157,12 +157,12 @@ func registerShieldSuite() {
 							continue
 						}
 						friendly = append(friendly, engine.Choice{
-							Label: "Tough: " + pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+							Label: engine.S("Tough: " + pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 						}.Msgs(engine.ToughEntity{Target: pl.ID}))
 						for _, aid := range pl.Allies {
 							if a := g.Allies[aid]; a != nil {
 								friendly = append(friendly, engine.Choice{
-									Label: "Tough: " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
+									Label: engine.S("Tough: " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
 								}.Msgs(engine.ToughEntity{Target: aid}))
 							}
 						}
@@ -174,7 +174,7 @@ func registerShieldSuite() {
 						}{{"Stun", func(t engine.EntityID) engine.Message { return engine.StunEntity{Target: t} }},
 							{"Confuse", func(t engine.EntityID) engine.Message { return engine.ConfuseEntity{Target: t} }}} {
 							enemy = append(enemy, engine.Choice{
-								Label: st.name + ": " + cardutil.EnemyLabel(g.Entity(id)), Kind: engine.ChoiceTarget, SourceID: id,
+								Label: engine.Tf("c.nameColon", st.name, cardutil.EnemyLabel(g.Entity(id))), Kind: engine.ChoiceTarget, SourceID: id,
 							}.Msgs(st.mk(id)))
 						}
 					}
@@ -182,8 +182,8 @@ func registerShieldSuite() {
 						return nil
 					}
 					return []engine.Message{
-						engine.AskQuestion{Player: p.ID, Question: engine.Ask("The Pericles — which friendly character gets tough?", friendly...)},
-						engine.AskQuestion{Player: p.ID, Question: engine.Ask("The Pericles — which enemy gets stunned or confused?", enemy...)},
+						engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.thePericlesWhichFriendlyCharacterGetsTough"), friendly...)},
+						engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.thePericlesWhichEnemyGetsStunnedOrConfused"), enemy...)},
 					}
 				},
 			}}
@@ -211,14 +211,14 @@ func registerShieldSuite() {
 			var choices []engine.Choice
 			for _, c := range p.Hand {
 				choices = append(choices, engine.Choice{
-					Label: "Discard " + c.Def().Name + " (cover for Grant Ward)", Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Discard " + c.Def().Name + " (cover for Grant Ward)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.ConsumeHandCard{Player: p.ID, CardID: c.ID}))
 			}
 			choices = append(choices, engine.Choice{
-				Label: "Refuse — Grant Ward takes damage and leaves", Kind: engine.ChoicePass,
+				Label: engine.Tf("c.refuseGrantWardTakesDamageAndLeaves"), Kind: engine.ChoicePass,
 			}.Msgs(engine.DamageEntity{Target: a.ID, Damage: a.AttackVal, Source: a.ID},
 				engine.DiscardControlled{Player: p.ID, ID: a.ID}))
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Grant Ward — spend a resource (discard a card) after the treachery reveal?", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.grantWardSpendAResourceDiscardACardAfterTheTreacheryReveal"), choices...)}}
 		},
 	})
 
@@ -245,9 +245,9 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Melinda May — top of the encounter deck: "+top.Def().Name,
-				engine.Choice{Label: "Discard it", Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
-				engine.Choice{Label: "Leave it", Kind: engine.ChoicePass},
+				engine.S("Melinda May — top of the encounter deck: "+top.Def().Name),
+				engine.Choice{Label: engine.Tf("c.discardIt"), Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
+				engine.Choice{Label: engine.Tf("c.leaveIt"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -292,14 +292,14 @@ func circeDeploy(g *engine.Game, self engine.EntityID) []engine.Message {
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: p.Name + " deploys " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+				Label: engine.S(p.Name + " deploys " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 			}.Msgs(engine.AllyEntersPlayFree{Player: p.ID, Card: c}))
 		}
 	}
 	if len(choices) == 0 {
 		return nil
 	}
-	return []engine.Message{engine.AskQuestion{Player: s.Owner, Question: engine.Ask("The Circe — which ally enters play for free?", choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: s.Owner, Question: engine.Ask(engine.Tf("c.theCirceWhichAllyEntersPlayForFree"), choices...)}}
 }
 
 func registerFurySuite() {
@@ -322,7 +322,7 @@ func registerFurySuite() {
 					card := c
 					p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 					p.Hand = append(p.Hand, card)
-					g.Logf("Agent Coulson finds %s", card.Def().Name)
+					g.TLogf("c.agentCoulsonFinds", card)
 					return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 				}
 			}
@@ -346,7 +346,7 @@ func registerFurySuite() {
 				return nil
 			}
 			a.Exhausted = true
-			g.Logf("Quake shocks %s after its scheme", mn.EDef().Name)
+			g.TLogf("c.quakeShocksAfterItsScheme", mn)
 			return []engine.Message{engine.DamageEntity{Target: mn.ID, Damage: 2, Source: e.EID()}}
 		},
 	})
@@ -367,11 +367,11 @@ func registerFurySuite() {
 			var choices []engine.Choice
 			for _, c := range top {
 				choices = append(choices, engine.Choice{
-					Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardEncounterCard{Card: c}))
 			}
-			choices = append(choices, engine.Choice{Label: "Discard none", Kind: engine.ChoicePass})
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Global Logistics — discard one of the encounter deck's top cards?", choices...)}}
+			choices = append(choices, engine.Choice{Label: engine.Tf("c.discardNone"), Kind: engine.ChoicePass})
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.globalLogisticsDiscardOneOfTheEncounterDeckSTopCards"), choices...)}}
 		},
 	})
 
@@ -395,11 +395,11 @@ func registerFurySuite() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Intelligence — top of the encounter deck: "+top.Def().Name,
-				engine.Choice{Label: "Discard Intelligence and the top card", Kind: engine.ChoicePass}.Msgs(
+				engine.S("Intelligence — top of the encounter deck: "+top.Def().Name),
+				engine.Choice{Label: engine.Tf("c.discardIntelligenceAndTheTopCard"), Kind: engine.ChoicePass}.Msgs(
 					engine.DiscardControlled{Player: p.ID, ID: u.ID},
 					engine.DiscardEncounterCard{Card: top}),
-				engine.Choice{Label: "Keep looking", Kind: engine.ChoicePass},
+				engine.Choice{Label: engine.Tf("c.keepLooking"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -418,8 +418,8 @@ func registerFurySuite() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Prism Dust — discard to confuse and damage "+g.Minions[m.MinionID].EDef().Name+"?",
-				engine.Choice{Label: "Discard Prism Dust", Kind: engine.ChoicePass}.Msgs(
+				engine.S("Prism Dust — discard to confuse and damage "+g.Minions[m.MinionID].EDef().Name+"?"),
+				engine.Choice{Label: engine.Tf("c.discardPrismDust"), Kind: engine.ChoicePass}.Msgs(
 					engine.DiscardControlled{Player: p.ID, ID: u.ID},
 					engine.ConfuseEntity{Target: m.MinionID},
 					engine.DamageEntity{Target: m.MinionID, Damage: 2, Source: u.ID}),
@@ -435,7 +435,7 @@ func registerFurySuite() {
 			if g.MainScheme != nil && u != nil {
 				u.AttachTo = g.MainScheme.ID
 				g.MainScheme.MaxThreat += 4
-				g.Logf("Under Surveillance raises the main scheme's target threat by 4")
+				g.TLogf("c.underSurveillanceRaisesTheMainSchemeSTargetThreatBy4")
 			}
 			return nil
 		},
@@ -454,25 +454,25 @@ func registerFurySuite() {
 					continue
 				}
 				if hasShieldTrait(pl.EDef()) {
-					tough = append(tough, engine.Choice{Label: "Tough: " + pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID}.Msgs(engine.ToughEntity{Target: pl.ID}))
+					tough = append(tough, engine.Choice{Label: engine.S("Tough: " + pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID}.Msgs(engine.ToughEntity{Target: pl.ID}))
 				}
 				for _, aid := range pl.Allies {
 					if a := g.Allies[aid]; a != nil && hasShieldTrait(a.EDef()) {
-						tough = append(tough, engine.Choice{Label: "Tough: " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code}.Msgs(engine.ToughEntity{Target: aid}))
+						tough = append(tough, engine.Choice{Label: engine.S("Tough: " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code}.Msgs(engine.ToughEntity{Target: aid}))
 					}
 				}
 			}
 			var scheme []engine.Choice
 			for _, sid := range g.Schemes() {
-				scheme = append(scheme, engine.Choice{Label: "Remove 3 threat from " + g.Entity(sid).EDef().Name, Kind: engine.ChoiceTarget, SourceID: sid}.Msgs(engine.ThwartScheme{Scheme: sid, N: 3, Source: e.EID()}))
+				scheme = append(scheme, engine.Choice{Label: engine.S("Remove 3 threat from " + g.Entity(sid).EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid}.Msgs(engine.ThwartScheme{Scheme: sid, N: 3, Source: e.EID()}))
 			}
 			var choices []engine.Choice
-			choices = append(choices, engine.Choice{Label: "Draw 2 cards", Kind: engine.ChoicePass}.Msgs(engine.DrawCards{Player: p.ID, N: 2}))
+			choices = append(choices, engine.Choice{Label: engine.Tf("c.draw2Cards"), Kind: engine.ChoicePass}.Msgs(engine.DrawCards{Player: p.ID, N: 2}))
 			if len(scheme) > 0 {
 				choices = append(choices, scheme...)
 			}
 			choices = append(choices, tough...)
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Nick Fury, Sr. — choose one:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.nickFurySrChooseOne"), choices...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			if _, ok := msg.(engine.EndRound); !ok {
@@ -482,7 +482,7 @@ func registerFurySuite() {
 			if p == nil || g.Allies[e.EID()] == nil {
 				return nil
 			}
-			g.Logf("Nick Fury, Sr. departs at the end of the round")
+			g.TLogf("c.nickFurySrDepartsAtTheEndOfTheRound")
 			return []engine.Message{engine.DiscardControlled{Player: p.ID, ID: e.EID()}}
 		},
 	})
@@ -510,7 +510,7 @@ func registerFurySuite() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Leo Fitz — search your deck for a Tech card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.leoFitzSearchYourDeckForATechCard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.Supports[self].Owner)
@@ -522,7 +522,7 @@ func registerFurySuite() {
 							card := c
 							p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 							p.Hand = append(p.Hand, card)
-							g.Logf("Leo Fitz finds %s", card.Def().Name)
+							g.TLogf("c.leoFitzFinds", card)
 							return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 						}
 					}
@@ -549,7 +549,7 @@ func registerFurySuite() {
 				return nil
 			}
 			s.Exhausted = true
-			g.Logf("Sky-Destroyer opens fire on %s", cardutil.EnemyLabel(g.Entity(ids[0])))
+			g.TLogf("c.skyDestroyerOpensFireOn", cardutil.EnemyLabel(g.Entity(ids[0])))
 			return []engine.Message{engine.DamageEntity{Target: ids[0], Damage: 2, Source: e.EID()}}
 		},
 	})

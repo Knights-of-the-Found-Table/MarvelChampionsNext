@@ -61,7 +61,7 @@ func TestDebugWorthy(t *testing.T) {
 	if pq != nil {
 		fmt.Printf("After worthy PROMPT: %q\n", pq.Question.Prompt)
 		for _, c := range pq.Question.Choices {
-			fmt.Printf("  CHOICE id=%q label=%q code=%q\n", c.ID, c.Label, c.CardCode)
+			fmt.Printf("  CHOICE id=%q label=%q code=%q\n", c.ID, c.Label.Text, c.CardCode)
 		}
 	}
 	_ = strings.Contains

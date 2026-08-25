@@ -74,7 +74,7 @@ func registerSpiderWoman() {
 				return nil
 			}
 			g.UsedThisRound[key] = true
-			g.Logf("Superhuman Agility — %s card played; Spider-Woman gets +1/+1/+1", defAspect)
+			g.TLogf("c.superhumanAgilityCardPlayedSpiderWomanGets111", defAspect)
 			return []engine.Message{engine.ApplyStatBonus{Target: p.ID, ATK: 1, THW: 1, DEF: 1}}
 		},
 		// The Viper rider: while engaged with you, hand size -1.
@@ -92,7 +92,7 @@ func registerSpiderWoman() {
 				// (limit once per round). (Approximation: the peeked card
 				// is written to the game log; there is no private
 				// information channel.)
-				Label:        "Jessica Drew — look at the top card of any deck",
+				Label:        engine.Tf("c.jessicaDrewLookAtTheTopCardOfAnyDeck"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -115,11 +115,11 @@ func lookAtTopCard(g *engine.Game, self engine.EntityID) []engine.Message {
 		}
 		top := deck[0]
 		choices = append(choices, engine.Choice{
-			Label: label, Kind: engine.ChoiceLabel,
+			Label: engine.S(label), Kind: engine.ChoiceLabel,
 		}.Msgs(engine.AskQuestion{
 			Player: p.ID,
-			Question: engine.Ask(fmt.Sprintf("Top card: %s", top.Def().Name),
-				engine.Choice{ID: "ok", Label: "OK", Kind: engine.ChoicePass}),
+			Question: engine.Ask(engine.Tf("c.topCard", top),
+				engine.Choice{ID: "ok", Label: engine.Tf("c.ok"), Kind: engine.ChoicePass}),
 		}))
 	}
 	for _, pl := range g.Players {
@@ -131,7 +131,7 @@ func lookAtTopCard(g *engine.Game, self engine.EntityID) []engine.Message {
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask("Jessica Drew — look at the top card of which deck?", choices...),
+		Question: engine.Ask(engine.Tf("c.jessicaDrewLookAtTheTopCardOfWhichDeck"), choices...),
 	}}
 }
 
@@ -176,7 +176,7 @@ func registerSWSIgnatures() {
 	engine.RegisterBehavior("04034", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Jessica Drew's Apartment — search the top 5 for an aspect card",
+				Label:        engine.Tf("c.jessicaDrewSApartmentSearchTheTop5ForAnAspectCard"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				Exhaust:      true,
@@ -197,7 +197,7 @@ func registerSWSIgnatures() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 							engine.ShufflePlayerDeck{Player: p.ID},
@@ -205,7 +205,7 @@ func registerSWSIgnatures() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Jessica Drew's Apartment — add an aspect card to your hand", choices...),
+						Question: engine.Ask(engine.Tf("c.jessicaDrewSApartmentAddAnAspectCardToYourHand"), choices...),
 					}}
 				},
 			}}
@@ -214,7 +214,7 @@ func registerSWSIgnatures() {
 
 	// 04035 Venom Blast: Hero Action (attack) — deal 5 damage to an enemy.
 	engine.RegisterBehavior("04035", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Venom Blast — deal 5 damage to an enemy",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.venomBlastDeal5DamageToAnEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 5, nil }),
 	})
 
@@ -233,7 +233,7 @@ func registerSWSIgnatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Pheromones — stun and confuse an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.pheromonesStunAndConfuseAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -254,7 +254,7 @@ func registerSWSIgnatures() {
 	// threat from among schemes. (Approximation: no split-threat chooser;
 	// all 3 threat comes from one scheme, the Torrential Rain precedent.)
 	engine.RegisterBehavior("04038", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Inconspicuous", func(g *engine.Game, e engine.Entity) int { return 3 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Inconspicuous"), func(g *engine.Game, e engine.Entity) int { return 3 }),
 	})
 
 	// 04039 Self-Propelled Glide: Hero Action — ready Spider-Woman; she
@@ -285,7 +285,7 @@ func registerSWSIgnatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   e.EOwner(),
-				Question: engine.Ask("Spider-Girl — stun and confuse a minion", choices...),
+				Question: engine.Ask(engine.Tf("c.spiderGirlStunAndConfuseAMinion"), choices...),
 			}}
 		},
 	})
@@ -300,7 +300,7 @@ func registerSWObligation() {
 			if g.MainScheme != nil {
 				penalty = append(penalty, engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 3, Source: p.ID})
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, "Place 3 threat on the main scheme", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.Tf("c.place3ThreatOnTheMainScheme"), penalty...)
 		},
 	})
 }
@@ -346,7 +346,7 @@ func registerSWNemesis() {
 				}
 			}
 			if len(msgs) > 0 {
-				g.Logf("Hail Hydra! — Hydra minions attack %s", p.Name)
+				g.TLogf("c.hailHydraHydraMinionsAttack", p.Name)
 				return msgs
 			}
 			for _, zone := range []*engine.CardList{&g.EncounterDeck, &g.EncounterDiscard} {
@@ -365,7 +365,7 @@ func registerSWNemesis() {
 						}
 						g.Minions[mn.ID] = mn
 						mn.EngagedWith = p.ID
-						g.Logf("Hail Hydra! — %s engages %s", def.Name, p.Name)
+						g.TLogf("c.hailHydraEngages", def.Name, p.Name)
 						return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}}
 					}
 				}

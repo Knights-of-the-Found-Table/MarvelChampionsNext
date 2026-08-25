@@ -1,8 +1,6 @@
 package deadpool
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -53,7 +51,7 @@ func registerCorpsCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   a.Owner,
-				Question: engine.Ask("Dogpool's parting shot — 1 damage to:", choices...),
+				Question: engine.Ask(engine.Tf("c.dogpoolSPartingShot1DamageTo"), choices...),
 			}}
 		},
 	})
@@ -71,7 +69,7 @@ func registerCorpsCards() {
 			}
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				if id != m.Target {
-					g.Logf("Headpool's bite turns the minion on its ally")
+					g.TLogf("c.headpoolSBiteTurnsTheMinionOnItsAlly")
 					return []engine.Message{engine.DamageEntity{Target: id, Damage: 2, Source: e.EID()}}
 				}
 			}
@@ -93,7 +91,7 @@ func registerCorpsCards() {
 			}
 			for _, mn := range g.Minions {
 				if mn != nil && !mn.EDef().HasTrait("Elite") {
-					g.Logf("Lady Deadpool takes %s down with her", mn.EDef().Name)
+					g.TLogf("c.ladyDeadpoolTakesDownWithHer", mn)
 					return []engine.Message{engine.MinionDefeated{MinionID: mn.ID}}
 				}
 			}
@@ -106,7 +104,7 @@ func registerCorpsCards() {
 		DefenseEvent: func(g *engine.Game, p *engine.Player, e *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
 			n := iconCount(g)
 			d := engine.Defends{Defender: p.ID, Against: against, Undefended: true, ExtraPrevent: n}
-			g.Logf("Barely a Scratch prevents %d damage", n)
+			g.TLogf("c.barelyAScratchPreventsDamage", n)
 			return d, nil, true
 		},
 	})
@@ -126,7 +124,7 @@ func registerCorpsCards() {
 				}.Msgs(engine.DamageEntity{Target: id, Damage: 5, Source: p.ID}, engine.StunEntity{Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{
-				Player: p.ID, Question: engine.Ask("Cutupper — 5 damage and stun:", choices...),
+				Player: p.ID, Question: engine.Ask(engine.Tf("c.cutupper5DamageAndStun"), choices...),
 			}}
 		},
 	})
@@ -168,11 +166,11 @@ func registerCorpsCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.ReadyEntity{ID: id}, engine.AllyStatBonus{Ally: id, ATK: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{
-				Player: p.ID, Question: engine.Ask("Get Rage-y — ready and buff:", choices...),
+				Player: p.ID, Question: engine.Ask(engine.Tf("c.getRageYReadyAndBuff"), choices...),
 			}}
 		},
 	})
@@ -203,7 +201,7 @@ func registerCorpsCards() {
 			if n >= 4 {
 				msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 			}
-			g.Logf("I Got This — %d icons in play", n)
+			g.TLogf("c.iGotThisIconsInPlay", n)
 			return msgs
 		},
 	})
@@ -238,7 +236,7 @@ func registerCorpsCards() {
 	// 44024 Live Dangerously: +2 hand size.
 	engine.RegisterBehavior("44024", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			g.Logf("Live Dangerously — +2 hand size this game (approximated as a log; the bonus applies via the flag below)")
+			g.TLogf("c.liveDangerously2HandSizeThisGameApproximatedAsALogTheBonusAp")
 			for _, p := range g.Players {
 				p.TempHandSize += 0
 			}
@@ -261,7 +259,7 @@ func registerCorpsCards() {
 				g.Push(engine.ChangeForm{Player: p.ID})
 			}
 			g.Delete(u.ID)
-			g.Logf("Git Gud! %s holds on at 1 HP", p.Name)
+			g.TLogf("c.gitGudHoldsOnAt1Hp", p.Name)
 			return true
 		},
 	})
@@ -296,7 +294,7 @@ func registerCorpsCards() {
 				for _, r := range c.Def().Resources {
 					if r == "physical" || r == "wild" {
 						return []engine.Ability{{
-							Label: "Stick-To-Itiveness — ready your hero (spend " + c.Def().Name + ")", Type: engine.AbilityAction,
+							Label: engine.S("Stick-To-Itiveness — ready your hero (spend " + c.Def().Name + ")"), Type: engine.AbilityAction,
 							HeroOnly: true, Exhaust: true,
 							Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 								u := g.Upgrades[self]
@@ -395,7 +393,7 @@ func registerDreadpool() {
 			p := g.Player(cardutil.FirstPlayerID(g))
 			if p != nil {
 				p.EncounterDown = append(p.EncounterDown, engine.Card{ID: g.NextCardID(), Code: mn.Code})
-				g.Logf("Dreadpool is dealt facedown to %s", p.Name)
+				g.TLogf("c.dreadpoolIsDealtFacedownTo", p.Name)
 			}
 			return nil
 		},
@@ -481,7 +479,7 @@ func registerDreadpool() {
 			g.Minions[mn.ID] = mn
 			mn.EngagedWith = owner
 			t.Target = mn.ID
-			g.Logf("%s is 'Pool-ized!", engine.DB.MustLookup(code).Name)
+			g.TLogf("c.isPoolIzed", engine.DB.MustLookup(code).Name)
 			return nil
 		},
 	})
@@ -543,24 +541,24 @@ func registerCorpsNeutrals() {
 						Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.DamageEntity{Target: id, Damage: 2, Source: p.ID}))
 				}
-				choices = append(choices, engine.Choice{ID: "dmg", Label: "Deal 2 damage", Kind: engine.ChoiceLabel}.
-					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask("Bob — damage:", dmg...)}))
+				choices = append(choices, engine.Choice{ID: "dmg", Label: engine.Tf("c.deal2Damage"), Kind: engine.ChoiceLabel}.
+					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.bobDamage"), dmg...)}))
 			}
 			if len(g.Schemes()) > 0 {
 				var thw []engine.Choice
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					thw = append(thw, engine.Choice{
-						Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID}))
 				}
-				choices = append(choices, engine.Choice{ID: "thw", Label: "Remove 1 threat", Kind: engine.ChoiceLabel}.
-					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask("Bob — thwart:", thw...)}))
+				choices = append(choices, engine.Choice{ID: "thw", Label: engine.Tf("c.remove1Threat"), Kind: engine.ChoiceLabel}.
+					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.bobThwart"), thw...)}))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Bob — choose:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.bobChoose"), choices...)}}
 		},
 	})
 
@@ -605,7 +603,7 @@ func registerCorpsNeutrals() {
 			}
 			hand := append(engine.CardList{}, p.Hand...)
 			p.Hand = nil
-			g.Logf("Mulligan! %s discards %d cards", p.Name, len(hand))
+			g.TLogf("c.mulliganDiscardsCards", p.Name, len(hand))
 			return []engine.Message{
 				engine.DiscardCards{Player: p.ID, Cards: hand},
 				engine.DrawCards{Player: p.ID, N: p.HandSize(g)},
@@ -625,7 +623,7 @@ func registerCorpsNeutrals() {
 				if c.Def().Type == "ally" && c.Def().HasTrait("Deadpool Corps") {
 					card := c
 					return []engine.Ability{{
-						Label: "Deadpool Corps Ship — deploy " + card.Def().Name, Type: engine.AbilityAction,
+						Label: engine.S("Deadpool Corps Ship — deploy " + card.Def().Name), Type: engine.AbilityAction,
 						Exhaust: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
@@ -647,7 +645,7 @@ func registerCorpsNeutrals() {
 								g.Allies[a.ID] = a
 								p.Allies = append(p.Allies, a.ID)
 								g.Push(engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID})
-								g.Logf("%s beams down from the ship", def.Name)
+								g.TLogf("c.beamsDownFromTheShip", def.Name)
 							}
 							return []engine.Message{engine.DealEncounterToPlayer{Player: p.ID}}
 						},
@@ -669,7 +667,7 @@ func registerCorpsNeutrals() {
 			}
 			if len(s.AttachedCards) < 3 && len(p.Hand) > 0 {
 				out = append(out, engine.Ability{
-					Label: "Plot Convenience — stash a card", Type: engine.AbilityAction,
+					Label: engine.Tf("c.plotConvenienceStashACard"), Type: engine.AbilityAction,
 					Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
@@ -681,7 +679,7 @@ func registerCorpsNeutrals() {
 						if _, ok := p.Hand.Remove(c.ID); ok {
 							s.AttachedCards = append(s.AttachedCards, c)
 							s.Counters = len(s.AttachedCards)
-							g.Logf("%s is stashed on Plot Convenience", c.Def().Name)
+							g.TLogf("c.isStashedOnPlotConvenience", c)
 						}
 						return nil
 					},
@@ -689,7 +687,7 @@ func registerCorpsNeutrals() {
 			}
 			if len(s.AttachedCards) > 0 {
 				out = append(out, engine.Ability{
-					Label: "Plot Convenience — retrieve a card", Type: engine.AbilityAction,
+					Label: engine.Tf("c.plotConvenienceRetrieveACard"), Type: engine.AbilityAction,
 					Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
@@ -721,11 +719,11 @@ func registerCorpsNeutrals() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{
-				Player: p.ID, Question: engine.Ask("Ambush — attach to:", choices...),
+				Player: p.ID, Question: engine.Ask(engine.Tf("c.ambushAttachTo"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -756,7 +754,7 @@ func registerCorpsNeutrals() {
 			}
 			n := iconCount(g)
 			return []engine.Ability{{
-				Label: fmt.Sprintf("Bazooka — %d damage (discard itself)", n), Type: engine.AbilityAction,
+				Label: engine.Tf("c.bazookaDamageDiscardItself", n), Type: engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -773,7 +771,7 @@ func registerCorpsNeutrals() {
 							engine.DamageEntity{Target: id, Damage: n, Source: p.ID}))
 					}
 					return []engine.Message{engine.AskQuestion{
-						Player: p.ID, Question: engine.Ask("Bazooka — target:", choices...),
+						Player: p.ID, Question: engine.Ask(engine.Tf("c.bazookaTarget"), choices...),
 					}}
 				},
 			}}
@@ -793,7 +791,7 @@ func registerCorpsNeutrals() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "War — trade deck cards for damage", Type: engine.AbilityAction,
+				Label: engine.Tf("c.warTradeDeckCardsForDamage"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -806,7 +804,7 @@ func registerCorpsNeutrals() {
 					stars := cardutil.BoostOf(enc)
 					c := p.Deck[0]
 					dmg := cardutil.Cost(c.Def())
-					g.Logf("War: encounter %s (+%d stars), deck %s (%d damage)", enc.Def().Name, stars, c.Def().Name, dmg)
+					g.TLogf("c.warEncounterStarsDeckDamage", enc, stars, c, dmg)
 					return []engine.Message{
 						engine.MillPlayerDeck{Player: p.ID, N: 1},
 						engine.DamageEntity{Target: p.ID, Damage: stars, Source: u.Owner},

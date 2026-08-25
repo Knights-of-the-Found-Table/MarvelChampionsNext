@@ -27,7 +27,7 @@ func showReveal(g *engine.Game, e *engine.Environment) []engine.Message {
 		if other != nil && other.ID != e.ID && other.EDef().HasTrait("setting") {
 			g.Delete(other.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: other.Code})
-			g.Logf("%s replaces %s", e.EDef().Name, other.EDef().Name)
+			g.TLogf("c.replaces", e, other)
 		}
 	}
 	return msgs
@@ -84,7 +84,7 @@ func registerCrimeSet() {
 		engine.RegisterBehavior(code, &engine.Behavior{
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Spend X [" + icon + "] resources → remove X threat", Type: engine.AbilityAction,
+					Label: engine.S("Spend X [" + icon + "] resources → remove X threat"), Type: engine.AbilityAction,
 					HeroOnly: true, Cost: 1, CostIcons: icon + ":1",
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.ThwartScheme{Scheme: self, N: 1, Source: g.ActiveTurn}}
@@ -109,14 +109,14 @@ func registerCrimeSet() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Move " + s.EDef().Name + "'s threat to the main scheme", Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.S("Move " + s.EDef().Name + "'s threat to the main scheme"), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: s.Threat, Source: t.ID},
 					engine.ThwartScheme{Scheme: id, N: s.Threat, Source: t.ID}))
 			}
 			if len(choices) > 0 {
 				return []engine.Message{engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.Ask("Elementary, My Dear Mojo — choose:", choices...),
+					Question: engine.Ask(engine.Tf("c.elementaryMyDearMojoChoose"), choices...),
 				}}
 			}
 			for guards := 0; guards < 40; guards++ {
@@ -178,7 +178,7 @@ func registerFantasySet() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "ally" {
 					choices = append(choices, engine.Choice{
-						Label: "Put " + c.Def().Name + " into play", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Put " + c.Def().Name + " into play"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.AllyEntersPlayFree{Player: p.ID, Card: c}))
 					break
 				}
@@ -188,7 +188,7 @@ func registerFantasySet() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Troll defeated — return an ally to play", choices...),
+				Question: engine.Ask(engine.Tf("c.trollDefeatedReturnAnAllyToPlay"), choices...),
 			}}
 		},
 	})
@@ -312,7 +312,7 @@ func registerHorrorSet() {
 			}
 			if mn := g.Minions[e.EID()]; mn != nil {
 				mn.Damage = 0
-				g.Logf("The Vampire feeds and heals fully")
+				g.TLogf("c.theVampireFeedsAndHealsFully")
 			}
 			return nil
 		},
@@ -355,7 +355,7 @@ func registerSciFiSet() {
 	engine.RegisterBehavior("39055", &engine.Behavior{
 		MinionDamageable: func(g *engine.Game, mn *engine.Minion, damage int) bool {
 			if damage > 2 {
-				g.Logf("Blob 3.14 ignores damage beyond 2")
+				g.TLogf("c.blob314IgnoresDamageBeyond2")
 				mn.Damage += 2
 				return false
 			}
@@ -457,16 +457,16 @@ func registerSitcomSet() {
 	engine.RegisterBehavior("39061", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep Family Matters (supports blanked)", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepFamilyMattersSupportsBlanked"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if !p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "exhaust", Label: "Exhaust your identity and supports → discard", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustYourIdentityAndSupportsDiscard"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Family Matters — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.familyMattersChoose"), choices...),
 			}}
 		},
 	})
@@ -475,17 +475,17 @@ func registerSitcomSet() {
 	engine.RegisterBehavior("39062", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep Growing Pains (upgrades cost +2)", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepGrowingPainsUpgradesCost2"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if !p.IsHero() && len(p.Hand) > 0 {
 				c := p.Hand[0]
 				choices = append(choices, engine.Choice{
-					ID: "discard", Label: "Discard " + c.Def().Name + " (an upgrade) → discard this obligation", Kind: engine.ChoiceLabel,
+					ID: "discard", Label: engine.S("Discard " + c.Def().Name + " (an upgrade) → discard this obligation"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Growing Pains — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.growingPainsChoose"), choices...),
 			}}
 		},
 	})
@@ -495,19 +495,19 @@ func registerSitcomSet() {
 	engine.RegisterBehavior("39063", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep The Odd Couple", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepTheOddCouple"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			for _, c := range p.Discard {
 				if c.Def().Type == "ally" {
 					choices = append(choices, engine.Choice{
-						ID: "shuffle", Label: "Shuffle " + c.Def().Name + " into your deck → discard this obligation", Kind: engine.ChoiceLabel,
+						ID: "shuffle", Label: engine.S("Shuffle " + c.Def().Name + " into your deck → discard this obligation"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 					break
 				}
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("The Odd Couple — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.theOddCoupleChoose"), choices...),
 			}}
 		},
 	})
@@ -516,18 +516,18 @@ func registerSitcomSet() {
 	engine.RegisterBehavior("39064", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep The One with the Breakup", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepTheOneWithTheBreakup"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if len(p.Hand) >= 3 {
 				choices = append(choices, engine.Choice{
-					ID: "discard", Label: "Discard 3 cards → a player draws 1, discard this obligation", Kind: engine.ChoiceLabel,
+					ID: "discard", Label: engine.Tf("c.discard3CardsAPlayerDraws1DiscardThisObligation"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: handTake(p, 3)},
 					engine.DrawCards{Player: p.ID, N: 1},
 					engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("The One with the Breakup — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.theOneWithTheBreakupChoose"), choices...),
 			}}
 		},
 	})
@@ -536,16 +536,16 @@ func registerSitcomSet() {
 	engine.RegisterBehavior("39065", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep Watch Me Play", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepWatchMePlay"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if !p.IsHero() && !p.Exhausted && p.Confused {
 				choices = append(choices, engine.Choice{
-					ID: "remove", Label: "Exhaust your identity, discard the confusion → discard this obligation", Kind: engine.ChoiceLabel,
+					ID: "remove", Label: engine.Tf("c.exhaustYourIdentityDiscardTheConfusionDiscardThisObligation"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ClearConfuse{Target: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Watch Me Play — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.watchMePlayChoose"), choices...),
 			}}
 		},
 	})

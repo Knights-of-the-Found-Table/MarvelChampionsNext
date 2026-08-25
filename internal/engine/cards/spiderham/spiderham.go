@@ -36,14 +36,14 @@ func registerSpiderHam() {
 			// amount of damage, place 1 toon counter on him.
 			case engine.DamageEntity:
 				if m.Target == p.ID && m.Damage > 0 && p.IsHero() {
-					g.Logf("Spider-Nonsense — Spider-Ham gains a toon counter")
+					g.TLogf("c.spiderNonsenseSpiderHamGainsAToonCounter")
 					return []engine.Message{engine.AddEntityCounter{ID: p.ID, N: 1}}
 				}
 			// Cartoon Power — Response: after Peter Porker makes a basic
 			// recovery, place 1 toon counter on him.
 			case engine.BasicRecover:
 				if m.Player == p.ID && !p.IsHero() {
-					g.Logf("Cartoon Power — Peter Porker gains a toon counter")
+					g.TLogf("c.cartoonPowerPeterPorkerGainsAToonCounter")
 					return []engine.Message{engine.AddEntityCounter{ID: p.ID, N: 1}}
 				}
 			}
@@ -67,14 +67,14 @@ func registerHamSignatures() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "spider_ham" {
 					choices = append(choices, engine.Choice{
-						Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
 			if len(choices) > 1 {
 				msgs = append(msgs, engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.Ask("Captain Americat — shuffle a Spider-Ham card into your deck", choices...),
+					Question: engine.Ask(engine.Tf("c.captainAmericatShuffleASpiderHamCardIntoYourDeck"), choices...),
 				})
 			}
 			return msgs
@@ -89,7 +89,7 @@ func registerHamSignatures() {
 			if p == nil || p.Counters <= 0 {
 				return nil
 			}
-			return cardutil.ChooseScheme("Ham It Up", func(g *engine.Game, e engine.Entity) int {
+			return cardutil.ChooseScheme(engine.Tf("c.hamItUpChooseAScheme"), func(g *engine.Game, e engine.Entity) int {
 				return p.Counters
 			})(g, e)
 		},
@@ -108,14 +108,14 @@ func registerHamSignatures() {
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				mn := g.Minions[id]
 				choices = append(choices, engine.Choice{
-					Label: "Deal 5 damage to " + cardutil.EnemyLabel(mn), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("c.dealDamageTo", 5, cardutil.EnemyLabel(mn)), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: mn.Code,
 				}.Msgs(pay, engine.DamageEntity{Target: id, Damage: 5, Source: p.ID}))
 			}
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
 				s := g.SideSchemes[id]
 				choices = append(choices, engine.Choice{
-					Label: "Remove 5 threat from " + s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S("Remove 5 threat from " + s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.Code,
 				}.Msgs(pay, engine.ThwartScheme{Scheme: id, N: 5, Source: p.ID}))
 			}
@@ -124,7 +124,7 @@ func registerHamSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Hogwashed — remove 1 toon counter → choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.hogwashedRemove1ToonCounterChoose"), choices...),
 			}}
 		},
 	})
@@ -184,7 +184,7 @@ func registerHamSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Swinging Web Pig — deal 6 damage to and confuse an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.swingingWebPigDeal6DamageToAndConfuseAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -194,7 +194,7 @@ func registerHamSignatures() {
 	engine.RegisterBehavior("30008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "The Daily Beagle — place 1 toon counter on Peter Porker", Type: engine.AbilityAction,
+				Label: engine.Tf("c.theDailyBeaglePlace1ToonCounterOnPeterPorker"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AddEntityCounter{ID: e.EOwner(), N: 1}}
@@ -207,7 +207,7 @@ func registerHamSignatures() {
 	// any amount of damage, discard this card → prevent all but 1 of it.
 	engine.RegisterBehavior("30009", &engine.Behavior{
 		DamagePrevention: func(g *engine.Game, u *engine.Upgrade, p *engine.Player, n int) (int, int) {
-			g.Logf("Cartoon Physics — %s wiggles out of the damage", p.Name)
+			g.TLogf("c.cartoonPhysicsWigglesOutOfTheDamage", p.Name)
 			g.Delete(u.ID)
 			p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
 			if n <= 1 {
@@ -237,7 +237,7 @@ func registerHamSignatures() {
 			if p == nil || !p.IsHero() || m.Player != p.ID || p.Counters <= 0 {
 				return nil
 			}
-			g.Logf("Huge Wooden Hammer — +2 damage to the attack")
+			g.TLogf("c.hugeWoodenHammer2DamageToTheAttack")
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.AddEntityCounter{ID: p.ID, N: -1},
@@ -258,7 +258,7 @@ func registerHamSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Organic Webbing — remove 1 toon counter → ready Spider-Ham", Type: engine.AbilityAction,
+				Label: engine.Tf("c.organicWebbingRemove1ToonCounterReadySpiderHam"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -294,7 +294,7 @@ func registerHamObligation() {
 					engine.ObligationResolve{Player: p.ID, Card: card, Remove: true},
 				)
 				choices = append(choices, engine.Choice{
-					ID: "exhaust", Label: "Exhaust Peter Porker and remove 1 toon counter → remove from the game", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustPeterPorkerAndRemove1ToonCounterRemoveFromTheGame"), Kind: engine.ChoiceLabel,
 				}.Msgs(removeMsgs...))
 			}
 			penalty := []engine.Message{engine.StunEntity{Target: p.ID}}
@@ -304,11 +304,11 @@ func registerHamObligation() {
 			}
 			penalty = append(penalty, engine.ObligationResolve{Player: p.ID, Card: card})
 			choices = append(choices, engine.Choice{
-				ID: "stun", Label: "You are stunned → discard the obligation", Kind: engine.ChoiceLabel,
+				ID: "stun", Label: engine.Tf("c.youAreStunnedDiscardTheObligation"), Kind: engine.ChoiceLabel,
 			}.Msgs(penalty...))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("\"I Really Want a Hot Dog!\" — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.iReallyWantAHotDogChoose"), choices...),
 			}}
 		},
 	})
@@ -343,7 +343,7 @@ func registerHamNemesis() {
 							MaxHP: 4, AttackVal: 2, SchemeVal: 1, EngagedWith: pid,
 						}
 						g.Minions[mn.ID] = mn
-						g.Logf("Nefarious Trap — The Green Gobbler engages %s", pid)
+						g.TLogf("c.nefariousTrapTheGreenGobblerEngages", pid)
 						return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: pid}}
 					}
 				}
@@ -365,7 +365,7 @@ func registerHamNemesis() {
 			if p == nil {
 				return nil
 			}
-			g.Logf("The Green Gobbler — %s loses all counters", p.Name)
+			g.TLogf("c.theGreenGobblerLosesAllCounters", p.Name)
 			p.Counters = 0
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
@@ -415,7 +415,7 @@ func registerHamNemesis() {
 			}
 			t.Target = best.ID
 			best.Attachments = append(best.Attachments, t.ID)
-			g.Logf("Gobbler Glider — attached to %s", best.EDef().Name)
+			g.TLogf("c.gobblerGliderAttachedTo", best)
 			return []engine.Message{engine.BoostEnemyAttack{Enemy: best.ID, N: 1}}
 		},
 	})

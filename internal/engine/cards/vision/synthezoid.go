@@ -395,7 +395,7 @@ func registerSynthezoid() {
 	})
 	engine.RegisterBehavior("57054", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
-			g.Logf("Just Passing Through disorients its conqueror")
+			g.TLogf("c.justPassingThroughDisorientsItsConqueror")
 			return nil
 		},
 	})
@@ -490,7 +490,7 @@ func registerSynthezoid() {
 	})
 	engine.RegisterBehavior("57063", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			g.Logf("Spellcasting fizzles the next card")
+			g.TLogf("c.spellcastingFizzlesTheNextCard")
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})
@@ -526,7 +526,7 @@ func registerSynthezoid() {
 	engine.RegisterBehavior("57072", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			p.ExtraTraits = append(p.ExtraTraits, "hunted")
-			g.Logf("%s is Hunted", p.Name)
+			g.TLogf("c.isHunted", p.Name)
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})
@@ -583,7 +583,7 @@ func registerSynthezoidScenarios() {
 			if s.Stage < len(s.StageCodes) {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
-			return []engine.Message{engine.GameOver{Won: false, Reason: reason}}
+			return []engine.Message{engine.GameOver{Won: false, Reason: engine.S(reason)}}
 		}
 	}
 

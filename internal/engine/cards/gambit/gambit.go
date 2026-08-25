@@ -51,7 +51,7 @@ func registerGambit() {
 					}
 				}
 				if n > 0 {
-					g.Logf("Molecular Acceleration — %d charge counter(s)", n)
+					g.TLogf("c.molecularAccelerationChargeCounterS", n)
 					return []engine.Message{engine.AddEntityCounter{ID: p.ID, N: n}}
 				}
 				return nil
@@ -72,22 +72,22 @@ func registerGambit() {
 				max = 3
 			}
 			choices := []engine.Choice{{
-				ID: "keep", Label: "Keep the counters", Kind: engine.ChoicePass,
+				ID: "keep", Label: engine.Tf("c.keepTheCounters"), Kind: engine.ChoicePass,
 			}}
 			for n := 1; n <= max; n++ {
 				choices = append(choices, engine.Choice{
 					ID:    fmt.Sprintf("throw-%d", n),
-					Label: fmt.Sprintf("Remove %d charge counter(s) → +%d damage", n, n),
+					Label: engine.Tf("c.removeChargeCounterSDamage", n, n),
 					Kind:  engine.ChoiceLabel,
 				}.Msgs(
 					engine.AddEntityCounter{ID: p.ID, N: -n},
 					engine.SetEventBonus{Player: p.ID, Damage: n},
 				))
 			}
-			g.Logf("Throw de Card — %s may boost %s", p.Name, def.Name)
+			g.TLogf("c.throwDeCardMayBoost", p.Name, def.Name)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Throw de Card — remove up to 3 charge counters?", choices...),
+				Question: engine.Ask(engine.Tf("c.throwDeCardRemoveUpTo3ChargeCounters"), choices...),
 			}}
 		},
 		// Rogue (the signature ally) costs 1 less per charge counter on
@@ -105,7 +105,7 @@ func registerGambit() {
 				// encounter deck, discard 1 → remove threat from a
 				// scheme equal to that card's boost icons.
 				{
-					Label:        "Thief Extraordinaire — discard 1 of the top 2 encounter cards: remove threat equal to its boost icons",
+					Label:        engine.Tf("c.thiefExtraordinaireDiscard1OfTheTop2EncounterCardsRemoveThre"),
 					Type:         engine.AbilityAction,
 					Exhaust:      true,
 					AlterEgoOnly: true,
@@ -114,12 +114,12 @@ func registerGambit() {
 				// [1] Gambit — Charge de Card: Action: place 1 charge
 				// counter here (once per round).
 				{
-					Label:        "Charge de Card — place 1 charge counter on Gambit",
+					Label:        engine.Tf("c.chargeDeCardPlace1ChargeCounterOnGambit"),
 					Type:         engine.AbilityAction,
 					HeroOnly:     true,
 					OncePerRound: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
-						g.Logf("Charge de Card — Gambit gains a charge counter")
+						g.TLogf("c.chargeDeCardGambitGainsAChargeCounter")
 						return []engine.Message{engine.AddEntityCounter{ID: self, N: 1}}
 					},
 				},
@@ -154,15 +154,15 @@ func thiefExtraordinaire(g *engine.Game, self engine.EntityID) []engine.Message 
 		}
 		label := fmt.Sprintf("Discard %s (%d boost icon(s))", def.Name, n)
 		choices = append(choices, engine.Choice{
-			Label: label, Kind: engine.ChoiceCard, CardCode: def.Code,
-		}.WithThen(engine.Ask("Thief Extraordinaire — remove the threat from which scheme?", schemes...)))
+			Label: engine.S(label), Kind: engine.ChoiceCard, CardCode: def.Code,
+		}.WithThen(engine.Ask(engine.Tf("c.thiefExtraordinaireRemoveTheThreatFromWhichScheme"), schemes...)))
 	}
 	if len(choices) == 0 {
 		return nil
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask("Thief Extraordinaire — discard 1 of the top 2 encounter cards", choices...),
+		Question: engine.Ask(engine.Tf("c.thiefExtraordinaireDiscard1OfTheTop2EncounterCards"), choices...),
 	}}
 }
 
@@ -218,16 +218,16 @@ func registerThievesGuild() {
 					msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 				}
 				choices = append(choices, engine.Choice{
-					Label: sc.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: sc.ECode(),
+					Label: engine.S(sc.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: sc.ECode(),
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			g.Logf("The Thieves Guild — remove 1 threat after Thief Extraordinaire")
+			g.TLogf("c.theThievesGuildRemove1ThreatAfterThiefExtraordinaire")
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("The Thieves Guild — remove 1 threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.theThievesGuildRemove1ThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -266,7 +266,7 @@ func registerGambitsStaff() {
 			if g.Entity(w.Enemy) == nil {
 				return nil
 			}
-			g.Logf("Gambit's Staff — 1 damage to the attacker")
+			g.TLogf("c.gambitSStaff1DamageToTheAttacker")
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.DamageEntity{Target: w.Enemy, Damage: 1, Source: u.ID},
@@ -295,7 +295,7 @@ func registerGuildArmor() {
 			if w.Defender != p.ID || w.DamageTaken != 0 {
 				return nil
 			}
-			g.Logf("Gambit's Guild Armor — %s readies", p.Name)
+			g.TLogf("c.gambitSGuildArmorReadies", p.Name)
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.ReadyEntity{ID: p.ID},
@@ -310,7 +310,7 @@ func registerGuildArmor() {
 // counter damage boost still applies through the event bonus.)
 func registerChargedCard() {
 	engine.RegisterBehavior("37006", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Charged Card — deal 4 damage to an enemy",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.chargedCardDeal4DamageToAnEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 4, nil }),
 	})
 }
@@ -330,7 +330,7 @@ func registerRoyalFlush() {
 			if len(choices) > 0 {
 				msgs = append(msgs, engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Royal Flush — deal 1 damage to an enemy", choices...),
+					Question: engine.Ask(engine.Tf("c.royalFlushDeal1DamageToAnEnemy"), choices...),
 				})
 			}
 			return msgs
@@ -369,7 +369,7 @@ func registerCreoleCharmer() {
 					}
 				}
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
@@ -377,7 +377,7 @@ func registerCreoleCharmer() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Creole Charmer — remove 3 threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.creoleCharmerRemove3ThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -425,7 +425,7 @@ func registerNemesis() {
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				mn := g.Minions[id]
 				if mn != nil && mn.EngagedWith == a.Owner && mn.EDef().HasTrait("assassin") {
-					g.Logf("The Assassins Guild — an assassin felled a character; +2 threat")
+					g.TLogf("c.theAssassinsGuildAnAssassinFelledACharacter2Threat")
 					return []engine.Message{engine.SchemeThreat{Scheme: s.ID, N: 2, Source: s.ID}}
 				}
 			}
@@ -454,7 +454,7 @@ func registerNemesis() {
 				}
 			}
 			if len(msgs) > 0 {
-				g.Logf("Assassination Attempt — each assassin attacks %s", p.Name)
+				g.TLogf("c.assassinationAttemptEachAssassinAttacks", p.Name)
 				return msgs
 			}
 			if card, ok := findAssassin(g); ok {
@@ -467,7 +467,7 @@ func registerNemesis() {
 				}
 				g.Minions[mn.ID] = mn
 				mn.EngagedWith = p.ID
-				g.Logf("Assassination Attempt — %s is found and engages %s", card.Def().Name, p.Name)
+				g.TLogf("c.assassinationAttemptIsFoundAndEngages", card, p.Name)
 				return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}}
 			}
 			return nil
@@ -491,7 +491,7 @@ func nemesisAssassinReact(self string, n int) func(g *engine.Game, e engine.Enti
 		if g.MainScheme == nil {
 			return nil
 		}
-		g.Logf("%s fells a character — %d threat on the main scheme", mn.EDef().Name, n)
+		g.TLogf("c.fellsACharacterThreatOnTheMainScheme", mn, n)
 		return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: n, Source: e.EID()}}
 	}
 }
@@ -522,7 +522,7 @@ func findAssassin(g *engine.Game) (engine.Card, bool) {
 func registerObligation() {
 	engine.RegisterBehavior("37025", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			return cardutil.ExhaustOrPenalty(g, p, card, "Discard Guild Business")
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.Tf("c.discardGuildBusiness"))
 		},
 	})
 }

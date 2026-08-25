@@ -74,7 +74,7 @@ func TestSkinContactAttachesTouched(t *testing.T) {
 		t.Fatal("Rogue identity should expose HeroAbilities")
 	}
 	abs := b.HeroAbilities(g, p)
-	if len(abs) != 1 || !strings.Contains(abs[0].Label, "Skin Contact") {
+	if len(abs) != 1 || !strings.Contains(abs[0].Label.Text, "Skin Contact") {
 		t.Fatalf("HeroAbilities = %v, want Skin Contact", abs)
 	}
 	if !abs[0].HeroOnly || !abs[0].OncePerRound {

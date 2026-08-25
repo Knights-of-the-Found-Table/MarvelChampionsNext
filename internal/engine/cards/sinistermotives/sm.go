@@ -51,7 +51,7 @@ func registerSMScenarios() {
 				MaxThreat: 10 * len(g.Players),
 			}
 			g.SideSchemes[s.ID] = s
-			g.Logf("Light at the End enters play")
+			g.TLogf("c.lightAtTheEndEntersPlay")
 			return nil
 		},
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
@@ -59,7 +59,7 @@ func registerSMScenarios() {
 			base := engine.BaseCodeOf(v.ECode())
 			delete(g.Villains, v.ID)
 			g.SetAside = append(g.SetAside, engine.Card{ID: g.NextCardID(), Code: base})
-			g.Logf("%s is set aside", v.EDef().Name)
+			g.TLogf("c.isSetAside", v)
 			if g.ActiveVillain == v.ID {
 				advanceSixCounter(g, v.ID)
 			}
@@ -95,7 +95,7 @@ func registerSMScenarios() {
 					MaxThreat: maxT,
 				}
 				g.SideSchemes[s.ID] = s
-				g.Logf("%s enters play", def.Name)
+				g.TLogf("c.entersPlay", def.Name)
 			}
 			if g.MainScheme != nil {
 				g.GliderCounter = g.MainScheme.ID

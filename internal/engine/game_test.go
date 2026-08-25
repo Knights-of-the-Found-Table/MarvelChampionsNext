@@ -99,9 +99,9 @@ func TestRhinoGameRunsToLossByScheme(t *testing.T) {
 		t.Fatalf("expected game to end, round=%d", g.Round)
 	}
 	if g.Won {
-		t.Fatalf("expected loss with passive script, won instead: %s", g.Reason)
+		t.Fatalf("expected loss with passive script, won instead: %s", g.Reason.Text)
 	}
-	t.Logf("game over: %s after %d rounds", g.Reason, g.Round)
+	t.Logf("game over: %s after %d rounds", g.Reason.Text, g.Round)
 }
 
 func TestDeterminism(t *testing.T) {

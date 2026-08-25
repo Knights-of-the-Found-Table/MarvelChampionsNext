@@ -31,7 +31,7 @@ func registerTRORSAspect() {
 	engine.RegisterBehavior("04013", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Goliath gets +4 ATK this phase, then discards himself", Type: engine.AbilityAction,
+				Label: engine.Tf("c.goliathGets4AtkThisPhaseThenDiscardsHimself"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{
 						engine.AllyStatBonus{Ally: self, ATK: 4},
@@ -56,7 +56,7 @@ func registerTRORSAspect() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Sky Cycle → ready the attached ally", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustSkyCycleReadyTheAttachedAlly"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if u := g.Upgrades[self]; u != nil {
@@ -104,7 +104,7 @@ func registerTRORSAspect() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					picks = append(picks, engine.Choice{
-						Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -112,7 +112,7 @@ func registerTRORSAspect() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Ready for Action: tough which ally?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.readyForActionToughWhichAlly"), picks...)}}
 		},
 	})
 
@@ -127,7 +127,7 @@ func registerTRORSAspect() {
 					msgs = append(msgs, engine.AllyStatBonus{Ally: id, ATK: 1, THW: 1})
 				}
 			}
-			g.Logf("Lead from the Front: the team gets +1 THW and +1 ATK this phase")
+			g.TLogf("c.leadFromTheFrontTheTeamGets1ThwAnd1AtkThisPhase")
 			return msgs
 		},
 	})
@@ -142,7 +142,7 @@ func registerTRORSAspect() {
 	engine.RegisterBehavior("04021", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Avengers Tower → next Avenger ally this phase costs 1 less", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustAvengersTowerNextAvengerAllyThisPhaseCosts1Less"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.CostDiscountApply{Player: e.EOwner(), Amount: 1}}
@@ -162,7 +162,7 @@ func registerTRORSAspect() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Exhausted && g.EntityHasTrait(id, "avenger") {
 					picks = append(picks, engine.Choice{
-						Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -170,7 +170,7 @@ func registerTRORSAspect() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Earth's Mightiest Heroes: ready which Avenger?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.earthSMightiestHeroesReadyWhichAvenger"), picks...)}}
 		},
 	})
 
@@ -198,13 +198,13 @@ func registerTRORSAspect() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Tac Team + 1 counter → deal 2 damage", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTacTeam1CounterDeal2Damage"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if s := g.Supports[self]; s != nil {
 						s.Counters--
 					}
-					return cardutil.ChooseEnemy("Tac Team: deal 2 damage",
+					return cardutil.ChooseEnemy(engine.Tf("c.tacTeamDeal2Damage"),
 						func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(g, g.Entity(self))
 				},
 			}}
@@ -213,7 +213,7 @@ func registerTRORSAspect() {
 
 	// 04043 Press the Advantage: 2 damage, draw if target is statused.
 	engine.RegisterBehavior("04043", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Press the Advantage: deal 2 damage",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.pressTheAdvantageDeal2Damage"),
 			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 				var extra []engine.Message
 				switch t := tgt.(type) {
@@ -232,7 +232,7 @@ func registerTRORSAspect() {
 
 	// 04044 Piercing Strike: 3 damage.
 	engine.RegisterBehavior("04044", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Piercing Strike: deal 3 damage",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.piercingStrikeDeal3Damage"),
 			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 3, nil }),
 	})
 
@@ -243,7 +243,7 @@ func registerTRORSAspect() {
 			for _, id := range sortedSchemeIDs(g) {
 				if s := g.SideSchemes[id]; s != nil && s.Threat > 0 {
 					picks = append(picks, engine.Choice{
-						Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 3 * len(g.Players), Source: e.EID()}))
 				}
 			}
@@ -251,7 +251,7 @@ func registerTRORSAspect() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Spider-Man: remove threat from which side scheme?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.spiderManRemoveThreatFromWhichSideScheme"), picks...)}}
 		},
 	})
 
@@ -288,7 +288,7 @@ func registerTRORSAspect() {
 	// 04049 Clear the Area: 2 threat, draw on the kill.
 	engine.RegisterBehavior("04049", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			msgs := cardutil.ChooseScheme("Clear the Area", func(g *engine.Game, s engine.Entity) int { return 2 })(g, e)
+			msgs := cardutil.ChooseScheme(engine.Tf("c.clearTheAreaChooseAScheme"), func(g *engine.Game, s engine.Entity) int { return 2 })(g, e)
 			return append(msgs, engine.DrawCards{Player: e.EOwner(), N: 1})
 		},
 	})
@@ -504,7 +504,7 @@ func registerCrossbones() {
 			},
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Spend resources → discard this weapon", Type: engine.AbilityAction,
+					Label: engine.Tf("c.spendResourcesDiscardThisWeapon"), Type: engine.AbilityAction,
 					CostIcons: spec.icons,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -527,7 +527,7 @@ func revealExperimentalWeapon(g *engine.Game) []engine.Message {
 		g.SpawnAttachment(pick.Code, id)
 		break
 	}
-	g.LogMajorf("Experimental weapon: %s attaches to the villain!", pick.Def().Name)
+	g.TLogMajorf("c.experimentalWeaponAttachesToTheVillain", pick)
 	return nil
 }
 

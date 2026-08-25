@@ -41,7 +41,7 @@ func registerCable() {
 				return nil
 			}
 			g.UsedThisRound["40001-ready"] = true
-			g.Logf("Cable readies after defeating a side scheme")
+			g.TLogf("c.cableReadiesAfterDefeatingASideScheme")
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		},
 	})
@@ -57,7 +57,7 @@ func registerDomino() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "Domino — swap a card in hand with the top card of your deck",
+				Label:        engine.Tf("c.dominoSwapACardInHandWithTheTopCardOfYourDeck"),
 				Type:         engine.AbilityAction,
 				OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -68,12 +68,12 @@ func registerDomino() {
 					var choices []engine.Choice
 					for _, c := range p.Hand {
 						choices = append(choices, engine.Choice{
-							Label: "Swap out " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Swap out " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.SwapHandWithDeckTop{Player: p.ID, CardID: c.ID}))
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Domino — which hand card swaps with the deck top?", choices...),
+						Question: engine.Ask(engine.Tf("c.dominoWhichHandCardSwapsWithTheDeckTop"), choices...),
 					}}
 				},
 			}}
@@ -99,7 +99,7 @@ func marauderNextVillain(g *engine.Game) {
 			}
 		}
 		if v := g.SpawnVillainFromCard(c.Code); v != nil {
-			g.Logf("Next Marauder: %s", v.EDef().Name)
+			g.TLogf("c.nextMarauder", v)
 		}
 		return
 	}
@@ -140,7 +140,7 @@ func registerScenarios() {
 						g.Delete(id)
 					}
 				}
-				g.Logf("The Marauders form a villain deck — only its top card is in play")
+				g.TLogf("c.theMaraudersFormAVillainDeckOnlyItsTopCardIsInPlay")
 			}
 			return nil
 		},
@@ -153,7 +153,7 @@ func registerScenarios() {
 			for _, env := range g.Environments {
 				if env != nil && data.BaseCode(env.Code) == "40081" {
 					env.StoredCards = append(env.StoredCards, engine.Card{ID: g.NextCardID(), Code: code})
-					g.Logf("%s is routed (%d villains under Routed)", name, len(env.StoredCards))
+					g.TLogf("c.isRoutedVillainsUnderRouted", name, len(env.StoredCards))
 					if len(env.StoredCards) >= 3 {
 						return []engine.Message{engine.GameOver{Won: true, Reason: engine.Tf("reason.threeMaraudersRouted")}}
 					}
@@ -207,7 +207,7 @@ func registerScenarios() {
 				t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: "40105a", Target: v.ID}
 				g.Attachments[t.ID] = t
 				v.Attachments = append(v.Attachments, t.ID)
-				g.Logf("Hope's Captor attaches to %s (confident)", v.EDef().Name)
+				g.TLogf("c.hopeSCaptorAttachesToConfident", v)
 			}
 			return nil
 		},
@@ -237,7 +237,7 @@ func registerScenarios() {
 				v.Attachments = append(v.Attachments, t.ID)
 				v.Counters++
 				v.Tough = true
-				g.Logf("Juggernaut's Helmet attaches; 1 momentum counter")
+				g.TLogf("c.juggernautSHelmetAttaches1MomentumCounter")
 			}
 			return nil
 		},
@@ -245,13 +245,13 @@ func registerScenarios() {
 			// The scheme never completes: clear threat, flip the helmet,
 			// gain momentum, Juggernaut attacks everyone.
 			s.Threat = 0
-			g.Logf("The Unstoppable Juggernaut shrugs off the scheme!")
+			g.TLogf("c.theUnstoppableJuggernautShrugsOffTheScheme")
 			var msgs []engine.Message
 			if v := firstVillain(g); v != nil {
 				for _, a := range g.Attachments {
 					if a != nil && a.Code == "40122a" {
 						g.Delete(a.ID)
-						g.Logf("Juggernaut's Helmet flips (Exposed)")
+						g.TLogf("c.juggernautSHelmetFlipsExposed")
 					}
 				}
 				v.Counters++
@@ -278,7 +278,7 @@ func registerScenarios() {
 		},
 		OnMainSchemeMaxed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			if s.Stage < len(s.StageCodes) {
-				g.Logf("The stage completes — advancing")
+				g.TLogf("c.theStageCompletesAdvancing")
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 			}
 			return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.sinisterEnds")}}

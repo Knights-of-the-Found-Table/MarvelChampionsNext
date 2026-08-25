@@ -21,7 +21,7 @@ func registerAoaPlayerCards() {
 				return nil
 			}
 			if s := g.SideSchemes[m.Scheme]; s != nil && s.Threat <= a.ThwartVal+a.BonusTHW+a.PermTHW {
-				g.Logf("Cable's thwart defeats %s — draw 1", s.EDef().Name)
+				g.TLogf("c.cableSThwartDefeatsDraw1", s)
 				return []engine.Message{engine.DrawCards{Player: a.Owner, N: 1}}
 			}
 			return nil
@@ -50,7 +50,7 @@ func registerAoaPlayerCards() {
 				return nil
 			}
 			if hp <= a.AttackVal+a.BonusATK+a.PermATK {
-				g.Logf("X-23 readies after the kill")
+				g.TLogf("c.x23ReadiesAfterTheKill")
 				return []engine.Message{engine.ReadyEntity{ID: a.ID}}
 			}
 			return nil
@@ -87,7 +87,7 @@ func registerAoaPlayerCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 1}))
 			}
@@ -96,7 +96,7 @@ func registerAoaPlayerCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Advanced Suit — attach to:", choices...),
+				Question: engine.Ask(engine.Tf("c.advancedSuitAttachTo"), choices...),
 			}}
 		},
 	})
@@ -121,7 +121,7 @@ func registerAoaPlayerCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 2}))
 			}
@@ -130,7 +130,7 @@ func registerAoaPlayerCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Sidekick — attach to:", choices...),
+				Question: engine.Ask(engine.Tf("c.sidekickAttachTo"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -163,10 +163,10 @@ func registerAoaPlayerCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Side-by-Side — choose:",
-					engine.Choice{ID: "heal", Label: "Heal 1 damage from both characters", Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.sideBySideChoose"),
+					engine.Choice{ID: "heal", Label: engine.Tf("c.heal1DamageFromBothCharacters"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.HealEntity{Target: p.ID, N: 1}),
-					engine.Choice{ID: "buff", Label: "+1 THW / +1 ATK for both this phase", Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "buff", Label: engine.Tf("c.1Thw1AtkForBothThisPhase"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.ApplyStatBonus{Target: p.ID, THW: 1, ATK: 1}),
 				),
 			}}
@@ -201,7 +201,7 @@ func registerAoaPlayerCards() {
 				}
 			}
 			if got > 0 {
-				g.Logf("Suit Up pulls %d cards from the deck", got)
+				g.TLogf("c.suitUpPullsCardsFromTheDeck", got)
 				return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 			}
 			return nil
@@ -223,12 +223,12 @@ func registerAoaPlayerCards() {
 					msgs = append(msgs, engine.AllyStatBonus{Ally: id, THW: 1, ATK: 1})
 				}
 				choices = append(choices, engine.Choice{
-					ID: "p-" + o.ID.String(), Label: o.Name, Kind: engine.ChoiceLabel,
+					ID: "p-" + o.ID.String(), Label: engine.S(o.Name), Kind: engine.ChoiceLabel,
 				}.Msgs(msgs...))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Lead from the Front — which player's team?", choices...),
+				Question: engine.Ask(engine.Tf("c.leadFromTheFrontWhichPlayerSTeam"), choices...),
 			}}
 		},
 	})
@@ -278,7 +278,7 @@ func registerAoaPlayerCards() {
 					msgs = append(msgs, engine.HealEntity{Target: a.ID, N: 2})
 				}
 			}
-			g.Logf("Legion discards %s", c.Def().Name)
+			g.TLogf("c.legionDiscards", c)
 			return msgs
 		},
 	})
@@ -288,7 +288,7 @@ func registerAoaPlayerCards() {
 		Playable: func(g *engine.Game, p *engine.Player, def *data.CardDef) bool {
 			return g.EntityHasTrait(p.ID, "X-Force") || g.EntityHasTrait(p.ID, "X-Men")
 		},
-		OnPlay: cardutil.ChooseEnemy("Marrow", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.marrow"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 2, nil
 		}),
 	})
@@ -315,7 +315,7 @@ func registerAoaPlayerCards() {
 				n = len(p.Deck)
 			}
 			a.BonusATK += n
-			g.Logf("Goldballs discards %d cards — +%d ATK", n, n)
+			g.TLogf("c.goldballsDiscardsCardsAtk", n, n)
 			return []engine.Message{engine.MillPlayerDeck{Player: p.ID, N: n}}
 		},
 	})
@@ -352,7 +352,7 @@ func registerAoaPlayerCards() {
 			if hp > m.N {
 				return nil
 			}
-			g.Logf("Blood Rage — 1 damage for a card")
+			g.TLogf("c.bloodRage1DamageForACard")
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.DamageEntity{Target: u.Owner, Damage: 1, Source: u.Owner},
@@ -373,7 +373,7 @@ func registerAoaPlayerCards() {
 				return nil
 			}
 			u.Counters++
-			g.Logf("Test the Defense gains a test counter (%d/5)", u.Counters)
+			g.TLogf("c.testTheDefenseGainsATestCounter5", u.Counters)
 			if u.Counters >= 5 && len(g.Enemies()) > 0 {
 				u.Counters = 0
 				return []engine.Message{
@@ -387,7 +387,7 @@ func registerAoaPlayerCards() {
 
 	// 45045 Full-Body Charge: 8 damage (overkill rider approximated).
 	engine.RegisterBehavior("45045", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Full-Body Charge", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.fullBodyCharge"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 8, nil
 		}),
 	})
@@ -395,7 +395,7 @@ func registerAoaPlayerCards() {
 	// 45046 Clobber: 3 damage; returns to hand when it's the round's first
 	// card (window in the engine's play handler).
 	engine.RegisterBehavior("45046", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Clobber", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.clobber"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 3, nil
 		}),
 	})
@@ -410,7 +410,7 @@ func registerAoaPlayerCards() {
 			var choices []engine.Choice
 			if g.EntityHasTrait(p.ID, "X-Men") {
 				choices = append(choices, engine.Choice{
-					ID: "hero", Label: p.HeroDef().Name, Kind: engine.ChoiceTarget,
+					ID: "hero", Label: engine.S(p.HeroDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.HealEntity{Target: p.ID, N: 2}))
 			}
 			for _, id := range p.Allies {
@@ -419,7 +419,7 @@ func registerAoaPlayerCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.HealEntity{Target: id, N: 2}))
 			}
 			if len(choices) == 0 {
@@ -427,7 +427,7 @@ func registerAoaPlayerCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Triage — heal 2 damage from:", choices...),
+				Question: engine.Ask(engine.Tf("c.triageHeal2DamageFrom"), choices...),
 			}}
 		},
 	})
@@ -464,7 +464,7 @@ func registerAoaPlayerCards() {
 				return nil
 			}
 			choices := []engine.Choice{
-				engine.Choice{ID: "heal", Label: "Heal 3 damage from an identity", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "heal", Label: engine.Tf("c.heal3DamageFromAnIdentity"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.HealEntity{Target: p.ID, N: 3}),
 			}
 			if len(g.Enemies()) > 0 {
@@ -476,24 +476,24 @@ func registerAoaPlayerCards() {
 						SourceID: id, CardCode: enemy.ECode(),
 					}.Msgs(engine.DamageEntity{Target: id, Damage: 3, Source: p.ID}))
 				}
-				choices = append(choices, engine.Choice{ID: "dmg", Label: "Deal 3 damage to an enemy", Kind: engine.ChoiceLabel}.
-					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask("Basic Spell — damage:", dmg...)}))
+				choices = append(choices, engine.Choice{ID: "dmg", Label: engine.Tf("c.deal3DamageToAnEnemy"), Kind: engine.ChoiceLabel}.
+					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.basicSpellDamage"), dmg...)}))
 			}
 			if len(g.Schemes()) > 0 {
 				var thw []engine.Choice
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					thw = append(thw, engine.Choice{
-						Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: s.ECode(),
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: p.ID}))
 				}
-				choices = append(choices, engine.Choice{ID: "thw", Label: "Remove 3 threat from a scheme", Kind: engine.ChoiceLabel}.
-					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask("Basic Spell — thwart:", thw...)}))
+				choices = append(choices, engine.Choice{ID: "thw", Label: engine.Tf("c.remove3ThreatFromAScheme"), Kind: engine.ChoiceLabel}.
+					Msgs(engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.basicSpellThwart"), thw...)}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Basic Spell — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.basicSpellChoose"), choices...),
 			}}
 		},
 	})
@@ -512,12 +512,12 @@ func registerAoaPlayerCards() {
 			for i, c := range p.Hand {
 				card := c
 				discard = append(discard, engine.Choice{
-					ID: fmt.Sprintf("d-%d", i), Label: card.Def().Name, Kind: engine.ChoiceCard, CardCode: card.Code,
+					ID: fmt.Sprintf("d-%d", i), Label: engine.S(card.Def().Name), Kind: engine.ChoiceCard, CardCode: card.Code,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{card}}))
 			}
 			return []engine.Message{
 				engine.DrawCards{Player: p.ID, N: 2},
-				engine.AskQuestion{Player: p.ID, Question: engine.Ask("Spiritual Meditation — discard:", discard...)},
+				engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.spiritualMeditationDiscard"), discard...)},
 			}
 		},
 	})

@@ -34,7 +34,7 @@ func registerNightcrawler() {
 			}
 			if hasBamfDiscard && len(p.Hand) > 0 {
 				abs = append(abs, engine.Ability{
-					Label:        "Rapid Teleportation — discard 1 resource: return a Bamf! to hand",
+					Label:        engine.Tf("c.rapidTeleportationDiscard1ResourceReturnABamfToHand"),
 					Type:         engine.AbilityAction,
 					HeroOnly:     true,
 					OncePerRound: true,
@@ -60,7 +60,7 @@ func registerNightcrawler() {
 								continue
 							}
 							choices = append(choices, engine.Choice{
-								Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 								engine.ReturnDiscardCard{Player: p.ID, CardID: target},
@@ -71,14 +71,14 @@ func registerNightcrawler() {
 						}
 						return []engine.Message{engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("Rapid Teleportation — spend 1 resource", choices...),
+							Question: engine.Ask(engine.Tf("c.rapidTeleportationSpend1Resource"), choices...),
 						}}
 					},
 				})
 			}
 			// Kurt Wagner: search your deck for a Bamf! (once per round).
 			abs = append(abs, engine.Ability{
-				Label:        "Kurt Wagner — search your deck for a Bamf!",
+				Label:        engine.Tf("c.kurtWagnerSearchYourDeckForABamf"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -183,7 +183,7 @@ func registerSignatures() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Kurt's Chapel — a player draws 1",
+				Label:        engine.Tf("c.kurtSChapelAPlayerDraws1"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -198,10 +198,10 @@ func registerSignatures() {
 					var choices []engine.Choice
 					for _, pl := range g.Players {
 						choices = append(choices, engine.Choice{
-							Label: pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+							Label: engine.S(pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 						}.Msgs(engine.DrawCards{Player: pl.ID, N: 1}))
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Kurt's Chapel — who draws?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.kurtSChapelWhoDraws"), choices...)}}
 				},
 			}}
 		},
@@ -240,7 +240,7 @@ func registerSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Bamf! — attach to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.bamfAttachToAnEnemy"), choices...),
 			}}
 		},
 		DefenseSubstitute: func(g *engine.Game, p *engine.Player, u *engine.Upgrade, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
@@ -262,7 +262,7 @@ func registerSignatures() {
 				return []engine.Message{engine.DamageEntity{Target: t, Damage: 3, Source: pid}}
 			})
 			if len(choices) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask("'Port and Punch — deal 3 damage", choices...)})
+				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.portAndPunchDeal3Damage"), choices...)})
 			}
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				if bamfsAttachedTo(g, id) {
@@ -297,14 +297,14 @@ func registerSignatures() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Teleport Drop — 8 damage + stun", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.teleportDrop8DamageStun"), choices...)}}
 		},
 	})
 
 	// 48009 Scout Ahead: remove 3 threat (the extra-Bamf branch is
 	// approximated away).
 	engine.RegisterBehavior("48009", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Scout Ahead", func(g *engine.Game, e engine.Entity) int { return 3 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.scoutAheadChooseAScheme"), func(g *engine.Game, e engine.Entity) int { return 3 }),
 	})
 
 	// 48010 'Port Away: discard a Bamf! from hand → change form and ready.
@@ -321,7 +321,7 @@ func registerSignatures() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Discard a Bamf!", Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.discardABamf"), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(
 					engine.DiscardCards{Player: pid, Cards: engine.CardList{c}},
 					engine.ChangeForm{Player: pid},
@@ -331,7 +331,7 @@ func registerSignatures() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("'Port Away — discard a Bamf!?", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.portAwayDiscardABamf"), choices...)}}
 		},
 	})
 
@@ -434,10 +434,10 @@ func registerObligation() {
 			var penalty []engine.Message
 			if len(dropped) > 0 {
 				p.Discard = append(p.Discard, dropped...)
-				g.Logf("Crisis of Faith discards %d events", len(dropped))
+				g.TLogf("c.crisisOfFaithDiscardsEvents", len(dropped))
 			}
 			return cardutil.ExhaustOrPenalty(g, p, card,
-				"Discard each Attack and Defense event from your hand", penalty...)
+				engine.Tf("c.discardEachAttackAndDefenseEventFromYourHand"), penalty...)
 		},
 	})
 }

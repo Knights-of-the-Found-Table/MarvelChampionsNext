@@ -35,7 +35,7 @@ func TestOpticBlastRequiresHeroForm(t *testing.T) {
 	abs := b.HeroAbilities(g, p)
 	var optic *engine.Ability
 	for i := range abs {
-		if strings.Contains(abs[i].Label, "Optic Blast") {
+		if strings.Contains(abs[i].Label.Text, "Optic Blast") {
 			optic = &abs[i]
 		}
 	}
@@ -74,7 +74,7 @@ func TestOpticBlastOffersUpgradedEnemies(t *testing.T) {
 	abs := engine.LookupBehavior("33001").HeroAbilities(g, p)
 	var optic *engine.Ability
 	for i := range abs {
-		if strings.Contains(abs[i].Label, "Optic Blast") {
+		if strings.Contains(abs[i].Label.Text, "Optic Blast") {
 			optic = &abs[i]
 		}
 	}
@@ -111,7 +111,7 @@ func TestConstantTrainingSearchesDeck(t *testing.T) {
 	abs := engine.LookupBehavior("33001").HeroAbilities(g, p)
 	var ct *engine.Ability
 	for i := range abs {
-		if strings.Contains(abs[i].Label, "Constant Training") {
+		if strings.Contains(abs[i].Label.Text, "Constant Training") {
 			ct = &abs[i]
 		}
 	}
@@ -136,7 +136,7 @@ func TestConstantTrainingSearchesDeck(t *testing.T) {
 	hasTake := false
 	hasSkip := false
 	for _, c := range ask.Question.Choices {
-		if strings.Contains(c.Label, "Take Exploit Weakness") {
+		if strings.Contains(c.Label.Text, "Take Exploit Weakness") {
 			hasTake = true
 		}
 		if c.ID == "skip" {
@@ -166,7 +166,7 @@ func TestConstantTrainingEmptyDeckShuffles(t *testing.T) {
 	abs := engine.LookupBehavior("33001").HeroAbilities(g, p)
 	var ct *engine.Ability
 	for i := range abs {
-		if strings.Contains(abs[i].Label, "Constant Training") {
+		if strings.Contains(abs[i].Label.Text, "Constant Training") {
 			ct = &abs[i]
 		}
 	}

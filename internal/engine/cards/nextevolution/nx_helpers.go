@@ -1,8 +1,6 @@
 package nextevolution
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -144,9 +142,9 @@ func marauderChoice(g *engine.Game, e engine.Entity, m engine.AskAttack, penalty
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player: p.ID,
-		Question: engine.Ask(fmt.Sprintf("%s attacks %s — choose:", e.EDef().Name, p.Name),
-			engine.Choice{ID: "penalty", Label: penaltyLabel, Kind: engine.ChoiceLabel}.Msgs(penalty...),
-			engine.Choice{ID: "boost", Label: fmt.Sprintf("%s gets +%d ATK for this attack", e.EDef().Name, atk), Kind: engine.ChoiceLabel}.
+		Question: engine.Ask(engine.Tf("c.attacksChoose", e, p.Name),
+			engine.Choice{ID: "penalty", Label: engine.S(penaltyLabel), Kind: engine.ChoiceLabel}.Msgs(penalty...),
+			engine.Choice{ID: "boost", Label: engine.Tf("c.getsAtkForThisAttack", e, atk), Kind: engine.ChoiceLabel}.
 				Msgs(engine.BoostActivation{Enemy: e.EID(), N: atk}),
 		)},
 	}
@@ -157,7 +155,7 @@ func revealEncounterFrom(g *engine.Game) (engine.Card, bool) {
 	if len(g.EncounterDeck) == 0 {
 		g.EncounterDeck = append(g.EncounterDeck, g.EncounterDiscard...)
 		g.EncounterDiscard = nil
-		g.Logf("Encounter deck reshuffled")
+		g.TLogf("log.encounterReshuffled")
 	}
 	if len(g.EncounterDeck) == 0 {
 		return engine.Card{}, false
@@ -210,7 +208,7 @@ func spawnSideSchemeCard(g *engine.Game, code string, threat int) *engine.SideSc
 		MaxThreat: maxT,
 	}
 	g.SideSchemes[s.ID] = s
-	g.Logf("%s enters play (threat %d)", def.Name, threat)
+	g.TLogf("c.entersPlayThreat", def.Name, threat)
 	return s
 }
 

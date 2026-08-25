@@ -14,7 +14,7 @@ func advanceSchemeOrLose(reason string) func(g *engine.Game, s *engine.MainSchem
 		if s.Stage < len(s.StageCodes) {
 			return []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 		}
-		return []engine.Message{engine.GameOver{Won: false, Reason: reason}}
+		return []engine.Message{engine.GameOver{Won: false, Reason: engine.S(reason)}}
 	}
 }
 
@@ -44,7 +44,7 @@ func registerAOSScenarios() {
 							EngagedWith: p.ID,
 						}
 						g.Minions[mn.ID] = mn
-						g.Logf("%s is ambushed by %s", p.Name, def.Name)
+						g.TLogf("c.isAmbushedBy", p.Name, def.Name)
 						break
 					}
 				}
@@ -73,7 +73,7 @@ func registerAOSScenarios() {
 						AttackVal: intValue(card.Def().Attack, 1), ThwartVal: intValue(card.Def().Thwart, 1),
 					}
 					g.AddAlly(a, p.ID)
-					g.Logf("Rescued Captive joins %s", p.Name)
+					g.TLogf("c.rescuedCaptiveJoins", p.Name)
 				}
 			}
 			return nil
@@ -102,7 +102,7 @@ func registerAOSScenarios() {
 				if code == pick {
 					takeEncounterBy(g, func(def *data.CardDef) bool { return def.Code == code })
 					g.SpawnEnvironment(code)
-					g.Logf("%s empowers the Adaptoids", code)
+					g.TLogf("c.empowersTheAdaptoids", code)
 				}
 			}
 			// Each player is engaged by an Adaptoid.
@@ -119,7 +119,7 @@ func registerAOSScenarios() {
 							EngagedWith: p.ID,
 						}
 						g.Minions[mn.ID] = mn
-						g.Logf("%s is engaged by an Adaptoid", p.Name)
+						g.TLogf("c.isEngagedByAnAdaptoid", p.Name)
 						break
 					}
 				}
@@ -153,7 +153,7 @@ func registerAOSScenarios() {
 					EngagedWith: p.ID,
 				}
 				g.Minions[mn.ID] = mn
-				g.Logf("%s joins Citizen V's manhunt", def.Name)
+				g.TLogf("c.joinsCitizenVSManhunt", def.Name)
 			}
 			return nil
 		},
@@ -183,7 +183,7 @@ func registerAOSScenarios() {
 				kept = append(kept, c)
 			}
 			g.EncounterDeck = kept
-			g.Logf("The executive board's evidence is set aside")
+			g.TLogf("c.theExecutiveBoardSEvidenceIsSetAside")
 			return nil
 		},
 		OnMainSchemeMaxed: advanceSchemeOrLose("Baron Zemo's manipulations succeed"),
@@ -192,7 +192,7 @@ func registerAOSScenarios() {
 	// The Accusation (stage two): the heroes name their suspect.
 	engine.RegisterBehavior("50168", &engine.Behavior{
 		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
-			g.LogMajorf("The heroes make their accusation — who is Zemo's insider?")
+			g.TLogMajorf("c.theHeroesMakeTheirAccusationWhoIsZemoSInsider")
 			return nil
 		},
 	})
@@ -207,7 +207,7 @@ func registerAOSScenarios() {
 				v.Code = "50165b"
 				v.MaxHP = 16
 				v.Damage = 0
-				g.LogMajorf("Baron Zemo is unmasked!")
+				g.TLogMajorf("c.baronZemoIsUnmasked")
 				g.SpawnAttachment("50170", v.ID)
 			}
 			return nil

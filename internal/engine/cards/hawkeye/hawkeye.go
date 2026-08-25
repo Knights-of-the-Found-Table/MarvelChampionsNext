@@ -20,7 +20,7 @@ func init() {
 
 // bowCode / quiverCode name the two signature upgrades the arrows key off.
 const (
-	bowCode   = "04002"
+	bowCode    = "04002"
 	quiverCode = "04003"
 )
 
@@ -64,7 +64,7 @@ func registerHawkeye() {
 			// Bow. Only offered while a bow sits in play exhausted.
 			if bow := anyBow(g, p); bow != nil && bow.Exhausted {
 				out = append(out, engine.Ability{
-					Label:    "Quick Draw — exhaust Hawkeye, ready Hawkeye's Bow",
+					Label:    engine.Tf("c.quickDrawExhaustHawkeyeReadyHawkeyeSBow"),
 					Type:     engine.AbilityAction,
 					Exhaust:  true,
 					HeroOnly: true,
@@ -77,7 +77,7 @@ func registerHawkeye() {
 						if bow == nil {
 							return nil
 						}
-						g.Logf("Quick Draw — Hawkeye's Bow is readied")
+						g.TLogf("c.quickDrawHawkeyeSBowIsReadied")
 						return []engine.Message{engine.ReadyEntity{ID: bow.ID}}
 					},
 				})
@@ -87,7 +87,7 @@ func registerHawkeye() {
 			// it to your hand. Shuffle. (Limit once per phase; the
 			// once-per-turn tracker resets between phases.)
 			out = append(out, engine.Ability{
-				Label:        "Weapon of Choice — spend 1 resource, search for Hawkeye's Bow",
+				Label:        engine.Tf("c.weaponOfChoiceSpend1ResourceSearchForHawkeyeSBow"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				Cost:         1,
@@ -101,7 +101,7 @@ func registerHawkeye() {
 					for _, c := range pl.Deck {
 						if c.Code == bowCode {
 							choices = append(choices, engine.Choice{
-								Label: "Take " + c.Def().Name + " from deck", Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Take " + c.Def().Name + " from deck"), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.TakeDeckCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -111,7 +111,7 @@ func registerHawkeye() {
 					for _, c := range pl.Discard {
 						if c.Code == bowCode {
 							choices = append(choices, engine.Choice{
-								Label: "Take " + c.Def().Name + " from discard", Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Take " + c.Def().Name + " from discard"), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ReturnDiscardCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -119,15 +119,15 @@ func registerHawkeye() {
 						}
 					}
 					if len(choices) == 0 {
-						g.Logf("Weapon of Choice — Hawkeye's Bow is not in deck or discard; shuffling")
+						g.TLogf("c.weaponOfChoiceHawkeyeSBowIsNotInDeckOrDiscardShuffling")
 						return []engine.Message{engine.ShufflePlayerDeck{Player: pl.ID}}
 					}
 					choices = append(choices, engine.Choice{
-						ID: "skip", Label: "Skip (still shuffle)", Kind: engine.ChoicePass,
+						ID: "skip", Label: engine.Tf("c.skipStillShuffle"), Kind: engine.ChoicePass,
 					}.Msgs(engine.ShufflePlayerDeck{Player: pl.ID}))
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Weapon of Choice — take Hawkeye's Bow", choices...),
+						Question: engine.Ask(engine.Tf("c.weaponOfChoiceTakeHawkeyeSBow"), choices...),
 					}}
 				},
 			})
@@ -186,7 +186,7 @@ func registerQuiver() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Hawkeye's Quiver — search the top 5 for an Arrow event",
+				Label:    engine.Tf("c.hawkeyeSQuiverSearchTheTop5ForAnArrowEvent"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -206,7 +206,7 @@ func registerQuiver() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.TakeDeckCard{Player: pl.ID, CardID: c.ID}))
 					}
 					if len(choices) == 0 {
@@ -214,7 +214,7 @@ func registerQuiver() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Hawkeye's Quiver — take an Arrow event from the top 5", choices...),
+						Question: engine.Ask(engine.Tf("c.hawkeyeSQuiverTakeAnArrowEventFromTheTop5"), choices...),
 					}}
 				},
 			}}
@@ -236,7 +236,7 @@ func registerMockingbird() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Mockingbird — spend 1 resource, return her to your hand (attack damage prevention not modeled)",
+				Label:   engine.Tf("c.mockingbirdSpend1ResourceReturnHerToYourHandAttackDamagePrev"),
 				Type:    engine.AbilityTrigger,
 				Trigger: engine.TriggerVillainAttacksYou,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -250,7 +250,7 @@ func registerMockingbird() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Spend " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Spend " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: pl.ID, Cards: engine.CardList{c}},
 							engine.ReturnControlled{Player: pl.ID, ID: self},
@@ -261,7 +261,7 @@ func registerMockingbird() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Mockingbird — spend 1 resource to return her to your hand", choices...),
+						Question: engine.Ask(engine.Tf("c.mockingbirdSpend1ResourceToReturnHerToYourHand"), choices...),
 					}}
 				},
 			}}
@@ -280,7 +280,7 @@ func arrowEffect(g *engine.Game, e engine.Entity, build func(bow *engine.Upgrade
 	}
 	bow := readyBow(g, p)
 	if bow == nil {
-		g.Logf("%s — no ready Hawkeye's Bow in play; the arrow fizzles", e.EDef().Name)
+		g.TLogf("c.noReadyHawkeyeSBowInPlayTheArrowFizzles", e)
 		return nil
 	}
 	return build(bow)
@@ -315,7 +315,7 @@ func registerArrows() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Sonic Arrow — confuse an enemy and deal 3 damage (5 if already confused)", choices...),
+					Question: engine.Ask(engine.Tf("c.sonicArrowConfuseAnEnemyAndDeal3Damage5IfAlreadyConfused"), choices...),
 				}}
 			})
 		},
@@ -346,7 +346,7 @@ func registerArrows() {
 						continue
 					}
 					choices = append(choices, engine.Choice{
-						Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID,
+						Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID,
 					}.Msgs(msgs...))
 				}
 				if len(choices) == 0 {
@@ -354,7 +354,7 @@ func registerArrows() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Explosive Arrow — choose a player; 3 damage to the villain and their engaged minions", choices...),
+					Question: engine.Ask(engine.Tf("c.explosiveArrowChooseAPlayer3DamageToTheVillainAndTheirEngage"), choices...),
 				}}
 			})
 		},
@@ -387,7 +387,7 @@ func registerArrows() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Electric Arrow — stun an enemy and deal 3 damage (5 if already stunned)", choices...),
+					Question: engine.Ask(engine.Tf("c.electricArrowStunAnEnemyAndDeal3Damage5IfAlreadyStunned"), choices...),
 				}}
 			})
 		},
@@ -412,7 +412,7 @@ func registerArrows() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Cable Arrow — remove 3 threat from a scheme", choices...),
+					Question: engine.Ask(engine.Tf("c.cableArrowRemove3ThreatFromAScheme"), choices...),
 				}}
 			})
 		},
@@ -436,7 +436,7 @@ func registerArrows() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Vibranium Arrow — deal 6 damage to an enemy", choices...),
+					Question: engine.Ask(engine.Tf("c.vibraniumArrowDeal6DamageToAnEnemy"), choices...),
 				}}
 			})
 		},
@@ -484,7 +484,7 @@ func registerKateBishop() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Hawkeye — exhaust and discard 1 card: deal damage equal to its printed resources",
+				Label:   engine.Tf("c.hawkeyeExhaustAndDiscard1CardDealDamageEqualToItsPrintedReso"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -502,17 +502,17 @@ func registerKateBishop() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Discard " + c.Def().Name + " (X=" + itoa(x) + ")", Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Discard " + c.Def().Name + " (X=" + itoa(x) + ")"), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: pl.ID, Cards: engine.CardList{c}},
-						).WithThen(engine.Ask("Hawkeye — deal "+itoa(x)+" damage to which enemy?", sub...)))
+						).WithThen(engine.Ask(engine.S("Hawkeye — deal "+itoa(x)+" damage to which enemy?"), sub...)))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Hawkeye — discard which card?", choices...),
+						Question: engine.Ask(engine.Tf("c.hawkeyeDiscardWhichCard"), choices...),
 					}}
 				},
 			}}
@@ -565,7 +565,7 @@ func registerNemesis() {
 					s.StoredCards = append(s.StoredCards, engine.Card{
 						ID: g.NextCardID(), Code: "04004", Owner: p.ID,
 					})
-					g.Logf("Marked for Death — Mockingbird is placed beneath the scheme")
+					g.TLogf("c.markedForDeathMockingbirdIsPlacedBeneathTheScheme")
 					return nil
 				}
 			}
@@ -575,12 +575,12 @@ func registerNemesis() {
 					if c.Code == "04004" {
 						z.Remove(c.ID)
 						s.StoredCards = append(s.StoredCards, c)
-						g.Logf("Marked for Death — Mockingbird is placed beneath the scheme")
+						g.TLogf("c.markedForDeathMockingbirdIsPlacedBeneathTheScheme")
 						return nil
 					}
 				}
 			}
-			g.Logf("Marked for Death — Mockingbird is nowhere to be found")
+			g.TLogf("c.markedForDeathMockingbirdIsNowhereToBeFound")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -595,7 +595,7 @@ func registerNemesis() {
 			for _, c := range s.StoredCards {
 				if p := g.Player(c.Owner); p != nil {
 					p.Hand = append(p.Hand, c)
-					g.Logf("Marked for Death defeated — %s returns to %s's hand", c.Def().Name, p.Name)
+					g.TLogf("c.markedForDeathDefeatedReturnsToSHand", c, p.Name)
 				}
 			}
 			s.StoredCards = nil
@@ -612,13 +612,13 @@ func registerNemesis() {
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				if mn := g.Minions[id]; mn != nil && mn.Code == "04027" {
 					t.Target = id
-					g.Logf("Crossfire's Rifle attaches to Crossfire")
+					g.TLogf("c.crossfireSRifleAttachesToCrossfire")
 					return nil
 				}
 			}
 			for _, id := range cardutil.SortedIDs(g.Villains) {
 				t.Target = id
-				g.Logf("Crossfire's Rifle attaches to the villain")
+				g.TLogf("c.crossfireSRifleAttachesToTheVillain")
 				return nil
 			}
 			return nil
@@ -629,7 +629,7 @@ func registerNemesis() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:     "Crossfire's Rifle — exhaust your hero and spend [wild]: discard this attachment",
+				Label:     engine.Tf("c.crossfireSRifleExhaustYourHeroAndSpendWildDiscardThisAttachm"),
 				Type:      engine.AbilityAction,
 				HeroOnly:  true,
 				Cost:      1,
@@ -651,11 +651,11 @@ func registerNemesis() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			g.Delete(t.ID)
 			if p.IsHero() {
-				g.Logf("Sniper Shot — 3 damage to %s", p.Name)
+				g.TLogf("c.sniperShot3DamageTo", p.Name)
 				return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: 3, Source: t.ID}}
 			}
 			if g.MainScheme != nil {
-				g.Logf("Sniper Shot — 3 threat on the main scheme")
+				g.TLogf("c.sniperShot3ThreatOnTheMainScheme")
 				return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 3, Source: t.ID}}
 			}
 			return nil
@@ -678,7 +678,7 @@ func registerObligation() {
 				penalty = append(penalty, engine.DiscardControlled{Player: p.ID, ID: bow.ID})
 			}
 			return cardutil.ExhaustOrPenalty(g, p, card,
-				"Discard Hawkeye's Bow from play", penalty...)
+				engine.Tf("c.discardHawkeyeSBowFromPlay"), penalty...)
 		},
 	})
 }

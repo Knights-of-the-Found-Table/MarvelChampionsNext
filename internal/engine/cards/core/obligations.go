@@ -19,7 +19,7 @@ func registerCoreObligations() {
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.EDef().HasTrait("black panther") {
 					choices = append(choices, engine.Choice{
-						Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code,
+						Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -27,10 +27,10 @@ func registerCoreObligations() {
 			if len(choices) > 0 {
 				penalty = append(penalty, engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.Ask("Affairs of State — discard a Black Panther upgrade", choices...),
+					Question: engine.Ask(engine.Tf("c.affairsOfStateDiscardABlackPantherUpgrade"), choices...),
 				})
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, "Discard a Black Panther upgrade you control", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.S("Discard a Black Panther upgrade you control"), penalty...)
 		},
 	})
 
@@ -42,7 +42,7 @@ func registerCoreObligations() {
 			if g.MainScheme != nil {
 				penalty = append(penalty, engine.AddAccelerationToken{Scheme: g.MainScheme.ID})
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, "Give the main scheme 1 acceleration token", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.S("Give the main scheme 1 acceleration token"), penalty...)
 		},
 	})
 
@@ -60,7 +60,7 @@ func registerCoreObligations() {
 				})
 			}
 			penalty = append(penalty, engine.RevealNextEncounter{Player: p.ID})
-			return cardutil.ExhaustOrPenalty(g, p, card, "Discard 1 card at random; surge", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.S("Discard 1 card at random; surge"), penalty...)
 		},
 	})
 
@@ -71,7 +71,7 @@ func registerCoreObligations() {
 			for _, id := range p.Upgrades {
 				penalty = append(penalty, engine.ExhaustEntity{ID: id})
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, fmt.Sprintf("Exhaust each upgrade you control (%d)", len(penalty)), penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.S(fmt.Sprintf("Exhaust each upgrade you control (%d)", len(penalty))), penalty...)
 		},
 	})
 
@@ -82,7 +82,7 @@ func registerCoreObligations() {
 				engine.StunEntity{Target: p.ID},
 				engine.RevealNextEncounter{Player: p.ID},
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, "You are stunned; surge", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.S("You are stunned; surge"), penalty...)
 		},
 	})
 }

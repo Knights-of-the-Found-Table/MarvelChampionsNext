@@ -21,7 +21,7 @@ func tagTeamMill(g *engine.Game, p *engine.Player) []engine.Message {
 		c := g.EncounterDiscard[i]
 		if c.Def().Type == "minion" && c.Def().HasTrait("Marauder") {
 			g.EncounterDiscard = append(g.EncounterDiscard[:i:i], g.EncounterDiscard[i+1:]...)
-			g.Logf("Tag Team summons %s", c.Def().Name)
+			g.TLogf("c.tagTeamSummons", c)
 			return []engine.Message{engine.RevealEncounterCard{Player: p.ID, Card: c}}
 		}
 	}
@@ -167,9 +167,9 @@ func registerMarauders() {
 				return nil
 			}
 			g.MainScheme.Counters++
-			g.Logf("Knock, Knock gains a knock counter (%d)", g.MainScheme.Counters)
+			g.TLogf("c.knockKnockGainsAKnockCounter", g.MainScheme.Counters)
 			if g.MainScheme.Counters >= 3 && g.MainScheme.Stage == 1 {
-				g.Logf("The Marauders break down the door!")
+				g.TLogf("c.theMaraudersBreakDownTheDoor")
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: g.MainScheme.ID}}
 			}
 			return nil
@@ -261,7 +261,7 @@ func registerMarauders() {
 				n := villainsUnderRouted(g) * len(g.Players)
 				if n > 0 {
 					s.Threat += n
-					g.Logf("%s gains %d extra threat (villains under Routed)", s.EDef().Name, n)
+					g.TLogf("c.gainsExtraThreatVillainsUnderRouted", s, n)
 				}
 				return nil
 			},
@@ -350,7 +350,7 @@ func registerMarauders() {
 					return nil
 				}
 				if c.Def().Type == "attachment" {
-					g.Logf("The Senator's Support reveals %s", c.Def().Name)
+					g.TLogf("c.theSenatorSSupportReveals", c)
 					return []engine.Message{engine.RevealEncounterCard{Player: cardutil.FirstPlayerID(g), Card: c}}
 				}
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
@@ -381,7 +381,7 @@ func registerMarauders() {
 			}
 			if n > 0 {
 				s.Threat += n
-				g.Logf("%s gains %d extra threat", s.EDef().Name, n)
+				g.TLogf("c.gainsExtraThreat", s, n)
 			}
 			return nil
 		},
@@ -396,7 +396,7 @@ func registerMarauders() {
 				if c.Def().Type == "minion" && c.Def().HasTrait("Marauder") && !titleInPlay(g, c.Def().Name) {
 					g.EncounterDeck = g.EncounterDeck[i+1:]
 					g.EncounterDiscard = append(g.EncounterDiscard, discarded[:i]...)
-					g.Logf("Bound by Business finds %s", c.Def().Name)
+					g.TLogf("c.boundByBusinessFinds", c)
 					return []engine.Message{engine.RevealEncounterCard{Player: p.ID, Card: c}}
 				}
 			}
@@ -494,7 +494,7 @@ func registerOnTheRun() {
 			}
 			if marauderInPlay(g, "40071") {
 				s.Crisis = true
-				g.Logf("Pure Force gains the crisis icon")
+				g.TLogf("c.pureForceGainsTheCrisisIcon")
 			}
 			return nil
 		},
@@ -529,9 +529,9 @@ func registerOnTheRun() {
 			if len(activate) > 0 {
 				return []engine.Message{engine.AskQuestion{
 					Player: p.ID,
-					Question: engine.Ask("Tag Team — choose:",
-						engine.Choice{ID: "activate", Label: "Each Marauder engaged with you activates", Kind: engine.ChoiceLabel}.Msgs(activate...),
-						engine.Choice{ID: "mill", Label: "Mill 7 for a Marauder minion", Kind: engine.ChoiceLabel}.
+					Question: engine.Ask(engine.Tf("c.tagTeamChoose"),
+						engine.Choice{ID: "activate", Label: engine.Tf("c.eachMarauderEngagedWithYouActivates"), Kind: engine.ChoiceLabel}.Msgs(activate...),
+						engine.Choice{ID: "mill", Label: engine.Tf("c.mill7ForAMarauderMinion"), Kind: engine.ChoiceLabel}.
 							Msgs(tagTeamMill(g, p)...),
 					),
 				}}
@@ -550,7 +550,7 @@ func registerNastyBoys() {
 				return nil
 			}
 			if p := g.Player(m.Player); p != nil && !p.Exhausted {
-				g.Logf("Gorgeous George forces %s to exhaust", p.Name)
+				g.TLogf("c.gorgeousGeorgeForcesToExhaust", p.Name)
 				return []engine.Message{engine.ExhaustEntity{ID: p.ID}}
 			}
 			return nil
@@ -572,7 +572,7 @@ func registerNastyBoys() {
 						v.RevealedBoosts = append(v.RevealedBoosts[:i:i], v.RevealedBoosts[i+1:]...)
 						g.EncounterDeck = append(g.EncounterDeck, c)
 						g.ShuffleEncounterDeck()
-						g.Logf("Hairbag shuffles back into the encounter deck")
+						g.TLogf("c.hairbagShufflesBackIntoTheEncounterDeck")
 						return nil
 					}
 				}
@@ -580,7 +580,7 @@ func registerNastyBoys() {
 			if _, ok := g.EncounterDiscard.Remove(card.ID); ok {
 				g.EncounterDeck = append(g.EncounterDeck, card)
 				g.ShuffleEncounterDeck()
-				g.Logf("Hairbag shuffles back into the encounter deck")
+				g.TLogf("c.hairbagShufflesBackIntoTheEncounterDeck")
 			}
 			return nil
 		},
@@ -626,7 +626,7 @@ func registerNastyBoys() {
 			mn := g.Minions[e.EID()]
 			if mn != nil {
 				mn.Counters++
-				g.Logf("Slab grows (+%d ATK this attack)", mn.Counters)
+				g.TLogf("c.slabGrowsAtkThisAttack", mn.Counters)
 			}
 			return nil
 		},
@@ -652,7 +652,7 @@ func registerNastyBoys() {
 				}
 			}
 			s.Threat += n
-			g.Logf("Get Nasty starts with %d threat (%d minions)", n, len(g.Minions))
+			g.TLogf("c.getNastyStartsWithThreatMinions", n, len(g.Minions))
 			return nil
 		},
 	})

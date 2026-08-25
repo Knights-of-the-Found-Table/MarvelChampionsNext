@@ -137,7 +137,7 @@ func TestGoldenCityDrawsTwo(t *testing.T) {
 	// answer it via label drill: choose by matching label
 	var path []string
 	for _, c := range pq.Question.Choices {
-		if strings.HasPrefix(c.Label, "Exhaust The Golden City") {
+		if strings.HasPrefix(c.Label.Text, "Exhaust The Golden City") {
 			path = []string{c.ID}
 		}
 	}
@@ -180,7 +180,7 @@ func TestFocusedRageDraws(t *testing.T) {
 	pq := g.Pending()
 	var path []string
 	for _, c := range pq.Question.Choices {
-		if strings.Contains(c.Label, "Focused Rage") {
+		if strings.Contains(c.Label.Text, "Focused Rage") {
 			path = []string{c.ID}
 		}
 	}

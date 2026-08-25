@@ -21,7 +21,7 @@ func registerVenomScenario() {
 			if !(d.Source.Is(engine.KindPlayer) || d.Source.Is(engine.KindAlly)) {
 				return nil
 			}
-			g.Logf("Vengeance: Venom banks a facedown boost card")
+			g.TLogf("c.vengeanceVenomBanksAFacedownBoostCard")
 			return []engine.Message{engine.DealBoost{Enemy: e.EID()}}
 		}
 		if base != "27073" {
@@ -85,10 +85,10 @@ func registerVenomScenario() {
 			// prevent the damage by pre-marking; the handler still runs
 			// so damage is applied — the counters are the tracked race).
 			env.Counters += d.Damage
-			g.Logf("The Bell Tower chimes (%d counters)", env.Counters)
+			g.TLogf("c.theBellTowerChimesCounters", env.Counters)
 			if env.Counters >= 3*len(g.Players) && env.Code == "27077a" {
 				env.Code = "27077b"
-				g.LogMajorf("The Bell Tower rings!")
+				g.TLogMajorf("c.theBellTowerRings")
 			}
 			return nil
 		},
@@ -115,7 +115,7 @@ func registerVenomScenario() {
 				if env != nil && env.Code[:5] == "27077" {
 					env.Counters = 0
 					env.Code = "27077a"
-					g.Logf("The Bell Tower falls silent")
+					g.TLogf("c.theBellTowerFallsSilent")
 				}
 			}
 			return nil
@@ -160,7 +160,7 @@ func registerVenomScenario() {
 			for _, env := range g.Environments {
 				if env != nil && env.Code[:5] == "27077" && env.Counters > 0 {
 					env.Counters--
-					g.Logf("Biting Retort removes a chime counter")
+					g.TLogf("c.bitingRetortRemovesAChimeCounter")
 				}
 			}
 			return nil
@@ -205,15 +205,15 @@ func registerMysterio() {
 				switch to {
 				case "discard":
 					fp.Discard = append(fp.Discard, c)
-					g.Logf("%s joins %s's discard pile", c.Def().Name, fp.Name)
+					g.TLogf("c.joinsSDiscardPile", c, fp.Name)
 					continue
 				case "bottom":
 					fp.Deck = append(fp.Deck, c)
-					g.Logf("%s goes to the bottom of %s's deck", c.Def().Name, fp.Name)
+					g.TLogf("c.goesToTheBottomOfSDeck", c, fp.Name)
 					continue
 				case "top":
 					fp.Deck = append([]engine.Card{c}, fp.Deck...)
-					g.Logf("%s goes on top of %s's deck", c.Def().Name, fp.Name)
+					g.TLogf("c.goesOnTopOfSDeck", c, fp.Name)
 					continue
 				}
 			}
@@ -242,7 +242,7 @@ func registerMysterio() {
 					// Shuffle the encounter top into each player deck —
 					// skipped (encounter cards in player decks are not
 					// modeled); noted approximation.
-					g.Logf("Creeping Fear whispers (deck-seeding approximated away)")
+					g.TLogf("c.creepingFearWhispersDeckSeedingApproximatedAway")
 					return nil
 				}
 				var msgs []engine.Message
@@ -262,7 +262,7 @@ func registerMysterio() {
 			for _, p := range g.Players {
 				m := &engine.Minion{ID: g.NextEntityID("minion"), Code: "27091", MaxHP: 3, AttackVal: 1, SchemeVal: 1}
 				g.AddMinion(m, p.ID)
-				g.Logf("A Shifting Apparition engages %s", p.Name)
+				g.TLogf("c.aShiftingApparitionEngages", p.Name)
 			}
 			return msgs
 		},
@@ -290,7 +290,7 @@ func registerMysterio() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 1 resource → discard Humongous Hallucination", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1ResourceDiscardHumongousHallucination"), Type: engine.AbilityAction,
 				Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{

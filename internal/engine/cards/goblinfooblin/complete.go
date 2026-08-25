@@ -6,8 +6,6 @@ package goblinfooblin
 // marker registrations here so the survey reflects them.
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -33,12 +31,12 @@ func registerRemainingGob() {
 			}
 			_ = addInfamy // infamy option mutates on selection via nil msgs; use a marker
 			picks := []engine.Choice{
-				engine.Choice{ID: "boost", Label: "Give the villain 1 facedown boost card", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "boost", Label: engine.Tf("c.giveTheVillain1FacedownBoostCard"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DealBoost{Enemy: villain}),
-				engine.Choice{ID: "infamy", Label: "Place 2 infamy counters on Criminal Enterprise", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "infamy", Label: engine.Tf("c.place2InfamyCountersOnCriminalEnterprise"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.AddInfamyMsg{Env: "02006a", N: 2, OrMadness: 2}),
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Hired Gun:", picks...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.hiredGun"), picks...)}}
 		},
 		Boost: boostInfamy(1),
 	})
@@ -128,7 +126,7 @@ func registerRemainingGob() {
 					mn.AttackVal++
 				}
 			}
-			g.Logf("Goblin Nation: each Goblin enemy gets +1 ATK")
+			g.TLogf("c.goblinNationEachGoblinEnemyGets1Atk")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -180,10 +178,10 @@ func registerRemainingGob() {
 				}
 				if c.Def().Type == "minion" && c.Def().HasTrait("goblin") {
 					msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-						fmt.Sprintf("%s discarded: take 3 damage or put it into play engaged with you?", c.Def().Name),
-						engine.Choice{ID: "dmg", Label: "Take 3 damage", Kind: engine.ChoiceLabel}.
+						engine.Tf("c.discardedTake3DamageOrPutItIntoPlayEngagedWithYou", c),
+						engine.Choice{ID: "dmg", Label: engine.Tf("c.take3Damage"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.DamageEntity{Target: p.ID, Damage: 3, Source: t.ID}),
-						engine.Choice{ID: "play", Label: "Put into play engaged with you", Kind: engine.ChoiceLabel}.
+						engine.Choice{ID: "play", Label: engine.Tf("c.putIntoPlayEngagedWithYou"), Kind: engine.ChoiceLabel}.
 							Msgs(engine.RevealEncounterCard{Player: p.ID, Card: c}),
 					)})
 				} else {
@@ -201,12 +199,12 @@ func registerRemainingGob() {
 			for id := range g.Villains {
 				villain = id
 			}
-			pay := g.CustomPaymentQuestion(p, 2, "Intimidation: spend 2 resources or give the villain a boost card",
+			pay := g.CustomPaymentQuestion(p, 2, engine.S("Intimidation: spend 2 resources or give the villain a boost card"),
 				map[string]any{"player": p.ID.String()})
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Intimidation: pay 2 resources or boost the villain?",
-				engine.Choice{ID: "pay", Label: "Pay 2 resources", Kind: engine.ChoiceLabel}.WithThen(pay),
-				engine.Choice{ID: "boost", Label: "Give the villain 1 facedown boost card", Kind: engine.ChoiceLabel}.
+				engine.Tf("c.intimidationPay2ResourcesOrBoostTheVillain"),
+				engine.Choice{ID: "pay", Label: engine.Tf("c.pay2Resources"), Kind: engine.ChoiceLabel}.WithThen(pay),
+				engine.Choice{ID: "boost", Label: engine.Tf("c.giveTheVillain1FacedownBoostCard"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DealBoost{Enemy: villain}),
 			)}}
 		},
@@ -331,7 +329,7 @@ func registerRemainingGob() {
 						q.Discard = append(q.Discard, c)
 					}
 				}
-				g.Logf("Power Drain: each player discards %d card(s)", icons)
+				g.TLogf("c.powerDrainEachPlayerDiscardsCardS", icons)
 			}
 			return nil
 		},
@@ -425,12 +423,12 @@ func registerRemainingGob() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			var msgs []engine.Message
 			for _, q := range g.Players {
-				pay := g.CustomPaymentQuestion(q, 2, "Running Interference: spend 2 resources or place 2 threat",
+				pay := g.CustomPaymentQuestion(q, 2, engine.S("Running Interference: spend 2 resources or place 2 threat"),
 					map[string]any{"player": q.ID.String()})
 				msgs = append(msgs, engine.AskQuestion{Player: q.ID, Question: engine.Ask(
-					"Running Interference: pay 2 resources or place 2 threat here?",
-					engine.Choice{ID: "pay", Label: "Pay 2 resources", Kind: engine.ChoiceLabel}.WithThen(pay),
-					engine.Choice{ID: "threat", Label: "Place 2 threat here", Kind: engine.ChoiceLabel}.
+					engine.Tf("c.runningInterferencePay2ResourcesOrPlace2ThreatHere"),
+					engine.Choice{ID: "pay", Label: engine.Tf("c.pay2Resources"), Kind: engine.ChoiceLabel}.WithThen(pay),
+					engine.Choice{ID: "threat", Label: engine.Tf("c.place2ThreatHere"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.SchemeThreat{Scheme: e.EID(), N: 2, Source: q.ID}),
 				)})
 			}
@@ -455,7 +453,7 @@ func registerRemainingGob() {
 					if r == "mental" || r == "physical" {
 						p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 						p.Discard = append(p.Discard, c)
-						g.Logf("%s discards %s (Tombstone)", p.Name, c.Def().Name)
+						g.TLogf("c.discardsTombstone", p.Name, c)
 						return nil
 					}
 				}
@@ -475,7 +473,7 @@ func registerRemainingGob() {
 	engine.RegisterBehavior("02049", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [mental] → discard Media Coverage", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendMentalDiscardMediaCoverage"), Type: engine.AbilityAction,
 				Cost: 1, CostIcons: "mental:1", AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -505,7 +503,7 @@ func boostInfamy(n int) func(g *engine.Game, card engine.Card) []engine.Message 
 func addInfamy(g *engine.Game, n int) []engine.Message {
 	if env := g.EnvironmentByCode("02006a"); env != nil {
 		env.Counters += n
-		g.Logf("Criminal Enterprise gains %d infamy counter(s) (%d total)", n, env.Counters)
+		g.TLogf("c.criminalEnterpriseGainsInfamyCounterSTotal", n, env.Counters)
 		return nil
 	}
 	if env := g.EnvironmentByCode("02006b"); env != nil {
@@ -513,7 +511,7 @@ func addInfamy(g *engine.Game, n int) []engine.Message {
 		if env.Counters < 0 {
 			env.Counters = 0
 		}
-		g.Logf("State of Madness loses %d madness counter(s) (%d left)", n, env.Counters)
+		g.TLogf("c.stateOfMadnessLosesMadnessCounterSLeft", n, env.Counters)
 		if env.Counters == 0 {
 			for id, v := range g.Villains {
 				flipToNorman(g, v, env)
@@ -539,7 +537,7 @@ func healVillainsGob(g *engine.Game, n int) bool {
 			d := min(n, v.Damage)
 			v.Damage -= d
 			healed = true
-			g.Logf("%s heals %d damage", v.EDef().Name, d)
+			g.TLogf("log.heals", v, d)
 		}
 	}
 	return healed
@@ -584,7 +582,7 @@ func derefBoost(c engine.Card) int {
 func removalAbilityGob(label, icons string, cost int) func(g *engine.Game, e engine.Entity) []engine.Ability {
 	return func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: label, Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
+			Label: engine.S(label), Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				a := g.Attachments[self]
 				if a == nil {
@@ -592,7 +590,7 @@ func removalAbilityGob(label, icons string, cost int) func(g *engine.Game, e eng
 				}
 				g.Delete(self)
 				g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
-				g.Logf("%s is discarded", a.EDef().Name)
+				g.TLogf("log.discarded", a)
 				return nil
 			},
 		}}

@@ -45,7 +45,7 @@ func registerThor() {
 				return nil
 			}
 			g.UsedThisTurn[key] = true
-			g.Logf("Have at thee! — %s draws 2 cards", p.Name)
+			g.TLogf("c.haveAtTheeDraws2Cards", p.Name)
 			return []engine.Message{engine.DrawCards{Player: p.ID, N: 2}}
 		},
 		// Asgard location (06007) in play grants +1 hand size. Only
@@ -69,7 +69,7 @@ func registerThor() {
 		// Shuffle. Limit once per round.
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Worthy — search your deck and discard for Mjolnir",
+				Label:        engine.Tf("c.worthySearchYourDeckAndDiscardForMjolnir"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -82,7 +82,7 @@ func registerThor() {
 					for _, c := range pl.Deck {
 						if c.Code == "06009" {
 							deckChoices = append(deckChoices, engine.Choice{
-								Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.TakeDeckCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -92,7 +92,7 @@ func registerThor() {
 					for _, c := range pl.Discard {
 						if c.Code == "06009" {
 							discardChoices = append(discardChoices, engine.Choice{
-								Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ReturnDiscardCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -101,15 +101,15 @@ func registerThor() {
 					}
 					all := append(deckChoices, discardChoices...)
 					if len(all) == 0 {
-						g.Logf("Worthy — Mjolnir is not in deck or discard; shuffling")
+						g.TLogf("c.worthyMjolnirIsNotInDeckOrDiscardShuffling")
 						return []engine.Message{engine.ShufflePlayerDeck{Player: pl.ID}}
 					}
 					all = append(all, engine.Choice{
-						ID: "skip", Label: "Skip (still shuffle)", Kind: engine.ChoicePass,
+						ID: "skip", Label: engine.Tf("c.skipStillShuffle"), Kind: engine.ChoicePass,
 					}.Msgs(engine.ShufflePlayerDeck{Player: pl.ID}))
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Worthy — take Mjolnir from your deck or discard", all...),
+						Question: engine.Ask(engine.Tf("c.worthyTakeMjolnirFromYourDeckOrDiscard"), all...),
 					}}
 				},
 			}}
@@ -141,7 +141,7 @@ func registerLadySif() {
 			if p == nil {
 				return nil
 			}
-			g.Logf("Lady Sif readies %s", p.Name)
+			g.TLogf("c.ladySifReadies", p.Name)
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		},
 	})
@@ -165,7 +165,7 @@ func registerDefenderOfTheNineRealms() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Defender of the Nine Realms — choose a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.defenderOfTheNineRealmsChooseAScheme"), choices...),
 			}}
 		},
 	})
@@ -185,7 +185,7 @@ func registerForAsgard() {
 			for _, c := range p.Deck {
 				if c.Def().HasTrait("asgard") {
 					deckChoices = append(deckChoices, engine.Choice{
-						Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.TakeDeckCard{Player: pid, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: pid},
@@ -195,7 +195,7 @@ func registerForAsgard() {
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("asgard") {
 					discardChoices = append(discardChoices, engine.Choice{
-						Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.ShuffleIntoDeck{Player: pid, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: pid},
@@ -204,15 +204,15 @@ func registerForAsgard() {
 			}
 			all := append(deckChoices, discardChoices...)
 			if len(all) == 0 {
-				g.Logf("For Asgard! — no Asgard card in deck or discard")
+				g.TLogf("c.forAsgardNoAsgardCardInDeckOrDiscard")
 				return []engine.Message{engine.ShufflePlayerDeck{Player: pid}}
 			}
 			all = append(all, engine.Choice{
-				ID: "skip", Label: "Skip (still shuffle)", Kind: engine.ChoicePass,
+				ID: "skip", Label: engine.Tf("c.skipStillShuffle"), Kind: engine.ChoicePass,
 			}.Msgs(engine.ShufflePlayerDeck{Player: pid}))
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("For Asgard! — take an Asgard card", all...),
+				Question: engine.Ask(engine.Tf("c.forAsgardTakeAnAsgardCard"), all...),
 			}}
 		},
 	})
@@ -236,7 +236,7 @@ func registerHammerThrow() {
 				}
 			}
 			if mjolnir == nil || mjolnir.Exhausted {
-				g.Logf("Hammer Throw — no ready Mjolnir in play")
+				g.TLogf("c.hammerThrowNoReadyMjolnirInPlay")
 				return nil
 			}
 			choices := cardutil.EnemyChoices(g, 8, pid, func(target engine.EntityID) []engine.Message {
@@ -251,7 +251,7 @@ func registerHammerThrow() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Hammer Throw — deal 8 damage and return Mjolnir to your hand", choices...),
+				Question: engine.Ask(engine.Tf("c.hammerThrowDeal8DamageAndReturnMjolnirToYourHand"), choices...),
 			}}
 		},
 	})
@@ -275,20 +275,20 @@ func registerLightningStrike() {
 				maxPay += len(c.Def().Resources)
 			}
 			if maxPay == 0 {
-				g.Logf("Lightning Strike — no resources available")
+				g.TLogf("c.lightningStrikeNoResourcesAvailable")
 				return nil
 			}
 			var amtChoices []engine.Choice
 			for x := 1; x <= maxPay; x++ {
 				x := x
 				amtChoices = append(amtChoices, engine.Choice{
-					ID: fmt.Sprintf("x-%d", x), Label: fmt.Sprintf("Deal %d damage to each target", x),
+					ID: fmt.Sprintf("x-%d", x), Label: engine.Tf("c.dealDamageToEachTarget", x),
 					Kind: engine.ChoiceLabel,
 				}.Msgs(lightningStrikeMessages(g, p, x)...))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Lightning Strike — choose X to spend", amtChoices...),
+				Question: engine.Ask(engine.Tf("c.lightningStrikeChooseXToSpend"), amtChoices...),
 			}}
 		},
 	})
@@ -356,7 +356,7 @@ func registerThorsHelmet() {
 				return nil
 			}
 			p.MaxHP += 5
-			g.Logf("Thor's Helmet grants +5 HP to %s (now %d)", p.Name, p.MaxHP)
+			g.TLogf("c.thorSHelmetGrants5HpToNow", p.Name, p.MaxHP)
 			return nil
 		},
 	})
@@ -408,7 +408,7 @@ func registerFamilyFeud() {
 				if s.Threat > s.MaxThreat {
 					s.Threat = s.MaxThreat
 				}
-				g.Logf("Family Feud gains %d threat from Asgard cards (now %d)", n, s.Threat)
+				g.TLogf("c.familyFeudGainsThreatFromAsgardCardsNow", n, s.Threat)
 			}
 			return nil
 		},
@@ -443,10 +443,10 @@ func registerLoki() {
 			}
 			def := card.Def()
 			if def.Type != "treachery" {
-				g.Logf("Loki's self-resolve discarded %s (not a treachery)", def.Name)
+				g.TLogf("c.lokiSSelfResolveDiscardedNotATreachery", def.Name)
 				return nil
 			}
-			g.Logf("Loki's self-resolve! Top is %s — Loki heals to full", def.Name)
+			g.TLogf("c.lokiSSelfResolveTopIsLokiHealsToFull", def.Name)
 			mn.Damage = 0
 			return nil
 		},
@@ -484,7 +484,7 @@ func registerTrickster() {
 					Scheme: g.MainScheme.ID, N: len(discarded), Source: t.ID,
 				})
 			}
-			g.Logf("Trickster discards %d cards and places %d threat on the main scheme", len(discarded), len(discarded))
+			g.TLogf("c.tricksterDiscardsCardsAndPlacesThreatOnTheMainScheme", len(discarded), len(discarded))
 			return msgs
 		},
 	})
@@ -533,13 +533,13 @@ func registerObligation() {
 					}
 					msgs = append(msgs, stunAndDiscard...)
 					combined = append(combined, engine.Choice{
-						Label: m.label, Kind: engine.ChoiceCard, CardCode: "06009",
+						Label: engine.S(m.label), Kind: engine.ChoiceCard, CardCode: "06009",
 					}.Msgs(msgs...))
 				}
-				penaltySubtree = engine.Ask("Odin's Anger — choose a Mjolnir to discard", combined...)
+				penaltySubtree = engine.Ask(engine.Tf("c.odinSAngerChooseAMjolnirToDiscard"), combined...)
 			} else {
-				penaltySubtree = engine.Ask("Odin's Anger — no Mjolnir; you are stunned",
-					engine.Choice{ID: "stun", Label: "Stun", Kind: engine.ChoiceLabel}.Msgs(stunAndDiscard...),
+				penaltySubtree = engine.Ask(engine.Tf("c.odinSAngerNoMjolnirYouAreStunned"),
+					engine.Choice{ID: "stun", Label: engine.Tf("c.stun"), Kind: engine.ChoiceLabel}.Msgs(stunAndDiscard...),
 				)
 			}
 			var removeMsgs []engine.Message
@@ -550,15 +550,15 @@ func registerObligation() {
 				engine.ExhaustEntity{ID: p.ID},
 				engine.ObligationResolve{Player: p.ID, Card: card, Remove: true},
 			)
-			root := engine.Ask("Odin's Anger — choose:",
+			root := engine.Ask(engine.Tf("c.odinSAngerChoose"),
 				engine.Choice{
 					ID:    "remove",
-					Label: "Exhaust Odinson → remove Odin's Anger from the game",
+					Label: engine.Tf("c.exhaustOdinsonRemoveOdinSAngerFromTheGame"),
 					Kind:  engine.ChoiceLabel,
 				}.Msgs(removeMsgs...),
 				engine.Choice{
 					ID:    "penalty",
-					Label: "Discard Mjolnir; you are stunned",
+					Label: engine.Tf("c.discardMjolnirYouAreStunned"),
 					Kind:  engine.ChoiceLabel,
 				}.WithThen(penaltySubtree),
 			)

@@ -34,10 +34,10 @@ func flipShadowcatForm(g *engine.Game, p *engine.Player) {
 		if u := g.Upgrades[id]; u != nil && data.BaseCode(u.Code) == "32031" {
 			if u.Code == "32031b" {
 				u.Code = "32031a"
-				g.Logf("Shadowcat flips to Solid mass form")
+				g.TLogf("c.shadowcatFlipsToSolidMassForm")
 			} else {
 				u.Code = "32031b"
-				g.Logf("Shadowcat flips to Phased mass form")
+				g.TLogf("c.shadowcatFlipsToPhasedMassForm")
 			}
 			return
 		}
@@ -52,7 +52,7 @@ func shadowcatSetup(g *engine.Game, p *engine.Player) []engine.Message {
 	}
 	g.Upgrades[u.ID] = u
 	p.Upgrades = append(p.Upgrades, u.ID)
-	g.Logf("Shadowcat starts in Solid mass form")
+	g.TLogf("c.shadowcatStartsInSolidMassForm")
 	return nil
 }
 
@@ -91,7 +91,7 @@ func registerShadowcatPack() {
 			}
 			phased := shadowcatForm(g, p) == "phased"
 			if phased {
-				return cardutil.ChooseScheme("Lockheed", func(g *engine.Game, e engine.Entity) int { return 2 })(g, e)
+				return cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Lockheed"), func(g *engine.Game, e engine.Entity) int { return 2 })(g, e)
 			}
 			choices := cardutil.EnemyChoices(g, 2, p.ID, func(target engine.EntityID) []engine.Message {
 				return []engine.Message{engine.DamageEntity{Target: target, Damage: 2, Source: p.ID}}
@@ -101,7 +101,7 @@ func registerShadowcatPack() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Lockheed — deal 2 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.lockheedDeal2Damage"), choices...),
 			}}
 		},
 	})
@@ -110,7 +110,7 @@ func registerShadowcatPack() {
 	engine.RegisterBehavior("32033", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Kitty's Room — heal 2 (solid) or draw 1 (phased)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.kittySRoomHeal2SolidOrDraw1Phased"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -147,7 +147,7 @@ func registerShadowcatPack() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + cardutil.EnemyLabel(en), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.attachTo2", cardutil.EnemyLabel(en)), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			if len(choices) == 0 {
@@ -155,7 +155,7 @@ func registerShadowcatPack() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   e.EOwner(),
-				Question: engine.Ask("Phased and Confused — attach to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.phasedAndConfusedAttachToAnEnemy"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -176,7 +176,7 @@ func registerShadowcatPack() {
 				return nil
 			}
 			g.Delete(u.ID)
-			g.Logf("Phased and Confused — the attack fizzles and the enemy is confused")
+			g.TLogf("c.phasedAndConfusedTheAttackFizzlesAndTheEnemyIsConfused")
 			return []engine.Message{engine.ConfuseEntity{Target: u.AttachTo}}
 		},
 	})
@@ -196,7 +196,7 @@ func registerShadowcatPack() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Shadowcat Surprise — deal 3 damage and ready your hero", choices...),
+				Question: engine.Ask(engine.Tf("c.shadowcatSurpriseDeal3DamageAndReadyYourHero"), choices...),
 			}}
 		},
 	})
@@ -204,14 +204,14 @@ func registerShadowcatPack() {
 	// 32038 Phase Strike: 6 damage (the phased attachment-discard rider is
 	// not modeled).
 	engine.RegisterBehavior("32038", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Phase Strike", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.phaseStrike"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 6, nil
 		}),
 	})
 
 	// 32039 Airwalk: remove 2 threat (4 in Phased mass form).
 	engine.RegisterBehavior("32039", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Airwalk", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Airwalk"), func(g *engine.Game, e engine.Entity) int {
 			p := g.Player(e.EOwner())
 			if p != nil && shadowcatForm(g, p) == "phased" {
 				return 4
@@ -240,16 +240,16 @@ func registerShadowcatPack() {
 				flipShadowcatForm(g, p)
 			}
 			choices := []engine.Choice{engine.Choice{
-				ID: "keep", Label: "Keep Permanently Phased in play", Kind: engine.ChoiceLabel,
+				ID: "keep", Label: engine.Tf("c.keepPermanentlyPhasedInPlay"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})}
 			if !p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "exhaust", Label: "Exhaust your identity → remove from the game", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustYourIdentityRemoveFromTheGame"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Permanently Phased — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.permanentlyPhasedChoose"), choices...),
 			}}
 		},
 	})
@@ -316,7 +316,7 @@ func registerShadowcatNemesis() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Telepathic Restraint — spend [mental][mental] → discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.telepathicRestraintSpendMentalMentalDiscard"), Type: engine.AbilityAction,
 				Cost: 2, CostIcons: "mental:2",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}

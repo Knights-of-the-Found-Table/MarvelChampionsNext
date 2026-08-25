@@ -34,7 +34,7 @@ func registerCWLeaderScenarios() {
 					v.SetVillainStages(normalLadder(v.Code))
 				}
 				cwFindAttach(g, attachCode, v.ID)
-				g.Logf("%s prepares for the showdown", v.EDef().Name)
+				g.TLogf("c.preparesForTheShowdown", v)
 			}
 			return nil
 		}

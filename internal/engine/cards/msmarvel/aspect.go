@@ -47,7 +47,7 @@ func registerNova() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Nova — spend an [energy] resource: deal 2 damage to the attacker",
+				Label:    engine.Tf("c.novaSpendAnEnergyResourceDeal2DamageToTheAttacker"),
 				Type:     engine.AbilityTrigger,
 				Trigger:  engine.TriggerVillainAttacksYou,
 				Exhaust:  true,
@@ -81,7 +81,7 @@ func registerNova() {
 							continue
 						}
 						out = append(out, engine.Choice{
-							Label: "Spend " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Spend " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 							engine.DamageEntity{Target: atk, Damage: 2, Source: p.ID},
@@ -92,7 +92,7 @@ func registerNova() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Nova — spend an [energy] resource", out...),
+						Question: engine.Ask(engine.Tf("c.novaSpendAnEnergyResource"), out...),
 					}}
 				},
 			}}
@@ -110,7 +110,7 @@ func registerGetBehindMe() {
 				return nil
 			}
 			for id := range g.Villains {
-				g.Logf("%s plays Get Behind Me!", p.Name)
+				g.TLogf("c.playsGetBehindMe", p.Name)
 				return []engine.Message{engine.VillainActivates{VillainID: id, Player: p.ID}}
 			}
 			return nil
@@ -130,7 +130,7 @@ func registerPreemptiveStrike() {
 			}
 			n := v.BoostCount
 			v.BoostCount = 0
-			g.Logf("Preemptive Strike cancels %d boost icons", n)
+			g.TLogf("c.preemptiveStrikeCancelsBoostIcons", n)
 			d := engine.Defends{Defender: p.ID, Against: against, Undefended: true}
 			return d, []engine.Message{engine.DamageEntity{Target: against, Damage: n, Source: p.ID}}, true
 		},
@@ -159,7 +159,7 @@ func registerTackle() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Tackle — stun an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.tackleStunAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -182,13 +182,13 @@ func registerEnergyBarrier() {
 				return 0, 0
 			}
 			u.Counters -= use
-			g.Logf("Energy Barrier prevents %d damage (%d counters left)", use, u.Counters)
+			g.TLogf("c.energyBarrierPreventsDamageCountersLeft", use, u.Counters)
 			return use, use
 		},
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if u, ok := e.(*engine.Upgrade); ok {
 				u.Counters = 3
-				g.Logf("Energy Barrier enters play with 3 reflection counters")
+				g.TLogf("c.energyBarrierEntersPlayWith3ReflectionCounters")
 			}
 			return nil
 		},
@@ -216,7 +216,7 @@ func registerAvengersMansion() {
 	engine.RegisterBehavior("05022", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:   "Avengers Mansion — a player draws 1 card",
+				Label:   engine.Tf("c.avengersMansionAPlayerDraws1Card"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -230,12 +230,12 @@ func registerAvengersMansion() {
 					var choices []engine.Choice
 					for _, pl := range g.Players {
 						choices = append(choices, engine.Choice{
-							Label: pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+							Label: engine.S(pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 						}.Msgs(engine.DrawCards{Player: pl.ID, N: 1}))
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Avengers Mansion — who draws?", choices...),
+						Question: engine.Ask(engine.Tf("c.avengersMansionWhoDraws"), choices...),
 					}}
 				},
 			}}
@@ -252,12 +252,12 @@ func registerEndurance() {
 			var choices []engine.Choice
 			for _, pl := range g.Players {
 				choices = append(choices, engine.Choice{
-					Label: pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+					Label: engine.S(pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: pl.ID, MaxHP: 3}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Endurance — who gets +3 hit points?", choices...),
+				Question: engine.Ask(engine.Tf("c.enduranceWhoGets3HitPoints"), choices...),
 			}}
 		},
 	})
@@ -271,7 +271,7 @@ func registerEnhancedReflexes() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if u, ok := e.(*engine.Upgrade); ok {
 				u.Counters = 3
-				g.Logf("Enhanced Reflexes enters play with 3 energy counters")
+				g.TLogf("c.enhancedReflexesEntersPlayWith3EnergyCounters")
 			}
 			return nil
 		},
@@ -307,11 +307,11 @@ func registerMelee() {
 				first = append(first, engine.Choice{
 					Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: enemy.ECode(),
-				}.WithThen(engine.Ask("Melee — the other enemy", second...)))
+				}.WithThen(engine.Ask(engine.Tf("c.meleeTheOtherEnemy"), second...)))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Melee — first enemy (3 damage each)", first...),
+				Question: engine.Ask(engine.Tf("c.meleeFirstEnemy3DamageEach"), first...),
 			}}
 		},
 	})
@@ -339,7 +339,7 @@ func registerConcussiveBlow() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Concussive Blow — confuse an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.concussiveBlowConfuseAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -355,14 +355,14 @@ func registerMoraleBoost() {
 			for _, pl := range g.Players {
 				pl := pl
 				choices = append(choices, engine.Choice{
-					Label: pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+					Label: engine.S(pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 				}.Msgs(engine.ApplyStatBonus{
 					Target: pl.ID, THW: 1, ATK: 1, DEF: 1,
 				}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Morale Boost — which hero?", choices...),
+				Question: engine.Ask(engine.Tf("c.moraleBoostWhichHero"), choices...),
 			}}
 		},
 	})
@@ -383,12 +383,12 @@ func registerDownTime() {
 			var choices []engine.Choice
 			for _, pl := range g.Players {
 				choices = append(choices, engine.Choice{
-					Label: pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+					Label: engine.S(pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: pl.ID}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Down Time — under whose control?", choices...),
+				Question: engine.Ask(engine.Tf("c.downTimeUnderWhoseControl"), choices...),
 			}}
 		},
 	})

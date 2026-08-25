@@ -10,7 +10,7 @@ import (
 func registerAspectCards() {
 	// For Justice!: remove 3 threat (4 if paid with a mental resource).
 	engine.RegisterBehavior("01060", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("For Justice!", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "For Justice!"), func(g *engine.Game, e engine.Entity) int {
 			if ec, ok := e.(*engine.EventCard); ok && ec.Paid.PaidIcon("mental") {
 				return 4
 			}
@@ -20,7 +20,7 @@ func registerAspectCards() {
 
 	// Uppercut: deal 5 damage to an enemy.
 	engine.RegisterBehavior("01054", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Uppercut — deal 5 damage", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.uppercutDeal5Damage"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			n := 5
 			if ec, ok := e.(*engine.EventCard); ok && ec.Paid.PaidIcon("physical") {
 				// physical rider: +2 damage (approximation of the
@@ -33,7 +33,7 @@ func registerAspectCards() {
 
 	// Relentless Assault: deal 5 damage to a minion.
 	engine.RegisterBehavior("01053", &engine.Behavior{
-		OnPlay: cardutil.ChooseMinion("Relentless Assault — deal 5 damage", 5),
+		OnPlay: cardutil.ChooseMinion(engine.Tf("c.relentlessAssaultDeal5Damage"), 5),
 	})
 
 	// First Aid: heal 2 damage from any character (approximation: heal
@@ -48,13 +48,13 @@ func registerAspectCards() {
 			var choices []engine.Choice
 			if p.Damage > 0 {
 				choices = append(choices, engine.Choice{
-					Label: "Heal " + p.Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.S("Heal " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.HealEntity{Target: p.ID, N: 2}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Damage > 0 {
 					choices = append(choices, engine.Choice{
-						Label: "Heal " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.S("Heal " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.HealEntity{Target: id, N: 2}))
 				}
 			}
@@ -63,7 +63,7 @@ func registerAspectCards() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("First Aid — heal 2 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.firstAidHeal2Damage"), choices...),
 			}}
 		},
 	})
@@ -90,7 +90,7 @@ func registerAspectCards() {
 				return nil
 			}
 			choices := []engine.Choice{
-				engine.Choice{ID: "draw", Label: "Draw 2 cards", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "draw", Label: engine.Tf("c.draw2Cards"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DrawCards{Player: pid, N: 2}),
 			}
 			if len(g.Enemies()) > 0 {
@@ -102,12 +102,12 @@ func registerAspectCards() {
 					}.Msgs(engine.DamageEntity{Target: id, Damage: 4, Source: pid}))
 				}
 				choices = append(choices, engine.Choice{
-					ID: "damage", Label: "Deal 4 damage to an enemy", Kind: engine.ChoiceLabel,
+					ID: "damage", Label: engine.Tf("c.deal4DamageToAnEnemy"), Kind: engine.ChoiceLabel,
 				}.WithThen(engine.Ask(engine.Tf("q.chooseEnemy"), dmgChoices...)))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Nick Fury — choose one", choices...),
+				Question: engine.Ask(engine.Tf("c.nickFuryChooseOne"), choices...),
 			}}
 		},
 	})

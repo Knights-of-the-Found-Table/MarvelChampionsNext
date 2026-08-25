@@ -17,7 +17,7 @@ func registerSandman() {
 		}
 		env.Counters++
 		n := env.Counters
-		g.Logf("City Streets surges (%d sand counters, milling %d)", n, n)
+		g.TLogf("c.cityStreetsSurgesSandCountersMilling", n, n)
 		for i := 0; i < n && len(g.EncounterDeck) > 0; i++ {
 			c := g.EncounterDeck[0]
 			g.EncounterDeck = g.EncounterDeck[1:]
@@ -42,7 +42,7 @@ func registerSandman() {
 				// approximated as +2 damage follow-up) and Surging Sands
 				// when the identity is hurt.
 				if base != "27063" {
-					g.Logf("Sand Blast scatters the attack")
+					g.TLogf("c.sandBlastScattersTheAttack")
 					return []engine.Message{
 						engine.DamageEntity{Target: p.ID, Damage: 2, Source: e.EID()},
 					}
@@ -91,7 +91,7 @@ func registerSandman() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust a character you control → remove sand counters equal to its ATK", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustACharacterYouControlRemoveSandCountersEqualToItsAtk"), Type: engine.AbilityAction,
 				OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -101,14 +101,14 @@ func registerSandman() {
 					var picks []engine.Choice
 					if !p.Exhausted {
 						picks = append(picks, engine.Choice{
-							ID: "self", Label: p.Name + " (ATK " + itoa(max(0, p.AttackStat(g))) + ")", Kind: engine.ChoiceLabel,
+							ID: "self", Label: engine.S(p.Name + " (ATK " + itoa(max(0, p.AttackStat(g))) + ")"), Kind: engine.ChoiceLabel,
 						}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.AddEntityCounter{ID: self, N: -max(1, p.AttackStat(g))}))
 					}
 					for _, id := range p.Allies {
 						if a := g.Allies[id]; a != nil && !a.Exhausted {
 							n := max(1, a.AttackVal)
 							picks = append(picks, engine.Choice{
-								Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+								Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 							}.Msgs(engine.ExhaustEntity{ID: id}, engine.AddEntityCounter{ID: self, N: -n}))
 						}
 					}
@@ -116,7 +116,7 @@ func registerSandman() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("City Streets: exhaust which character?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.cityStreetsExhaustWhichCharacter"), picks...)}}
 				},
 			}}
 		},
@@ -129,7 +129,7 @@ func registerSandman() {
 			for id := range g.Villains {
 				if v := g.Villains[id]; v != nil && v.Code[:5] == "27061" {
 					t.Target = id
-					g.Logf("Sand Form attaches to Sandman")
+					g.TLogf("c.sandFormAttachesToSandman")
 					return nil
 				}
 			}

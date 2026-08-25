@@ -1,11 +1,12 @@
 package engine
 
-// 消息目录：key → 语言 → 格式串。en 条目与迁移前的英文字面量逐字
-// 一致（默认语言下输出不变，存量测试不受影响）；zh 译文遵循
-// tools/zh/glossary.json 术语表。zh 格式串可用 %[1]s 式显式序号调整
-// 语序（Go fmt 的 %[1]s 方括号形式）。新增界面文案时：调用点写
-// Tf("key", args...)，并在此补齐
-// en/zh 两条。
+// 消息目录：key → 语言 → 格式串（手写核心文案；卡牌包批量迁移条目在
+// i18n_cards_catalog.go，init 时并入）。en 条目与迁移前的英文字面量逐字
+// 一致——en 是引擎与服务端 API 的基准渲染语言（Msg.Text / LogEntry.Text），
+// zh 条目经 /api/v1/locales 导出、由前端按观战者语言渲染，服务端本身
+// 不维护任何客户端语言状态。zh 格式串可用 %[1]s 式显式序号调整语序。
+// 新增界面文案：调用点写 Tf("key", args...)，并在此补齐 en/zh 两条；
+// 完整规范见 i18n.go 顶部的「如何正确实现 i18n」。
 var messages = map[string]map[Lang]string{
 	"log.accelPlaces":                  {LangEn: "Acceleration places %d threat on %s", LangZh: "加速放置 %d 点威胁到 %s"},
 	"log.advancesStage":                {LangEn: "%s advances to stage %s", LangZh: "%s 推进到阶段 %s"},
@@ -252,4 +253,11 @@ var messages = map[string]map[Lang]string{
 	"reason.villainDefeated":           {LangEn: "The villain was defeated", LangZh: "反派被击败"},
 	"reason.wreckingCrewDefeated":      {LangEn: "The Wrecking Crew was defeated", LangZh: "破坏小队被击败"},
 	"reason.xMansionStands":            {LangEn: "The X-Mansion stands — every Brotherhood villain is defeated", LangZh: "X大厦屹立——所有兄弟会反派被击败"},
+
+	// 通用组合格式：动词/数值前缀 + 目标（含嵌套消息，如带血量的敌人标签）。
+	"c.damageN":     {LangEn: "%d damage", LangZh: "%d 点伤害"},
+	"c.damage2Dash": {LangEn: "2 damage — %s", LangZh: "2 点伤害——%s"},
+	"c.nameColon":   {LangEn: "%s: %s", LangZh: "%s：%s"},
+	"c.dash":        {LangEn: "%s — %s", LangZh: "%s——%s"},
+	"c.toughRider":  {LangEn: "%s (discard a tough → stun and confuse)", LangZh: "%s（弃置一张坚韧 → 眩晕并困惑）"},
 }

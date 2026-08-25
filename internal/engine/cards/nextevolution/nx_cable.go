@@ -24,9 +24,9 @@ func registerCableCards() {
 				}
 				msgs = append(msgs, engine.AskQuestion{
 					Player: o.ID,
-					Question: engine.Ask(fmt.Sprintf("Bodyslide: change %s to the same form as %s?", o.Name, p.Name),
-						engine.Choice{ID: "yes", Label: "Change form", Kind: engine.ChoiceLabel}.Msgs(engine.ChangeForm{Player: o.ID}),
-						engine.Choice{ID: "no", Label: "Stay", Kind: engine.ChoicePass}),
+					Question: engine.Ask(engine.Tf("c.bodyslideChangeToTheSameFormAs", o.Name, p.Name),
+						engine.Choice{ID: "yes", Label: engine.Tf("c.changeForm"), Kind: engine.ChoiceLabel}.Msgs(engine.ChangeForm{Player: o.ID}),
+						engine.Choice{ID: "no", Label: engine.Tf("c.stay"), Kind: engine.ChoicePass}),
 				})
 			}
 			return msgs
@@ -36,7 +36,7 @@ func registerCableCards() {
 	// 40003 Mind Scan: remove 3 threat +1 per side scheme in the victory
 	// display.
 	engine.RegisterBehavior("40003", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Mind Scan", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.mindScanChooseAScheme"), func(g *engine.Game, e engine.Entity) int {
 			return 3 + victorySideSchemes(g)
 		}),
 	})
@@ -51,7 +51,7 @@ func registerCableCards() {
 			}
 			x := victorySideSchemes(g)
 			if x == 0 {
-				g.Logf("Precognition: no side schemes in the victory display")
+				g.TLogf("c.precognitionNoSideSchemesInTheVictoryDisplay")
 				return nil
 			}
 			var names []string
@@ -62,21 +62,21 @@ func registerCableCards() {
 			for i := 0; i < x && i < len(g.EncounterDeck); i++ {
 				c := g.EncounterDeck[i]
 				choices = append(choices, engine.Choice{
-					ID: fmt.Sprintf("drop-%d", i), Label: "Discard " + c.Def().Name, Kind: engine.ChoiceLabel,
+					ID: fmt.Sprintf("drop-%d", i), Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.EncounterTakeCard{CardID: c.ID}))
 			}
 			choices = append(choices, cardutil.Skip())
-			g.Logf("Precognition sees: %v", names)
+			g.TLogf("c.precognitionSees", names)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Precognition — discard one of the revealed encounter cards?", choices...),
+				Question: engine.Ask(engine.Tf("c.precognitionDiscardOneOfTheRevealedEncounterCards"), choices...),
 			}}
 		},
 	})
 
 	// 40005 Telekinetic Blast: 6 damage +1 per victory display side scheme.
 	engine.RegisterBehavior("40005", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Telekinetic Blast", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.telekineticBlast"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 6 + victorySideSchemes(g), nil
 		}),
 	})
@@ -88,7 +88,7 @@ func registerCableCards() {
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
 			// The generic defeat handler already moves "Victory" schemes to
 			// the display; this hook only logs the ongoing rider.
-			g.Logf("Technovirus Purge joins the victory display (PSIONIC rider not modeled)")
+			g.TLogf("c.technovirusPurgeJoinsTheVictoryDisplayPsionicRiderNotModeled")
 			return nil
 		},
 	})
@@ -104,7 +104,7 @@ func registerCableCards() {
 			s := e.(*engine.Support)
 			if s.Exhausted {
 				s.Exhausted = false
-				g.Logf("Graymalkin readies")
+				g.TLogf("c.graymalkinReadies")
 			}
 			return nil
 		},
@@ -115,7 +115,7 @@ func registerCableCards() {
 	engine.RegisterBehavior("40008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Professor — draw 1 card or fetch a player side scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.professorDraw1CardOrFetchAPlayerSideScheme"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -129,17 +129,17 @@ func registerCableCards() {
 					}); ok {
 						takeFromZone(p, c, zone)
 						p.Hand = append(p.Hand, c)
-						g.Logf("%s fetches %s from their %s", p.Name, c.Def().Name, zone)
+						g.TLogf("c.fetchesFromTheir", p.Name, c, zone)
 						if zone == "deck" {
 							fetch = append(fetch, engine.ShufflePlayerDeck{Player: p.ID})
 						}
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player: p.ID,
-						Question: engine.Ask("Professor — choose:",
-							engine.Choice{ID: "draw", Label: "Draw 1 card", Kind: engine.ChoiceLabel}.
+						Question: engine.Ask(engine.Tf("c.professorChoose"),
+							engine.Choice{ID: "draw", Label: engine.Tf("c.draw1Card"), Kind: engine.ChoiceLabel}.
 								Msgs(engine.DrawCards{Player: p.ID, N: 1}),
-							engine.Choice{ID: "fetch", Label: "Search for a player side scheme", Kind: engine.ChoiceLabel}.
+							engine.Choice{ID: "fetch", Label: engine.Tf("c.searchForAPlayerSideScheme"), Kind: engine.ChoiceLabel}.
 								Msgs(fetch...),
 						)},
 					}
@@ -172,14 +172,14 @@ func registerCableCards() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: p.ID}))
 					}
 					return []engine.Message{
 						engine.ExhaustEntity{ID: u.ID},
 						engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 						engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-							fmt.Sprintf("Askani'son — spend %s for energy and remove %d threat from:", c.Def().Name, n), choices...)},
+							engine.Tf("c.askaniSonSpendForEnergyAndRemoveThreatFrom", c, n), choices...)},
 					}
 				}
 			}
@@ -205,7 +205,7 @@ func registerCableCards() {
 			}
 			g.VictoryDisplay = append(g.VictoryDisplay, engine.Card{ID: g.NextCardID(), Code: u.Code})
 			g.Delete(u.ID)
-			g.Logf("Forced Amnesia adds the scheme and itself to the victory display")
+			g.TLogf("c.forcedAmnesiaAddsTheSchemeAndItselfToTheVictoryDisplay")
 			return nil
 		},
 	})
@@ -219,11 +219,11 @@ func registerCableCards() {
 				n = 4
 			}
 			return []engine.Ability{{
-				Label: fmt.Sprintf("Plasma Rifle — deal %d damage to an enemy", n), Type: engine.AbilityAction,
+				Label: engine.Tf("c.plasmaRifleDealDamageToAnEnemy", n), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true, CostIcons: "energy:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					_ = self
-					return cardutil.ChooseEnemy("Plasma Rifle", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+					return cardutil.ChooseEnemy(engine.Tf("c.plasmaRifle"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 						return n, nil
 					})(g, e)
 				},
@@ -236,7 +236,7 @@ func registerCableCards() {
 	engine.RegisterBehavior("40012", &engine.Behavior{
 		DamagePrevention: func(g *engine.Game, u *engine.Upgrade, p *engine.Player, n int) (prevented, reflect int) {
 			g.Push(engine.DiscardControlled{Player: u.Owner, ID: u.ID})
-			g.Logf("Telekinetic Force Field prevents %d damage", n)
+			g.TLogf("c.telekineticForceFieldPreventsDamage", n)
 			return n, 0
 		},
 	})
@@ -267,7 +267,7 @@ func registerCableCards() {
 				}
 				g.MainScheme.Threat -= move
 				spawnSideSchemeCard(g, c.Code, move)
-				g.Logf("Temporal Leap removes itself from the game and pulls %s back out (%d threat moved)", c.Def().Name, move)
+				g.TLogf("c.temporalLeapRemovesItselfFromTheGameAndPullsBackOutThreatMov", c, move)
 				return nil
 			}
 			return nil
@@ -281,14 +281,14 @@ func registerCableCards() {
 			if c, zone, ok := firstCardOf(p, "40006"); ok {
 				takeFromZone(p, c, zone)
 				p.Hand = append(p.Hand, c)
-				g.Logf("%s pulls Technovirus Purge from their %s", p.Name, zone)
+				g.TLogf("c.pullsTechnovirusPurgeFromTheir", p.Name, zone)
 				var extra []engine.Message
 				if zone == "deck" {
 					extra = append(extra, engine.ShufflePlayerDeck{Player: p.ID})
 				}
 				return append([]engine.Message{engine.PlayCard{Player: p.ID, Card: c}}, extra...)
 			}
-			g.Logf("Technovirus Purge not found — %s takes a facedown encounter card", p.Name)
+			g.TLogf("c.technovirusPurgeNotFoundTakesAFacedownEncounterCard", p.Name)
 			return []engine.Message{
 				engine.ObligationResolve{Player: p.ID, Card: card},
 				engine.DealEncounterToPlayer{Player: p.ID},
@@ -312,7 +312,7 @@ func registerCableCards() {
 			if mn == nil {
 				return nil
 			}
-			g.Logf("Stryfe absorbs the psionic backlash — 1 damage")
+			g.TLogf("c.stryfeAbsorbsThePsionicBacklash1Damage")
 			return []engine.Message{engine.DamageEntity{Target: mn.ID, Damage: 1, Source: m.Player}}
 		},
 	})
@@ -328,7 +328,7 @@ func registerCableCards() {
 			for _, mn := range g.Minions {
 				if mn != nil && engine.BaseCodeOf(mn.Code) == "40032" {
 					t.Target = mn.ID
-					g.Logf("Telekinetic Force Field attaches to Stryfe")
+					g.TLogf("c.telekineticForceFieldAttachesToStryfe")
 					return nil
 				}
 			}
@@ -344,7 +344,7 @@ func registerCableCards() {
 			if id := boostEnemy(g); id != "" {
 				t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: "40034", Target: id}
 				g.Attachments[t.ID] = t
-				g.Logf("Telekinetic Force Field attaches to the villain")
+				g.TLogf("c.telekineticForceFieldAttachesToTheVillain")
 			}
 			return nil
 		},

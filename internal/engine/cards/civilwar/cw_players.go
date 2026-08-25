@@ -51,7 +51,7 @@ func registerCWPlayers() {
 						EngagedWith: p.ID, Stunned: true, Confused: true,
 					}
 					g.Minions[mn.ID] = mn
-					g.Logf("Moon Knight drags in %s — stunned and confused", def.Name)
+					g.TLogf("c.moonKnightDragsInStunnedAndConfused", def.Name)
 					return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}, engine.ShuffleEncounterDeck{}}
 				}
 			}
@@ -64,7 +64,7 @@ func registerCWPlayers() {
 	engine.RegisterBehavior("56003", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Precinct HQ — remove 1 threat (+1 per engaged minion)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.precinctHqRemove1Threat1PerEngagedMinion"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.Supports[self].Owner)
@@ -105,7 +105,7 @@ func registerCWPlayers() {
 			}
 			g.Delete(u.ID)
 			p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
-			g.Logf("Cat-Like Reflexes prevent 3 damage")
+			g.TLogf("c.catLikeReflexesPrevent3Damage")
 			prevent := 3
 			if prevent > n {
 				prevent = n
@@ -122,10 +122,10 @@ func registerCWPlayers() {
 	// hook not modeled); two 4-damage strikes (two serial target asks).
 	engine.RegisterBehavior("56008", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			strike := cardutil.ChooseEnemy("Tooth and Claw — first 4 damage", func(g *engine.Game, en engine.Entity) (int, []engine.Message) {
+			strike := cardutil.ChooseEnemy(engine.Tf("c.toothAndClawFirst4Damage"), func(g *engine.Game, en engine.Entity) (int, []engine.Message) {
 				return 4, nil
 			})
-			strike2 := cardutil.ChooseEnemy("Tooth and Claw — second 4 damage", func(g *engine.Game, en engine.Entity) (int, []engine.Message) {
+			strike2 := cardutil.ChooseEnemy(engine.Tf("c.toothAndClawSecond4Damage"), func(g *engine.Game, en engine.Entity) (int, []engine.Message) {
 				return 4, nil
 			})
 			return append(strike(g, e), strike2(g, e)...)
@@ -177,7 +177,7 @@ func registerCWPlayers() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if p := g.Player(e.EOwner()); p != nil {
 				p.MaxHP += 3
-				g.Logf("+3 max hit points")
+				g.TLogf("c.3MaxHitPoints")
 			}
 			return nil
 		},
@@ -254,7 +254,7 @@ func registerCWPlayers() {
 					card := p.Deck[i]
 					p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 					p.Hand = append(p.Hand, card)
-					g.Logf("Yellow Jacket finds %s", card.Def().Name)
+					g.TLogf("c.yellowJacketFinds", card)
 					return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 				}
 			}
@@ -269,7 +269,7 @@ func registerCWPlayers() {
 	// 56023 In Too Deep obligation.
 	engine.RegisterBehavior("56023", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			g.Logf("In Too Deep closes in")
+			g.TLogf("c.inTooDeepClosesIn")
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})
@@ -331,7 +331,7 @@ func registerCWPlayers() {
 	engine.RegisterBehavior("56031", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Altman Residence — heal 2 and shuffle back a Hulkling card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.altmanResidenceHeal2AndShuffleBackAHulklingCard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.Supports[self].Owner)
@@ -375,7 +375,7 @@ func registerCWPlayers() {
 			if p == nil {
 				return nil
 			}
-			out := cardutil.ChooseEnemy("Shapeshifter Strike — 5 damage", func(g *engine.Game, en engine.Entity) (int, []engine.Message) {
+			out := cardutil.ChooseEnemy(engine.Tf("c.shapeshifterStrike5Damage"), func(g *engine.Game, en engine.Entity) (int, []engine.Message) {
 				return 5, nil
 			})(g, e)
 			for _, uid := range p.Upgrades {
@@ -485,7 +485,7 @@ func registerCWPlayers() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "The Night Nurse — heal 1 and clear a status", Type: engine.AbilityAction,
+				Label: engine.Tf("c.theNightNurseHeal1AndClearAStatus"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -561,7 +561,7 @@ func registerCWPlayers() {
 	// 56054 Complicated Lineage obligation.
 	engine.RegisterBehavior("56054", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			g.Logf("Complicated Lineage resurfaces")
+			g.TLogf("c.complicatedLineageResurfaces")
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})
@@ -589,7 +589,7 @@ func registerCWPlayers() {
 				p.Discard = p.Discard[:len(p.Discard)-1]
 				s.StoredCards = append(s.StoredCards, c)
 			}
-			g.Logf("Skrull Business confiscates %d cards", m.N)
+			g.TLogf("c.skrullBusinessConfiscatesCards", m.N)
 			return nil
 		},
 	})

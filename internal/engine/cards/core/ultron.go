@@ -27,12 +27,12 @@ func registerUltron() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Ultron: place 1 threat on the main scheme or spawn a Drone?",
+				Question: engine.Ask(engine.Tf("c.ultronPlace1ThreatOnTheMainSchemeOrSpawnADrone"),
 					engine.Choice{
-						ID: "threat", Label: "Place 1 threat on the main scheme", Kind: engine.ChoiceLabel,
+						ID: "threat", Label: engine.Tf("c.place1ThreatOnTheMainScheme"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: e.EID()}),
 					engine.Choice{
-						ID: "drone", Label: "Put the top card of your deck into play as a Drone", Kind: engine.ChoiceLabel,
+						ID: "drone", Label: engine.Tf("c.putTheTopCardOfYourDeckIntoPlayAsADrone"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.SpawnDrone{Player: p.ID}),
 				),
 			}}
@@ -73,7 +73,7 @@ func registerUltron() {
 		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
 			env := &engine.Environment{ID: g.NextEntityID("environment"), Code: "01140"}
 			g.AddEnvironment(env)
-			g.Logf("%s enters play", env.EDef().Name)
+			g.TLogf("c.entersPlay", env)
 			return nil
 		},
 	})

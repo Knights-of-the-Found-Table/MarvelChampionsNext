@@ -43,13 +43,13 @@ func registerGamora() {
 				}
 				g.UsedThisTurn["gamora-finesse"] = true
 				return []engine.Message{engine.AskQuestion{Player: ep.Player, Question: engine.Ask(
-					"Finesse: remove 1 threat from which scheme?", schemePicks(g, 1, ep.Player)...)}}
+					engine.Tf("c.finesseRemove1ThreatFromWhichScheme"), schemePicks(g, 1, ep.Player)...)}}
 			case "thwart":
 				if g.UsedThisTurn["gamora-precision"] {
 					return nil
 				}
 				g.UsedThisTurn["gamora-precision"] = true
-				return cardutil.ChooseEnemy("Precision: deal 1 damage to which enemy?",
+				return cardutil.ChooseEnemy(engine.Tf("c.precisionDeal1DamageToWhichEnemy"),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 1, nil })(
 					g, &engine.EventCard{Code: ep.Card.Code, Owner: ep.Player})
 			}
@@ -70,7 +70,7 @@ func registerGamora() {
 				k := eventKind(c.Code)
 				if (k == "attack" || k == "thwart") && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -78,13 +78,13 @@ func registerGamora() {
 				return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Nebula: add which event to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.nebulaAddWhichEventToHand"), picks...)}}
 		},
 	})
 
 	// Acrobatic Move: 2 damage.
 	engine.RegisterBehavior("18003", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Acrobatic Move: deal 2 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.acrobaticMoveDeal2DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 2, nil }),
 	})
 
@@ -93,7 +93,7 @@ func registerGamora() {
 		DefenseEvent: func(g *engine.Game, p *engine.Player, ec *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
 			extra := []engine.Message{engine.DamageEntity{Target: against, Damage: 1, Source: p.ID}}
 			extra = append(extra, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Crosscounter: remove 1 threat from which scheme?", schemePicks(g, 1, p.ID)...)})
+				engine.Tf("c.crosscounterRemove1ThreatFromWhichScheme"), schemePicks(g, 1, p.ID)...)})
 			return engine.Defends{Defender: p.ID, Against: against, ExtraPrevent: 3}, extra, true
 		},
 	})
@@ -102,7 +102,7 @@ func registerGamora() {
 	engine.RegisterBehavior("18005", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Set the Pace: remove 1 threat from which scheme?", schemePicks(g, 1, e.EOwner())...)}}
+				engine.Tf("c.setThePaceRemove1ThreatFromWhichScheme"), schemePicks(g, 1, e.EOwner())...)}}
 		},
 	})
 
@@ -115,7 +115,7 @@ func registerGamora() {
 				n = 7
 			}
 			g.UsedThisTurn["gamora-played-attack"] = true
-			return cardutil.ChooseEnemy("Decisive Blow: deal damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.decisiveBlowDealDamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)
 		},
 	})
@@ -129,7 +129,7 @@ func registerGamora() {
 			}
 			g.UsedThisTurn["gamora-played-thwart"] = true
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Forward Momentum: remove threat from which scheme?", schemePicks(g, n, e.EOwner())...)}}
+				engine.Tf("c.forwardMomentumRemoveThreatFromWhichScheme"), schemePicks(g, n, e.EOwner())...)}}
 		},
 	})
 
@@ -138,7 +138,7 @@ func registerGamora() {
 	engine.RegisterBehavior("18008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Conditioning Room → bottommost attack/thwart event + heal 1", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustConditioningRoomBottommostAttackThwartEventHeal1"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -152,7 +152,7 @@ func registerGamora() {
 							c := p.Discard[i]
 							p.Discard = append(p.Discard[:i], p.Discard[i+1:]...)
 							p.Hand = append(p.Hand, c)
-							g.Logf("Conditioning Room returns %s", c.Def().Name)
+							g.TLogf("c.conditioningRoomReturns", c)
 							break
 						}
 					}
@@ -176,7 +176,7 @@ func registerGamora() {
 			if !ok || u == nil || ep.Player != u.Owner || eventKind(ep.Card.Code) != "attack" {
 				return nil
 			}
-			return cardutil.ChooseEnemy("Gamora's Sword: deal 1 damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.gamoraSSwordDeal1DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 1, nil })(g, e)
 		},
 	})
@@ -206,7 +206,7 @@ func registerGamora() {
 	// Clobber: 3 damage; returns if first card played this round.
 	engine.RegisterBehavior("18012", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			msgs := cardutil.ChooseEnemy("Clobber: deal 3 damage to which enemy?",
+			msgs := cardutil.ChooseEnemy(engine.Tf("c.clobberDeal3DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 3, nil })(g, e)
 			return msgs // the return-to-hand rider needs first-card
 			// tracking that the engine does not keep
@@ -228,7 +228,7 @@ func registerGamora() {
 			for i := 0; i < n && i < len(p.Deck); i++ {
 				c := p.Deck[i]
 				if eventKind(c.Code) == "attack" {
-					picks = append(picks, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -236,13 +236,13 @@ func registerGamora() {
 				return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Plan of Attack: add which event to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.planOfAttackAddWhichEventToHand"), picks...)}}
 		},
 	})
 
 	// Uppercut: 5 damage.
 	engine.RegisterBehavior("18014", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Uppercut: deal 5 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.uppercutDeal5DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 5, nil }),
 	})
 
@@ -286,10 +286,10 @@ func registerGamora() {
 	// Hit and Run: 2 damage + 2 threat.
 	engine.RegisterBehavior("18020", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			msgs := cardutil.ChooseEnemy("Hit and Run: deal 2 damage to which enemy?",
+			msgs := cardutil.ChooseEnemy(engine.Tf("c.hitAndRunDeal2DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(g, e)
 			msgs = append(msgs, engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Hit and Run: remove 2 threat from which scheme?", schemePicks(g, 2, e.EOwner())...)})
+				engine.Tf("c.hitAndRunRemove2ThreatFromWhichScheme"), schemePicks(g, 2, e.EOwner())...)})
 			return msgs
 		},
 	})
@@ -304,7 +304,7 @@ func registerGamora() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust your alter-ego → remove from the game", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustYourAlterEgoRemoveFromTheGame"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
@@ -318,18 +318,18 @@ func registerGamora() {
 				var subs []engine.Choice
 				for _, c := range p.Hand {
 					if eventKind(c.Code) != "" {
-						subs = append(subs, engine.Choice{Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+						subs = append(subs, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 					}
 				}
-				picks = append(picks, engine.Choice{ID: "discard", Label: "Discard 2 events", Kind: engine.ChoiceCard}.
-					WithThen(engine.AskN("Discard which 2 events?", 2, subs...)))
+				picks = append(picks, engine.Choice{ID: "discard", Label: engine.Tf("c.discard2Events"), Kind: engine.ChoiceCard}.
+					WithThen(engine.AskN(engine.Tf("c.discardWhich2Events"), 2, subs...)))
 			}
 			if len(picks) == 0 {
 				return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Unfulfilled Destiny:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.unfulfilledDestiny"), picks...)}}
 		},
 	})
 
@@ -358,7 +358,7 @@ func registerGamora() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil && a.EDef().HasTrait("guardian") {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, MaxHP: 1, THW: 1}))
 				}
 			}
@@ -366,7 +366,7 @@ func registerGamora() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Attach Comms Implant to which guardian ally?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.attachCommsImplantToWhichGuardianAlly"), picks...)}}
 		},
 	})
 
@@ -379,7 +379,7 @@ func registerGamora() {
 			}
 			return engine.Defends{Defender: p.ID, Against: against},
 				[]engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					"True Grit: remove threat from which scheme?", schemePicks(g, thw, p.ID)...)}}, true
+					engine.Tf("c.trueGritRemoveThreatFromWhichScheme"), schemePicks(g, thw, p.ID)...)}}, true
 		},
 	})
 
@@ -443,7 +443,7 @@ func registerNemesis() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard an attack event + take 1 damage → discard In a Bind", Type: engine.AbilityAction,
+				Label: engine.Tf("c.discardAnAttackEventTake1DamageDiscardInABind"), Type: engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -458,7 +458,7 @@ func registerNemesis() {
 					var subs []engine.Choice
 					for _, c := range hand {
 						if eventKind(c.Code) == "attack" {
-							subs = append(subs, engine.Choice{Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+							subs = append(subs, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 								Msgs(engine.DiscardCards{Player: pid, Cards: engine.CardList{c}}))
 						}
 					}
@@ -466,7 +466,7 @@ func registerNemesis() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(
-						"In a Bind: discard which attack event?", subs...)}}
+						engine.Tf("c.inABindDiscardWhichAttackEvent"), subs...)}}
 				},
 			}}
 		},

@@ -145,7 +145,7 @@ func TestEndOfPlayerPhaseDrawsAndReadies(t *testing.T) {
 			continue
 		}
 		for _, d := range c.Then.Choices {
-			if strings.Contains(d.Label, "to defend") {
+			if strings.Contains(d.Label.Text, "to defend") {
 				found = true
 			}
 		}
@@ -323,7 +323,7 @@ prompts:
 				t.Fatalf("step %d: interrupts choice lacks defense subtree", i)
 			}
 			for _, d := range outer.Then.Choices {
-				if d.Label == "Take the attack" {
+				if d.Label.Text == "Take the attack" {
 					path = d.ID
 				}
 			}
@@ -360,7 +360,7 @@ func TestPlayerEliminationNotInstantLoss(t *testing.T) {
 	drillForm(t, g)
 
 	if g.Over {
-		t.Fatalf("game should continue after one elimination: %s", g.Reason)
+		t.Fatalf("game should continue after one elimination: %s", g.Reason.Text)
 	}
 	if !p2.KOed {
 		t.Fatal("P2 should be eliminated")
@@ -622,7 +622,7 @@ func TestMinionActivationOrderChosenByPlayer(t *testing.T) {
 			continue
 		}
 		for _, d := range c.Then.Choices {
-			if d.Label == "Take the attack" {
+			if d.Label.Text == "Take the attack" {
 				takePath = d.ID
 			}
 		}
@@ -723,7 +723,7 @@ func TestOtherPlayerMayDefend(t *testing.T) {
 		var walk func(q *engine.Question) string
 		walk = func(q *engine.Question) string {
 			for _, c := range q.Choices {
-				if c.Label == label {
+				if c.Label.Text == label {
 					return c.ID
 				}
 				if c.Then != nil {
@@ -868,7 +868,7 @@ func TestInterruptEffectFiresWithDefense(t *testing.T) {
 		if c.ID == "interrupt-player-0" && c.Then != nil {
 			interruptID = c.ID
 			for _, d := range c.Then.Choices {
-				if d.Label == "Take the attack" {
+				if d.Label.Text == "Take the attack" {
 					passTakePath = d.ID // interrupt branch's take leaf
 				}
 			}
@@ -882,7 +882,7 @@ func TestInterruptEffectFiresWithDefense(t *testing.T) {
 	for _, c := range pq.Question.Choices {
 		if c.ID == "pass-interrupt" && c.Then != nil {
 			for _, d := range c.Then.Choices {
-				if d.Label == "Take the attack" {
+				if d.Label.Text == "Take the attack" {
 					passBranchTake = d.ID
 				}
 			}
@@ -946,7 +946,7 @@ func TestPassInterruptBranchSkipsEffect(t *testing.T) {
 			continue
 		}
 		for _, d := range c.Then.Choices {
-			if d.Label == "Take the attack" {
+			if d.Label.Text == "Take the attack" {
 				takePath = d.ID
 			}
 		}
@@ -999,7 +999,7 @@ func TestAskAnotherPlayerToAct(t *testing.T) {
 		if c.ID == "ask-action" {
 			askPath = c.ID
 			for _, d := range c.Then.Choices {
-				if d.Label == "Never mind" {
+				if d.Label.Text == "Never mind" {
 					pickNever = d.ID
 				}
 			}
@@ -1020,7 +1020,7 @@ func TestAskAnotherPlayerToAct(t *testing.T) {
 	for _, c := range pq.Question.Choices {
 		if c.ID == "ask-action" {
 			for _, d := range c.Then.Choices {
-				if d.Label == asked.Name {
+				if d.Label.Text == asked.Name {
 					askWho = d.ID
 				}
 			}

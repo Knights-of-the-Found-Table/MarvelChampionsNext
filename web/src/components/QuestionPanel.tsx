@@ -1,13 +1,12 @@
 import { useRef } from 'react'
 import type { Choice, Question } from '../api'
 import { CardImage, useCardZoom } from '../cards'
-import { useLang, useT } from '../i18n'
-import { localizePrompt, useChoiceLabel } from '../i18n/labels'
+import { useT } from '../i18n'
+import { useChoiceLabel, useEngineMsg } from '../i18n/labels'
 
-function usePromptText(prompt: string | undefined): string {
-  const lang = useLang()
-  if (!prompt) return ''
-  return localizePrompt(prompt, lang)
+function usePromptText(q: Question): string {
+  const em = useEngineMsg()
+  return em({ key: q.promptKey, args: q.promptArgs, text: q.prompt ?? '' })
 }
 
 const iconAliases: Record<string, string> = {
@@ -31,10 +30,10 @@ function iconRequirements(prompt: string): Array<{ icon: string; n: number }> {
   return [...out.entries()].map(([icon, n]) => ({ icon, n }))
 }
 
-function choiceIcons(choice: Choice): string[] {
+function iconsInLabel(label: string): string[] {
   const out: string[] = []
   const re = /\[(energy|mental|physical|wild|能量|精神|物理|万用)\]/g
-  for (const match of choice.label.matchAll(re)) {
+  for (const match of label.matchAll(re)) {
     const icon = iconAliases[match[1]]
     if (icon) out.push(icon)
   }
@@ -82,7 +81,8 @@ function ChoiceButton({
 
 export default function QuestionPanel({ current, selected, onPick, onBack, onConfirm, open, onToggle }: Props) {
   const t = useT()
-  const promptText = usePromptText(current.prompt)
+  const promptText = usePromptText(current)
+  const labelOf = useChoiceLabel()
 
   const isMulti = current.type === 'choose_n'
   const need = current.n ?? 1
@@ -91,7 +91,7 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
   if (requiredIcons.length > 0) {
     for (const c of current.choices) {
       if (!selected.has(c.id)) continue
-      for (const icon of choiceIcons(c)) selectedIcons.set(icon, (selectedIcons.get(icon) ?? 0) + 1)
+      for (const icon of iconsInLabel(labelOf(c))) selectedIcons.set(icon, (selectedIcons.get(icon) ?? 0) + 1)
     }
   }
   const missingIcons = requiredIcons.filter(({ icon, n }) => (selectedIcons.get(icon) ?? 0) < n)

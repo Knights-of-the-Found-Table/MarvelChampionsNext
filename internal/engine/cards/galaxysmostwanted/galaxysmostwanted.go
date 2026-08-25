@@ -37,14 +37,14 @@ func registerGroot() {
 				return 0
 			}
 			p.GrowthCounters -= use
-			g.Logf("Groot's growth counters prevent %d damage (%d left)", use, p.GrowthCounters)
+			g.TLogf("c.grootSGrowthCountersPreventDamageLeft", use, p.GrowthCounters)
 			return use
 		},
 		// Approximation: without the Flora Colossus upgrades modeled,
 		// Groot starts with 4 growth counters.
 		HeroSetup: func(g *engine.Game, p *engine.Player) []engine.Message {
 			p.GrowthCounters = 4
-			g.Logf("Groot begins the game with 4 growth counters")
+			g.TLogf("c.grootBeginsTheGameWith4GrowthCounters")
 			return nil
 		},
 	})

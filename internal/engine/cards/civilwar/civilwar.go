@@ -37,7 +37,7 @@ func registerTigra() {
 			if n <= 0 {
 				return nil
 			}
-			g.Logf("On the Hunt: %s draws %d", p.Name, n)
+			g.TLogf("c.onTheHuntDraws", p.Name, n)
 			return []engine.Message{engine.DrawCards{Player: p.ID, N: n}}
 		},
 	})

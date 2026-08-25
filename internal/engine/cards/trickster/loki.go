@@ -25,7 +25,7 @@ func ttAvatar(g *engine.Game) *engine.Villain {
 func ttShatter(g *engine.Game, n int) {
 	if v := ttAvatar(g); v != nil {
 		v.Counters += n
-		g.Logf("%s holds %d shatter counters", v.EDef().Name, v.Counters)
+		g.TLogf("c.holdsShatterCounters", v, v.Counters)
 	}
 }
 
@@ -53,7 +53,7 @@ func registerLoki() {
 					return true
 				}
 				v.Damage = 0
-				g.Logf("%s was an illusion — another takes its place!", v.EDef().Name)
+				g.TLogf("c.wasAnIllusionAnotherTakesItsPlace", v)
 				ttSwapAvatar(g, v)
 				return false
 			},
@@ -68,7 +68,7 @@ func registerLoki() {
 			v.Damage += damage
 			if v.MaxHP-v.Damage <= 10 && v.Code == "55027a" {
 				v.Code = "55027b"
-				g.LogMajorf("Loki, God of Lies sheds his disguise!")
+				g.TLogMajorf("c.lokiGodOfLiesShedsHisDisguise")
 			}
 			return false
 		},
@@ -173,7 +173,7 @@ func registerLoki() {
 
 	// 55052-55055 Synergy environments: spend a synergy counter for a
 	// one-shot boost.
-	synergy := func(base, label string) {
+	synergy := func(base string, label engine.Msg) {
 		engine.RegisterBehavior(base, &engine.Behavior{
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				env := g.Environments[e.EID()]
@@ -213,10 +213,10 @@ func registerLoki() {
 			},
 		})
 	}
-	synergy("55052", "Domineering Force — spend a synergy counter: deal 4 damage")
-	synergy("55053", "Feigned Retreat — spend a synergy counter: tough status card")
-	synergy("55054", "Mounting Resistance — spend a synergy counter: remove 4 threat")
-	synergy("55055", "Unified Front — spend a synergy counter: draw 2 cards")
+	synergy("55052", engine.Tf("c.domineeringForceSpendASynergyCounterDeal4Damage"))
+	synergy("55053", engine.Tf("c.feignedRetreatSpendASynergyCounterToughStatusCard"))
+	synergy("55054", engine.Tf("c.mountingResistanceSpendASynergyCounterRemove4Threat"))
+	synergy("55055", engine.Tf("c.unifiedFrontSpendASynergyCounterDraw2Cards"))
 }
 
 // shatterOnDefeat adds shatter counters when the entity is defeated.
@@ -258,7 +258,7 @@ func ttSwapAvatar(g *engine.Game, v *engine.Villain) {
 		// The illusions are spent: Loki, God of Lies takes the field.
 		nv := g.SpawnVillainFromCard("55027")
 		if nv != nil {
-			g.Logf("The illusions burn away — Loki, God of Lies stands revealed!")
+			g.TLogf("c.theIllusionsBurnAwayLokiGodOfLiesStandsRevealed")
 		}
 		return
 	}
@@ -271,7 +271,7 @@ func ttSwapAvatar(g *engine.Game, v *engine.Villain) {
 	}
 	g.SetAside = kept
 	if nv := g.SpawnVillainFromCard(data.BaseCode(pick.Code)); nv != nil {
-		g.Logf("A new Avatar of Loki emerges")
+		g.TLogf("c.aNewAvatarOfLokiEmerges")
 	}
 	_ = old
 }

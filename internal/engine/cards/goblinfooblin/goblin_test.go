@@ -83,7 +83,7 @@ func TestRiskyBusinessRuns(t *testing.T) {
 	if !strings.Contains(logText, "Criminal Enterprise") {
 		t.Fatal("Criminal Enterprise environment never entered play")
 	}
-	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason, g.Round)
+	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason.Text, g.Round)
 }
 
 func TestRiskyBusinessStartsAsNorman(t *testing.T) {
@@ -151,7 +151,7 @@ func TestMutagenFormulaRuns(t *testing.T) {
 	if !g.Over {
 		t.Fatalf("game did not end, round=%d", g.Round)
 	}
-	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason, g.Round)
+	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason.Text, g.Round)
 }
 
 func TestAllFiveScenariosRegistered(t *testing.T) {

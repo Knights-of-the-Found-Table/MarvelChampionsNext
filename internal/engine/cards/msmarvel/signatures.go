@@ -40,13 +40,13 @@ func registerRedDagger() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: a.Owner,
-				Question: engine.Ask("Red Dagger — spend 2 resources to deal 2 damage and return him to your hand?",
+				Question: engine.Ask(engine.Tf("c.redDaggerSpend2ResourcesToDeal2DamageAndReturnHimToYourHand"),
 					engine.Choice{
-						ID: "save", Label: "Save Red Dagger — pay 2 resources", Kind: engine.ChoiceLabel,
-					}.WithThen(g.CustomPaymentQuestion(p, 2, "Pay 2 resources to save Red Dagger",
+						ID: "save", Label: engine.Tf("c.saveRedDaggerPay2Resources"), Kind: engine.ChoiceLabel,
+					}.WithThen(g.CustomPaymentQuestion(p, 2, engine.S("Pay 2 resources to save Red Dagger"),
 						map[string]any{"saveAlly": a.ID.String(), "saveDamage": 2})),
 					engine.Choice{
-						ID: "defeat", Label: "Let Red Dagger be defeated", Kind: engine.ChoicePass,
+						ID: "defeat", Label: engine.Tf("c.letRedDaggerBeDefeated"), Kind: engine.ChoicePass,
 					}.Msgs(engine.AllyDestroyed{AllyID: a.ID}),
 				),
 			}}
@@ -57,7 +57,7 @@ func registerRedDagger() {
 // 05003 Big Hands: deal 4 damage to an enemy.
 func registerBigHands() {
 	engine.RegisterBehavior("05003", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Big Hands — deal 4 damage", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.bigHandsDeal4Damage"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 4, nil
 		}),
 	})
@@ -66,7 +66,7 @@ func registerBigHands() {
 // 05004 Sneak By: remove 3 threat from a scheme.
 func registerSneakBy() {
 	engine.RegisterBehavior("05004", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Sneak By", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Sneak By"), func(g *engine.Game, e engine.Entity) int {
 			return 3
 		}),
 	})
@@ -97,7 +97,7 @@ func registerAamirKhan() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "Aamir Khan — put a discard card on the bottom of your deck, draw 1",
+				Label:        engine.Tf("c.aamirKhanPutADiscardCardOnTheBottomOfYourDeckDraw1"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -105,7 +105,7 @@ func registerAamirKhan() {
 					var choices []engine.Choice
 					for _, c := range p.Discard {
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardToBottom{Player: p.ID, CardID: c.ID},
 							engine.DrawCards{Player: p.ID, N: 1},
@@ -113,7 +113,7 @@ func registerAamirKhan() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Aamir Khan — choose a discard card", choices...),
+						Question: engine.Ask(engine.Tf("c.aamirKhanChooseADiscardCard"), choices...),
 					}}
 				},
 			}}
@@ -139,7 +139,7 @@ func registerBrunoCarrelli() {
 			var abs []engine.Ability
 			if len(p.Hand) > 0 {
 				abs = append(abs, engine.Ability{
-					Label:        "Bruno Carrelli — tuck a card from your hand facedown",
+					Label:        engine.Tf("c.brunoCarrelliTuckACardFromYourHandFacedown"),
 					Type:         engine.AbilityAction,
 					Exhaust:      true,
 					AlterEgoOnly: true,
@@ -147,19 +147,19 @@ func registerBrunoCarrelli() {
 						var choices []engine.Choice
 						for _, c := range p.Hand {
 							choices = append(choices, engine.Choice{
-								Label: "Tuck " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(engine.SupportStoreCard{ID: s.ID, Card: c}))
 						}
 						return []engine.Message{engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("Bruno Carrelli — tuck a card", choices...),
+							Question: engine.Ask(engine.Tf("c.brunoCarrelliTuckACard"), choices...),
 						}}
 					},
 				})
 			}
 			if s.Counters > 0 {
 				abs = append(abs, engine.Ability{
-					Label:   "Bruno Carrelli — take up to 3 stored cards back",
+					Label:   engine.Tf("c.brunoCarrelliTakeUpTo3StoredCardsBack"),
 					Type:    engine.AbilityAction,
 					Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -168,13 +168,13 @@ func registerBrunoCarrelli() {
 						for i := 1; i <= n; i++ {
 							cards := append(engine.CardList{}, s.AttachedCards[:i]...)
 							choices = append(choices, engine.Choice{
-								ID: fmt.Sprintf("take-%d", i), Label: fmt.Sprintf("Take %d card(s)", i),
+								ID: fmt.Sprintf("take-%d", i), Label: engine.Tf("c.takeCardS", i),
 								Kind: engine.ChoiceLabel,
 							}.Msgs(engine.SupportRetrieveCards{ID: s.ID, Cards: cards}))
 						}
 						return []engine.Message{engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("Bruno Carrelli — how many stored cards?", choices...),
+							Question: engine.Ask(engine.Tf("c.brunoCarrelliHowManyStoredCards"), choices...),
 						}}
 					},
 				})
@@ -190,14 +190,14 @@ func registerNakiaBahadir() {
 	engine.RegisterBehavior("05008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Nakia Bahadir — your next card this phase costs 1 less",
+				Label:        engine.Tf("c.nakiaBahadirYourNextCardThisPhaseCosts1Less"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if p := g.Player(e.EOwner()); p != nil {
 						p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{Amount: 1})
-						g.Logf("%s's next card this phase costs 1 less", p.Name)
+						g.TLogf("c.sNextCardThisPhaseCosts1Less", p.Name)
 					}
 					return nil
 				},
@@ -256,12 +256,12 @@ func eventBoost(code, trait, kind string, n int) func(g *engine.Game, e engine.E
 		}
 		return []engine.Message{engine.AskQuestion{
 			Player: p.ID,
-			Question: engine.Ask(fmt.Sprintf("Exhaust %s → %s gets +%d %s?", e.EDef().Name, def.Name, n, kind),
+			Question: engine.Ask(engine.Tf("c.exhaustGets", e, def.Name, n, kind),
 				engine.Choice{
-					ID: "boost", Label: fmt.Sprintf("Exhaust %s (+%d %s)", e.EDef().Name, n, kind),
+					ID: "boost", Label: engine.Tf("c.exhaust2", e, n, kind),
 					Kind: engine.ChoiceLabel,
 				}.Msgs(append([]engine.Message{engine.ExhaustEntity{ID: e.EID()}}, effect...)...),
-				engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+				engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 			),
 		}}
 	}

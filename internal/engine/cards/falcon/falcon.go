@@ -39,7 +39,7 @@ func registerIdentity() {
 
 func registerSignatures() {
 	engine.RegisterBehavior("53002", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Redwing — return to hand and scout", Type: engine.AbilityAction, HeroOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+		return []engine.Ability{{Label: engine.Tf("c.redwingReturnToHandAndScout"), Type: engine.AbilityAction, HeroOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			a := g.Allies[self]
 			p := g.Player(a.Owner)
 			n := topIcons(g)
@@ -52,7 +52,7 @@ func registerSignatures() {
 			})...)
 			msgs := []engine.Message{engine.ReturnControlled{Player: p.ID, ID: a.ID}, engine.MillEncounter{N: 1}}
 			if len(ch) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Redwing — damage or thwart", ch...)})
+				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.redwingDamageOrThwart"), ch...)})
 			}
 			return msgs
 		}}}
@@ -66,7 +66,7 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Bird of Prey — choose an enemy", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.birdOfPreyChooseAnEnemy"), ch...)}}
 	}})
 	engine.RegisterBehavior("53004", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -77,7 +77,7 @@ func registerSignatures() {
 		if len(ch) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Bird's-Eye View — choose a scheme", ch...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.birdSEyeViewChooseAScheme"), ch...)}}
 	}})
 	engine.RegisterBehavior("53005", &engine.Behavior{DefenseEvent: func(g *engine.Game, p *engine.Player, e *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
 		n := topIcons(g)
@@ -87,7 +87,7 @@ func registerSignatures() {
 		return []engine.Message{engine.AddEntityCounter{ID: e.EID(), N: 5}}
 	}, Resource: &engine.ResourceAbility{Icon: "energy", UsesCounters: true}})
 	engine.RegisterBehavior("53007", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Soup Kitchen — heal and discount", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
+		return []engine.Ability{{Label: engine.Tf("c.soupKitchenHealAndDiscount"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true, Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			s := g.Supports[self]
 			p := g.Player(s.Owner)
 			return []engine.Message{engine.ExhaustEntity{ID: p.ID}, engine.HealEntity{Target: p.ID, N: p.RecoverStat(g)}, engine.CostDiscountApply{Player: p.ID, Amount: 2}}
@@ -103,7 +103,7 @@ func registerSignatures() {
 	engine.RegisterBehavior("53009", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Aerial Recon — take an encounter card for a recon counter", Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
+				Label: engine.Tf("c.aerialReconTakeAnEncounterCardForAReconCounter"), Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					return []engine.Message{engine.DealEncounterToPlayer{Player: u.Owner}, engine.AddEntityCounter{ID: u.ID, N: 1}}

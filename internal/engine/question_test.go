@@ -10,13 +10,13 @@ func stubMsg(text string) Message { return DrawCards{Player: "p", N: 1} }
 // question object gives each branch its own id namespace and an
 // independently mutable copy.
 func TestWithThenIsolatesSubtrees(t *testing.T) {
-	shared := Ask("defend?",
-		Choice{ID: "", Label: "Take the attack"}.Msgs(stubMsg("take")),
-		Choice{ID: "", Label: "Hero defend"}.Msgs(stubMsg("defend")),
+	shared := Ask(S("defend?"),
+		Choice{ID: "", Label: S("Take the attack")}.Msgs(stubMsg("take")),
+		Choice{ID: "", Label: S("Hero defend")}.Msgs(stubMsg("defend")),
 	)
-	root := Ask("Interrupts",
-		Choice{ID: "interrupt-player-0", Label: "interrupt"}.Msgs(stubMsg("interrupt")).WithThen(shared),
-		Choice{ID: "pass-interrupt", Label: "pass"}.WithThen(shared),
+	root := Ask(S("Interrupts"),
+		Choice{ID: "interrupt-player-0", Label: S("interrupt")}.Msgs(stubMsg("interrupt")).WithThen(shared),
+		Choice{ID: "pass-interrupt", Label: S("pass")}.WithThen(shared),
 	)
 	if !root.idsUnique() {
 		t.Fatal("shared subtree must yield unique ids after WithThen copies it")
@@ -39,8 +39,8 @@ func TestWithThenIsolatesSubtrees(t *testing.T) {
 			underInterrupt[0].ID, underPass[0].ID)
 	}
 	// Mutating one branch's subtree must not leak into the other.
-	underInterrupt[0].Label = "mutated"
-	if underPass[0].Label == "mutated" {
+	underInterrupt[0].Label = S("mutated")
+	if underPass[0].Label.Text == "mutated" {
 		t.Fatal("WithThen must deep-copy: mutating one branch leaked into the other")
 	}
 	// The caller's original question is untouched by WithThen.
@@ -52,12 +52,12 @@ func TestWithThenIsolatesSubtrees(t *testing.T) {
 // TestChainResolvesAllLevels: Chain returns the root-to-leaf choices, and
 // descending past a leaf errors.
 func TestChainResolvesAllLevels(t *testing.T) {
-	leaf := Ask("defend?",
-		Choice{Label: "Take the attack"}.Msgs(stubMsg("take")),
+	leaf := Ask(S("defend?"),
+		Choice{Label: S("Take the attack")}.Msgs(stubMsg("take")),
 	)
-	root := Ask("Interrupts",
-		Choice{ID: "interrupt-player-0", Label: "interrupt"}.Msgs(stubMsg("interrupt")).WithThen(leaf),
-		Choice{ID: "pass", Label: "pass"}.Msgs(stubMsg("pass")),
+	root := Ask(S("Interrupts"),
+		Choice{ID: "interrupt-player-0", Label: S("interrupt")}.Msgs(stubMsg("interrupt")).WithThen(leaf),
+		Choice{ID: "pass", Label: S("pass")}.Msgs(stubMsg("pass")),
 	)
 	chain, err := root.Chain("interrupt-player-0.0")
 	if err != nil {
@@ -85,14 +85,14 @@ func TestChainMsgsFallsBackOnDuplicateIDs(t *testing.T) {
 	// branch's prefix.
 	root := &Question{Type: "choose_one"}
 	subA := &Question{Type: "choose_one", Choices: []Choice{
-		{ID: "interrupt-player-0.0", Label: "Take the attack", msgs: []Message{stubMsg("take")}},
+		{ID: "interrupt-player-0.0", Label: S("Take the attack"), msgs: []Message{stubMsg("take")}},
 	}}
 	subB := &Question{Type: "choose_one", Choices: []Choice{
-		{ID: "interrupt-player-0.0", Label: "Take the attack", msgs: []Message{stubMsg("take")}},
+		{ID: "interrupt-player-0.0", Label: S("Take the attack"), msgs: []Message{stubMsg("take")}},
 	}}
 	root.Choices = []Choice{
-		{ID: "interrupt-player-0", Label: "interrupt", msgs: []Message{stubMsg("interrupt")}, Then: subA},
-		{ID: "pass-interrupt", Label: "pass", Then: subB},
+		{ID: "interrupt-player-0", Label: S("interrupt"), msgs: []Message{stubMsg("interrupt")}, Then: subA},
+		{ID: "pass-interrupt", Label: S("pass"), Then: subB},
 	}
 	if root.idsUnique() {
 		t.Fatal("duplicate ids should be detected")
@@ -110,11 +110,11 @@ func TestChainMsgsFallsBackOnDuplicateIDs(t *testing.T) {
 // TestChainMsgsAggregatesLevels: unique-id trees fire every level's
 // messages root first.
 func TestChainMsgsAggregatesLevels(t *testing.T) {
-	root := Ask("Interrupts",
-		Choice{ID: "interrupt-player-0", Label: "interrupt"}.
+	root := Ask(S("Interrupts"),
+		Choice{ID: "interrupt-player-0", Label: S("interrupt")}.
 			Msgs(DrawCards{Player: "p", N: 1}).
-			WithThen(Ask("defend?",
-				Choice{Label: "Take the attack"}.Msgs(DiscardCards{Player: "p"}),
+			WithThen(Ask(S("defend?"),
+				Choice{Label: S("Take the attack")}.Msgs(DiscardCards{Player: "p"}),
 			)),
 	)
 	g := &Game{}

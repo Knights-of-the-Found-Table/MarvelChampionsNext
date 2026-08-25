@@ -92,7 +92,7 @@ func registerMagneto() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Magnetic Pull — discard until you find a Magnetic card",
+				Label: engine.Tf("c.magneticPullDiscardUntilYouFindAMagneticCard"),
 				Type:  engine.AbilityAction, HeroOnly: true, OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return pullMessages(g, g.Player(self))
@@ -116,7 +116,7 @@ func registerMagneto() {
 
 func registerMagnetoSignatures() {
 	engine.RegisterBehavior("49002", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Asteroid M — recycle a Magnetic card and heal 1", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
+		return []engine.Ability{{Label: engine.Tf("c.asteroidMRecycleAMagneticCardAndHeal1"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				s := g.Supports[self]
 				if s == nil {
@@ -161,13 +161,13 @@ func registerMagnetoSignatures() {
 				if mn == nil || mn.EDef().HasTrait("elite") {
 					continue
 				}
-				choices = append(choices, engine.Choice{Label: "Wrap " + mn.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
+				choices = append(choices, engine.Choice{Label: engine.S("Wrap " + mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
 					Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Wrapped in Metal — choose a minion", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.wrappedInMetalChooseAMinion"), choices...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			m, ok := msg.(engine.AttachUpgrade)
@@ -200,7 +200,7 @@ func registerMagnetoSignatures() {
 			case *engine.MainScheme:
 				remaining = s.Threat
 			}
-			choice := engine.Choice{Label: "Remove 3 threat from " + scheme.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: scheme.ECode()}.Msgs(msgs...)
+			choice := engine.Choice{Label: engine.S("Remove 3 threat from " + scheme.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: scheme.ECode()}.Msgs(msgs...)
 			if remaining <= 3 {
 				var attachments []engine.Choice
 				for aid, a := range g.Attachments {
@@ -209,12 +209,12 @@ func registerMagnetoSignatures() {
 					}
 					text := strings.ToLower(a.EDef().Text)
 					if strings.Contains(text, "hero action") || strings.Contains(text, "hero response") {
-						attachments = append(attachments, engine.Choice{Label: "Discard " + a.EDef().Name, Kind: engine.ChoiceCard, SourceID: aid, CardCode: a.Code}.
+						attachments = append(attachments, engine.Choice{Label: engine.S("Discard " + a.EDef().Name), Kind: engine.ChoiceCard, SourceID: aid, CardCode: a.Code}.
 							Msgs(engine.DiscardAttachmentMsg{ID: aid}))
 					}
 				}
 				if len(attachments) > 0 {
-					choice = choice.WithThen(engine.Ask("Electromagnetic Blast — discard an attachment", attachments...))
+					choice = choice.WithThen(engine.Ask(engine.Tf("c.electromagneticBlastDiscardAnAttachment"), attachments...))
 				}
 			}
 			choices = append(choices, choice)
@@ -222,7 +222,7 @@ func registerMagnetoSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Electromagnetic Blast — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.electromagneticBlastChooseAScheme"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("49009", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -244,7 +244,7 @@ func registerMagnetoSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Metal Shards — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.metalShardsChooseAnEnemy"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("49010", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -259,14 +259,14 @@ func registerMagnetoSignatures() {
 				return []engine.Message{engine.DamageEntity{Target: id, Damage: mn.HP(), Source: p.ID}, engine.DamageEntity{Target: target, Damage: 5, Source: p.ID}, engine.StunEntity{Target: target}}
 			})
 			if len(targets) > 0 {
-				wrapped = append(wrapped, engine.Choice{Label: "Discard " + mn.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
-					WithThen(engine.Ask("Magnetic Missile — choose the target", targets...)))
+				wrapped = append(wrapped, engine.Choice{Label: engine.S("Discard " + mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
+					WithThen(engine.Ask(engine.Tf("c.magneticMissileChooseTheTarget"), targets...)))
 			}
 		}
 		if len(wrapped) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Magnetic Missile — choose a wrapped minion", wrapped...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.magneticMissileChooseAWrappedMinion"), wrapped...)}}
 	}})
 	engine.RegisterBehavior("49011", &engine.Behavior{})
 }
@@ -285,13 +285,13 @@ func registerMagnetoObligation() {
 		// Old Grievances is persistent and keys damage to a future named
 		// ability resolution. With no obligation play area, resolve a minimum
 		// one-card Pull penalty now, or let alter ego exhaust to remove it.
-		choices := []engine.Choice{engine.Choice{ID: "damage", Label: "Take 1 damage and discard Old Grievances", Kind: engine.ChoiceLabel}.
+		choices := []engine.Choice{engine.Choice{ID: "damage", Label: engine.Tf("c.take1DamageAndDiscardOldGrievances"), Kind: engine.ChoiceLabel}.
 			Msgs(engine.DamageEntity{Target: p.ID, Damage: 1, Source: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card})}
 		if !p.IsHero() && !p.Exhausted {
-			choices = append(choices, engine.Choice{ID: "remove", Label: "Exhaust Erik Lehnsherr and discard Old Grievances", Kind: engine.ChoiceLabel}.
+			choices = append(choices, engine.Choice{ID: "remove", Label: engine.Tf("c.exhaustErikLehnsherrAndDiscardOldGrievances"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Old Grievances — choose", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.oldGrievancesChoose"), choices...)}}
 	}})
 }
 

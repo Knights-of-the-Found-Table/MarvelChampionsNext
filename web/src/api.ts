@@ -56,16 +56,38 @@ export const del = <T>(path: string) => request<T>('DELETE', path)
 
 // ---------------------------------------------------------------- types
 
+// Structured, locale-neutral message argument (see internal/engine/i18n.go):
+// k "card" resolves to the localized card name by code, "i" is an int,
+// "msg" nests another localizable message, "" is plain text.
+export interface ArgWire {
+  k?: string
+  s?: string
+  i?: number
+  code?: string
+  msg?: MsgWire
+}
+
+// A localizable message: key + structured args (client renders in the
+// viewer's language) plus text (canonical English fallback).
+export interface MsgWire {
+  key?: string
+  args?: ArgWire[]
+  text: string
+}
+
 export interface Question {
   type: 'choose_one' | 'choose_n' | 'choose_player_order'
   prompt?: string
+  promptKey?: string
+  promptArgs?: ArgWire[]
   choices: Choice[]
   n?: number
 }
 
 export interface Choice {
   id: string
-  label: string
+  // Structured label in current builds; a bare string in old saves.
+  label: MsgWire | string
   kind: string
   cardCode?: string
   sourceId?: string
@@ -186,6 +208,8 @@ export interface PlayerView {
 export interface LogEntry {
   level: string
   text: string
+  key?: string
+  args?: ArgWire[]
 }
 
 // Public table talk; separate from LogEntry and never part of game state.
@@ -205,7 +229,7 @@ export interface GameView {
   round: number
   over: boolean
   won: boolean
-  reason?: string
+  reason?: MsgWire | string
   villains: VillainView[] | null
   mainScheme: SchemeView | null
   sideSchemes: SchemeView[] | null

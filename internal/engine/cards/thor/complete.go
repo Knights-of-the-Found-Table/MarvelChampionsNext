@@ -4,8 +4,6 @@ package thor
 // Approximations are noted inline.
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -33,7 +31,7 @@ func registerRemainingThor() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			// The 3-damage energy-payment rider is approximated at 2
 			// (ally payments are not recorded by the engine).
-			return cardutil.ChooseMinion("Valkyrie: deal 2 damage to which minion?", 2)(g, e)
+			return cardutil.ChooseMinion(engine.Tf("c.valkyrieDeal2DamageToWhichMinion"), 2)(g, e)
 		},
 	})
 
@@ -65,7 +63,7 @@ func registerRemainingThor() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Get Over Here!: which minion?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.getOverHereWhichMinion"), picks...)}}
 		},
 	})
 
@@ -94,7 +92,7 @@ func registerRemainingThor() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Hall of Heroes + 3 glory counters → draw 3 cards", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustHallOfHeroes3GloryCountersDraw3Cards"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{
@@ -134,10 +132,10 @@ func registerRemainingThor() {
 	engine.RegisterBehavior("06019", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [physical] → deal 2 damage to an enemy", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendPhysicalDeal2DamageToAnEnemy"), Type: engine.AbilityAction,
 				Cost: 1, CostIcons: "physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
-					return cardutil.ChooseEnemy("Jarnbjorn: deal 2 damage to which enemy?",
+					return cardutil.ChooseEnemy(engine.Tf("c.jarnbjornDeal2DamageToWhichEnemy"),
 						func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(g, g.Entity(self))
 				},
 			}}
@@ -154,11 +152,11 @@ func registerRemainingThor() {
 			var picks []engine.Choice
 			for _, c := range top {
 				picks = append(picks, engine.Choice{
-					Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardEncounterCard{Card: c}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Heimdall: discard which of the top 3 encounter cards?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.heimdallDiscardWhichOfTheTop3EncounterCards"), picks...)}}
 		},
 	})
 
@@ -189,7 +187,7 @@ func registerRemainingThor() {
 			}
 			u.AttachTo = g.MainScheme.ID
 			g.MainScheme.MaxThreat += 4
-			g.Logf("%s target threat increased by 4 (Under Surveillance)", g.MainScheme.EDef().Name)
+			g.TLogf("c.targetThreatIncreasedBy4UnderSurveillance", g.MainScheme)
 			return nil
 		},
 	})
@@ -211,16 +209,16 @@ func registerRemainingThor() {
 				}
 				atk, thw := a.AttackVal+a.BonusATK+a.PermATK, a.ThwartVal+a.BonusTHW+a.PermTHW
 				picks = append(picks,
-					engine.Choice{ID: "tw-atk", Label: fmt.Sprintf("+%d ATK (%s)", atk, a.EDef().Name), Kind: engine.ChoiceBasicPower, SourceID: a.ID}.
+					engine.Choice{ID: "tw-atk", Label: engine.Tf("c.atk2", atk, a), Kind: engine.ChoiceBasicPower, SourceID: a.ID}.
 						Msgs(engine.ExhaustEntity{ID: a.ID}, engine.ApplyStatBonus{Target: p.ID, ATK: atk}),
-					engine.Choice{ID: "tw-thw", Label: fmt.Sprintf("+%d THW (%s)", thw, a.EDef().Name), Kind: engine.ChoiceBasicPower, SourceID: a.ID}.
+					engine.Choice{ID: "tw-thw", Label: engine.Tf("c.thw", thw, a), Kind: engine.ChoiceBasicPower, SourceID: a.ID}.
 						Msgs(engine.ExhaustEntity{ID: a.ID}, engine.ApplyStatBonus{Target: p.ID, THW: thw}))
 			}
 			if len(picks) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Teamwork: exhaust an ally to add its power to your hero this phase?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.teamworkExhaustAnAllyToAddItsPowerToYourHeroThisPhase"), picks...)}}
 		},
 	})
 
@@ -235,7 +233,7 @@ func registerRemainingThor() {
 			var picks []engine.Choice
 			for _, q := range g.Players {
 				if q.Damage > 0 {
-					picks = append(picks, engine.Choice{Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					picks = append(picks, engine.Choice{Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 						Msgs(engine.HealEntity{Target: q.ID, N: 4}))
 				}
 			}
@@ -243,7 +241,7 @@ func registerRemainingThor() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Second Wind: heal which identity?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.secondWindHealWhichIdentity"), picks...)}}
 		},
 	})
 

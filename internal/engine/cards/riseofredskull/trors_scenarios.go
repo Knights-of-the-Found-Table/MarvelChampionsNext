@@ -88,7 +88,7 @@ func registerAbsorbingMan() {
 					return nil
 				}
 				g.MainScheme.Counters++
-				g.Logf("A delay counter accumulates (%d)", g.MainScheme.Counters)
+				g.TLogf("c.aDelayCounterAccumulates", g.MainScheme.Counters)
 			case engine.RevealEncounterCard:
 				if m.Card.Def().Type != "environment" {
 					return nil
@@ -97,7 +97,7 @@ func registerAbsorbingMan() {
 				for id, env := range g.Environments {
 					if env != nil && env.Code != m.Card.Code {
 						g.Delete(id)
-						g.Logf("%s washes away", env.EDef().Name)
+						g.TLogf("c.washesAway", env)
 					}
 				}
 			}
@@ -127,7 +127,7 @@ func registerAbsorbingMan() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 1 [physical] → shuffle Ball and Chain into the encounter deck", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1PhysicalShuffleBallAndChainIntoTheEncounterDeck"), Type: engine.AbilityAction,
 				CostIcons: "physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -307,17 +307,17 @@ func registerTaskmaster() {
 	})
 	engine.RegisterBehavior("04098", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			return cardutil.ChooseEnemy("Shang-Chi: stun which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.shangChiStunWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					return 0, []engine.Message{engine.StunEntity{Target: tgt.EID()}}
 				})(g, e)
 		},
 	})
 	engine.RegisterBehavior("04099", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("White Tiger", func(g *engine.Game, s engine.Entity) int { return 3 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.whiteTigerChooseAScheme"), func(g *engine.Game, s engine.Entity) int { return 3 }),
 	})
 	engine.RegisterBehavior("04100", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Elektra: deal 3 damage",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.elektraDeal3Damage"),
 			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 3, nil }),
 	})
 

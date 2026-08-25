@@ -45,13 +45,13 @@ func registerDrax() {
 	engine.RegisterBehavior("19002", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Mantis + she takes 1 damage → heal 3 from an identity", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustMantisSheTakes1DamageHeal3FromAnIdentity"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var picks []engine.Choice
 					for _, q := range g.Players {
 						if q.Damage > 0 {
-							picks = append(picks, engine.Choice{Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							picks = append(picks, engine.Choice{Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(engine.DamageEntity{Target: self, Damage: 1, Source: self},
 									engine.HealEntity{Target: q.ID, N: 3}))
 						}
@@ -60,7 +60,7 @@ func registerDrax() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: g.Entity(self).EOwner(),
-						Question: engine.Ask("Mantis: heal which identity?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.mantisHealWhichIdentity"), picks...)}}
 				},
 			}}
 		},
@@ -94,7 +94,7 @@ func registerDrax() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Intimidation: remove threat from which scheme?", schemePicks(g, n, e.EOwner())...)}}
+				engine.Tf("c.intimidationRemoveThreatFromWhichScheme"), schemePicks(g, n, e.EOwner())...)}}
 		},
 	})
 
@@ -174,7 +174,7 @@ func registerDrax() {
 			p.Damage = p.MaxHP - 4
 			p.Side = engine.SideAlterEgo
 			g.Delete(u.ID) // removed from the game; tracked via the log
-			g.LogMajorf("Too Stubborn to Die: %s survives at 4 hit points in alter-ego form", p.Name)
+			g.TLogMajorf("c.tooStubbornToDieSurvivesAt4HitPointsInAlterEgoForm", p.Name)
 			return true
 		},
 	})
@@ -195,7 +195,7 @@ func registerDrax() {
 	engine.RegisterBehavior("19013", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust + discard Moondragon → a minion attacks another enemy", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustDiscardMoondragonAMinionAttacksAnotherEnemy"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardControlled{Player: g.Entity(self).EOwner(), ID: self}}
@@ -224,7 +224,7 @@ func registerDrax() {
 	// defeating a minion target).
 	engine.RegisterBehavior("19016", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			return cardutil.ChooseEnemy("Hard Knocks: deal 4 damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.hardKnocksDeal4DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 4, nil })(g, e)
 		},
 	})
@@ -276,7 +276,7 @@ func registerDrax() {
 				p.Deck = p.Deck[1:]
 				if c.Def().Type == "event" {
 					p.Hand = append(p.Hand, c)
-					g.Logf("Gamora: %s finds %s", p.Name, c.Def().Name)
+					g.TLogf("c.gamoraFinds", p.Name, c)
 					return nil
 				}
 				p.Discard = append(p.Discard, c)
@@ -309,12 +309,12 @@ func registerDrax() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust your alter-ego → remove from the game", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustYourAlterEgoRemoveFromTheGame"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			if !p.Stunned {
-				picks = append(picks, engine.Choice{ID: "stun", Label: "You are stunned", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "stun", Label: engine.Tf("c.youAreStunned"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.StunEntity{Target: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card}))
 			}
@@ -325,7 +325,7 @@ func registerDrax() {
 				}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Memories of Another Life:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.memoriesOfAnotherLife"), picks...)}}
 		},
 	})
 
@@ -387,7 +387,7 @@ func registerNemesis() {
 			for _, mn := range g.Minions {
 				mn.AttackVal += 2
 			}
-			g.Logf("Cull the Weak: each enemy gets +2 ATK")
+			g.TLogf("c.cullTheWeakEachEnemyGets2Atk")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -434,7 +434,7 @@ func registerNemesis() {
 			}
 			g.Delete(a.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
-			g.Logf("Challenge Accepted is discarded")
+			g.TLogf("c.challengeAcceptedIsDiscarded")
 			return nil
 		},
 	})

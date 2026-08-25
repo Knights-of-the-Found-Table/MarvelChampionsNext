@@ -50,14 +50,14 @@ func supportCounterChoices(g *engine.Game, p *engine.Player, prompt string, n in
 	var choices []engine.Choice
 	for _, s := range shieldSupports(g, p) {
 		choices = append(choices, engine.Choice{
-			Label: s.EDef().Name,
+			Label: engine.S(s.EDef().Name),
 			Kind:  engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 		}.Msgs(engine.AddEntityCounter{ID: s.ID, N: n}))
 	}
 	if len(choices) == 0 {
 		return nil
 	}
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(prompt, choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S(prompt), choices...)}}
 }
 
 func allEnemyDamage(g *engine.Game, source engine.EntityID, n int) []engine.Message {
@@ -91,7 +91,7 @@ func controlledMinion(g *engine.Game, p *engine.Player) *engine.Minion {
 		Source: &card, BlankText: true,
 	}
 	g.Minions[mn.ID] = mn
-	g.Logf("%s is put into play facedown as a Controlled minion", card.Def().Name)
+	g.TLogf("c.isPutIntoPlayFacedownAsAControlledMinion", card)
 	return mn
 }
 
@@ -102,7 +102,7 @@ func removeCounterFromFirstSupport(g *engine.Game, p *engine.Player) bool {
 	for _, id := range p.Supports {
 		if s := g.Supports[id]; s != nil && s.Counters > 0 {
 			s.Counters--
-			g.Logf("%s loses 1 all-purpose counter", s.EDef().Name)
+			g.TLogf("c.loses1AllPurposeCounter", s)
 			return true
 		}
 	}

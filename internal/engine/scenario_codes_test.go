@@ -211,7 +211,7 @@ func TestSchemeAFaceLifecycle(t *testing.T) {
 		for _, e := range g.Log[start:] {
 			t.Log(e.Text)
 		}
-		t.Fatalf("klaw: game over during advance: %s", g.Reason)
+		t.Fatalf("klaw: game over during advance: %s", g.Reason.Text)
 	}
 	if g.MainScheme.Code != "01117b" {
 		t.Errorf("klaw: scheme code after advance = %q, want 01117b", g.MainScheme.Code)

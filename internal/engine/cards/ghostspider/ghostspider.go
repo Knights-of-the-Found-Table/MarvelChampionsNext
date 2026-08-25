@@ -61,7 +61,7 @@ func registerGhostSpider() {
 				return nil
 			}
 			g.UsedThisTurn["gw-reflexes"] = true
-			g.Logf("Dizzying Reflexes — Ghost-Spider readies")
+			g.TLogf("c.dizzyingReflexesGhostSpiderReadies")
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
@@ -69,7 +69,7 @@ func registerGhostSpider() {
 				// Gwen Stacy — Action: shuffle Ticket to the Multiverse
 				// from your discard pile into your deck, or ready George
 				// Stacy (limit once per round).
-				Label:        "Gwen Stacy — recover Ticket to the Multiverse or ready George Stacy",
+				Label:        engine.Tf("c.gwenStacyRecoverTicketToTheMultiverseOrReadyGeorgeStacy"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -89,7 +89,7 @@ func gwenStacyAction(g *engine.Game, self engine.EntityID) []engine.Message {
 	for _, c := range p.Discard {
 		if c.Code == "27008" {
 			choices = append(choices, engine.Choice{
-				ID: "ticket", Label: "Shuffle Ticket to the Multiverse into your deck", Kind: engine.ChoiceCard, CardCode: c.Code,
+				ID: "ticket", Label: engine.Tf("c.shuffleTicketToTheMultiverseIntoYourDeck"), Kind: engine.ChoiceCard, CardCode: c.Code,
 			}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 			break
 		}
@@ -97,7 +97,7 @@ func gwenStacyAction(g *engine.Game, self engine.EntityID) []engine.Message {
 	for _, id := range p.Supports {
 		if s := g.Supports[id]; s != nil && s.Code == "27007" && s.Exhausted {
 			choices = append(choices, engine.Choice{
-				ID: "george", Label: "Ready George Stacy", Kind: engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
+				ID: "george", Label: engine.Tf("c.readyGeorgeStacy"), Kind: engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 			}.Msgs(engine.ReadyEntity{ID: s.ID}))
 		}
 	}
@@ -106,7 +106,7 @@ func gwenStacyAction(g *engine.Game, self engine.EntityID) []engine.Message {
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask("Gwen Stacy — choose:", choices...),
+		Question: engine.Ask(engine.Tf("c.gwenStacyChoose"), choices...),
 	}}
 }
 
@@ -141,7 +141,7 @@ func registerGWSignatures() {
 	// basic-power trigger and the max-1-per-use limit are not enforced by
 	// the event-play flow.)
 	engine.RegisterBehavior("27002", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Ghost Kick — deal 6 damage to an enemy",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.ghostKickDeal6DamageToAnEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 6, nil }),
 	})
 
@@ -167,14 +167,14 @@ func registerGWSignatures() {
 				for _, c := range p.Hand {
 					if c.Def().Type == "event" {
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name + " (hand)", Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name + " (hand)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.SupportStoreCard{ID: george.ID, Card: c}))
 					}
 				}
 				for _, c := range p.Discard {
 					if c.Def().Type == "event" {
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name + " (discard)", Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.ReturnDiscardCard{Player: pid, CardID: c.ID},
 							engine.SupportStoreCard{ID: george.ID, Card: c},
@@ -186,14 +186,14 @@ func registerGWSignatures() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Parental Guidance — attach an event to George Stacy", choices...),
+					Question: engine.Ask(engine.Tf("c.parentalGuidanceAttachAnEventToGeorgeStacy"), choices...),
 				}}
 			}
 			var choices []engine.Choice
 			for _, c := range p.Deck {
 				if c.Code == "27007" {
 					choices = append(choices, engine.Choice{
-						Label: "George Stacy (deck)", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.georgeStacyDeck"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.TakeDeckCard{Player: pid, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: pid},
@@ -203,7 +203,7 @@ func registerGWSignatures() {
 			for _, c := range p.Discard {
 				if c.Code == "27007" {
 					choices = append(choices, engine.Choice{
-						Label: "George Stacy (discard)", Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.georgeStacyDiscard"), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: pid, CardID: c.ID}))
 				}
 			}
@@ -212,7 +212,7 @@ func registerGWSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Parental Guidance — find George Stacy", choices...),
+				Question: engine.Ask(engine.Tf("c.parentalGuidanceFindGeorgeStacy"), choices...),
 			}}
 		},
 	})
@@ -221,7 +221,7 @@ func registerGWSignatures() {
 	// uses a basic power, remove 5 threat from a scheme. (Same trigger
 	// approximation as Ghost Kick.)
 	engine.RegisterBehavior("27004", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Phantom Flip", func(g *engine.Game, e engine.Entity) int { return 5 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Phantom Flip"), func(g *engine.Game, e engine.Entity) int { return 5 }),
 	})
 
 	// 27005 Pirouette and Punch: Hero Interrupt — when a card is revealed
@@ -269,7 +269,7 @@ func registerGWSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Web Binding — cancel an enemy's activation (stun it)", choices...),
+				Question: engine.Ask(engine.Tf("c.webBindingCancelAnEnemySActivationStunIt"), choices...),
 			}}
 		},
 	})
@@ -297,7 +297,7 @@ func registerGWSignatures() {
 				}
 				if hasEvent {
 					out = append(out, engine.Ability{
-						Label: "George Stacy — attach an event from your hand", Type: engine.AbilityAction, Exhaust: true,
+						Label: engine.Tf("c.georgeStacyAttachAnEventFromYourHand"), Type: engine.AbilityAction, Exhaust: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
 							p := g.Player(s.Owner)
@@ -307,7 +307,7 @@ func registerGWSignatures() {
 									continue
 								}
 								choices = append(choices, engine.Choice{
-									Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+									Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 								}.Msgs(engine.SupportStoreCard{ID: s.ID, Card: c}))
 							}
 							if len(choices) == 0 {
@@ -315,7 +315,7 @@ func registerGWSignatures() {
 							}
 							return []engine.Message{engine.AskQuestion{
 								Player:   p.ID,
-								Question: engine.Ask("George Stacy — attach which event?", choices...),
+								Question: engine.Ask(engine.Tf("c.georgeStacyAttachWhichEvent"), choices...),
 							}}
 						},
 					})
@@ -323,7 +323,7 @@ func registerGWSignatures() {
 			}
 			if len(s.AttachedCards) > 0 {
 				out = append(out, engine.Ability{
-					Label: "George Stacy — take the stored events into your hand", Type: engine.AbilityAction,
+					Label: engine.Tf("c.georgeStacyTakeTheStoredEventsIntoYourHand"), Type: engine.AbilityAction,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
 						if s == nil || len(s.AttachedCards) == 0 {
@@ -346,14 +346,14 @@ func registerGWSignatures() {
 	engine.RegisterBehavior("27008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Ticket to the Multiverse — reset your hand and ready Ghost-Spider", Type: engine.AbilityAction,
+				Label: engine.Tf("c.ticketToTheMultiverseResetYourHandAndReadyGhostSpider"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					p := g.Player(e.EOwner())
 					if u == nil || p == nil {
 						return nil
 					}
-					g.Logf("Ticket to the Multiverse — %s resets their hand", p.Name)
+					g.TLogf("c.ticketToTheMultiverseResetsTheirHand", p.Name)
 					msgs := []engine.Message{engine.DiscardControlled{Player: p.ID, ID: u.ID}}
 					// Discard hand, then shuffle the whole discard pile
 					// back (the ticket lands there too and rides along).
@@ -399,7 +399,7 @@ func registerGWSignatures() {
 			if code == "" || !isInterruptResponseEvent(code) {
 				return nil
 			}
-			g.Logf("Web-Bracelet — %s draws 1 card", p.Name)
+			g.TLogf("c.webBraceletDraws1Card", p.Name)
 			return []engine.Message{
 				engine.ExhaustEntity{ID: u.ID},
 				engine.DrawCards{Player: p.ID, N: 1},
@@ -418,7 +418,7 @@ func registerGWSignatures() {
 			}
 			for _, c := range g.EncounterDeck {
 				if c.Def().Type == "treachery" {
-					g.Logf("Silk — discards %s from the encounter deck", c.Def().Name)
+					g.TLogf("c.silkDiscardsFromTheEncounterDeck", c)
 					return []engine.Message{engine.DiscardEncounterCard{Card: c}}
 				}
 			}
@@ -445,7 +445,7 @@ func registerGWSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Spider-Man — stun and confuse an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.spiderManStunAndConfuseAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -463,7 +463,7 @@ func registerGWObligation() {
 			georgeCardID := ""
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil && s.Code == "27007" {
-					g.Logf("Worried Father — George Stacy leaves play")
+					g.TLogf("c.worriedFatherGeorgeStacyLeavesPlay")
 					g.Delete(s.ID)
 					for i, sid := range p.Supports {
 						if sid == s.ID {
@@ -491,15 +491,15 @@ func registerGWObligation() {
 			}
 			removeMsgs = append(removeMsgs, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true})
 			exhaustChoice := engine.Choice{
-				ID: "exhaust", Label: "Exhaust Gwen Stacy → remove Worried Father and take George Stacy into hand", Kind: engine.ChoiceLabel,
+				ID: "exhaust", Label: engine.Tf("c.exhaustGwenStacyRemoveWorriedFatherAndTakeGeorgeStacyIntoHan"), Kind: engine.ChoiceLabel,
 			}.Msgs(removeMsgs...)
 			discardChoice := engine.Choice{
-				ID: "discard", Label: "Discard Worried Father", Kind: engine.ChoiceLabel,
+				ID: "discard", Label: engine.Tf("c.discardWorriedFather"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card})
 			choices := []engine.Choice{exhaustChoice, discardChoice}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Worried Father — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.worriedFatherChoose"), choices...),
 			}}
 		},
 	})
@@ -559,7 +559,7 @@ func registerGWNemesis() {
 			t.Target = best.ID
 			best.Attachments = append(best.Attachments, t.ID)
 			best.MaxHP += 4
-			g.Logf("Experimental Injection — %s gets +4 hit points", best.EDef().Name)
+			g.TLogf("c.experimentalInjectionGets4HitPoints", best)
 			return nil
 		},
 	})
@@ -573,7 +573,7 @@ func registerGWNemesis() {
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				mn := g.Minions[id]
 				if mn != nil && mn.Code == "27027" {
-					g.Logf("In Cold Blood — The Lizard attacks %s", p.Name)
+					g.TLogf("c.inColdBloodTheLizardAttacks", p.Name)
 					return []engine.Message{engine.MinionActivates{MinionID: id, Player: p.ID}}
 				}
 			}

@@ -45,7 +45,7 @@ func setupSideDecks(g *engine.Game, p *engine.Player) {
 	}
 	shuffleCards(g, p.SenseDeck)
 	shuffleCards(g, p.SideDiscard)
-	g.Logf("%s begins with a %d-card Labor deck and a %d-card Gift deck", p.Name, len(p.SenseDeck), len(p.SideDiscard))
+	g.TLogf("c.beginsWithACardLaborDeckAndACardGiftDeck", p.Name, len(p.SenseDeck), len(p.SideDiscard))
 }
 
 func isLaborCode(code string) bool {
@@ -95,7 +95,7 @@ func revealTopLabor(g *engine.Game, p *engine.Player) []engine.Message {
 	}
 	card := p.SenseDeck[0]
 	p.SenseDeck = p.SenseDeck[1:]
-	g.Logf("%s reveals %s from the Labor deck", p.Name, card.Def().Name)
+	g.TLogf("c.revealsFromTheLaborDeck", p.Name, card)
 	return []engine.Message{engine.RevealEncounterCard{Player: p.ID, Card: card}}
 }
 
@@ -132,7 +132,7 @@ func putTopGiftIntoPlay(g *engine.Game, p *engine.Player) []engine.Message {
 	u := &engine.Upgrade{ID: g.NextEntityID("upgrade"), Code: card.Code, Owner: p.ID}
 	g.Upgrades[u.ID] = u
 	p.Upgrades = append(p.Upgrades, u.ID)
-	g.Logf("%s puts %s into play from the Gift deck", p.Name, card.Def().Name)
+	g.TLogf("c.putsIntoPlayFromTheGiftDeck", p.Name, card)
 	if b := engine.LookupBehavior(card.Code); b != nil && b.OnPlay != nil {
 		return b.OnPlay(g, u)
 	}
@@ -162,9 +162,9 @@ func completeLabor(g *engine.Game, p *engine.Player, code string, entity engine.
 	msgs = append(msgs, engine.ReadyEntity{ID: p.ID})
 	if p.IsHero() {
 		msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-			"Atonement — flip to alter-ego form?",
-			engine.Choice{ID: "flip", Label: "Flip to alter-ego", Kind: engine.ChoiceLabel}.Msgs(engine.ChangeForm{Player: p.ID}),
-			engine.Choice{ID: "stay", Label: "Remain in hero form", Kind: engine.ChoicePass},
+			engine.Tf("c.atonementFlipToAlterEgoForm"),
+			engine.Choice{ID: "flip", Label: engine.Tf("c.flipToAlterEgo"), Kind: engine.ChoiceLabel}.Msgs(engine.ChangeForm{Player: p.ID}),
+			engine.Choice{ID: "stay", Label: engine.Tf("c.remainInHeroForm"), Kind: engine.ChoicePass},
 		)})
 	}
 	return msgs
@@ -181,7 +181,7 @@ func registerHercules() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "New Labors of Hercules — reveal the top Labor", Type: engine.AbilityAction, AlterEgoOnly: true,
+				Label: engine.Tf("c.newLaborsOfHerculesRevealTheTopLabor"), Type: engine.AbilityAction, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return revealTopLabor(g, g.Player(self))
 				},
@@ -235,7 +235,7 @@ func registerLabors() {
 			})
 			if !ok {
 				g.Delete(a.ID)
-				g.Logf("Defeat the Hydra found no eligible minion")
+				g.TLogf("c.defeatTheHydraFoundNoEligibleMinion")
 				return nil
 			}
 			// A newly revealed minion is identified by the following
@@ -272,7 +272,7 @@ func registerLabors() {
 		card, ok := popEncounterCard(g, func(def *data.CardDef) bool { return def.Type == "side_scheme" })
 		if !ok {
 			g.Delete(a.ID)
-			g.Logf("Embody Pathos found no encounter side scheme")
+			g.TLogf("c.embodyPathosFoundNoEncounterSideScheme")
 			return nil
 		}
 		def := card.Def()
@@ -287,7 +287,7 @@ func registerLabors() {
 		}
 		g.SideSchemes[s.ID] = s
 		a.Target = s.ID
-		g.Logf("%s enters play with Embody Pathos attached (%d threat)", def.Name, s.Threat)
+		g.TLogf("c.entersPlayWithEmbodyPathosAttachedThreat", def.Name, s.Threat)
 		if b := engine.LookupBehavior(card.Code); b != nil && b.OnPlay != nil {
 			return b.OnPlay(g, s)
 		}
@@ -323,7 +323,7 @@ func registerLabors() {
 					a := &engine.Ally{ID: g.NextEntityID("ally"), Code: c.Code, Owner: p.ID, MaxHP: hp, AttackVal: atk, ThwartVal: thw}
 					g.Allies[a.ID] = a
 					p.Allies = append(p.Allies, a.ID)
-					g.Logf("Protect Humanity puts Amadeus Cho into play")
+					g.TLogf("c.protectHumanityPutsAmadeusChoIntoPlay")
 					if b := engine.LookupBehavior(c.Code); b != nil && b.OnPlay != nil {
 						return b.OnPlay(g, a)
 					}
@@ -379,7 +379,7 @@ func giftDiscount(g *engine.Game, p *engine.Player, def *data.CardDef) int {
 
 func registerSignatures() {
 	engine.RegisterBehavior("59008", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Amadeus Cho — draw 1 card", Type: engine.AbilityAction, Exhaust: true,
+		return []engine.Ability{{Label: engine.Tf("c.amadeusChoDraw1Card"), Type: engine.AbilityAction, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				return []engine.Message{engine.DrawCards{Player: e.EOwner(), N: 1}}
 			},
@@ -397,7 +397,7 @@ func registerSignatures() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask("The Gift of Battle — choose an enemy", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(engine.Tf("c.theGiftOfBattleChooseAnEnemy"), choices...)}}
 		},
 	})
 
@@ -418,11 +418,11 @@ func registerSignatures() {
 			var choices []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.Exhausted && u.EDef().CardSet == "hercules" {
-					choices = append(choices, engine.Choice{Label: "Ready " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID}.Msgs(engine.ReadyEntity{ID: u.ID}))
+					choices = append(choices, engine.Choice{Label: engine.S("Ready " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID}.Msgs(engine.ReadyEntity{ID: u.ID}))
 				}
 			}
 			if len(choices) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Son of Zeus — ready an upgrade", choices...)})
+				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.sonOfZeusReadyAnUpgrade"), choices...)})
 			}
 		}
 		return msgs
@@ -437,7 +437,7 @@ func registerSignatures() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask("Wisdom of Athena — choose a scheme", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(engine.Tf("c.wisdomOfAthenaChooseAScheme"), choices...)}}
 		},
 	})
 
@@ -447,7 +447,7 @@ func registerSignatures() {
 
 	engine.RegisterBehavior("59013", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: "Gauntlets of Hercules — retaliate for each Gift", Type: engine.AbilityTrigger,
+			Label: engine.Tf("c.gauntletsOfHerculesRetaliateForEachGift"), Type: engine.AbilityTrigger,
 			Trigger: engine.TriggerWhenDefended, Exhaust: true, HeroOnly: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				p := g.Player(e.EOwner())
@@ -535,7 +535,7 @@ func registerObligation() {
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-			return []engine.Ability{{Label: "Appeal to Athena — exhaust Hercules and remove", Type: engine.AbilityAction, AlterEgoOnly: true,
+			return []engine.Ability{{Label: engine.Tf("c.appealToAthenaExhaustHerculesAndRemove"), Type: engine.AbilityAction, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					if u == nil {
@@ -580,13 +580,13 @@ func registerNemesis() {
 		for _, c := range owner.Hand {
 			for _, r := range c.Def().Resources {
 				if r == "physical" || r == "wild" {
-					choices = append(choices, engine.Choice{Label: "Spend " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.DiscardCards{Player: owner.ID, Cards: engine.CardList{c}}))
+					choices = append(choices, engine.Choice{Label: engine.S("Spend " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.DiscardCards{Player: owner.ID, Cards: engine.CardList{c}}))
 					break
 				}
 			}
 		}
-		choices = append(choices, engine.Choice{ID: "heal", Label: "Let Lernean Hydra heal 2", Kind: engine.ChoiceLabel}.Msgs(engine.HealEntity{Target: mn.ID, N: 2}))
-		return []engine.Message{engine.AskQuestion{Player: owner.ID, Question: engine.Ask("Lernean Hydra — spend a physical resource?", choices...)}}
+		choices = append(choices, engine.Choice{ID: "heal", Label: engine.Tf("c.letLerneanHydraHeal2"), Kind: engine.ChoiceLabel}.Msgs(engine.HealEntity{Target: mn.ID, N: 2}))
+		return []engine.Message{engine.AskQuestion{Player: owner.ID, Question: engine.Ask(engine.Tf("c.lerneanHydraSpendAPhysicalResource"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("59038", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {

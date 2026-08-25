@@ -26,7 +26,7 @@ func registerMutagenFormula() {
 				// Stage 1 completes: the mutagen is unleashed and the
 				// cloud forms (the scheme replaces; the villain does
 				// not advance).
-				g.Logf("The mutagen is unleashed!")
+				g.TLogf("c.theMutagenIsUnleashed")
 				msgs := []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 				return msgs
 			}
@@ -73,7 +73,7 @@ func registerRiskyBusiness() {
 				Counters: 2 * len(g.Players),
 			}
 			g.AddEnvironment(env)
-			g.Logf("Criminal Enterprise enters play with %d infamy counters", env.Counters)
+			g.TLogf("c.criminalEnterpriseEntersPlayWithInfamyCounters", env.Counters)
 			return msgs
 		},
 		OnMainSchemeMaxed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
@@ -84,7 +84,7 @@ func registerRiskyBusiness() {
 				msgs := []engine.Message{engine.ReplaceMainScheme{Scheme: s.ID}}
 				if env := g.EnvironmentByCode("02006a", "02006b"); env != nil {
 					env.Counters += len(g.Players)
-					g.Logf("Criminal Enterprise gains %d infamy counters", len(g.Players))
+					g.TLogf("c.criminalEnterpriseGainsInfamyCounters", len(g.Players))
 				}
 				for _, p := range g.Players {
 					msgs = append(msgs, engine.MillPlayerDeck{Player: p.ID, N: 2})
@@ -116,13 +116,13 @@ func registerPersona(stageBase string, perStage int) {
 				// Norman never attacks; he gains infamy instead.
 				if env := g.EnvironmentByCode("02006a", "02006b"); env != nil && env.Code == "02006a" {
 					env.Counters += perStage
-					g.Logf("Norman Osborn plots: +%d infamy on Criminal Enterprise", perStage)
+					g.TLogf("c.normanOsbornPlotsInfamyOnCriminalEnterprise", perStage)
 					return nil
 				}
 				return nil
 			}
 			// Norman schemes with his own scheme value.
-			g.Logf("Norman Osborn schemes against %s", p.Name)
+			g.TLogf("c.normanOsbornSchemesAgainst", p.Name)
 			g.Push(engine.DealBoost{Enemy: v.ID})
 			g.Push(engine.RevealBoost{Enemy: v.ID})
 			return []engine.Message{engine.ApplyVillainScheme{VillainID: v.ID, Player: p.ID}}
@@ -139,7 +139,7 @@ func registerPersona(stageBase string, perStage int) {
 			}
 			if env.Counters >= toRemove {
 				env.Counters -= toRemove
-				g.Logf("Damage converted: -%d infamy from Criminal Enterprise (%d left)", toRemove, env.Counters)
+				g.TLogf("c.damageConvertedInfamyFromCriminalEnterpriseLeft", toRemove, env.Counters)
 			} else {
 				env.Counters = 0
 			}
@@ -159,10 +159,10 @@ func registerPersona(stageBase string, perStage int) {
 				// Normal attack flow.
 				if v.Stunned {
 					v.Stunned = false
-					g.Logf("Green Goblin is stunned; attack canceled")
+					g.TLogf("c.greenGoblinIsStunnedAttackCanceled")
 					return nil
 				}
-				g.Logf("Green Goblin attacks %s", p.Name)
+				g.TLogf("c.greenGoblinAttacks", p.Name)
 				g.Push(engine.DealBoost{Enemy: v.ID})
 				g.Push(engine.RevealBoost{Enemy: v.ID})
 				return []engine.Message{engine.AskQuestion{
@@ -181,14 +181,14 @@ func registerPersona(stageBase string, perStage int) {
 				if env.Counters < 0 {
 					env.Counters = 0
 				}
-				g.Logf("Madness consumes the Goblin: -%d madness counters (%d left)", n, env.Counters)
+				g.TLogf("c.madnessConsumesTheGoblinMadnessCountersLeft", n, env.Counters)
 				if env.Counters == 0 {
 					flipToNorman(g, v, env)
 				}
 				return nil
 			}
 			// No State of Madness: scheme for real.
-			g.Logf("Green Goblin schemes against %s", p.Name)
+			g.TLogf("c.greenGoblinSchemesAgainst", p.Name)
 			g.Push(engine.DealBoost{Enemy: v.ID})
 			g.Push(engine.RevealBoost{Enemy: v.ID})
 			return []engine.Message{engine.ApplyVillainScheme{VillainID: v.ID, Player: p.ID}}
@@ -208,7 +208,7 @@ func flipToGoblin(g *engine.Game, v *engine.Villain, env *engine.Environment) {
 	v.Tough = def.HasKeyword("Toughness")
 	env.Code = "02006b"
 	env.Counters = 2 * len(g.Players)
-	g.Logf("Norman snaps: the Green Goblin emerges! (%d madness counters)", env.Counters)
+	g.TLogf("c.normanSnapsTheGreenGoblinEmergesMadnessCounters", env.Counters)
 	for _, msg := range dealIndirectToAll(g, 3) {
 		g.Push(msg)
 	}
@@ -221,7 +221,7 @@ func flipToNorman(g *engine.Game, v *engine.Villain, env *engine.Environment) {
 	v.AttackVal = derefOr(def.Attack, 0)
 	env.Code = "02006a"
 	env.Counters = 2 * len(g.Players)
-	g.Logf("The madness subsides: Norman Osborn regains control. (%d infamy counters)", env.Counters)
+	g.TLogf("c.theMadnessSubsidesNormanOsbornRegainsControlInfamyCounters", env.Counters)
 }
 
 func derefOr(p *int, def int) int {

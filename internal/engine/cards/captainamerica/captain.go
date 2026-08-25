@@ -36,7 +36,7 @@ func registerCaptainAmerica() {
 				if c.Code == "03009" {
 					if _, ok := p.Discard.Remove(c.ID); ok {
 						p.Hand = append(p.Hand, c)
-						g.Logf("%s takes Captain America's Shield from their discard pile", p.Name)
+						g.TLogf("c.takesCaptainAmericaSShieldFromTheirDiscardPile", p.Name)
 					}
 					break
 				}
@@ -58,7 +58,7 @@ func registerCaptainAmerica() {
 			return []engine.Ability{{
 				// "I Can Do This All Day!" — Action: discard 1 card from
 				// your hand → ready Captain America (limit once per round).
-				Label:        "\"I Can Do This All Day!\" — discard 1 card → ready Captain America",
+				Label:        engine.Tf("c.iCanDoThisAllDayDiscard1CardReadyCaptainAmerica"),
 				Type:         engine.AbilityAction,
 				HeroOnly:     true,
 				OncePerRound: true,
@@ -70,7 +70,7 @@ func registerCaptainAmerica() {
 					var choices []engine.Choice
 					for _, c := range p.Hand {
 						choices = append(choices, engine.Choice{
-							Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 							engine.ReadyEntity{ID: self},
@@ -78,7 +78,7 @@ func registerCaptainAmerica() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("\"I Can Do This All Day!\" — choose a card to discard", choices...),
+						Question: engine.Ask(engine.Tf("c.iCanDoThisAllDayChooseACardToDiscard"), choices...),
 					}}
 				},
 			}}
@@ -101,7 +101,7 @@ func registerCapNemesis() {
 				}
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
 				n := cardutil.BoostOf(c)
-				g.Logf("%s discards %s from the encounter deck (+%d boost icons)", p.Name, c.Def().Name, n)
+				g.TLogf("c.discardsFromTheEncounterDeckBoostIcons", p.Name, c, n)
 				if n > 0 {
 					msgs = append(msgs, engine.DamageEntity{Target: p.ID, Damage: n, Source: e.EID()})
 				}
@@ -192,18 +192,18 @@ func registerCapObligation() {
 			var choices []engine.Choice
 			for _, c := range p.Hand {
 				choices = append(choices, engine.Choice{
-					Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 			}
 			var penalty []engine.Message
 			if n > 0 && len(choices) > 0 {
 				penalty = append(penalty, engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.AskN(fmt.Sprintf("Man Out of Time — discard %d cards", n), n, choices...),
+					Question: engine.AskN(engine.Tf("c.manOutOfTimeDiscardCards", n), n, choices...),
 				})
 			}
 			return cardutil.ExhaustOrPenalty(g, p, card,
-				fmt.Sprintf("Discard %d cards from your hand", n), penalty...)
+				engine.S(fmt.Sprintf("Discard %d cards from your hand", n)), penalty...)
 		},
 	})
 }

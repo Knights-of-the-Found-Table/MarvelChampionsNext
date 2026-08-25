@@ -1,8 +1,6 @@
 package captainamerica
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -52,7 +50,7 @@ func registerFalcon() {
 				rest = append(rest, g.EncounterDeck[n:]...)
 				rest = append(rest, g.EncounterDeck[:n]...)
 				g.EncounterDeck = rest
-				g.Logf("Falcon looks at: %v", names)
+				g.TLogf("c.falconLooksAt", names)
 			}
 			if treacheries == 0 || len(g.Schemes()) == 0 {
 				return nil
@@ -61,13 +59,13 @@ func registerFalcon() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: treacheries, Source: pid}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask(fmt.Sprintf("Falcon — remove %d threat from a scheme", treacheries), choices...),
+				Question: engine.Ask(engine.Tf("c.falconRemoveThreatFromAScheme", treacheries), choices...),
 			}}
 		},
 	})
@@ -80,7 +78,7 @@ func registerHawkeye() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if a, ok := e.(*engine.Ally); ok {
 				a.Counters = 4
-				g.Logf("Hawkeye enters play with 4 arrow counters")
+				g.TLogf("c.hawkeyeEntersPlayWith4ArrowCounters")
 			}
 			return nil
 		},
@@ -99,14 +97,14 @@ func registerHawkeye() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: a.Owner,
-				Question: engine.Ask(fmt.Sprintf("Hawkeye — remove 1 arrow counter to shoot %s for 2? (%d arrows)", mn.EDef().Name, a.Counters),
+				Question: engine.Ask(engine.Tf("c.hawkeyeRemove1ArrowCounterToShootFor2Arrows", mn, a.Counters),
 					engine.Choice{
-						ID: "shoot", Label: "Shoot", Kind: engine.ChoiceLabel,
+						ID: "shoot", Label: engine.Tf("c.shoot"), Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.AddEntityCounter{ID: a.ID, N: -1},
 						engine.DamageEntity{Target: m.MinionID, Damage: 2, Source: a.Owner},
 					),
-					engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+					engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 				),
 			}}
 		},
@@ -142,7 +140,7 @@ func registerAvengersAssemble() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			pid := e.EOwner()
 			if g.UsedThisRound["03015"] {
-				g.Logf("Avengers Assemble! was already played this round (max 1)")
+				g.TLogf("c.avengersAssembleWasAlreadyPlayedThisRoundMax1")
 				return nil
 			}
 			g.UsedThisRound["03015"] = true
@@ -162,7 +160,7 @@ func registerAvengersAssemble() {
 					pl.BonusATK++
 				}
 			}
-			g.Logf("Avengers Assemble! — Avengers get +1 THW and +1 ATK until the end of the phase")
+			g.TLogf("c.avengersAssembleAvengersGet1ThwAnd1AtkUntilTheEndOfThePhase")
 			return msgs
 		},
 	})
@@ -187,7 +185,7 @@ func registerMakeTheCall() {
 					}
 					cost := cardutil.Cost(def)
 					choices = append(choices, engine.Choice{
-						Label: fmt.Sprintf("%s (cost %d) — from %s's discard pile", def.Name, cost, pl.Name),
+						Label: engine.Tf("c.costFromSDiscardPile", def.Name, cost, pl.Name),
 						Kind:  engine.ChoiceCard, CardCode: def.Code,
 					}.WithThen(g.CustomPaymentQuestion(p, cost,
 						engine.Tf("q.payGeneric", cost, def.Name),
@@ -202,7 +200,7 @@ func registerMakeTheCall() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Make the Call — choose an ally from any discard pile", choices...),
+				Question: engine.Ask(engine.Tf("c.makeTheCallChooseAnAllyFromAnyDiscardPile"), choices...),
 			}}
 		},
 	})
@@ -222,7 +220,7 @@ func registerStrengthInNumbers() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && !a.Exhausted {
 					choices = append(choices, engine.Choice{
-						Label: "Exhaust " + a.EDef().Name, Kind: engine.ChoiceTarget,
+						Label: engine.S("Exhaust " + a.EDef().Name), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: a.Code,
 					}.Msgs(
 						engine.ExhaustEntity{ID: id},
@@ -235,7 +233,7 @@ func registerStrengthInNumbers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.AskN("Strength In Numbers — exhaust allies (draw 1 per ally)", len(choices), choices...),
+				Question: engine.AskN(engine.Tf("c.strengthInNumbersExhaustAlliesDraw1PerAlly"), len(choices), choices...),
 			}}
 		},
 	})
@@ -275,7 +273,7 @@ func registerQuinjet() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code,
+					Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
 				}.Msgs(
 					engine.AllyEntersPlayFree{Player: p.ID, Card: c},
 					engine.DiscardControlled{Player: p.ID, ID: e.EID()},
@@ -285,12 +283,12 @@ func registerQuinjet() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: fmt.Sprintf("Quinjet — put an Avenger ally (cost ≤ %d) into play, then discard Quinjet", s.Counters),
+				Label: engine.Tf("c.quinjetPutAnAvengerAllyCostIntoPlayThenDiscardQuinjet", s.Counters),
 				Type:  engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Quinjet — choose an Avenger ally", choices...),
+						Question: engine.Ask(engine.Tf("c.quinjetChooseAnAvengerAlly"), choices...),
 					}}
 				},
 			}}
@@ -311,7 +309,7 @@ func registerMockingbird() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Mockingbird — stun an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.mockingbirdStunAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -324,7 +322,7 @@ func registerAvengersTower() {
 	engine.RegisterBehavior("03024", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:   "Avengers Tower — the next Avenger ally this phase costs 1 less",
+				Label:   engine.Tf("c.avengersTowerTheNextAvengerAllyThisPhaseCosts1Less"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -332,7 +330,7 @@ func registerAvengersTower() {
 						p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{
 							Type: "ally", Trait: "avenger", Amount: 1,
 						})
-						g.Logf("The next Avenger ally this phase costs 1 less")
+						g.TLogf("c.theNextAvengerAllyThisPhaseCosts1Less")
 					}
 					return nil
 				},
@@ -353,18 +351,18 @@ func registerHonoraryAvenger() {
 			}
 			var choices []engine.Choice
 			choices = append(choices, engine.Choice{
-				Label: p.Name + " (identity)", Kind: engine.ChoiceTarget, SourceID: p.ID,
+				Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID,
 			}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: p.ID, MaxHP: 1, GrantTrait: "avenger"}))
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					choices = append(choices, engine.Choice{
-						Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id, MaxHP: 1, GrantTrait: "avenger"}))
 				}
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Honorary Avenger — attach to a friendly character", choices...),
+				Question: engine.Ask(engine.Tf("c.honoraryAvengerAttachToAFriendlyCharacter"), choices...),
 			}}
 		},
 	})
@@ -393,13 +391,13 @@ func registerEnraged() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					choices = append(choices, engine.Choice{
-						Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id, ATK: 2}))
 				}
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Enraged — attach to an ally (+2 ATK)", choices...),
+				Question: engine.Ask(engine.Tf("c.enragedAttachToAnAlly2Atk"), choices...),
 			}}
 		},
 	})
@@ -415,7 +413,7 @@ func registerFollowed() {
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
 				s := g.SideSchemes[id]
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
 			if len(choices) == 0 {
@@ -423,7 +421,7 @@ func registerFollowed() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Followed — attach to a side scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.followedAttachToASideScheme"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -444,7 +442,7 @@ func registerFollowed() {
 			if len(choices) > 0 {
 				out = append(out, engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Followed — deal 4 damage to an enemy", choices...),
+					Question: engine.Ask(engine.Tf("c.followedDeal4DamageToAnEnemy"), choices...),
 				})
 			}
 			return out
@@ -473,7 +471,7 @@ func registerEnhancedAwareness() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if u, ok := e.(*engine.Upgrade); ok {
 				u.Counters = 3
-				g.Logf("Enhanced Awareness enters play with 3 mental counters")
+				g.TLogf("c.enhancedAwarenessEntersPlayWith3MentalCounters")
 			}
 			return nil
 		},

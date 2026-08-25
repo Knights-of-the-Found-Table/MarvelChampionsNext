@@ -307,7 +307,7 @@ func TestWorthyFetchesMjolnir(t *testing.T) {
 	var takeChoice *engine.Choice
 	for i := range ask.Question.Choices {
 		c := &ask.Question.Choices[i]
-		if strings.Contains(c.Label, "Take") {
+		if strings.Contains(c.Label.Text, "Take") {
 			takeChoice = c
 		}
 	}

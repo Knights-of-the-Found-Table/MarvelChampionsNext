@@ -28,7 +28,7 @@ func registerIcemanExtras() {
 			}
 			if n > 0 {
 				a.BonusATK += n
-				g.Logf("Shark-Girl smells gear — +%d ATK", n)
+				g.TLogf("c.sharkGirlSmellsGearAtk", n)
 			}
 			return nil
 		},
@@ -78,7 +78,7 @@ func registerIcemanExtras() {
 				return nil
 			}
 			g.EventDamageBonus[p.ID] += 2
-			g.Logf("Surprise Move — +2 ATK")
+			g.TLogf("c.surpriseMove2Atk")
 			return nil
 		},
 	})
@@ -110,7 +110,7 @@ func registerIcemanExtras() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Take That! — 7 damage to:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.takeThat7DamageTo"), choices...)}}
 		},
 	})
 
@@ -148,7 +148,7 @@ func registerIcemanExtras() {
 					if c.Def().Type == "event" && c.Def().HasTrait("Attack") {
 						if _, ok := p.Deck.Remove(c.ID); ok {
 							p.Hand = append(p.Hand, c)
-							g.Logf("%s draws %s", p.Name, c.Def().Name)
+							g.TLogf("c.draws", p.Name, c)
 						}
 						break
 					}
@@ -168,13 +168,13 @@ func registerIcemanExtras() {
 				if s != nil {
 					s.Crisis = false
 					s.Hazard = 0
-					g.Logf("%s loses its icons (Shadowcat)", s.EDef().Name)
+					g.TLogf("c.losesItsIconsShadowcat", s)
 					return nil
 				}
 			}
 			if g.MainScheme != nil {
 				g.MainScheme.Crisis = false
-				g.Logf("The main scheme loses its icons (Shadowcat)")
+				g.TLogf("c.theMainSchemeLosesItsIconsShadowcat")
 			}
 			return nil
 		},
@@ -203,7 +203,7 @@ func registerIcemanExtras() {
 	engine.RegisterBehavior("46021", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Team-Building Exercise — next matching card costs 1 less", Type: engine.AbilityAction,
+				Label: engine.Tf("c.teamBuildingExerciseNextMatchingCardCosts1Less"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -273,7 +273,7 @@ func registerSauron() {
 				if c.Code == "46029" {
 					g.EncounterDeck.Remove(c.ID)
 					p.EncounterDown = append(p.EncounterDown, c)
-					g.Logf("Sauron is dealt facedown to %s", p.Name)
+					g.TLogf("c.sauronIsDealtFacedownTo", p.Name)
 					return nil
 				}
 			}

@@ -37,7 +37,7 @@ func registerBatroc() {
 			}
 			if env := alertLevel(g); env != nil {
 				env.Counters++
-				g.Logf("Alert Level rises (%d)", env.Counters)
+				g.TLogf("c.alertLevelRises", env.Counters)
 			}
 			return nil
 		},
@@ -51,7 +51,7 @@ func registerBatroc() {
 				if t := g.Attachments[aid]; t != nil && t.Code == "50092" && t.Counters > 0 {
 					t.Counters--
 					damage -= 2
-					g.Logf("Heightened Reflexes prevents 2 damage (%d leap counters left)", t.Counters)
+					g.TLogf("c.heightenedReflexesPrevents2DamageLeapCountersLeft", t.Counters)
 					if v.Damage+damage < v.MaxHP {
 						v.Damage += damage
 						return false
@@ -61,7 +61,7 @@ func registerBatroc() {
 			if v.Counters == 0 {
 				v.Counters = 1 // the once-per-game reset marker
 				v.Damage = 0
-				g.Logf("Batroc leaps away from defeat and taunts the heroes!")
+				g.TLogf("c.batrocLeapsAwayFromDefeatAndTauntsTheHeroes")
 				if g.MainScheme != nil && g.MainScheme.Threat > 0 {
 					g.Push(engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 6, Source: v.ID})
 				}
@@ -96,7 +96,7 @@ func registerBatroc() {
 			}
 			env.Counters = 0
 			env.StoredCards = append(env.StoredCards, engine.Card{ID: g.NextCardID(), Code: "50090a"})
-			g.LogMajorf("The Alert Level flips to HIGH!")
+			g.TLogMajorf("c.theAlertLevelFlipsToHigh")
 			return nil
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -105,12 +105,12 @@ func registerBatroc() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Alert Level — spend 1 resource to remove 1 threat", Type: engine.AbilityAction,
+				Label: engine.Tf("c.alertLevelSpend1ResourceToRemove1Threat"), Type: engine.AbilityAction,
 				Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if env := g.Environments[self]; env != nil && env.Counters > 0 {
 						env.Counters--
-						g.Logf("Alert Level drops to %d", env.Counters)
+						g.TLogf("c.alertLevelDropsTo", env.Counters)
 					}
 					return nil
 				},
@@ -122,7 +122,7 @@ func registerBatroc() {
 	engine.RegisterBehavior("50091", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Rescued Captive — remove 1 threat from the main scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.rescuedCaptiveRemove1ThreatFromTheMainScheme"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if g.MainScheme != nil {
@@ -139,7 +139,7 @@ func registerBatroc() {
 	engine.RegisterBehavior("50092", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			t.Counters = 4
-			g.Logf("Heightened Reflexes enters play with 4 leap counters")
+			g.TLogf("c.heightenedReflexesEntersPlayWith4LeapCounters")
 			return nil
 		},
 	})
@@ -153,7 +153,7 @@ func registerBatroc() {
 			}
 			if env := alertLevel(g); env != nil {
 				env.Counters++
-				g.Logf("Embassy Guard's defeat raises the Alert Level (%d)", env.Counters)
+				g.TLogf("c.embassyGuardSDefeatRaisesTheAlertLevel", env.Counters)
 			}
 			return nil
 		},
@@ -168,7 +168,7 @@ func registerBatroc() {
 			}
 			if env := alertLevel(g); env != nil {
 				env.Counters++
-				g.Logf("Embassy Patrol's defeat raises the Alert Level (%d)", env.Counters)
+				g.TLogf("c.embassyPatrolSDefeatRaisesTheAlertLevel", env.Counters)
 			}
 			return nil
 		},
@@ -182,7 +182,7 @@ func registerBatroc() {
 				if env.Counters < 0 {
 					env.Counters = 0
 				}
-				g.Logf("The security office is commandeered — Alert Level drops to %d", env.Counters)
+				g.TLogf("c.theSecurityOfficeIsCommandeeredAlertLevelDropsTo", env.Counters)
 			}
 			return nil
 		},
@@ -224,7 +224,7 @@ func registerBatroc() {
 			if !p.IsHero() {
 				if env := alertLevel(g); env != nil && env.Counters > 0 {
 					env.Counters--
-					g.Logf("Security cameras go dark — Alert Level drops")
+					g.TLogf("c.securityCamerasGoDarkAlertLevelDrops")
 				}
 				return []engine.Message{engine.RevealNextEncounter{Player: p.ID}}
 			}
@@ -246,9 +246,9 @@ func registerBatroc() {
 					exhaust = append(exhaust, engine.ExhaustEntity{ID: aid})
 				}
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Security Cameras — exhaust your characters or raise the Alert Level?",
-				engine.Choice{Label: "Exhaust your characters", Kind: engine.ChoicePass}.Msgs(exhaust...),
-				engine.Choice{Label: "Raise the Alert Level", Kind: engine.ChoicePass}.Msgs(raise...),
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.securityCamerasExhaustYourCharactersOrRaiseTheAlertLevel"),
+				engine.Choice{Label: engine.Tf("c.exhaustYourCharacters"), Kind: engine.ChoicePass}.Msgs(exhaust...),
+				engine.Choice{Label: engine.Tf("c.raiseTheAlertLevel"), Kind: engine.ChoicePass}.Msgs(raise...),
 			)}}
 		},
 	})
@@ -264,7 +264,7 @@ func registerBatrocBrigade() {
 			if !ok || m.MinionID != e.EID() {
 				return nil
 			}
-			g.Logf("Machete slips away into the encounter deck")
+			g.TLogf("c.macheteSlipsAwayIntoTheEncounterDeck")
 			return []engine.Message{engine.ShuffleMinionIntoDeck{MinionID: m.MinionID}}
 		},
 	})
@@ -293,7 +293,7 @@ func registerBatrocBrigade() {
 				p.Deck = p.Deck[1:]
 				p.Discard = append(p.Discard, c)
 				mn.AttackVal++
-				g.Logf("Zaran arms himself with %s (+1 ATK)", c.Def().Name)
+				g.TLogf("c.zaranArmsHimselfWith1Atk", c)
 			}
 			return nil
 		},

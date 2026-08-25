@@ -21,7 +21,7 @@ const (
 // recreated on demand from card behaviors; their identity within an entity is
 // the index in the ability slice, which must stay deterministic.
 type Ability struct {
-	Label string `json:"label"`
+	Label Msg    `json:"label"`
 	Type  string `json:"type"` // action | triggered | forced
 	// Trigger is set for reactive abilities; the engine gathers matching
 	// abilities at known points and asks the player.

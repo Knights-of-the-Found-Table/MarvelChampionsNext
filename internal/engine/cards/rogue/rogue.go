@@ -55,7 +55,7 @@ func bringTouchedIntoPlay(g *engine.Game, p *engine.Player) *engine.Upgrade {
 			}
 			g.Upgrades[u.ID] = u
 			p.Upgrades = append(p.Upgrades, u.ID)
-			g.Logf("%s brings Touched into play", p.Name)
+			g.TLogf("c.bringsTouchedIntoPlay", p.Name)
 			return u
 		}
 	}
@@ -69,7 +69,7 @@ func setTouchedAside(g *engine.Game, p *engine.Player) {
 		g.Delete(u.ID)
 		p.SenseDeck = append(p.SenseDeck, engine.Card{ID: g.NextCardID(), Code: touchedCode, Owner: p.ID})
 		p.ExtraTraits = nil
-		g.Logf("Touched is set aside")
+		g.TLogf("c.touchedIsSetAside")
 		return
 	}
 	for _, z := range []*engine.CardList{&p.Hand, &p.Deck, &p.Discard} {
@@ -78,7 +78,7 @@ func setTouchedAside(g *engine.Game, p *engine.Player) {
 				z.Remove(c.ID)
 				p.SenseDeck = append(p.SenseDeck, c)
 				p.ExtraTraits = nil
-				g.Logf("Touched is set aside")
+				g.TLogf("c.touchedIsSetAside")
 				return
 			}
 		}
@@ -129,7 +129,7 @@ func attachQuestion(g *engine.Game, p *engine.Player, u *engine.Upgrade, extra .
 	add := func(id engine.EntityID, name, code string) {
 		msgs := append([]engine.Message{engine.AttachUpgrade{ID: u.ID, Target: id}}, extra...)
 		choices = append(choices, engine.Choice{
-			Label: name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: code,
+			Label: engine.S(name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: code,
 		}.Msgs(msgs...))
 	}
 	for _, id := range cardutil.SortedIDs(g.Villains) {
@@ -155,7 +155,7 @@ func attachQuestion(g *engine.Game, p *engine.Player, u *engine.Upgrade, extra .
 	if len(choices) == 0 {
 		return nil
 	}
-	return engine.Ask("Attach Touched to which character?", choices...)
+	return engine.Ask(engine.Tf("c.attachTouchedToWhichCharacter"), choices...)
 }
 
 // registerRogue installs the Rogue / Anna Marie identity (38001a/b).
@@ -193,7 +193,7 @@ func registerRogue() {
 			return []engine.Ability{{
 				// Skin Contact — Action: attach Touched to another
 				// character; gain its traits until the end of the round.
-				Label:        "Skin Contact — attach Touched to another character",
+				Label:        engine.Tf("c.skinContactAttachTouchedToAnotherCharacter"),
 				Type:         engine.AbilityAction,
 				HeroOnly:     true,
 				OncePerRound: true,
@@ -204,7 +204,7 @@ func registerRogue() {
 					}
 					u := bringTouchedIntoPlay(g, pl)
 					if u == nil {
-						g.Logf("Skin Contact — Touched is nowhere to be found")
+						g.TLogf("c.skinContactTouchedIsNowhereToBeFound")
 						return nil
 					}
 					q := attachQuestion(g, pl, u)
@@ -283,7 +283,7 @@ func registerGambitAlly() {
 			if a == nil || a.Counters <= 0 {
 				return nil
 			}
-			g.Logf("Gambit removes a charge counter — 1 damage")
+			g.TLogf("c.gambitRemovesAChargeCounter1Damage")
 			return []engine.Message{
 				engine.AddEntityCounter{ID: a.ID, N: -1},
 				engine.DamageEntity{Target: w.Target, Damage: 1, Source: a.ID},
@@ -337,14 +337,14 @@ func registerGoinRogue() {
 					msgs = append(msgs, engine.DrawCards{Player: pid, N: 1})
 				}
 				ch := engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(msgs...)
 				if kind == "villain" {
 					confuse := cardutil.EnemyChoices(g, 0, pid, func(t engine.EntityID) []engine.Message {
 						return []engine.Message{engine.ConfuseEntity{Target: t}}
 					})
 					if len(confuse) > 0 {
-						ch = ch.WithThen(engine.Ask("Goin' Rogue — confuse an enemy", confuse...))
+						ch = ch.WithThen(engine.Ask(engine.Tf("c.goinRogueConfuseAnEnemy"), confuse...))
 					}
 				}
 				choices = append(choices, ch)
@@ -354,7 +354,7 @@ func registerGoinRogue() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Goin' Rogue — remove threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.goinRogueRemoveThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -391,7 +391,7 @@ func registerSouthernCross() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Southern Cross — deal damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.southernCrossDealDamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -410,7 +410,7 @@ func registerEnergyTransfer() {
 			}
 			u := bringTouchedIntoPlay(g, p)
 			if u == nil {
-				g.Logf("Energy Transfer — Touched is nowhere to be found")
+				g.TLogf("c.energyTransferTouchedIsNowhereToBeFound")
 				return nil
 			}
 			q := attachQuestion(g, p, u)
@@ -422,7 +422,7 @@ func registerEnergyTransfer() {
 				c := q.Choices[i]
 				tgt := c.SourceID
 				q.Choices[i] = engine.Choice{
-					Label: c.Label + " (takes 2 damage)", Kind: c.Kind, SourceID: tgt, CardCode: c.CardCode,
+					Label: engine.Tf("c.takes2Damage", c.Label), Kind: c.Kind, SourceID: tgt, CardCode: c.CardCode,
 				}.Msgs(
 					engine.AttachUpgrade{ID: u.ID, Target: tgt},
 					engine.DamageEntity{Target: tgt, Damage: 2, Source: pid},
@@ -496,7 +496,7 @@ func registerSuperpowerAdaptation() {
 				}
 				seen[c.Code] = true
 				choices = append(choices, engine.Choice{
-					Label: "Take " + def.Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Take " + def.Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.RecycleFromDiscard{Player: pid, From: owner.ID, CardID: c.ID}))
 			}
 			if len(choices) == 0 {
@@ -504,7 +504,7 @@ func registerSuperpowerAdaptation() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Superpower Adaptation — take an event from the discard pile", choices...),
+				Question: engine.Ask(engine.Tf("c.superpowerAdaptationTakeAnEventFromTheDiscardPile"), choices...),
 			}}
 		},
 	})
@@ -540,7 +540,7 @@ func registerNemesis() {
 			if !ok {
 				return nil
 			}
-			g.Logf("Mystique — Misled is shuffled into %s's deck", p.Name)
+			g.TLogf("c.mystiqueMisledIsShuffledIntoSDeck", p.Name)
 			p.Deck = append(p.Deck, card)
 			return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 		},
@@ -564,7 +564,7 @@ func registerNemesis() {
 			if !ok {
 				return nil
 			}
-			g.Logf("Mystique's Manipulations defeated — Misled is shuffled into %s's deck", p.Name)
+			g.TLogf("c.mystiqueSManipulationsDefeatedMisledIsShuffledIntoSDeck", p.Name)
 			p.Deck = append(p.Deck, card)
 			return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 		},
@@ -577,7 +577,7 @@ func registerNemesis() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			g.Delete(t.ID)
 			p.Deck = append(p.Deck, engine.Card{ID: g.NextCardID(), Code: "38027", Owner: p.ID})
-			g.Logf("Misled shuffles into %s's deck (surge)", p.Name)
+			g.TLogf("c.misledShufflesIntoSDeckSurge", p.Name)
 			return []engine.Message{
 				engine.ShufflePlayerDeck{Player: p.ID},
 				engine.RevealNextEncounter{Player: p.ID},
@@ -624,7 +624,7 @@ func registerObligation() {
 				switch g.Entity(u.AttachTo).(type) {
 				case *engine.Player, *engine.Ally:
 					msgs = append(msgs, engine.DamageEntity{Target: u.AttachTo, Damage: 2, Source: ""})
-					g.Logf("Deadly Touch — 2 damage to the touched character")
+					g.TLogf("c.deadlyTouch2DamageToTheTouchedCharacter")
 					msgs = append(msgs, engine.ObligationResolve{Player: p.ID, Card: card})
 					return msgs
 				}
@@ -632,7 +632,7 @@ func registerObligation() {
 			if g.MainScheme != nil {
 				msgs = append(msgs, engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 2, Source: ""})
 			}
-			g.Logf("Deadly Touch — 2 threat on the main scheme")
+			g.TLogf("c.deadlyTouch2ThreatOnTheMainScheme")
 			return append(msgs, engine.ObligationResolve{Player: p.ID, Card: card})
 		},
 	})

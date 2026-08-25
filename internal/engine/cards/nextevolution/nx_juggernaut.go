@@ -1,8 +1,6 @@
 package nextevolution
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -24,7 +22,7 @@ func addMomentum(g *engine.Game, n int) {
 		return
 	}
 	v.Counters += n
-	g.Logf("Juggernaut gains a momentum counter (%d total)", v.Counters)
+	g.TLogf("c.juggernautGainsAMomentumCounterTotal", v.Counters)
 }
 
 func registerJuggernaut() {
@@ -102,7 +100,7 @@ func registerJuggernaut() {
 				return nil
 			}
 			s.Threat--
-			g.Logf("Building Momentum loses 1 threat (%d left)", s.Threat)
+			g.TLogf("c.buildingMomentumLoses1ThreatLeft", s.Threat)
 			return nil
 		},
 	})
@@ -117,10 +115,10 @@ func registerJuggernaut() {
 			discardMsgs, discardLabel := highestCostControlledDiscard(g, p)
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask(fmt.Sprintf("Breakthrough — Juggernaut's ATK is %d:", atk),
-					engine.Choice{ID: "dmg", Label: fmt.Sprintf("Take %d damage", atk), Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.breakthroughJuggernautSAtkIs", atk),
+					engine.Choice{ID: "dmg", Label: engine.Tf("c.takeDamage", atk), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: atk, Source: t.ID}),
-					engine.Choice{ID: "disc", Label: discardLabel, Kind: engine.ChoiceLabel}.Msgs(discardMsgs...),
+					engine.Choice{ID: "disc", Label: engine.S(discardLabel), Kind: engine.ChoiceLabel}.Msgs(discardMsgs...),
 				),
 			}}
 		},
@@ -140,10 +138,10 @@ func registerJuggernaut() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask(fmt.Sprintf("Flatten — Juggernaut's ATK is %d:", atk),
-					engine.Choice{ID: "dmg", Label: fmt.Sprintf("Take %d damage", atk), Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.flattenJuggernautSAtkIs", atk),
+					engine.Choice{ID: "dmg", Label: engine.Tf("c.takeDamage", atk), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: atk, Source: t.ID}),
-					engine.Choice{ID: "mom", Label: "Give Juggernaut 1 momentum counter", Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "mom", Label: engine.Tf("c.giveJuggernaut1MomentumCounter"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.AddEntityCounter{ID: vID, N: 1}),
 				),
 			}}
@@ -221,7 +219,7 @@ func registerJuggernaut() {
 			for _, a := range g.Attachments {
 				if a != nil && a.Code == "40122a" {
 					g.Delete(a.ID)
-					g.Logf("Juggernaut's Helmet flips (Exposed)")
+					g.TLogf("c.juggernautSHelmetFlipsExposed")
 					addMomentum(g, 1)
 					return nil
 				}
@@ -265,7 +263,7 @@ func registerJuggernaut() {
 	engine.RegisterBehavior("40132", &engine.Behavior{
 		MinionDamageable: func(g *engine.Game, m *engine.Minion, damage int) bool {
 			if marauderInPlay(g, "40133") {
-				g.Logf("Black Tom Cassidy cannot take damage while Creeping Willow is in play")
+				g.TLogf("c.blackTomCassidyCannotTakeDamageWhileCreepingWillowIsInPlay")
 				return false
 			}
 			return true
@@ -299,7 +297,7 @@ func registerJuggernaut() {
 			if !ok || m.Source != e.EID() || m.Damage <= 0 {
 				return nil
 			}
-			g.Logf("Creeping Willow's thorns stun her victim")
+			g.TLogf("c.creepingWillowSThornsStunHerVictim")
 			return []engine.Message{engine.StunEntity{Target: m.Target}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {

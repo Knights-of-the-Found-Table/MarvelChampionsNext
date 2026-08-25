@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"testing"
@@ -33,7 +34,7 @@ func parseVerbs(f string) ([]int, []string, bool) {
 // TestMessageCatalogComplete 要求每个键都有非空 en/zh 两条,且译文确实
 // 与原文不同（防止复制原文当译文）。
 func TestMessageCatalogComplete(t *testing.T) {
-	if len(messages) < 200 {
+	if len(messages) < 2000 {
 		t.Fatalf("catalog unexpectedly small: %d keys", len(messages))
 	}
 	for key, m := range messages {
@@ -48,48 +49,8 @@ func TestMessageCatalogComplete(t *testing.T) {
 	}
 }
 
-// TestLegacyMessageCatalog guards the audited compatibility catalog. New code
-// should still prefer keyed T/Tf messages.
-func TestLegacyMessageCatalog(t *testing.T) {
-	if len(legacyMessages) < 2300 {
-		t.Fatalf("legacy catalog unexpectedly small: %d entries", len(legacyMessages))
-	}
-	for en, zh := range legacyMessages {
-		if en == "" || zh == "" {
-			t.Errorf("empty legacy translation: %q -> %q", en, zh)
-			continue
-		}
-		enIdx, enTypes, enExplicit := parseVerbs(en)
-		zhIdx, zhTypes, zhExplicit := parseVerbs(zh)
-		normalize := func(idx []int, types []string, explicit bool) (map[int]string, bool) {
-			out := make(map[int]string, len(idx))
-			for i, n := range idx {
-				if !explicit {
-					n = i + 1
-				}
-				if n < 1 || out[n] != "" {
-					return nil, false
-				}
-				out[n] = types[i]
-			}
-			return out, true
-		}
-		enSig, enOK := normalize(enIdx, enTypes, enExplicit)
-		zhSig, zhOK := normalize(zhIdx, zhTypes, zhExplicit)
-		if !enOK || !zhOK || len(enSig) != len(zhSig) {
-			t.Errorf("legacy placeholder mismatch: %q -> %q", en, zh)
-			continue
-		}
-		for n, typ := range enSig {
-			if zhSig[n] != typ {
-				t.Errorf("legacy placeholder mismatch at arg %d: %q -> %q", n, en, zh)
-			}
-		}
-	}
-}
-
 // TestMessageArgConsistency 校验各语言格式串的参数使用:
-//   - 用了显式序号（%1$s）就必须全部显式,且恰好覆盖 1..N 各一次;
+//   - 用了显式序号（%[1]s）就必须全部显式,且恰好覆盖 1..N 各一次;
 //   - 各语言的第 i 个参数类型必须一致（Sprintf 按位置/序号填参,
 //     类型错位或数量不匹配会在运行期输出 %!VERB 或乱序参数）。
 func TestMessageArgConsistency(t *testing.T) {
@@ -168,8 +129,8 @@ func TestPaymentIconSpecFromLegacyPrompt(t *testing.T) {
 
 // TestI18nFallback 缺失的键回退键名本身（gettext 惯例）。
 func TestI18nFallback(t *testing.T) {
-	if got := Tf("no.such.key"); got != "no.such.key" {
-		t.Errorf("missing key: %q", got)
+	if got := Tf("no.such.key"); got.Text != "no.such.key" {
+		t.Errorf("missing key: %q", got.Text)
 	}
 	if got := T("no.such.key"); got != "no.such.key" {
 		t.Errorf("missing key (T): %q", got)
@@ -196,84 +157,122 @@ func TestI18nZhFormatting(t *testing.T) {
 		{"q.attacksForDefend", []any{"绿魔", 5}, "绿魔 发起 5 点攻击:是否防御?"},
 	}
 	for _, c := range cases {
-		if got := Tf(c.key, c.args...); got != c.want {
+		if got := Tf(c.key, c.args...).Text; got != c.want {
 			t.Errorf("Tf(%q) = %q, want %q", c.key, got, c.want)
 		}
 	}
 	if got := T("q.yourTurn"); got != "你的回合" {
 		t.Errorf("T(q.yourTurn) = %q", got)
 	}
-	if !msgIs("你的回合", "q.yourTurn") || !msgIs("Your turn", "q.yourTurn") {
-		t.Errorf("msgIs failed across languages")
-	}
 }
 
-// TestI18nEnUnchanged 默认语言下输出与迁移前的英文字面量一致。
+// TestI18nEnUnchanged 默认语言下 Text 与迁移前的英文字面量一致——
+// 这是测试套件与旧存档所依赖的稳定输出。
 func TestI18nEnUnchanged(t *testing.T) {
 	SetLang(LangEn)
 	defer SetLang(LangEn)
-	if got := Tf("log.plays", "A", "B"); got != "A plays B" {
-		t.Errorf("en drift: %q", got)
+	if got := Tf("log.plays", "A", "B"); got.Text != "A plays B" {
+		t.Errorf("en drift: %q", got.Text)
 	}
-	if got := Tf("q.paySelect", 2, "Shield"); got != "Pay 2 resources for Shield (select cards)" {
-		t.Errorf("en drift: %q", got)
+	if got := Tf("q.paySelect", 2, "Shield"); got.Text != "Pay 2 resources for Shield (select cards)" {
+		t.Errorf("en drift: %q", got.Text)
 	}
 }
 
-func TestLegacyLogFormatUsesCatalog(t *testing.T) {
-	SetLang(LangZh)
-	defer SetLang(LangEn)
+// TestMsgStructure 验证结构化消息:键 + 类型化参数。CardDef/Card/Entity
+// 参数记录为 card 引用（前端按 code 解析本地化卡名）,整数记为 i,
+// 嵌套 Msg 递归保留结构,en 渲染照常可用。
+func TestMsgStructure(t *testing.T) {
+	def := &data.CardDef{Code: "01034", Name: "Shield Block"}
+	m := Tf("log.plays", "Alice", def)
+	if m.Key != "log.plays" || m.Text != "Alice plays Shield Block" {
+		t.Fatalf("bad msg: %#v", m)
+	}
+	if len(m.Args) != 2 {
+		t.Fatalf("args: %#v", m.Args)
+	}
+	if m.Args[0] != (Arg{S: "Alice"}) {
+		t.Errorf("plain arg: %#v", m.Args[0])
+	}
+	if m.Args[1] != (Arg{Kind: "card", Code: "01034", S: "Shield Block"}) {
+		t.Errorf("card arg: %#v", m.Args[1])
+	}
 
+	n := Tf("c.dealDamageTo", 5, Tf("m.hp", def, 2, 3))
+	if len(n.Args) != 2 || n.Args[0] != (Arg{Kind: "i", I: 5}) {
+		t.Fatalf("int/nested args: %#v", n.Args)
+	}
+	nested := n.Args[1]
+	if nested.Kind != "msg" || nested.M == nil || nested.M.Key != "m.hp" || nested.M.Text != "Shield Block — 2/3 HP" {
+		t.Errorf("nested msg arg: %#v", nested)
+	}
+	if n.Text != "Deal 5 damage to Shield Block — 2/3 HP" {
+		t.Errorf("nested render: %q", n.Text)
+	}
+}
+
+// TestStructuredLog 验证日志条目同时携带 key/args（供前端按观战者语言
+// 渲染）与 en 基准 Text（测试/兜底）。旧存档的纯字符串条目按原样加载。
+func TestStructuredLog(t *testing.T) {
 	g := &Game{}
-	g.Logf("%s plays %s", "蜘蛛侠", "网击")
-	g.LogMajorf("💀 Defeat: %s", "主线密谋完成")
-
-	if got := g.Log[0].Text; got != "蜘蛛侠 打出 网击" {
-		t.Errorf("legacy log format was not localized: %q", got)
+	g.tlogf("log.plays", "Alice", &data.CardDef{Code: "01034", Name: "Shield Block"})
+	e := g.Log[0]
+	if e.Level != LogInfo || e.Key != "log.plays" || e.Text != "Alice plays Shield Block" {
+		t.Fatalf("entry: %#v", e)
 	}
-	if got := g.Log[1].Text; got != "💀 败北:主线密谋完成" {
-		t.Errorf("legacy major log format was not localized: %q", got)
+	if len(e.Args) != 2 || e.Args[1].Code != "01034" {
+		t.Fatalf("entry args: %#v", e.Args)
+	}
+
+	var legacy LogEntries
+	if err := json.Unmarshal([]byte(`["Round 1 begins"]`), &legacy); err != nil {
+		t.Fatal(err)
+	}
+	if len(legacy) != 1 || legacy[0].Text != "Round 1 begins" || legacy[0].Key != "" || legacy[0].Level != LogInfo {
+		t.Fatalf("legacy entry: %#v", legacy[0])
 	}
 }
 
-func TestLegacyRenderedTextUsesCatalog(t *testing.T) {
-	SetLang(LangZh)
-	defer SetLang(LangEn)
-
-	cases := map[string]string{
-		"ChagallC's turn begins":                              "ChagallC 的回合开始",
-		"Boost card revealed: 横冲直撞 (+1)":                      "揭示增效牌 横冲直撞（+1）",
-		"犀牛人 takes 3 damage (9/14)":                           "犀牛人 受到 3 点伤害（9/14）",
-		"💀 Defeat: The main scheme completed":                 "💀 败北:主线密谋完成",
-		"Pay 2 resources for 能量护盾 (select cards)":             "为 能量护盾 支付 2 点资源",
-		"Discard 蜘蛛侠":                                         "弃置 蜘蛛侠",
-		"Remove 3 threat from 暴力闯入！":                          "从 暴力闯入！ 上移除 3 点威胁",
-		"Heal 2 damage from 德拉克斯":                             "为 德拉克斯 治疗 2 点伤害",
-		"The Bellerophon enters play with 3 missile counters": "柏勒罗丰号进场并带有 3 个导弹指示物",
-		"The Bellerophon — choose a player":                   "柏勒罗丰号——选择一位玩家",
+// TestAskPromptStructure 验证问题提示的 Prompt（en 基准）与
+// PromptKey/PromptArgs（前端重渲染）同时就位,子树拷贝不丢失。
+func TestAskPromptStructure(t *testing.T) {
+	q := Ask(Tf("q.paySelect", 2, &data.CardDef{Code: "01034", Name: "Shield Block"}),
+		Choice{ID: "pass", Label: S("Pass"), Kind: ChoicePass})
+	if q.Prompt != "Pay 2 resources for Shield Block (select cards)" {
+		t.Errorf("prompt: %q", q.Prompt)
 	}
-	for input, want := range cases {
-		if got := localizeLegacyRenderedText(input); got != want {
-			t.Errorf("localizeLegacyRenderedText(%q) = %q, want %q", input, got, want)
+	if q.PromptKey != "q.paySelect" || len(q.PromptArgs) != 2 || q.PromptArgs[1].Code != "01034" {
+		t.Errorf("prompt structure: %q %#v", q.PromptKey, q.PromptArgs)
+	}
+	if q.Choices[0].Label.Text != "Pass" {
+		t.Errorf("label: %#v", q.Choices[0].Label.Text)
+	}
+
+	// 旧存档/旧客户端里的字符串形态标签反序列化为纯文本 Msg。
+	var c Choice
+	if err := json.Unmarshal([]byte(`{"id":"x","label":"End turn"}`), &c); err != nil {
+		t.Fatal(err)
+	}
+	if c.Label.Text != "End turn" || c.Label.Key != "" {
+		t.Fatalf("legacy label: %#v", c.Label.Text)
+	}
+}
+
+// TestMessagesExport 验证 /api/locales 导出的目录完备:zh 缺失的条目
+// 以 en 填充,保证前端总能按 key 取到格式串。
+func TestMessagesExport(t *testing.T) {
+	for _, lang := range []Lang{LangEn, LangZh} {
+		out := Messages(lang)
+		if len(out) != len(messages) {
+			t.Fatalf("%s: exported %d keys, catalog has %d", lang, len(out), len(messages))
+		}
+		for k, v := range out {
+			if v == "" {
+				t.Errorf("%s: empty format for %s", lang, k)
+			}
 		}
 	}
-}
-
-func TestLegacyQuestionUsesCatalog(t *testing.T) {
-	SetLang(LangZh)
-	defer SetLang(LangEn)
-
-	q := Ask("Your turn",
-		Choice{Label: "End turn", Kind: ChoiceEndTurn},
-		Choice{Label: "Pass", Kind: ChoicePass}.WithThen(
-			Ask("Choose an enemy", Choice{Label: "Done", Kind: ChoicePass}),
-		),
-	)
-
-	if q.Prompt != "你的回合" || q.Choices[0].Label != "结束回合" || q.Choices[1].Label != "跳过" {
-		t.Fatalf("legacy question was not localized: %#v", q)
-	}
-	if q.Choices[1].Then == nil || q.Choices[1].Then.Prompt != "选择一个敌人" || q.Choices[1].Then.Choices[0].Label != "完成" {
-		t.Fatalf("nested legacy question was not localized: %#v", q.Choices[1].Then)
+	if Messages(LangZh)["q.yourTurn"] != "你的回合" {
+		t.Errorf("zh export wrong: %q", Messages(LangZh)["q.yourTurn"])
 	}
 }

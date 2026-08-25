@@ -29,7 +29,7 @@ func registerGrootCards() {
 				return nil
 			}
 			n := p.GrowthCounters
-			return cardutil.ChooseScheme("I am Groot", func(g *engine.Game, s engine.Entity) int { return n })(g, e)
+			return cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "I am Groot"), func(g *engine.Game, s engine.Entity) int { return n })(g, e)
 		},
 	})
 
@@ -41,14 +41,14 @@ func registerGrootCards() {
 				return nil
 			}
 			n := p.GrowthCounters
-			return cardutil.ChooseEnemy("I. AM. GROOT!: choose an enemy",
+			return cardutil.ChooseEnemy(engine.Tf("c.iAmGrootChooseAnEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)
 		},
 	})
 
 	// 16005 Root Stomp: 5 damage; growth counter on the kill.
 	engine.RegisterBehavior("16005", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Root Stomp: choose an enemy",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.rootStompChooseAnEnemy"),
 			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 				// Defeat is observable at pick time via remaining HP.
 				if entityHP(tgt) <= 5 {
@@ -86,16 +86,16 @@ func registerGrootCards() {
 			for k := 1; k <= min(max, len(chars)); k++ {
 				var subs []engine.Choice
 				for i, id := range chars {
-					subs = append(subs, engine.Choice{Label: labels[i], Kind: engine.ChoiceTarget, SourceID: id}.
+					subs = append(subs, engine.Choice{Label: engine.S(labels[i]), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ToughEntity{Target: id}))
 				}
 				picks = append(picks, engine.Choice{
-					ID: fmt.Sprintf("k%d", k), Label: fmt.Sprintf("Remove %d counter(s)", k),
+					ID: fmt.Sprintf("k%d", k), Label: engine.Tf("c.removeCounterS", k),
 					Kind: engine.ChoiceLabel,
-				}.WithThen(engine.AskN(fmt.Sprintf("Give tough to %d character(s)", k), k, subs...)))
+				}.WithThen(engine.AskN(engine.Tf("c.giveToughToCharacterS", k), k, subs...)))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("We Are Groot: remove how many growth counters?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.weAreGrootRemoveHowManyGrowthCounters"), picks...)}}
 		},
 	})
 
@@ -103,7 +103,7 @@ func registerGrootCards() {
 	engine.RegisterBehavior("16007", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Fertile Ground → +1 growth counter on Groot, draw 1", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustFertileGround1GrowthCounterOnGrootDraw1"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if p := g.Player(e.EOwner()); p != nil {
@@ -130,7 +130,7 @@ func registerGrootCards() {
 			}
 			u.Exhausted = true
 			p.GrowthCounters--
-			g.Logf("Entangling Vines: +2 THW for this thwart")
+			g.TLogf("c.entanglingVines2ThwForThisThwart")
 			return []engine.Message{engine.ThwartScheme{Scheme: bt.Target, N: 2, Source: e.EID()}}
 		},
 	})
@@ -163,7 +163,7 @@ func registerGrootCards() {
 			}
 			u.Exhausted = true
 			p.GrowthCounters -= 2
-			g.Logf("Lashing Vines: Groot readies")
+			g.TLogf("c.lashingVinesGrootReadies")
 			return []engine.Message{engine.ReadyEntity{ID: pid}}
 		},
 	})
@@ -185,7 +185,7 @@ func registerGrootCards() {
 			u.Exhausted = true
 			p.GrowthCounters--
 			p.BonusDEF += 3
-			g.Logf("Vine Shield: +3 DEF for this attack")
+			g.TLogf("c.vineShield3DefForThisAttack")
 			return nil
 		},
 	})
@@ -205,7 +205,7 @@ func registerGrootCards() {
 			}
 			u.Exhausted = true
 			p.GrowthCounters--
-			g.Logf("Vine Spikes: +2 damage for this attack")
+			g.TLogf("c.vineSpikes2DamageForThisAttack")
 			return []engine.Message{engine.DamageEntity{Target: ba.Target, Damage: 2, Source: e.EID()}}
 		},
 	})
@@ -246,10 +246,10 @@ func registerGrootBasics() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Starhawk: return him to your hand instead of discarding?",
-				engine.Choice{ID: "hand", Label: "Return Starhawk to hand", Kind: engine.ChoiceLabel}.
+				engine.Tf("c.starhawkReturnHimToYourHandInsteadOfDiscarding"),
+				engine.Choice{ID: "hand", Label: engine.Tf("c.returnStarhawkToHand"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ReturnControlled{Player: p.ID, ID: a.ID}),
-				engine.Choice{ID: "die", Label: "Let Starhawk be defeated", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "die", Label: engine.Tf("c.letStarhawkBeDefeated"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.AllyDestroyed{AllyID: a.ID}),
 			)}}
 		},
@@ -268,7 +268,7 @@ func registerGrootBasics() {
 			if p != nil && p.Damage == 0 {
 				n = 5
 			}
-			return cardutil.ChooseEnemy("Fighting Fit: choose the villain",
+			return cardutil.ChooseEnemy(engine.Tf("c.fightingFitChooseTheVillain"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)
 		},
 	})
@@ -300,7 +300,7 @@ func registerGrootBasics() {
 				return nil
 			}
 			u.Exhausted = true
-			g.Logf("Hard to Ignore: 1 threat removed from the main scheme")
+			g.TLogf("c.hardToIgnore1ThreatRemovedFromTheMainScheme")
 			return []engine.Message{engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 1, Source: e.EID()}}
 		},
 	})
@@ -321,7 +321,7 @@ func registerGrootObligation() {
 	engine.RegisterBehavior("16025", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			exhaust := engine.Choice{
-				ID: "exhaust", Label: "Exhaust your alter-ego → remove Wilt from the game", Kind: engine.ChoiceLabel,
+				ID: "exhaust", Label: engine.Tf("c.exhaustYourAlterEgoRemoveWiltFromTheGame"), Kind: engine.ChoiceLabel,
 			}.Msgs(
 				engine.ExhaustEntity{ID: p.ID},
 				engine.ObligationResolve{Player: p.ID, Card: card, Remove: true})
@@ -329,16 +329,16 @@ func registerGrootObligation() {
 			strip = append(strip, exhaust)
 			if p.GrowthCounters >= 3 {
 				strip = append(strip, engine.Choice{
-					ID: "growth", Label: "Remove 3 growth counters from Groot", Kind: engine.ChoiceLabel,
+					ID: "growth", Label: engine.Tf("c.remove3GrowthCountersFromGroot"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.AddProgressCounters{Player: p.ID, N: -3},
 					engine.ObligationResolve{Player: p.ID, Card: card}))
 			} else {
 				strip = append(strip, engine.Choice{
-					ID: "surge", Label: "No growth counters to remove (surge)", Kind: engine.ChoiceLabel, Disabled: true,
+					ID: "surge", Label: engine.Tf("c.noGrowthCountersToRemoveSurge"), Kind: engine.ChoiceLabel, Disabled: true,
 				})
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Wilt: choose an option", strip...)}}
+				Question: engine.Ask(engine.Tf("c.wiltChooseAnOption"), strip...)}}
 		},
 	})
 }

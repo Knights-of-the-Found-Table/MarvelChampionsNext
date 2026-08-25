@@ -83,7 +83,7 @@ func registerRedSkull() {
 			},
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Spend [energy][mental][physical] → discard this card", Type: engine.AbilityAction,
+					Label: engine.Tf("c.spendEnergyMentalPhysicalDiscardThisCard"), Type: engine.AbilityAction,
 					CostIcons: "energy:1 mental:1 physical:1",
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -178,7 +178,7 @@ func registerRedSkull() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			m := &engine.Minion{ID: g.NextEntityID("minion"), Code: "04130", MaxHP: 8, AttackVal: 3, SchemeVal: 2}
 			g.AddMinion(m, cardutil.FirstPlayerID(g))
-			g.Logf("The Sleeper awakens")
+			g.TLogf("c.theSleeperAwakens")
 			return nil
 		},
 	})
@@ -227,7 +227,7 @@ func revealSideSchemeFromPool(g *engine.Game) []engine.Message {
 	for i, c := range g.SetAside {
 		if c.Def().Type == "side_scheme" {
 			g.SetAside = append(g.SetAside[:i], g.SetAside[i+1:]...)
-			g.LogMajorf("%s is revealed from the side-scheme deck", c.Def().Name)
+			g.TLogMajorf("c.isRevealedFromTheSideSchemeDeck", c)
 			return []engine.Message{engine.RevealEncounterCard{Player: cardutil.FirstPlayerID(g), Card: c}}
 		}
 	}
@@ -265,7 +265,7 @@ func registerHydraModulars() {
 			},
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Spend resources → discard this weapon", Type: engine.AbilityAction,
+					Label: engine.Tf("c.spendResourcesDiscardThisWeapon"), Type: engine.AbilityAction,
 					CostIcons: spec.icons,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -327,7 +327,7 @@ func registerCampaignExtras() {
 		return &engine.Behavior{
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: label + " (discard from the campaign)", Type: engine.AbilityAction,
+					Label: engine.S(label + " (discard from the campaign)"), Type: engine.AbilityAction,
 					HeroOnly: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						msgs := exec(g, self)

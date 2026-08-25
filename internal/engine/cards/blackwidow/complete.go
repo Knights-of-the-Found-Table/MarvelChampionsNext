@@ -4,8 +4,6 @@
 package blackwidow
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -40,7 +38,7 @@ func registerBlackWidow() {
 	engine.RegisterBehavior("08003", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			msgs := []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Covert Ops: remove 4 threat from which scheme?", schemePicks(g, 4, e.EOwner())...)}}
+				engine.Tf("c.covertOpsRemove4ThreatFromWhichScheme"), schemePicks(g, 4, e.EOwner())...)}}
 			for id := range g.Villains {
 				msgs = append(msgs, engine.ConfuseEntity{Target: id})
 				break
@@ -55,7 +53,7 @@ func registerBlackWidow() {
 			var msgs []engine.Message
 			for _, n := range []int{1, 2, 3} {
 				msgs = append(msgs, cardutil.ChooseEnemy(
-					fmt.Sprintf("Dance of Death: deal %d damage to which enemy?", n),
+					engine.Tf("c.danceOfDeathDealDamageToWhichEnemy", n),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)...)
 			}
 			return msgs
@@ -66,7 +64,7 @@ func registerBlackWidow() {
 	engine.RegisterBehavior("08005", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Safe House #29 → add a Preparation from your discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustSafeHouse29AddAPreparationFromYourDiscard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.Entity(self).EOwner())
@@ -81,14 +79,14 @@ func registerBlackWidow() {
 							continue
 						}
 						seen[c.Code] = true
-						picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 					if len(picks) == 0 {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Add which Preparation to hand?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.addWhichPreparationToHand"), picks...)}}
 				},
 			}}
 		},
@@ -126,12 +124,12 @@ func registerBlackWidow() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask(
-				"Discard Widow's Bite → deal 2 damage to "+mn.EDef().Name+" and stun it?",
-				engine.Choice{ID: "use", Label: "Use Widow's Bite", Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "08010"}.
+				engine.S("Discard Widow's Bite → deal 2 damage to "+mn.EDef().Name+" and stun it?"),
+				engine.Choice{ID: "use", Label: engine.Tf("c.useWidowSBite"), Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "08010"}.
 					Msgs(engine.DiscardControlled{Player: u.Owner, ID: e.EID()},
 						engine.DamageEntity{Target: m.MinionID, Damage: 2, Source: u.Owner},
 						engine.StunEntity{Target: m.MinionID}),
-				engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+				engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -159,10 +157,10 @@ func registerBlackWidow() {
 					label += " (discard)"
 				}
 				if fromDeck {
-					picks = append(picks, engine.Choice{Label: label, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(label), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				} else {
-					picks = append(picks, engine.Choice{Label: label, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(label), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -170,7 +168,7 @@ func registerBlackWidow() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Coulson: add which Preparation to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.coulsonAddWhichPreparationToHand"), picks...)}}
 		},
 	})
 
@@ -186,11 +184,11 @@ func registerBlackWidow() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: a.Owner, Question: engine.Ask(
-				"Exhaust Quake → deal 2 damage to the scheming minion?",
-				engine.Choice{ID: "use", Label: "Exhaust Quake (2 damage)", Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "08012"}.
+				engine.Tf("c.exhaustQuakeDeal2DamageToTheSchemingMinion"),
+				engine.Choice{ID: "use", Label: engine.Tf("c.exhaustQuake2Damage"), Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "08012"}.
 					Msgs(engine.ExhaustEntity{ID: e.EID()},
 						engine.DamageEntity{Target: st.Source, Damage: 2, Source: a.Owner}),
-				engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+				engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -198,7 +196,7 @@ func registerBlackWidow() {
 	// Stealth Strike: 4 damage (the defeat-rider threat removal is
 	// approximated away).
 	engine.RegisterBehavior("08013", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Stealth Strike: deal 4 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.stealthStrikeDeal4DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 4, nil }),
 	})
 
@@ -225,13 +223,13 @@ func registerBlackWidow() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Nick Fury: choose one",
-				engine.Choice{ID: "threat", Label: "Remove 2 threat from a scheme", Kind: engine.ChoiceLabel}.
-					WithThen(engine.Ask("Remove 2 threat from which scheme?", schemePicks(g, 2, p.ID)...)),
-				engine.Choice{ID: "draw", Label: "Draw 3 cards", Kind: engine.ChoiceLabel}.
+				engine.Tf("c.nickFuryChooseOne2"),
+				engine.Choice{ID: "threat", Label: engine.Tf("c.remove2ThreatFromAScheme"), Kind: engine.ChoiceLabel}.
+					WithThen(engine.Ask(engine.Tf("c.remove2ThreatFromWhichScheme"), schemePicks(g, 2, p.ID)...)),
+				engine.Choice{ID: "draw", Label: engine.Tf("c.draw3Cards"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DrawCards{Player: p.ID, N: 3}),
-				engine.Choice{ID: "damage", Label: "Deal 4 damage to an enemy", Kind: engine.ChoiceLabel}.
-					WithThen(engine.Ask("Deal 4 damage to which enemy?", cardutil.EnemyChoices(g, 4, p.ID,
+				engine.Choice{ID: "damage", Label: engine.Tf("c.deal4DamageToAnEnemy"), Kind: engine.ChoiceLabel}.
+					WithThen(engine.Ask(engine.Tf("c.deal4DamageToWhichEnemy"), cardutil.EnemyChoices(g, 4, p.ID,
 						func(t engine.EntityID) []engine.Message {
 							return []engine.Message{engine.DamageEntity{Target: t, Damage: 4, Source: p.ID}}
 						})...)),
@@ -264,7 +262,7 @@ func registerBlackWidow() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust Natasha → remove from the game", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustNatashaRemoveFromTheGame"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
@@ -277,7 +275,7 @@ func registerBlackWidow() {
 				}
 			}
 			if best != "" {
-				picks = append(picks, engine.Choice{ID: "discard", Label: "Discard the highest-cost Preparation", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "discard", Label: engine.Tf("c.discardTheHighestCostPreparation"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DiscardControlled{Player: p.ID, ID: engine.EntityID(best)},
 						engine.ObligationResolve{Player: p.ID, Card: card}))
 			}
@@ -288,7 +286,7 @@ func registerBlackWidow() {
 				}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Burn Notice:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.burnNotice"), picks...)}}
 		},
 	})
 
@@ -342,7 +340,7 @@ func registerBlackWidow() {
 			var picks []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil {
-					picks = append(picks, engine.Choice{Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -356,10 +354,10 @@ func registerBlackWidow() {
 					rider = []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: t.ID}}
 				}
 			}
-			ask := engine.Ask("Deadly Shot: discard which upgrade?", picks...)
+			ask := engine.Ask(engine.Tf("c.deadlyShotDiscardWhichUpgrade"), picks...)
 			if len(rider) > 0 {
-				ask = engine.Ask("Deadly Shot: discard which upgrade?", append(picks, engine.Choice{
-					ID: "skip", Label: "Skip discard", Kind: engine.ChoicePass,
+				ask = engine.Ask(engine.Tf("c.deadlyShotDiscardWhichUpgrade"), append(picks, engine.Choice{
+					ID: "skip", Label: engine.Tf("c.skipDiscard"), Kind: engine.ChoicePass,
 				}.Msgs(rider...))...)
 				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: ask}}
 			}
@@ -400,11 +398,11 @@ func registerBlackWidow() {
 			}
 			code := a.Code
 			return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask(
-				"Discard Rapid Response → return "+a.EDef().Name+" to play with 1 damage?",
-				engine.Choice{ID: "use", Label: "Use Rapid Response", Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "08031"}.
+				engine.S("Discard Rapid Response → return "+a.EDef().Name+" to play with 1 damage?"),
+				engine.Choice{ID: "use", Label: engine.Tf("c.useRapidResponse"), Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "08031"}.
 					Msgs(engine.DiscardControlled{Player: u.Owner, ID: e.EID()},
 						engine.RapidReturn{Player: u.Owner, Code: code}),
-				engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+				engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -414,7 +412,7 @@ func registerBlackWidow() {
 		DamagePrevention: func(g *engine.Game, u *engine.Upgrade, p *engine.Player, n int) (int, int) {
 			g.Delete(u.ID)
 			p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
-			g.Logf("%s discards Defensive Stance to prevent 3 damage", p.Name)
+			g.TLogf("c.discardsDefensiveStanceToPrevent3Damage", p.Name)
 			return min(3, n), 0
 		},
 	})

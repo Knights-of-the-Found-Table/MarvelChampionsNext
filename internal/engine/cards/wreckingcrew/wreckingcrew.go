@@ -7,7 +7,6 @@
 package wreckingcrew
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
@@ -49,7 +48,7 @@ func registerScenario() {
 			for _, vid := range cardutil.SortedIDs(g.Villains) {
 				if g.Villains[vid].Code[:5] == "07002" {
 					g.ActiveVillain = vid
-					g.Logf("The active counter starts on %s", g.Villains[vid].EDef().Name)
+					g.TLogf("c.theActiveCounterStartsOn", g.Villains[vid].EDef().Name)
 					break
 				}
 			}
@@ -57,7 +56,7 @@ func registerScenario() {
 		},
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
 			delete(g.Villains, v.ID)
-			g.Logf("%s is defeated for good!", v.EDef().Name)
+			g.TLogf("c.isDefeatedForGood", v)
 			if g.ActiveVillain == v.ID {
 				setActiveLeastThreat(g)
 			}
@@ -83,7 +82,7 @@ func spawnCrewScheme(g *engine.Game, code string, v *engine.Villain) {
 		MaxThreat: deref(def.Threat, 10),
 	}
 	g.SideSchemes[s.ID] = s
-	g.Logf("%s enters play (%s's side scheme)", def.Name, v.EDef().Name)
+	g.TLogf("c.entersPlaySSideScheme", def.Name, v)
 }
 
 // schemeOfVillain finds the crew side scheme owned by the villain's base.
@@ -123,7 +122,7 @@ func setActiveLeastThreat(g *engine.Game) {
 	}
 	if best != "" && best != g.ActiveVillain {
 		g.ActiveVillain = best
-		g.Logf("The active counter moves to %s", g.Villains[best].EDef().Name)
+		g.TLogf("c.theActiveCounterMovesTo", g.Villains[best].EDef().Name)
 	}
 }
 
@@ -265,7 +264,7 @@ func registerCrew() {
 					}
 				}
 				s.Threat = 3
-				g.Logf("%s triggers and resets to 3 threat", s.EDef().Name)
+				g.TLogf("c.triggersAndResetsTo3Threat", s)
 				_ = ownerBase
 				return msgs
 			},
@@ -280,10 +279,10 @@ func crewActivate(base, ownerBase string) func(g *engine.Game, v *engine.Villain
 		if p.IsHero() {
 			if v.Stunned {
 				v.Stunned = false
-				g.Logf("%s is stunned; attack canceled", v.EDef().Name)
+				g.TLogf("log.stunnedCanceled", v)
 				return nil
 			}
-			g.Logf("%s attacks %s", v.EDef().Name, p.Name)
+			g.TLogf("log.attacks", v, p.Name)
 			g.Push(engine.DealBoost{Enemy: v.ID})
 			g.Push(engine.RevealBoost{Enemy: v.ID})
 			g.Push(engine.AskAttack{Enemy: v.ID, Player: p.ID, Trigger: engine.TriggerVillainAttacksYou})
@@ -292,7 +291,7 @@ func crewActivate(base, ownerBase string) func(g *engine.Game, v *engine.Villain
 		// Scheme onto his own side scheme instead of the main scheme.
 		if v.Confused {
 			v.Confused = false
-			g.Logf("%s is confused; scheme canceled", v.EDef().Name)
+			g.TLogf("log.confusedCanceled", v)
 			return nil
 		}
 		sid := schemeOfVillain(g, v.ID)
@@ -304,7 +303,7 @@ func crewActivate(base, ownerBase string) func(g *engine.Game, v *engine.Villain
 		if target == "" && g.MainScheme != nil {
 			target = g.MainScheme.ID
 		}
-		g.Logf("%s schemes against %s (threat to his side scheme)", v.EDef().Name, p.Name)
+		g.TLogf("c.schemesAgainstThreatToHisSideScheme", v, p.Name)
 		g.Push(engine.SchemeThreat{Scheme: target, N: n, Source: v.ID})
 		g.Push(engine.ClearBoosts{Enemy: v.ID})
 		// No boost cards are dealt for scheming villains per scenario
@@ -396,7 +395,7 @@ func registerShared() {
 		for _, id := range p.Upgrades {
 			u := g.Upgrades[id]
 			if u != nil {
-				picks = append(picks, engine.Choice{Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+				picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 					Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 			}
 		}
@@ -404,12 +403,12 @@ func registerShared() {
 		sid := schemeOfVillain(g, active)
 		if sid != "" {
 			picks = append(picks, engine.Choice{
-				ID: "threat", Label: fmt.Sprintf("Place %d threat on the active villain's scheme", len(p.Upgrades)),
+				ID: "threat", Label: engine.Tf("c.placeThreatOnTheActiveVillainSScheme", len(p.Upgrades)),
 				Kind: engine.ChoiceLabel,
 			}.Msgs(engine.SchemeThreat{Scheme: sid, N: len(p.Upgrades), Source: t.ID}))
 		}
 		return []engine.Message{engine.AskQuestion{Player: p.ID,
-			Question: engine.Ask("Chaos In the Prison:", picks...)}}
+			Question: engine.Ask(engine.Tf("c.chaosInThePrison"), picks...)}}
 	}
 	for _, code := range []string{"07011", "07026", "07056"} {
 		engine.RegisterBehavior(code, &engine.Behavior{
@@ -549,7 +548,7 @@ func registerShared() {
 			n := least.Threat
 			least.Threat = 0
 			most.Threat += n
-			g.Logf("Tactical Prowess moves %d threat from %s to %s", n, least.EDef().Name, most.EDef().Name)
+			g.TLogf("c.tacticalProwessMovesThreatFromTo", n, least, most)
 			return nil
 		},
 	})
@@ -736,13 +735,13 @@ func registerCrewAttachments() {
 			OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 				if sid := schemeOfVillain(g, g.ActiveVillain); sid != "" {
 					t.Target = sid
-					g.Logf("Held Hostage attaches to %s", g.SideSchemes[sid].EDef().Name)
+					g.TLogf("c.heldHostageAttachesTo", g.SideSchemes[sid].EDef().Name)
 				}
 				return nil
 			},
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Provoke the active villain's attack, then discard Held Hostage", Type: engine.AbilityAction,
+					Label: engine.Tf("c.provokeTheActiveVillainSAttackThenDiscardHeldHostage"), Type: engine.AbilityAction,
 					HeroOnly: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						a := g.Attachments[self]
@@ -935,7 +934,7 @@ func afterVillainAttacks(base string, run func(g *engine.Game, a *engine.Attachm
 func exhaustRandomDiscardRemoval(name string) func(g *engine.Game, e engine.Entity) []engine.Ability {
 	return func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: "Exhaust your hero + discard 1 random card → discard " + name, Type: engine.AbilityAction,
+			Label: engine.S("Exhaust your hero + discard 1 random card → discard " + name), Type: engine.AbilityAction,
 			HeroOnly: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				a := g.Attachments[self]
@@ -961,7 +960,7 @@ func exhaustRandomDiscardRemoval(name string) func(g *engine.Game, e engine.Enti
 func iconRemoval(label, icons string, cost int) func(g *engine.Game, e engine.Entity) []engine.Ability {
 	return func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: label, Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
+			Label: engine.S(label), Type: engine.AbilityAction, Cost: cost, CostIcons: icons, HeroOnly: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				a := g.Attachments[self]
 				if a == nil {

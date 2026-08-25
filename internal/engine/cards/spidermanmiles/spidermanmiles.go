@@ -31,10 +31,10 @@ func venomBlast(g *engine.Game, p *engine.Player) []engine.Message {
 	if len(choices) == 0 {
 		return nil
 	}
-	g.Logf("Venom Blast — 2 damage and stun")
+	g.TLogf("c.venomBlast2DamageAndStun")
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask("Venom Blast — deal 2 damage to and stun an enemy", choices...),
+		Question: engine.Ask(engine.Tf("c.venomBlastDeal2DamageToAndStunAnEnemy"), choices...),
 	}}
 }
 
@@ -51,10 +51,10 @@ func spiderCamouflage(g *engine.Game, p *engine.Player) []engine.Message {
 	if len(choices) > 0 {
 		msgs = append(msgs, engine.AskQuestion{
 			Player:   p.ID,
-			Question: engine.Ask("Spider Camouflage — confuse an enemy", choices...),
+			Question: engine.Ask(engine.Tf("c.spiderCamouflageConfuseAnEnemy"), choices...),
 		})
 	}
-	g.Logf("Spider Camouflage — %s gains tough", p.Name)
+	g.TLogf("c.spiderCamouflageGainsTough", p.Name)
 	return msgs
 }
 
@@ -95,7 +95,7 @@ func registerMiles() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "spider_man_morales" {
 					choices = append(choices, engine.Choice{
-						Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -104,20 +104,20 @@ func registerMiles() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Miles Morales — shuffle a Spider-Man card from your discard pile into your deck", choices...),
+				Question: engine.Ask(engine.Tf("c.milesMoralesShuffleASpiderManCardFromYourDiscardPileIntoYour"), choices...),
 			}}
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{
 				{
-					Label: "Venom Blast — deal 2 damage to and stun an enemy", Type: engine.AbilityAction,
+					Label: engine.Tf("c.venomBlastDeal2DamageToAndStunAnEnemy"), Type: engine.AbilityAction,
 					HeroOnly: true, OncePerRound: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return venomBlast(g, g.Player(self))
 					},
 				},
 				{
-					Label: "Spider Camouflage — gain tough and confuse an enemy", Type: engine.AbilityAction,
+					Label: engine.Tf("c.spiderCamouflageGainToughAndConfuseAnEnemy"), Type: engine.AbilityAction,
 					HeroOnly: true, OncePerRound: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return spiderCamouflage(g, g.Player(self))
@@ -164,7 +164,7 @@ func registerMilesSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Arachnobatics — deal damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.arachnobaticsDealDamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -205,7 +205,7 @@ func registerMilesSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Swing In — remove 4 threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.swingInRemove4ThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -232,7 +232,7 @@ func registerMilesSignatures() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Web-Shot — deal 4 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.webShotDeal4DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -242,7 +242,7 @@ func registerMilesSignatures() {
 	engine.RegisterBehavior("27035", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Ganke Lee — draw 1 card (hero form: discard 1)", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.gankeLeeDraw1CardHeroFormDiscard1"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(e.EOwner())
@@ -254,12 +254,12 @@ func registerMilesSignatures() {
 						var choices []engine.Choice
 						for _, c := range p.Hand {
 							choices = append(choices, engine.Choice{
-								Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 						}
 						msgs = append(msgs, engine.AskQuestion{
 							Player:   p.ID,
-							Question: engine.Ask("Ganke Lee — discard 1 card", choices...),
+							Question: engine.Ask(engine.Tf("c.gankeLeeDiscard1Card"), choices...),
 						})
 					}
 					return msgs
@@ -273,7 +273,7 @@ func registerMilesSignatures() {
 	engine.RegisterBehavior("27036", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Jefferson Davis — remove 1 threat from the least-threatened scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.jeffersonDavisRemove1ThreatFromTheLeastThreatenedScheme"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var target engine.EntityID
@@ -345,7 +345,7 @@ func registerMilesSignatures() {
 					s := &engine.Support{ID: g.NextEntityID(engine.KindSupport), Code: c.Code, Owner: p.ID}
 					g.Supports[s.ID] = s
 					p.Supports = append(p.Supports, s.ID)
-					g.Logf("Monica Chang — puts %s into play", s.EDef().Name)
+					g.TLogf("c.monicaChangPutsIntoPlay", s)
 					if b := engine.LookupBehavior("27045"); b != nil && b.OnPlay != nil {
 						g.Push(b.OnPlay(g, s)...)
 					}
@@ -379,7 +379,7 @@ func registerMilesSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Surveillance Team — remove 1 snoop counter → remove 1 threat", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.surveillanceTeamRemove1SnoopCounterRemove1Threat"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					if s == nil || s.Counters <= 0 {
@@ -396,7 +396,7 @@ func registerMilesSignatures() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   s.Owner,
-						Question: engine.Ask("Surveillance Team — remove 1 threat from a scheme", choices...),
+						Question: engine.Ask(engine.Tf("c.surveillanceTeamRemove1ThreatFromAScheme"), choices...),
 					}}
 				},
 			}}
@@ -416,13 +416,13 @@ func powerWithinReact(code string, special func(g *engine.Game, p *engine.Player
 		if p == nil || !p.IsHero() || !basicPowerUsed(p, msg) {
 			return nil
 		}
-		skip := engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass}
+		skip := engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass}
 		confirm := engine.Choice{
-			ID: "resolve", Label: prompt, Kind: engine.ChoiceLabel,
+			ID: "resolve", Label: engine.S(prompt), Kind: engine.ChoiceLabel,
 		}.Msgs(append([]engine.Message{engine.DiscardControlled{Player: p.ID, ID: u.ID}}, special(g, p)...)...)
 		return []engine.Message{engine.AskQuestion{
 			Player:   p.ID,
-			Question: engine.Ask(prompt, confirm, skip),
+			Question: engine.Ask(engine.S(prompt), confirm, skip),
 		}}
 	}
 }
@@ -445,17 +445,17 @@ func registerMilesObligation() {
 			}
 			discardMsgs = append(discardMsgs, engine.ObligationResolve{Player: p.ID, Card: card})
 			exhaust := engine.Choice{
-				ID: "exhaust", Label: "Exhaust Miles Morales → remove Keeping Secrets from the game", Kind: engine.ChoiceLabel,
+				ID: "exhaust", Label: engine.Tf("c.exhaustMilesMoralesRemoveKeepingSecretsFromTheGame"), Kind: engine.ChoiceLabel,
 			}.Msgs(
 				engine.ExhaustEntity{ID: p.ID},
 				engine.ObligationResolve{Player: p.ID, Card: card, Remove: true},
 			)
 			discard := engine.Choice{
-				ID: "discard", Label: "Discard Ganke Lee and Jefferson Davis from play", Kind: engine.ChoiceLabel,
+				ID: "discard", Label: engine.Tf("c.discardGankeLeeAndJeffersonDavisFromPlay"), Kind: engine.ChoiceLabel,
 			}.Msgs(discardMsgs...)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Keeping Secrets — choose:", exhaust, discard),
+				Question: engine.Ask(engine.Tf("c.keepingSecretsChoose"), exhaust, discard),
 			}}
 		},
 	})
@@ -517,7 +517,7 @@ func registerMilesNemesis() {
 			}
 			t.Target = best.ID
 			best.Attachments = append(best.Attachments, t.ID)
-			g.Logf("Razor Claws — attached to %s", best.EDef().Name)
+			g.TLogf("c.razorClawsAttachedTo", best)
 			return []engine.Message{engine.BoostEnemyAttack{Enemy: best.ID, N: 2}}
 		},
 	})
@@ -550,7 +550,7 @@ func registerMilesNemesis() {
 			if victim == nil {
 				return nil
 			}
-			g.Logf("Slice and Dice — Prowler attacks %s", victim.Name)
+			g.TLogf("c.sliceAndDiceProwlerAttacks", victim.Name)
 			return []engine.Message{engine.MinionActivates{MinionID: prowler, Player: victim.ID}}
 		},
 	})

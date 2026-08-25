@@ -66,7 +66,7 @@ func registerFalconComplete() {
 			card := p.Hand[idx]
 			p.Hand = append(p.Hand[:idx:idx], p.Hand[idx+1:]...)
 			p.Discard = append(p.Discard, card)
-			g.Logf("Adam Warlock discards %s", card.Def().Name)
+			g.TLogf("c.adamWarlockDiscards", card)
 			icon := ""
 			if rs := card.Def().Resources; len(rs) > 0 {
 				icon = rs[0]
@@ -92,7 +92,7 @@ func registerFalconComplete() {
 		return &engine.Behavior{
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: "Exhaust — " + map[string]string{"atk": "Aero: Aerial allies +1 ATK", "thw": "Cloud 9: Aerial allies +1 THW"}[stat],
+					Label: engine.S("Exhaust — " + map[string]string{"atk": "Aero: Aerial allies +1 ATK", "thw": "Cloud 9: Aerial allies +1 THW"}[stat]),
 					Type:  engine.AbilityAction, HeroOnly: true, Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						var out []engine.Message
@@ -199,7 +199,7 @@ func registerFalconComplete() {
 	engine.RegisterBehavior("53020", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Flight Squadron — ready an Aerial ally", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.flightSquadronReadyAnAerialAlly"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(s.Owner)
@@ -225,7 +225,7 @@ func registerFalconComplete() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Resource Reserve — tuck a resource card from your hand", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.resourceReserveTuckAResourceCardFromYourHand"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(s.Owner)
@@ -236,7 +236,7 @@ func registerFalconComplete() {
 					p.Hand = p.Hand[1:]
 					s.AttachedCards = append(s.AttachedCards, card)
 					s.Counters = 1
-					g.Logf("%s is banked on Resource Reserve", card.Def().Name)
+					g.TLogf("c.isBankedOnResourceReserve", card)
 					return nil
 				},
 			}}
@@ -250,7 +250,7 @@ func registerFalconComplete() {
 	engine.RegisterBehavior("53023", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Captain America — spend a resource: fetch Cap's Shield", Type: engine.AbilityAction,
+				Label: engine.Tf("c.captainAmericaSpendAResourceFetchCapSShield"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true, Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -263,7 +263,7 @@ func registerFalconComplete() {
 							card := c
 							p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 							p.Hand = append(p.Hand, card)
-							g.Logf("Cap's Shield answers the call")
+							g.TLogf("c.capSShieldAnswersTheCall")
 							return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 						}
 					}

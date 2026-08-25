@@ -87,7 +87,7 @@ func registerBPComplete() {
 	// 51016 Going Undercover.
 	engine.RegisterBehavior("51016", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
-			g.Logf("Going Undercover maps the enemy operation")
+			g.TLogf("c.goingUndercoverMapsTheEnemyOperation")
 			return nil
 		},
 	})
@@ -128,7 +128,7 @@ func registerBPComplete() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Sonic Rifle — confuse an enemy (3 damage if already confused)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.sonicRifleConfuseAnEnemy3DamageIfAlreadyConfused"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -169,7 +169,7 @@ func registerBPComplete() {
 			p := g.Player(u.Owner)
 			p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
 			g.Delete(mn.ID)
-			g.Logf("Sting Operation takes down %s", mn.EDef().Name)
+			g.TLogf("c.stingOperationTakesDown", mn)
 			return nil
 		},
 	})
@@ -178,7 +178,7 @@ func registerBPComplete() {
 		engine.RegisterBehavior(code, &engine.Behavior{
 			Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 				return []engine.Ability{{
-					Label: label, Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
+					Label: engine.S(label), Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
 					Execute: exec,
 				}}
 			},
@@ -231,7 +231,7 @@ func registerBPComplete() {
 						card := c
 						p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 						p.Hand = append(p.Hand, card)
-					out = append(out, engine.ShufflePlayerDeck{Player: p.ID})
+						out = append(out, engine.ShufflePlayerDeck{Player: p.ID})
 						break
 					}
 				}
@@ -247,7 +247,7 @@ func registerBPComplete() {
 	engine.RegisterBehavior("51030", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Dora Milaje — resolve an ally Special and heal them", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.doraMilajeResolveAnAllySpecialAndHealThem"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(s.Owner)

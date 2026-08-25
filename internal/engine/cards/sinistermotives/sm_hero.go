@@ -8,8 +8,6 @@ import (
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
 
-
-
 // registerSMHeroCards installs the box's hero-pack aspect cards (27012–
 // 27055).
 func registerSMHeroCards() {
@@ -40,7 +38,7 @@ func registerSMHeroCards() {
 					n++
 				}
 			}
-			g.Logf("Spider-UK retaliates for %d", n)
+			g.TLogf("c.spiderUkRetaliatesFor", n)
 			return []engine.Message{engine.DamageEntity{Target: w.Against, Damage: n, Source: e.EID()}}
 		},
 	})
@@ -145,20 +143,20 @@ func registerSMHeroCards() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && !a.Exhausted && g.EntityHasTrait(id, "web-warrior") {
 					exhausts = append(exhausts, engine.Choice{
-						Label: "Exhaust " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S("Exhaust " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: id}))
 				}
 			}
 			if p.Exhausted == false {
 				exhausts = append(exhausts, engine.Choice{
-					ID: "self", Label: "Exhaust " + p.Name + " (Web-Warrior)", Kind: engine.ChoiceLabel,
+					ID: "self", Label: engine.S("Exhaust " + p.Name + " (Web-Warrior)"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}))
 			}
 			if len(exhausts) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Across the Spider-Verse: exhaust which Web-Warrior?", exhausts...)}}
+				Question: engine.Ask(engine.Tf("c.acrossTheSpiderVerseExhaustWhichWebWarrior"), exhausts...)}}
 		},
 	})
 
@@ -174,7 +172,7 @@ func registerSMHeroCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Heal 3 damage from your identity", Type: engine.AbilityAction,
+				Label: engine.Tf("c.heal3DamageFromYourIdentity"), Type: engine.AbilityAction,
 				AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.HealEntity{Target: e.EOwner(), N: 3}}
@@ -216,12 +214,12 @@ func registerSMHeroCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust Plan B + discard 1 random card → 2 damage to an enemy", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustPlanBDiscard1RandomCard2DamageToAnEnemy"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					c := p.Hand[0]
 					return append([]engine.Message{engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}},
-						cardutil.ChooseEnemy("Plan B: deal 2 damage",
+						cardutil.ChooseEnemy(engine.Tf("c.planBDeal2Damage"),
 							func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(
 							g, g.Entity(self))...)
 				},
@@ -247,7 +245,7 @@ func registerSMHeroCards() {
 				var def = g.Entity(id).EDef()
 				if def != nil && def.HasTrait("shield") {
 					opts = append(opts, engine.Choice{
-						Label: def.Name, Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.S(def.Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: id}))
 				}
 			}
@@ -255,7 +253,7 @@ func registerSMHeroCards() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.AskN("Homeland Intervention: exhaust up to 3 S.H.I.E.L.D. cards (2 threat each)", 3, opts...)}}
+				Question: engine.AskN(engine.Tf("c.homelandInterventionExhaustUpTo3SHIELDCards2ThreatEach"), 3, opts...)}}
 		},
 	})
 
@@ -269,7 +267,7 @@ func registerSMHeroCards() {
 			}
 			n := min(4, len(p.Deck))
 			for i := 0; i < n; i++ {
-				g.Logf("Global Logistics sees %s", p.Deck[i].Def().Name)
+				g.TLogf("c.globalLogisticsSees", p.Deck[i].Def().Name)
 			}
 			return nil
 		},
@@ -329,7 +327,7 @@ func registerSMHeroCards() {
 				if def.Type == "event" && !seen[def.Code] {
 					seen[def.Code] = true
 					picks = append(picks, engine.Choice{
-						Label: def.Name + " (deck)", Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -337,7 +335,7 @@ func registerSMHeroCards() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Ghost-Spider: add which event to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.ghostSpiderAddWhichEventToHand"), picks...)}}
 		},
 	})
 
@@ -383,7 +381,7 @@ func registerSMHeroCards() {
 			if def := pc.Card.Def(); def == nil || !def.HasTrait("shield") {
 				return nil
 			}
-			return cardutil.ChooseEnemy("Sky-Destroyer: deal 2 damage",
+			return cardutil.ChooseEnemy(engine.Tf("c.skyDestroyerDeal2Damage"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(
 				g, e)
 		},
@@ -412,8 +410,8 @@ func registerPromos() {
 			if stars <= 0 {
 				return nil
 			}
-			g.Logf("Venom (ally) channels %s for %d damage", r.Card.Def().Name, stars)
-			return cardutil.ChooseEnemy("Venom: deal damage equal to boost icons",
+			g.TLogf("c.venomAllyChannelsForDamage", r.Card, stars)
+			return cardutil.ChooseEnemy(engine.Tf("c.venomDealDamageEqualToBoostIcons"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					return stars, []engine.Message{engine.DamageEntity{Target: e.EID(), Damage: 1}}
 				})(g, e)
@@ -426,7 +424,7 @@ func registerPromos() {
 			p := g.Player(e.EOwner())
 			if p != nil {
 				p.MaxHP += 10
-				g.Logf("%s gets +10 hit points", p.Name)
+				g.TLogf("c.gets10HitPoints", p.Name)
 			}
 			return nil
 		},

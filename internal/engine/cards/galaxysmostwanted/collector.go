@@ -70,7 +70,7 @@ func registerCollectorScenario() {
 			for id := range g.Villains {
 				if v := g.Villains[id]; v != nil && v.Code[:5] == "16070" {
 					t.Target = id
-					g.Logf("Biogram Image attaches to the Collector")
+					g.TLogf("c.biogramImageAttachesToTheCollector")
 					return nil
 				}
 			}
@@ -98,7 +98,7 @@ func registerCollectorScenario() {
 				}
 			}
 			if lowest == "" {
-				g.Logf("Inconspicuous Box has no target (surge)")
+				g.TLogf("c.inconspicuousBoxHasNoTargetSurge")
 				if c, ok := g.DrawEncounter(); ok {
 					return []engine.Message{engine.RevealEncounterCard{Player: p.ID, Card: c}}
 				}
@@ -107,7 +107,7 @@ func registerCollectorScenario() {
 			e := g.Entity(lowest)
 			code := e.ECode()
 			g.Delete(lowest)
-			g.Logf("%s is taken into The Collection", e.EDef().Name)
+			g.TLogf("c.isTakenIntoTheCollection", e)
 			return []engine.Message{engine.CollectCard{Card: engine.Card{ID: g.NextCardID(), Code: code}}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -140,15 +140,15 @@ func registerCollectorScenario() {
 			}
 			card, _ := p.Hand.Find(hi)
 			feed := engine.Choice{
-				ID: "feed", Label: "Put your highest-cost card into The Collection", Kind: engine.ChoiceLabel,
+				ID: "feed", Label: engine.Tf("c.putYourHighestCostCardIntoTheCollection"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.CollectCard{Card: card},
 				engine.DiscardCards{Player: p.ID, Cards: engine.CardList{card}})
 			burn := engine.Choice{
-				ID: "burn", Label: "Discard it and place threat equal to its cost", Kind: engine.ChoiceLabel,
+				ID: "burn", Label: engine.Tf("c.discardItAndPlaceThreatEqualToItsCost"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{card}},
 				engine.SchemeThreat{Scheme: g.MainScheme.ID, N: hiCost, Source: t.ID})
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("View the Cosmos: choose one", feed, burn)}}
+				Question: engine.Ask(engine.Tf("c.viewTheCosmosChooseOne"), feed, burn)}}
 		},
 	})
 
@@ -160,17 +160,17 @@ func registerCollectorScenario() {
 			g.Delete(t.ID)
 			if !p.IsHero() {
 				var feed = engine.Choice{
-					ID: "feed", Label: "Put the top card of your deck into The Collection", Kind: engine.ChoiceLabel,
+					ID: "feed", Label: engine.Tf("c.putTheTopCardOfYourDeckIntoTheCollection"), Kind: engine.ChoiceLabel,
 				}.Msgs(topDeckCollect(p)...)
 				var opts []engine.Choice
 				opts = append(opts, feed)
 				if len(p.Hand) >= 2 {
 					opts = append(opts, engine.Choice{
-						ID: "pay", Label: "Discard 2 cards (approximates spending [physical][physical])", Kind: engine.ChoiceLabel,
+						ID: "pay", Label: engine.Tf("c.discard2CardsApproximatesSpendingPhysicalPhysical"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{p.Hand[0], p.Hand[1]}}))
 				}
 				return []engine.Message{engine.AskQuestion{Player: p.ID,
-					Question: engine.Ask("Stay Awhile: choose one", opts...)}}
+					Question: engine.Ask(engine.Tf("c.stayAwhileChooseOne"), opts...)}}
 			}
 			for id := range g.Villains {
 				return []engine.Message{engine.VillainActivates{VillainID: id, Player: p.ID}}
@@ -200,7 +200,7 @@ func biogramSave(g *engine.Game, v *engine.Villain, damage int) bool {
 		if g.MainScheme != nil {
 			g.Push(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: damage, Source: id})
 		}
-		g.LogMajorf("Biogram Image prevents %d damage to the Collector", damage)
+		g.TLogMajorf("c.biogramImagePreventsDamageToTheCollector", damage)
 		return false
 	}
 	return true
@@ -233,7 +233,7 @@ func registerEscapeTheMuseum() {
 				if def.Attack != nil {
 					v.AttackVal = *def.Attack
 				}
-				g.LogMajorf("The Collector slips away and flips to %s", def.StageLabel)
+				g.TLogMajorf("c.theCollectorSlipsAwayAndFlipsTo", def.StageLabel)
 				return false
 			},
 			React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -268,7 +268,7 @@ func registerEscapeTheMuseum() {
 			for _, c := range g.EncounterDeck {
 				if c.Def().CardSet == "ship_command" {
 					g.SetAside = append(g.SetAside, c)
-					g.Logf("%s is set aside", c.Def().Name)
+					g.TLogf("c.isSetAside", c)
 				} else {
 					kept = append(kept, c)
 				}
@@ -311,7 +311,7 @@ func registerEscapeTheMuseum() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Take 1 facedown encounter card → remove 5 threat from the main scheme", Type: engine.AbilityAction,
+				Label: engine.Tf("c.take1FacedownEncounterCardRemove5ThreatFromTheMainScheme"), Type: engine.AbilityAction,
 				HeroOnly: true, OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{
@@ -346,7 +346,7 @@ func registerEscapeTheMuseum() {
 			for id := range g.Villains {
 				if v := g.Villains[id]; v != nil {
 					v.Tough = true
-					g.Logf("%s gains a tough status card", v.EDef().Name)
+					g.TLogf("c.gainsAToughStatusCard", v)
 				}
 			}
 			return nil
@@ -380,16 +380,16 @@ func registerEscapeTheMuseum() {
 // damage.
 func collectorToll(p *engine.Player) []engine.Message {
 	feed := engine.Choice{
-		ID: "feed", Label: "Put the top card of your deck into The Collection", Kind: engine.ChoiceLabel,
+		ID: "feed", Label: engine.Tf("c.putTheTopCardOfYourDeckIntoTheCollection"), Kind: engine.ChoiceLabel,
 	}
 	if len(p.Deck) > 0 {
 		feed = feed.Msgs(topDeckCollect(p)...)
 	}
 	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-		"The Collector demands tribute: choose one",
+		engine.Tf("c.theCollectorDemandsTributeChooseOne"),
 		feed,
 		engine.Choice{
-			ID: "dmg", Label: "Take 3 damage", Kind: engine.ChoiceLabel,
+			ID: "dmg", Label: engine.Tf("c.take3Damage"), Kind: engine.ChoiceLabel,
 		}.Msgs(engine.DamageEntity{Target: p.ID, Damage: 3}),
 	)}}
 }

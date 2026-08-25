@@ -53,7 +53,7 @@ func registerCyclops() {
 		// payment step, which we cannot model here.
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Optic Blast — deal 3 damage to an enemy with an upgrade attached",
+				Label:        engine.Tf("c.opticBlastDeal3DamageToAnEnemyWithAnUpgradeAttached"),
 				Type:         engine.AbilityAction,
 				HeroOnly:     true,
 				OncePerRound: true,
@@ -66,12 +66,12 @@ func registerCyclops() {
 						return []engine.Message{engine.DamageEntity{Target: target, Damage: 3, Source: pl.ID}}
 					})
 					if len(choices) == 0 {
-						g.Logf("Optic Blast — no enemy with an upgrade attached")
+						g.TLogf("c.opticBlastNoEnemyWithAnUpgradeAttached")
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Optic Blast — spend a resource of any type to deal 3 damage to an enemy with an upgrade attached", choices...),
+						Question: engine.Ask(engine.Tf("c.opticBlastSpendAResourceOfAnyTypeToDeal3DamageToAnEnemyWithA"), choices...),
 					}}
 				},
 			}}
@@ -103,7 +103,7 @@ func appendConstantTraining(base string) {
 		var abs []engine.Ability
 		abs = append(abs, origHero(g, p)...)
 		abs = append(abs, engine.Ability{
-			Label:        "Constant Training — search your deck for a Tactic upgrade and add it to your hand",
+			Label:        engine.Tf("c.constantTrainingSearchYourDeckForATacticUpgradeAndAddItToYou"),
 			Type:         engine.AbilityAction,
 			AlterEgoOnly: true,
 			OncePerRound: true,
@@ -116,7 +116,7 @@ func appendConstantTraining(base string) {
 				for _, c := range pl.Deck {
 					if c.Def().HasTrait("tactic") {
 						picks = append(picks, engine.Choice{
-							Label:    "Take " + c.Def().Name,
+							Label:    engine.S("Take " + c.Def().Name),
 							Kind:     engine.ChoiceCard,
 							CardCode: c.Code,
 						}.Msgs(
@@ -126,15 +126,15 @@ func appendConstantTraining(base string) {
 					}
 				}
 				if len(picks) == 0 {
-					g.Logf("Constant Training — no Tactic upgrade in your deck; shuffling")
+					g.TLogf("c.constantTrainingNoTacticUpgradeInYourDeckShuffling")
 					return []engine.Message{engine.ShufflePlayerDeck{Player: pl.ID}}
 				}
 				picks = append(picks, engine.Choice{
-					ID: "skip", Label: "Skip (still shuffle)", Kind: engine.ChoicePass,
+					ID: "skip", Label: engine.Tf("c.skipStillShuffle"), Kind: engine.ChoicePass,
 				}.Msgs(engine.ShufflePlayerDeck{Player: pl.ID}))
 				return []engine.Message{engine.AskQuestion{
 					Player:   pl.ID,
-					Question: engine.Ask("Constant Training — take a Tactic upgrade from your deck", picks...),
+					Question: engine.Ask(engine.Tf("c.constantTrainingTakeATacticUpgradeFromYourDeck"), picks...),
 				}}
 			},
 		})
@@ -206,17 +206,17 @@ func registerPhoenixAlly() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "cyclops" {
 					picks = append(picks, engine.Choice{
-						Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
 			if len(picks) == 0 {
-				g.Logf("Phoenix — no Cyclops card in discard")
+				g.TLogf("c.phoenixNoCyclopsCardInDiscard")
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Phoenix — take a Cyclops card from your discard pile", picks...),
+				Question: engine.Ask(engine.Tf("c.phoenixTakeACyclopsCardFromYourDiscardPile"), picks...),
 			}}
 		},
 	})
@@ -297,7 +297,7 @@ func registerPriorityTarget() {
 			if src == "" {
 				return nil
 			}
-			g.Logf("Priority Target — %s draws 2 cards from the kill", src)
+			g.TLogf("c.priorityTargetDraws2CardsFromTheKill", src)
 			return []engine.Message{engine.DrawCards{Player: src, N: 2}}
 		},
 	})
@@ -351,8 +351,8 @@ func registerRicochetBeam() {
 			_ = first
 			// Build a question for the first target so the player picks.
 			return []engine.Message{engine.AskQuestion{
-				Player: pid,
-				Question: engine.Ask("Ricochet Beam — deal 3 damage to an enemy, then 3 damage to an enemy with an upgrade attached", first...),
+				Player:   pid,
+				Question: engine.Ask(engine.Tf("c.ricochetBeamDeal3DamageToAnEnemyThen3DamageToAnEnemyWithAnUp"), first...),
 			}}
 		},
 	})
@@ -390,7 +390,7 @@ func registerTacticalBrilliance() {
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("tactic") {
 					tacticChoices = append(tacticChoices, engine.Choice{
-						Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: pid, CardID: c.ID}))
 				}
 			}
@@ -398,13 +398,13 @@ func registerTacticalBrilliance() {
 			if len(tacticChoices) > 0 {
 				tail = append(tail, engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Tactical Brilliance — choose a Tactic card from your discard", tacticChoices...),
+					Question: engine.Ask(engine.Tf("c.tacticalBrillianceChooseATacticCardFromYourDiscard"), tacticChoices...),
 				})
 			}
-			schemes = append(schemes, engine.Choice{ID: "skip", Label: "No Tactic to recover", Kind: engine.ChoicePass}.Msgs(tail...))
+			schemes = append(schemes, engine.Choice{ID: "skip", Label: engine.Tf("c.noTacticToRecover"), Kind: engine.ChoicePass}.Msgs(tail...))
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Tactical Brilliance — remove 3 threat from a scheme", schemes...),
+				Question: engine.Ask(engine.Tf("c.tacticalBrillianceRemove3ThreatFromAScheme"), schemes...),
 			}}
 		},
 	})
@@ -468,10 +468,10 @@ func registerConcussiveForce() {
 					// Sinister attacks the player (approximation: queue
 					// 1 damage; the engine would normally run a full
 					// attack window with defense, but we keep it light).
-					g.Logf("Concussive Force — Mister Sinister attacks %s", p.Name)
+					g.TLogf("c.concussiveForceMisterSinisterAttacks", p.Name)
 					return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: 1, Source: t.ID}}
 				}
-				g.Logf("Concussive Force — %s takes 2 damage", p.Name)
+				g.TLogf("c.concussiveForceTakes2Damage", p.Name)
 				return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: 2, Source: t.ID}}
 			}
 			if sinister {
@@ -528,9 +528,9 @@ func registerObligation() {
 			// The alter-ego recovery path returns the most recently
 			// tucked card.
 			if len(visors) > 0 {
-				g.Logf("Lost Visor tucks %d Ruby Quartz Visor card(s) under itself", len(visors))
+				g.TLogf("c.lostVisorTucksRubyQuartzVisorCardSUnderItself", len(visors))
 			} else {
-				g.Logf("Lost Visor — no Ruby Quartz Visor found in any zone")
+				g.TLogf("c.lostVisorNoRubyQuartzVisorFoundInAnyZone")
 			}
 			// Block Cyclops' attacks: mark the player with a sentinel
 			// in CostDiscounts (engine's free-form bag; the React below

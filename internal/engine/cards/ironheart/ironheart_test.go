@@ -90,14 +90,14 @@ func TestLevelUpSwapsSide(t *testing.T) {
 	}
 	var levelUpID string
 	for _, c := range pq.Question.Choices {
-		if strings.Contains(c.Label, "Level Up") {
+		if strings.Contains(c.Label.Text, "Level Up") {
 			levelUpID = c.ID
 		}
 	}
 	if levelUpID == "" {
 		var labels []string
 		for _, c := range pq.Question.Choices {
-			labels = append(labels, c.Label)
+			labels = append(labels, c.Label.Text)
 		}
 		t.Fatalf("Level Up! not offered; menu: %v", labels)
 	}

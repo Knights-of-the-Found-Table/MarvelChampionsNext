@@ -20,7 +20,7 @@ func hopeSummers(g *engine.Game) {
 		if a := g.Allies[id]; a != nil && engine.BaseCodeOf(a.Code) == "40130" {
 			a.ThwartVal = p.ThwartStat(g)
 			a.AttackVal = p.AttackStat(g)
-			g.Logf("Hope Summers mirrors %s (THW %d / ATK %d)", p.HeroDef().Name, a.ThwartVal, a.AttackVal)
+			g.TLogf("c.hopeSummersMirrorsThwAtk", p.HeroDef().Name, a.ThwartVal, a.AttackVal)
 		}
 	}
 }
@@ -62,7 +62,7 @@ func registerCampaign() {
 				searchDeckDiscard(g, p, func(d *data.CardDef) bool { return d.Type == "ally" },
 					func(p *engine.Player, c engine.Card) { spawnAllyFor(g, p, c) })
 			}
-			g.Logf("Team Assembled!")
+			g.TLogf("c.teamAssembled")
 			return nil
 		},
 	})
@@ -76,7 +76,7 @@ func registerCampaign() {
 				return nil
 			}
 			spawnSupportFor(g, p, engine.Card{ID: g.NextCardID(), Code: "40197", Owner: p.ID})
-			g.Logf("Safehouse Established!")
+			g.TLogf("c.safehouseEstablished")
 			return nil
 		},
 	})
@@ -87,7 +87,7 @@ func registerCampaign() {
 			for _, p := range g.Players {
 				p.Hand = append(p.Hand, engine.Card{ID: g.NextCardID(), Code: "40196", Owner: p.ID})
 			}
-			g.Logf("Geared Up — everyone gains a Pouches")
+			g.TLogf("c.gearedUpEveryoneGainsAPouches")
 			return nil
 		},
 	})
@@ -100,7 +100,7 @@ func registerCampaign() {
 				searchDeckDiscard(g, p, func(d *data.CardDef) bool { return d.Type == "upgrade" },
 					func(p *engine.Player, c engine.Card) { spawnUpgradeFor(g, p, c) })
 			}
-			g.Logf("Mission Prepped!")
+			g.TLogf("c.missionPrepped")
 			return nil
 		},
 	})
@@ -109,7 +109,7 @@ func registerCampaign() {
 	// approximated away (log only).
 	engine.RegisterBehavior("40194", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
-			g.Logf("Practiced Maneuvers (permanent event discount not modeled)")
+			g.TLogf("c.practicedManeuversPermanentEventDiscountNotModeled")
 			return nil
 		},
 	})
@@ -118,7 +118,7 @@ func registerCampaign() {
 	// approximated away (log only).
 	engine.RegisterBehavior("40195", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
-			g.Logf("Prepared Defenses (+1 DEF / retaliate 1 not modeled)")
+			g.TLogf("c.preparedDefenses1DefRetaliate1NotModeled")
 			return nil
 		},
 	})
@@ -130,7 +130,7 @@ func registerCampaign() {
 	engine.RegisterBehavior("40197", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Safehouse — heal 2 damage or draw 1 card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.safehouseHeal2DamageOrDraw1Card"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -140,10 +140,10 @@ func registerCampaign() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player: p.ID,
-						Question: engine.Ask("Safehouse — choose:",
-							engine.Choice{ID: "heal", Label: "Heal 2 damage from your identity", Kind: engine.ChoiceLabel}.
+						Question: engine.Ask(engine.Tf("c.safehouseChoose"),
+							engine.Choice{ID: "heal", Label: engine.Tf("c.heal2DamageFromYourIdentity"), Kind: engine.ChoiceLabel}.
 								Msgs(engine.HealEntity{Target: p.ID, N: 2}),
-							engine.Choice{ID: "draw", Label: "Draw 1 card", Kind: engine.ChoiceLabel}.
+							engine.Choice{ID: "draw", Label: engine.Tf("c.draw1Card"), Kind: engine.ChoiceLabel}.
 								Msgs(engine.DrawCards{Player: p.ID, N: 1}),
 						),
 					}}
@@ -226,7 +226,7 @@ func registerCampaign() {
 			g.Minions[mn.ID] = mn
 			mn.EngagedWith = owner
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: "40199"})
-			g.Logf("Malice possesses %s — treated as a POSSESSED minion!", engine.DB.MustLookup(code).Name)
+			g.TLogf("c.malicePossessesTreatedAsAPossessedMinion", engine.DB.MustLookup(code).Name)
 			return nil
 		},
 	})
@@ -311,7 +311,7 @@ func registerCampaign() {
 			searchDeckDiscard(g, p, func(d *data.CardDef) bool { return d.HasTrait("Superpower") },
 				func(p *engine.Player, c engine.Card) {
 					p.Hand = append(p.Hand, c)
-					g.Logf("%s adds %s to hand", p.Name, c.Def().Name)
+					g.TLogf("c.addsToHand", p.Name, c)
 				})
 			return nil
 		},
@@ -328,17 +328,17 @@ func overburdenChoice(g *engine.Game, p *engine.Player) []engine.Message {
 		}
 	}
 	choices := []engine.Choice{
-		engine.Choice{ID: "dmg", Label: "Take 2 damage", Kind: engine.ChoiceLabel}.
+		engine.Choice{ID: "dmg", Label: engine.Tf("c.take2Damage"), Kind: engine.ChoiceLabel}.
 			Msgs(engine.DamageEntity{Target: p.ID, Damage: 2, Source: engine.EntityID("")}),
 	}
 	if found {
 		choices = append(choices, engine.Choice{
-			ID: "disc", Label: "Discard " + resource.Def().Name, Kind: engine.ChoiceLabel,
+			ID: "disc", Label: engine.S("Discard " + resource.Def().Name), Kind: engine.ChoiceLabel,
 		}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{resource}}))
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask("Overburdened — choose:", choices...),
+		Question: engine.Ask(engine.Tf("c.overburdenedChoose"), choices...),
 	}}
 }
 

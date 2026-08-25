@@ -34,7 +34,7 @@ func registerMODOK() {
 	engine.RegisterBehavior("50103", &engine.Behavior{
 		VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 			if g.SideSchemeInPlay("50121") {
-				g.Logf("M.O.D.O.K. is shielded by the hostage situation")
+				g.TLogf("c.mODOKIsShieldedByTheHostageSituation")
 				return false
 			}
 			if v.Damage+damage < v.MaxHP {
@@ -49,9 +49,9 @@ func registerMODOK() {
 				cell.Counters = 0
 			}
 			v.Damage = 0
-			g.Logf("M.O.D.O.K. retreats to the Holding Cell (%d lock counters left)", cell.Counters)
+			g.TLogf("c.mODOKRetreatsToTheHoldingCellLockCountersLeft", cell.Counters)
 			if cell.Counters == 0 {
-				g.Logf("A Holding Cell bursts open!")
+				g.TLogf("c.aHoldingCellBurstsOpen")
 			}
 			return false
 		},
@@ -69,7 +69,7 @@ func registerMODOK() {
 					return nil
 				}
 				return []engine.Ability{{
-					Label: "Holding Cell — spend 3 resources to remove 1 lock counter", Type: engine.AbilityAction,
+					Label: engine.Tf("c.holdingCellSpend3ResourcesToRemove1LockCounter"), Type: engine.AbilityAction,
 					HeroOnly: true, Cost: 3,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						env := g.Environments[self]
@@ -77,7 +77,7 @@ func registerMODOK() {
 							return nil
 						}
 						env.Counters--
-						g.Logf("A lock counter is removed (%d left)", env.Counters)
+						g.TLogf("c.aLockCounterIsRemovedLeft", env.Counters)
 						if env.Counters == 0 {
 							// The cell bursts open and its prisoner
 							// (the linked b-side ally) joins a player.
@@ -97,7 +97,7 @@ func registerMODOK() {
 								AttackVal: intValue(def.Attack, 1), ThwartVal: intValue(def.Thwart, 1),
 							}
 							g.AddAlly(a, p.ID)
-							g.Logf("%s bursts free from the Holding Cell!", def.Name)
+							g.TLogf("c.burstsFreeFromTheHoldingCell", def.Name)
 							return []engine.Message{engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID}}
 						}
 						return nil
@@ -139,7 +139,7 @@ func registerMODOK() {
 			for _, env := range g.Environments {
 				if env != nil && env.Counters > 0 {
 					env.Counters--
-					g.Logf("%s powers down (%d counters left)", env.EDef().Name, env.Counters)
+					g.TLogf("c.powersDownCountersLeft", env, env.Counters)
 					break
 				}
 			}
@@ -154,7 +154,7 @@ func registerMODOK() {
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			if v := g.Villains[target]; v != nil {
 				v.MaxHP += 5
-				g.Logf("M.O.D.O.K. gains 5 max hit points")
+				g.TLogf("c.mODOKGains5MaxHitPoints")
 			}
 			return nil
 		},
@@ -191,7 +191,7 @@ func registerMODOK() {
 			}
 			if cell := holdingCell(g); cell != nil {
 				cell.Counters++
-				g.Logf("A lock counter is added to a Holding Cell (%d)", cell.Counters)
+				g.TLogf("c.aLockCounterIsAddedToAHoldingCell", cell.Counters)
 			}
 			return nil
 		},
@@ -201,7 +201,7 @@ func registerMODOK() {
 	// stands (the ally attachment is approximated away).
 	engine.RegisterBehavior("50121", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			g.Logf("M.O.D.O.K. hides behind hostages — he cannot take damage while Hostage Situation stands")
+			g.TLogf("c.mODOKHidesBehindHostagesHeCannotTakeDamageWhileHostageSituat")
 			return nil
 		},
 	})
@@ -276,7 +276,7 @@ func registerScientistSupreme() {
 				for i := 0; i < n; i++ {
 					s.Counters++
 				}
-				g.Logf("Diplomatic Immunity gains %d acceleration tokens", n)
+				g.TLogf("c.diplomaticImmunityGainsAccelerationTokens", n)
 			}
 			return nil
 		},

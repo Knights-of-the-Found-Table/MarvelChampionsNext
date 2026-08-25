@@ -50,7 +50,7 @@ func registerDeadpool() {
 			if g.MainScheme != nil {
 				g.MainScheme.AccelerationTokens++
 			}
-			g.Logf("The Regeneratin' Degenerate — %s refuses to die (1 HP, alter-ego form); the main scheme gains an acceleration token", p.Name)
+			g.TLogf("c.theRegeneratinDegenerateRefusesToDie1HpAlterEgoFormTheMainSc", p.Name)
 			return true
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
@@ -58,7 +58,7 @@ func registerDeadpool() {
 				// Break the Fourth Wall — Action: discard a card from
 				// your hand → search your deck for a Deadpool event and
 				// add it to your hand. (Limit once per round.)
-				Label:        "Break the Fourth Wall — discard a card: search your deck for a Deadpool event",
+				Label:        engine.Tf("c.breakTheFourthWallDiscardACardSearchYourDeckForADeadpoolEven"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -83,28 +83,28 @@ func breakTheFourthWall(g *engine.Game, self engine.EntityID) []engine.Message {
 			continue
 		}
 		finds = append(finds, engine.Choice{
-			Label: "Add " + d.Name + " to your hand", Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.S("Add " + d.Name + " to your hand"), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.Msgs(
 			engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 			engine.ShufflePlayerDeck{Player: p.ID},
 		))
 	}
 	finds = append(finds, engine.Choice{
-		ID: "decline", Label: "Take nothing (search fails) — shuffle", Kind: engine.ChoicePass,
+		ID: "decline", Label: engine.Tf("c.takeNothingSearchFailsShuffle"), Kind: engine.ChoicePass,
 	}.Msgs(engine.ShufflePlayerDeck{Player: p.ID}))
-	search := engine.Ask("Break the Fourth Wall — search your deck for a Deadpool event", finds...)
+	search := engine.Ask(engine.Tf("c.breakTheFourthWallSearchYourDeckForADeadpoolEvent"), finds...)
 
 	var choices []engine.Choice
 	for _, c := range p.Hand {
 		choices = append(choices, engine.Choice{
-			Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.Msgs(
 			engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 		).WithThen(search))
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask("Break the Fourth Wall — discard a card from your hand", choices...),
+		Question: engine.Ask(engine.Tf("c.breakTheFourthWallDiscardACardFromYourHand"), choices...),
 	}}
 }
 
@@ -144,7 +144,7 @@ func registerCable() {
 			if n <= 0 {
 				return nil
 			}
-			g.Logf("Cable — +%d THW / +%d ATK from acceleration tokens this phase", n, n)
+			g.TLogf("c.cableThwAtkFromAccelerationTokensThisPhase", n, n)
 			return []engine.Message{engine.AllyStatBonus{Ally: a.ID, ATK: n, THW: n}}
 		},
 	})
@@ -164,7 +164,7 @@ func registerExhaustingPersonality() {
 				for vid := range g.Villains {
 					choices = append(choices, engine.Choice{
 						ID: "accelerate", Kind: engine.ChoiceLabel,
-						Label: "Place 1 acceleration token on the main scheme → stun and confuse the villain",
+						Label: engine.Tf("c.place1AccelerationTokenOnTheMainSchemeStunAndConfuseTheVilla"),
 					}.Msgs(
 						engine.AddAccelerationToken{Scheme: g.MainScheme.ID},
 						engine.StunEntity{Target: vid},
@@ -180,7 +180,7 @@ func registerExhaustingPersonality() {
 					continue
 				}
 				targets = append(targets, engine.Choice{
-					Label: fmt.Sprintf("Exhaust %s → draw %d", pl.Name, n), Kind: engine.ChoiceLabel,
+					Label: engine.Tf("c.exhaustDraw", pl.Name, n), Kind: engine.ChoiceLabel,
 				}.Msgs(
 					engine.ExhaustEntity{ID: pl.ID},
 					engine.DrawCards{Player: pl.ID, N: n},
@@ -189,15 +189,15 @@ func registerExhaustingPersonality() {
 			if len(targets) > 0 {
 				choices = append(choices, engine.Choice{
 					ID: "exhaust-draw", Kind: engine.ChoiceLabel,
-					Label: fmt.Sprintf("Exhaust a player's identity → that player draws %d", n),
-				}.WithThen(engine.Ask("Exhausting Personality — exhaust whose identity?", targets...)))
+					Label: engine.Tf("c.exhaustAPlayerSIdentityThatPlayerDraws", n),
+				}.WithThen(engine.Ask(engine.Tf("c.exhaustingPersonalityExhaustWhoseIdentity"), targets...)))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Exhausting Personality — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.exhaustingPersonalityChoose"), choices...),
 			}}
 		},
 	})
@@ -221,7 +221,7 @@ func anyDamageQuestion(g *engine.Game, p *engine.Player, name string, effect fun
 		}
 		choices = append(choices, engine.Choice{
 			ID: fmt.Sprintf("take-%d", n), Kind: engine.ChoiceLabel,
-			Label: fmt.Sprintf("Take %d damage", n),
+			Label: engine.Tf("c.takeDamage", n),
 		}.Msgs(
 			engine.DamageEntity{Target: p.ID, Damage: n, Source: p.ID},
 		).WithThen(q))
@@ -231,7 +231,7 @@ func anyDamageQuestion(g *engine.Game, p *engine.Player, name string, effect fun
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask(name+" — take how much damage?", choices...),
+		Question: engine.Ask(engine.S(name+" — take how much damage?"), choices...),
 	}}
 }
 
@@ -252,7 +252,7 @@ func registerMaximumEffort() {
 				if len(choices) == 0 {
 					return nil
 				}
-				return engine.Ask(fmt.Sprintf("Maximum Effort — deal %d damage to which enemy?", n), choices...)
+				return engine.Ask(engine.Tf("c.maximumEffortDealDamageToWhichEnemy", n), choices...)
 			})
 		},
 	})
@@ -270,7 +270,7 @@ func registerMetaknowledge() {
 			if !p.IsHero() {
 				return nil
 			}
-			g.Logf("Metaknowledge — the fourth wall eats the encounter card")
+			g.TLogf("c.metaknowledgeTheFourthWallEatsTheEncounterCard")
 			return []engine.Message{}
 		},
 	})
@@ -293,7 +293,7 @@ func registerYooHoo() {
 				if len(choices) == 0 {
 					return nil
 				}
-				return engine.Ask(fmt.Sprintf(`"Yoo-Hoo!" — remove %d threat from which scheme?`, n), choices...)
+				return engine.Ask(engine.S(fmt.Sprintf(`"Yoo-Hoo!" — remove %d threat from which scheme?`, n)), choices...)
 			})
 		},
 	})
@@ -326,7 +326,7 @@ func registerChimichangaTruck() {
 			if rp == nil || !rp.Exhausted {
 				return nil
 			}
-			g.Logf("Chimichanga Truck — %s readies after recovering", rp.Name)
+			g.TLogf("c.chimichangaTruckReadiesAfterRecovering", rp.Name)
 			return []engine.Message{
 				engine.ExhaustEntity{ID: s.ID},
 				engine.ReadyEntity{ID: rp.ID},
@@ -353,7 +353,7 @@ func registerKatanas() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Deadpool's Katana — exhaust and take 1 damage: deal 2 damage to an enemy",
+				Label:    engine.Tf("c.deadpoolSKatanaExhaustAndTake1DamageDeal2DamageToAnEnemy"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -372,7 +372,7 @@ func registerKatanas() {
 						engine.DamageEntity{Target: u.Owner, Damage: 1, Source: u.ID},
 						engine.AskQuestion{
 							Player:   u.Owner,
-							Question: engine.Ask("Deadpool's Katana — deal 2 damage to which enemy?", choices...),
+							Question: engine.Ask(engine.Tf("c.deadpoolSKatanaDeal2DamageToWhichEnemy"), choices...),
 						},
 					}
 				},
@@ -414,10 +414,10 @@ func registerThisCardIsFire() {
 			if len(choices) == 0 {
 				return nil
 			}
-			g.Logf("This Card is Fire — X is %d", x)
+			g.TLogf("c.thisCardIsFireXIs", x)
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask(fmt.Sprintf("This Card is Fire — deal %d damage to which enemy?", x), choices...),
+				Question: engine.Ask(engine.Tf("c.thisCardIsFireDealDamageToWhichEnemy", x), choices...),
 			}}
 		},
 	})
@@ -437,7 +437,7 @@ func registerObligation() {
 					msgs = append(msgs, engine.ExhaustEntity{ID: id})
 				}
 			}
-			g.Logf("The Merc with the Mouth — %s's allies are exhausted", p.Name)
+			g.TLogf("c.theMercWithTheMouthSAlliesAreExhausted", p.Name)
 			return append(msgs, engine.ObligationResolve{Player: p.ID, Card: card})
 		},
 	})
@@ -459,7 +459,7 @@ func registerNemesis() {
 			if p == nil {
 				return nil
 			}
-			g.Logf("Butler's boost — %s is confused", p.Name)
+			g.TLogf("c.butlerSBoostIsConfused", p.Name)
 			return []engine.Message{engine.ConfuseEntity{Target: p.ID}}
 		},
 	})
@@ -483,7 +483,7 @@ func registerNemesis() {
 			if !ok2 || data.BaseCode(victim.HeroCode) != "44001" {
 				return nil
 			}
-			g.Logf("Involuntary Procedures — Deadpool's damage feeds the scheme")
+			g.TLogf("c.involuntaryProceduresDeadpoolSDamageFeedsTheScheme")
 			return []engine.Message{engine.SchemeThreat{Scheme: s.ID, N: 1, Source: s.ID}}
 		},
 	})
@@ -510,7 +510,7 @@ func registerNemesis() {
 			if mn == nil || mn.Damage <= 0 {
 				return nil
 			}
-			g.Logf("Mutated Soldier — heals all damage after activating")
+			g.TLogf("c.mutatedSoldierHealsAllDamageAfterActivating")
 			mn.Damage = 0
 			return nil
 		},

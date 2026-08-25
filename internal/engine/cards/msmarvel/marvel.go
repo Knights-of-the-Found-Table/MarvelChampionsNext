@@ -3,8 +3,6 @@
 package msmarvel
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -39,15 +37,15 @@ func registerMsMarvel() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask(fmt.Sprintf("Morphogenetics — exhaust Ms. Marvel to return %s to your hand?", def.Name),
+				Question: engine.Ask(engine.Tf("c.morphogeneticsExhaustMsMarvelToReturnToYourHand", def.Name),
 					engine.Choice{
-						ID: "return", Label: "Exhaust Ms. Marvel — return " + def.Name + " to hand",
+						ID: "return", Label: engine.S("Exhaust Ms. Marvel — return " + def.Name + " to hand"),
 						Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.ExhaustEntity{ID: p.ID},
 						engine.ReturnDiscardCard{Player: p.ID, CardID: m.Card.ID},
 					),
-					engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+					engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 				),
 			}}
 		},
@@ -56,7 +54,7 @@ func registerMsMarvel() {
 				// Teen Spirit — Action: discard cards from the top of
 				// your deck until you discard a Ms. Marvel card, then add
 				// it to your hand (limit once per round).
-				Label:        "Teen Spirit — mill until a Ms. Marvel card, add it to your hand",
+				Label:        engine.Tf("c.teenSpiritMillUntilAMsMarvelCardAddItToYourHand"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -77,10 +75,10 @@ func registerMsMarvel() {
 					if found.Code != "" {
 						p.Deck = p.Deck[len(discarded)+1:]
 						p.Hand = append(p.Hand, found)
-						g.Logf("Teen Spirit finds %s", found.Def().Name)
+						g.TLogf("c.teenSpiritFinds", found)
 					} else {
 						p.Deck = p.Deck[len(discarded):]
-						g.Logf("Teen Spirit discards the whole deck and finds nothing")
+						g.TLogf("c.teenSpiritDiscardsTheWholeDeckAndFindsNothing")
 					}
 					if len(discarded) > 0 {
 						return []engine.Message{engine.DiscardCards{Player: p.ID, Cards: discarded}}
@@ -110,7 +108,7 @@ func registerNemesis() {
 			if n == 0 {
 				return nil
 			}
-			g.Logf("Generation Why? discards %d cards from each player's deck", n)
+			g.TLogf("c.generationWhyDiscardsCardsFromEachPlayerSDeck", n)
 			var msgs []engine.Message
 			for _, p := range g.Players {
 				msgs = append(msgs, engine.MillPlayerDeck{Player: p.ID, N: n})
@@ -128,7 +126,7 @@ func registerNemesis() {
 			}
 			for _, other := range g.Minions {
 				if other.ID != mn.ID && other.EngagedWith == mn.EngagedWith {
-					g.Logf("%s cannot take damage while another minion is engaged", mn.EDef().Name)
+					g.TLogf("c.cannotTakeDamageWhileAnotherMinionIsEngaged", mn)
 					return false
 				}
 			}
@@ -144,7 +142,7 @@ func registerNemesis() {
 			if mn.BlankText {
 				return true
 			}
-			g.Logf("Edison's Giant Robot cannot take damage")
+			g.TLogf("c.edisonSGiantRobotCannotTakeDamage")
 			return false
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
@@ -152,14 +150,14 @@ func registerNemesis() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:    "Spend a resource — blank Edison's Giant Robot until the end of the phase",
+				Label:    engine.Tf("c.spendAResourceBlankEdisonSGiantRobotUntilTheEndOfThePhase"),
 				Type:     engine.AbilityAction,
 				HeroOnly: true,
 				Cost:     1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if mn := g.Minions[self]; mn != nil {
 						mn.BlankText = true
-						g.Logf("Edison's Giant Robot's text box is blank until the end of the phase")
+						g.TLogf("c.edisonSGiantRobotSTextBoxIsBlankUntilTheEndOfThePhase")
 					}
 					return nil
 				},
@@ -188,11 +186,11 @@ func registerNemesis() {
 					heal := min(n, v.Damage)
 					if heal > 0 {
 						v.Damage -= heal
-						g.Logf("%s heals %d damage (Harvest)", v.EDef().Name, heal)
+						g.TLogf("c.healsDamageHarvest", v, heal)
 					}
 					break
 				}
-				g.Logf("Harvest exhausts %d Persona supports", n)
+				g.TLogf("c.harvestExhaustsPersonaSupports", n)
 				return msgs
 			}
 			// no support exhausted: surge
@@ -218,7 +216,7 @@ func registerObligation() {
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil && isPersonaSupport(s) {
 					supportChoices = append(supportChoices, engine.Choice{
-						Label: "Discard " + s.EDef().Name, Kind: engine.ChoiceCard, CardCode: s.Code,
+						Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -226,12 +224,12 @@ func registerObligation() {
 			if len(supportChoices) > 0 {
 				penalty = append(penalty, engine.AskQuestion{
 					Player:   p.ID,
-					Question: engine.Ask("Home by Dawn — discard a Persona support", supportChoices...),
+					Question: engine.Ask(engine.Tf("c.homeByDawnDiscardAPersonaSupport"), supportChoices...),
 				})
 			} else {
 				penalty = append(penalty, engine.RevealNextEncounter{Player: p.ID})
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, "Discard 1 Persona support you control (surge if none)", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.Tf("c.discard1PersonaSupportYouControlSurgeIfNone"), penalty...)
 		},
 	})
 }

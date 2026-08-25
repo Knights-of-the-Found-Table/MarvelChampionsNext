@@ -173,7 +173,7 @@ func TestCapVersusRhinoRuns(t *testing.T) {
 	if !g.Over {
 		t.Fatalf("game did not end, round=%d", g.Round)
 	}
-	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason, g.Round)
+	t.Logf("outcome: won=%v reason=%q rounds=%d", g.Won, g.Reason.Text, g.Round)
 }
 
 func TestZemoBlocksThwart(t *testing.T) {

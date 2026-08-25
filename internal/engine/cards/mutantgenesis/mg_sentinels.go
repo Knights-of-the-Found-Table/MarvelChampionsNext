@@ -37,7 +37,7 @@ func tuckUnderOZT(g *engine.Game, pid engine.PlayerID) {
 	top := p.Deck[0]
 	p.Deck = p.Deck[1:]
 	s.StoredCards = append(s.StoredCards, top)
-	g.Logf("%s's %s is placed facedown under Operation Zero Tolerance", p.Name, top.Def().Name)
+	g.TLogf("c.sIsPlacedFacedownUnderOperationZeroTolerance", p.Name, top)
 }
 
 // sentinelVillain returns the Sentinel villain (Night of the Sentinels).
@@ -81,7 +81,7 @@ func registerSentinelVillain() {
 					}
 				}
 				if len(msgs) > 0 {
-					g.Logf("Sentinel stage %d comes online", stage)
+					g.TLogf("c.sentinelStageComesOnline", stage)
 				}
 				return msgs
 			},
@@ -139,7 +139,7 @@ func registerSentinelVillain() {
 			if p := g.Player(pid); p != nil {
 				p.Allies = append(p.Allies, a.ID)
 			}
-			g.Logf("Jubilee joins the fight!")
+			g.TLogf("c.jubileeJoinsTheFight")
 			return msgs
 		},
 	})
@@ -175,7 +175,7 @@ func registerWideawake() {
 					return nil
 				}
 				return []engine.Ability{{
-					Label: "Discard " + t.EDef().Name + " — spend " + icons, Type: engine.AbilityAction,
+					Label: engine.S("Discard " + t.EDef().Name + " — spend " + icons), Type: engine.AbilityAction,
 					Cost: 3, CostIcons: icons,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -206,7 +206,7 @@ func registerWideawake() {
 					v.Damage = 0
 				}
 			}
-			g.Logf("%s self-repairs (heals 5)", v.EDef().Name)
+			g.TLogf("c.selfRepairsHeals5", v)
 			return []engine.Message{engine.ToughEntity{Target: v.ID}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -233,12 +233,12 @@ func registerWideawake() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Mutant Detected — choose:",
+				Question: engine.Ask(engine.Tf("c.mutantDetectedChoose"),
 					engine.Choice{
-						ID: "tuck", Label: "Place your top card facedown under Operation Zero Tolerance", Kind: engine.ChoiceLabel,
+						ID: "tuck", Label: engine.Tf("c.placeYourTopCardFacedownUnderOperationZeroTolerance"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.TuckCardUnderOZT{Player: p.ID}),
 					engine.Choice{
-						ID: "fight", Label: "The villain and each engaged minion attacks you", Kind: engine.ChoiceLabel,
+						ID: "fight", Label: engine.Tf("c.theVillainAndEachEngagedMinionAttacksYou"), Kind: engine.ChoiceLabel,
 					}.Msgs(attack...),
 				),
 			}}
@@ -347,7 +347,7 @@ func registerZeroTolerance() {
 			}
 			if a := g.Allies[m.AllyID]; a != nil {
 				s.StoredCards = append(s.StoredCards, engine.Card{ID: g.NextCardID(), Code: a.Code})
-				g.Logf("%s is placed under Operation Zero Tolerance", a.EDef().Name)
+				g.TLogf("c.isPlacedUnderOperationZeroTolerance", a)
 			}
 			if len(s.StoredCards) >= len(g.Players)+3 {
 				return []engine.Message{engine.GameOver{Won: false, Reason: engine.Tf("reason.oztCaptured")}}
@@ -399,7 +399,7 @@ func registerSentinelsModular() {
 				}
 				if !has {
 					t.Target = p.ID
-					g.Logf("Targeted for Elimination attaches to %s", p.Name)
+					g.TLogf("c.targetedForEliminationAttachesTo", p.Name)
 					return nil
 				}
 			}
@@ -412,7 +412,7 @@ func registerSentinelsModular() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust your identity → discard Targeted for Elimination", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustYourIdentityDiscardTargetedForElimination"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					t := g.Attachments[self]
 					if t == nil {

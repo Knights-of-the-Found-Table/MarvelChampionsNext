@@ -7,7 +7,9 @@ import (
 )
 
 func init() {
-	registerBlackWidowVillain(); registerAIMSets() }
+	registerBlackWidowVillain()
+	registerAIMSets()
+}
 
 // widowAttackTax implements Black Widow's forced interrupt shared by all
 // three stages: when a character you control attacks her, remove 1 threat
@@ -23,7 +25,7 @@ func widowAttackTax(g *engine.Game, e engine.Entity, msg engine.Message) []engin
 		out = append(out, engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 1, Source: e.EID()})
 	}
 	if c, ok := g.DrawEncounter(); ok {
-		g.Logf("Black Widow's intel: %s is discarded from the encounter deck", c.Def().Name)
+		g.TLogf("c.blackWidowSIntelIsDiscardedFromTheEncounterDeck", c)
 		g.EncounterDiscard = append(g.EncounterDiscard, c)
 	}
 	return out
@@ -160,7 +162,7 @@ func registerAIMSets() {
 				a := g.Allies[best]
 				s.StoredCards = append(s.StoredCards, engine.Card{ID: g.NextCardID(), Code: a.Code})
 				g.Delete(best)
-				g.Logf("A.I.M. abducts %s", a.EDef().Name)
+				g.TLogf("c.aIMAbducts", a)
 				return []engine.Message{engine.SchemeThreat{Scheme: s.ID, N: cardutil.Cost(a.EDef()), Source: e.EID()}}
 			}
 			return []engine.Message{engine.SchemeThreat{Scheme: s.ID, N: 2, Source: e.EID()}}
@@ -181,7 +183,7 @@ func registerAIMSets() {
 				return nil
 			}
 			s.StoredCards = append(s.StoredCards, engine.Card{ID: g.NextCardID(), Code: a.Code})
-			g.Logf("%s is abducted into Abduct Superhumans", a.EDef().Name)
+			g.TLogf("c.isAbductedIntoAbductSuperhumans", a)
 			return []engine.Message{
 				engine.SchemeThreat{Scheme: s.ID, N: cardutil.Cost(a.EDef()), Source: s.ID},
 				engine.AddAccelerationToken{Scheme: s.ID},
@@ -219,7 +221,7 @@ func registerAIMSets() {
 					card := c
 					p.Deck = append(p.Deck[:i:i], p.Deck[i+1:]...)
 					s.StoredCards = append(s.StoredCards, card)
-					g.Logf("%s is nabbed into Abduct Superhumans", card.Def().Name)
+					g.TLogf("c.isNabbedIntoAbductSuperhumans", card)
 					return []engine.Message{
 						engine.SchemeThreat{Scheme: s.ID, N: cardutil.Cost(card.Def()), Source: t.ID},
 						engine.AddAccelerationToken{Scheme: s.ID},
@@ -261,7 +263,7 @@ func registerAIMSets() {
 						EngagedWith: mn.EngagedWith,
 					}
 					g.Minions[m2.ID] = m2
-					g.Logf("A.I.M. Scientist joins the fight")
+					g.TLogf("c.aIMScientistJoinsTheFight")
 					return []engine.Message{engine.MinionEntersPlay{MinionID: m2.ID, Player: mn.EngagedWith}}
 				}
 			}
@@ -324,6 +326,6 @@ func abductScheme(g *engine.Game) *engine.SideScheme {
 		Threat: len(g.Players), MaxThreat: len(g.Players) + 2,
 	}
 	g.SideSchemes[s.ID] = s
-	g.Logf("Abduct Superhumans enters play")
+	g.TLogf("c.abductSuperhumansEntersPlay")
 	return s
 }

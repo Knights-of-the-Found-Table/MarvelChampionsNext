@@ -1,8 +1,6 @@
 package aos
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -51,7 +49,7 @@ func setSuitForm(g *engine.Game, pid engine.PlayerID, form string) {
 	}
 	if u.Code != code {
 		u.Code = code
-		g.Logf("Nick Fury changes to %s suit form", form)
+		g.TLogf("c.nickFuryChangesToSuitForm", form)
 	}
 }
 
@@ -89,7 +87,7 @@ func registerNickFury() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Infiltrate — change to Stealth suit form",
+				Label: engine.Tf("c.infiltrateChangeToStealthSuitForm"),
 				Type:  engine.AbilityAction, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := suitUpgrade(g, self)
@@ -225,7 +223,7 @@ func registerNickSignatures() {
 					continue
 				}
 				choice := engine.Choice{
-					Label: fmt.Sprintf("%s — %d ranged damage", cardutil.EnemyLabel(target), damage),
+					Label: engine.Tf("c.rangedDamage", cardutil.EnemyLabel(target), damage),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: target.ECode(),
 				}.Msgs(engine.DamageEntity{Target: id, Damage: damage, Source: pid})
 				lethal, scheme := false, 0
@@ -236,10 +234,10 @@ func registerNickSignatures() {
 					lethal, scheme = t.HP() <= damage, t.SchemeVal
 				}
 				if lethal && u != nil {
-					rider := engine.Ask("Concentrated Fire — enemy defeated; choose:",
-						engine.Choice{ID: "intel", Label: fmt.Sprintf("Place %d threat on the suit", scheme), Kind: engine.ChoiceLabel}.
+					rider := engine.Ask(engine.Tf("c.concentratedFireEnemyDefeatedChoose"),
+						engine.Choice{ID: "intel", Label: engine.Tf("c.placeThreatOnTheSuit", scheme), Kind: engine.ChoiceLabel}.
 							Msgs(engine.AddEntityCounter{ID: u.ID, N: scheme}),
-						engine.Choice{ID: "stealth", Label: "Change to Stealth suit form", Kind: engine.ChoiceLabel}.
+						engine.Choice{ID: "stealth", Label: engine.Tf("c.changeToStealthSuitForm"), Kind: engine.ChoiceLabel}.
 							Msgs(stealthSignal(u)),
 					)
 					choice = choice.WithThen(rider)
@@ -250,7 +248,7 @@ func registerNickSignatures() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: pid,
-				Question: engine.Ask("Concentrated Fire — choose an enemy", choices...)}}
+				Question: engine.Ask(engine.Tf("c.concentratedFireChooseAnEnemy"), choices...)}}
 		},
 	})
 
@@ -274,7 +272,7 @@ func registerNickSignatures() {
 					}
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Remove 2 threat from " + s.EDef().Name + " and use the suit rider",
+					Label: engine.S("Remove 2 threat from " + s.EDef().Name + " and use the suit rider"),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(base...))
 			}
@@ -282,7 +280,7 @@ func registerNickSignatures() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: pid,
-				Question: engine.Ask("Covert Surveillance — choose a scheme", choices...)}}
+				Question: engine.Ask(engine.Tf("c.covertSurveillanceChooseAScheme"), choices...)}}
 		},
 	})
 
@@ -304,12 +302,12 @@ func registerNickSignatures() {
 					}
 				}
 				choices = append(choices, engine.Choice{
-					Label: fmt.Sprintf("%s's enemies — %d ranged damage", targetPlayer.Name, damage),
+					Label: engine.Tf("c.sEnemiesRangedDamage", targetPlayer.Name, damage),
 					Kind:  engine.ChoiceTarget, SourceID: targetPlayer.ID,
 				}.Msgs(msgs...))
 			}
 			return []engine.Message{engine.AskQuestion{Player: pid,
-				Question: engine.Ask("Spray Fire — choose a player", choices...)}}
+				Question: engine.Ask(engine.Tf("c.sprayFireChooseAPlayer"), choices...)}}
 		},
 	})
 
@@ -323,7 +321,7 @@ func registerNickSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Fury's Flying Car — remove 1 suit threat and ready Nick Fury",
+				Label: engine.Tf("c.furySFlyingCarRemove1SuitThreatAndReadyNickFury"),
 				Type:  engine.AbilityAction, HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -348,7 +346,7 @@ func registerNickSignatures() {
 	engine.RegisterBehavior("50041", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Safe House #221 — heal 2 or place 1 suit threat",
+				Label: engine.Tf("c.safeHouse221Heal2OrPlace1SuitThreat"),
 				Type:  engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -356,15 +354,15 @@ func registerNickSignatures() {
 						return nil
 					}
 					choices := []engine.Choice{engine.Choice{
-						ID: "heal", Label: "Heal 2 damage from Nick Fury", Kind: engine.ChoiceLabel,
+						ID: "heal", Label: engine.Tf("c.heal2DamageFromNickFury"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.HealEntity{Target: s.Owner, N: 2})}
 					if u := suitUpgrade(g, s.Owner); u != nil {
 						choices = append(choices, engine.Choice{
-							ID: "intel", Label: "Place 1 threat on the suit", Kind: engine.ChoiceLabel,
+							ID: "intel", Label: engine.Tf("c.place1ThreatOnTheSuit"), Kind: engine.ChoiceLabel,
 						}.Msgs(engine.AddEntityCounter{ID: u.ID, N: 1}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: s.Owner,
-						Question: engine.Ask("Safe House #221 — choose", choices...)}}
+						Question: engine.Ask(engine.Tf("c.safeHouse221Choose"), choices...)}}
 				},
 			}}
 		},
@@ -431,11 +429,11 @@ func registerNickObligation() {
 			}
 			n := u.Counters
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Discovered — choose:",
-					engine.Choice{ID: "damage", Label: fmt.Sprintf("Take %d damage", n), Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.discoveredChoose"),
+					engine.Choice{ID: "damage", Label: engine.Tf("c.takeDamage", n), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: n, Source: u.ID},
 							engine.ObligationResolve{Player: p.ID, Card: card}),
-					engine.Choice{ID: "clear", Label: fmt.Sprintf("Remove all %d threat", n), Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "clear", Label: engine.Tf("c.removeAllThreat", n), Kind: engine.ChoiceLabel}.
 						Msgs(engine.AddEntityCounter{ID: u.ID, N: -n},
 							engine.ObligationResolve{Player: p.ID, Card: card}),
 				)}}

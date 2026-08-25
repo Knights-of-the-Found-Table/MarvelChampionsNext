@@ -4,8 +4,6 @@
 package doctorstrange
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -31,7 +29,7 @@ func registerDoctorStrange() {
 				p.SenseDeck = append(p.SenseDeck, engine.Card{ID: g.NextCardID(), Code: code, Owner: p.ID})
 			}
 			g.ShuffleSideDeck(p)
-			g.Logf("%s begins the game with an Invocation deck of %d cards", p.Name, len(p.SenseDeck))
+			g.TLogf("c.beginsTheGameWithAnInvocationDeckOfCards", p.Name, len(p.SenseDeck))
 			return nil
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
@@ -43,7 +41,7 @@ func registerDoctorStrange() {
 					// Spell Mastery — Action: exhaust and pay the cost of
 					// the top card of the Invocation deck → resolve its
 					// Special ability.
-					Label:    fmt.Sprintf("Spell Mastery — resolve %s (cost %d)", top.Def().Name, cost),
+					Label:    engine.Tf("c.spellMasteryResolveCost", top, cost),
 					Type:     engine.AbilityAction,
 					HeroOnly: true,
 					Exhaust:  true,
@@ -55,7 +53,7 @@ func registerDoctorStrange() {
 			// Natural Talent — Action: discard the top card of the
 			// Invocation deck (limit once per phase).
 			abs = append(abs, engine.Ability{
-				Label:        "Natural Talent — discard the top Invocation card",
+				Label:        engine.Tf("c.naturalTalentDiscardTheTopInvocationCard"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true, // approximation of once per phase
@@ -67,7 +65,7 @@ func registerDoctorStrange() {
 					top := p.SenseDeck[0]
 					p.SenseDeck = p.SenseDeck[1:]
 					p.SideDiscard = append(p.SideDiscard, top)
-					g.Logf("%s discards %s from the Invocation deck", p.Name, top.Def().Name)
+					g.TLogf("c.discardsFromTheInvocationDeck", p.Name, top)
 					return nil
 				},
 			})
@@ -89,19 +87,19 @@ func invokeQuestion(g *engine.Game, p *engine.Player, card engine.Card, returnTo
 	var invoke engine.Choice
 	if cost > 0 {
 		invoke = engine.Choice{
-			ID: "resolve", Label: fmt.Sprintf("Resolve %s (cost %d)", card.Def().Name, cost),
+			ID: "resolve", Label: engine.Tf("c.resolveCost", card, cost),
 			Kind: engine.ChoiceCard, CardCode: card.Code,
 		}.WithThen(g.CustomPaymentQuestion(p, cost,
-			engine.Tf("q.payGeneric", cost, card.Def().Name), ctx))
+			engine.Tf("q.payGeneric", cost, card), ctx))
 	} else {
 		invoke = engine.Choice{
-			ID: "resolve", Label: fmt.Sprintf("Resolve %s (cost 0)", card.Def().Name),
+			ID: "resolve", Label: engine.Tf("c.resolveCost0", card),
 			Kind: engine.ChoiceCard, CardCode: card.Code,
 		}.Msgs(engine.InvokeSpecial{Player: p.ID, Card: card, ReturnToTop: returnToTop})
 	}
 	return []engine.Message{engine.AskQuestion{
 		Player:   p.ID,
-		Question: engine.Ask(fmt.Sprintf("Resolve %s?", card.Def().Name), invoke, cardutil.Skip()),
+		Question: engine.Ask(engine.Tf("c.resolve2", card), invoke, cardutil.Skip()),
 	}}
 }
 
@@ -120,7 +118,7 @@ func registerInvocations() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Crimson Bands of Cyttorak — stun and deal 7 damage", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.crimsonBandsOfCyttorakStunAndDeal7Damage"), choices...)}}
 		},
 	})
 	// 09033 Images of Ikonn: confuse the villain, remove 4 threat.
@@ -135,14 +133,14 @@ func registerInvocations() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 4, Source: pid}))
 			}
 			if len(choices) == 0 {
 				return msgs
 			}
-			msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask("Images of Ikonn — remove 4 threat", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.imagesOfIkonnRemove4Threat"), choices...)})
 			return msgs
 		},
 	})
@@ -156,12 +154,12 @@ func registerInvocations() {
 			}
 			var choices []engine.Choice
 			choices = append(choices, engine.Choice{
-				Label: p.Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+				Label: engine.S(p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 			}.Msgs(engine.ToughEntity{Target: p.ID}))
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					choices = append(choices, engine.Choice{
-						Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -170,7 +168,7 @@ func registerInvocations() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.AskN("Seven Rings of Raggadorr — tough status (up to 3)", 3, choices...),
+				Question: engine.AskN(engine.Tf("c.sevenRingsOfRaggadorrToughStatusUpTo3"), 3, choices...),
 			}}
 		},
 	})
@@ -188,7 +186,7 @@ func registerInvocations() {
 			} else if p.Confused {
 				msgs = append(msgs, engine.ClearConfuse{Target: p.ID})
 			} else {
-				g.Logf("Vapors of Valtorr: no status card to replace")
+				g.TLogf("c.vaporsOfValtorrNoStatusCardToReplace")
 			}
 			return msgs
 		},
@@ -208,7 +206,7 @@ func registerSignatures() {
 	engine.RegisterBehavior("09002", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:   "Wong — heal 1 damage or discard the top Invocation card",
+				Label:   engine.Tf("c.wongHeal1DamageOrDiscardTheTopInvocationCard"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -217,16 +215,16 @@ func registerSignatures() {
 						return nil
 					}
 					heal := engine.Choice{
-						ID: "heal", Label: "Heal 1 damage from your identity", Kind: engine.ChoiceLabel,
+						ID: "heal", Label: engine.Tf("c.heal1DamageFromYourIdentity"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.HealEntity{Target: p.ID, N: 1})
 					choices := []engine.Choice{heal}
 					if len(p.SenseDeck) > 0 {
 						top := p.SenseDeck[0]
 						choices = append(choices, engine.Choice{
-							ID: "discard", Label: "Discard " + top.Def().Name + " from the Invocation deck", Kind: engine.ChoiceLabel,
+							ID: "discard", Label: engine.S("Discard " + top.Def().Name + " from the Invocation deck"), Kind: engine.ChoiceLabel,
 						}.Msgs(engine.SideDeckDiscardTop{Player: p.ID}))
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Wong — choose", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.wongChoose"), choices...)}}
 				},
 			}}
 		},
@@ -248,14 +246,14 @@ func registerSignatures() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: pid}))
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(fmt.Sprintf("Astral Projection — remove %d threat", n), choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.astralProjectionRemoveThreat", n), choices...)}}
 		},
 	})
 
@@ -277,7 +275,7 @@ func registerSignatures() {
 				for _, r := range milled.Def().Resources {
 					icon = r
 				}
-				g.Logf("Magic Blast discards %s [%s]", milled.Def().Name, icon)
+				g.TLogf("c.magicBlastDiscards", milled, icon)
 			}
 			mk := func(target engine.EntityID) []engine.Message {
 				msgs := []engine.Message{engine.DamageEntity{Target: target, Damage: 5, Source: pid}}
@@ -298,7 +296,7 @@ func registerSignatures() {
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Magic Blast — deal 5 damage", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.magicBlastDeal5Damage"), choices...)}}
 		},
 	})
 
@@ -328,7 +326,7 @@ func registerSignatures() {
 				def := c.Def()
 				if def.CardSet == "doctor_strange" && def.Code != "09006" {
 					choices = append(choices, engine.Choice{
-						Label: "Take " + def.Name, Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.S("Take " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.TakeDeckCard{Player: pid, CardID: c.ID}, engine.ShufflePlayerDeck{Player: pid}))
 				}
 			}
@@ -337,7 +335,7 @@ func registerSignatures() {
 				if def.CardSet == "doctor_strange" && def.Code != "09006" {
 					msgs := []engine.Message{engine.ShuffleIntoDeck{Player: pid, CardID: c.ID}}
 					choices = append(choices, engine.Choice{
-						Label: "Shuffle in " + def.Name, Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.S("Shuffle in " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(msgs...))
 				}
 			}
@@ -345,7 +343,7 @@ func registerSignatures() {
 				return nil
 			}
 			choices = append(choices, cardutil.Skip())
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Mystical Studies — take a Doctor Strange card", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.mysticalStudiesTakeADoctorStrangeCard"), choices...)}}
 		},
 	})
 
@@ -378,7 +376,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "Sanctum Sanctorum — shuffle a Spell into your deck, draw 1",
+				Label:        engine.Tf("c.sanctumSanctorumShuffleASpellIntoYourDeckDraw1"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -389,7 +387,7 @@ func registerSignatures() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Shuffle in " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID},
 							engine.DrawCards{Player: p.ID, N: 1},
@@ -398,7 +396,7 @@ func registerSignatures() {
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Sanctum Sanctorum — shuffle which Spell?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.sanctumSanctorumShuffleWhichSpell"), choices...)}}
 				},
 			}}
 		},
@@ -412,7 +410,7 @@ func registerSignatures() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:    "Cloak of Levitation — ready Doctor Strange",
+				Label:    engine.Tf("c.cloakOfLevitationReadyDoctorStrange"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -468,14 +466,14 @@ func registerSignatures() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.TakeDeckCard{Player: pid, CardID: c.ID}, engine.ShufflePlayerDeck{Player: pid}))
 			}
 			if len(choices) == 0 {
 				return []engine.Message{engine.ShufflePlayerDeck{Player: pid}}
 			}
 			choices = append(choices, cardutil.Skip().Msgs(engine.ShufflePlayerDeck{Player: pid}))
-			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask("Brother Voodoo — take an event from the top 5", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.brotherVoodooTakeAnEventFromTheTop5"), choices...)}}
 		},
 	})
 
@@ -488,7 +486,7 @@ func registerSignatures() {
 			}
 			g.Delete(a.ID)
 			owner.Deck = append(owner.Deck, engine.Card{ID: g.NextCardID(), Code: a.Code, Owner: owner.ID})
-			g.Logf("Clea shuffles into %s's deck", owner.Name)
+			g.TLogf("c.cleaShufflesIntoSDeck", owner.Name)
 			return nil
 		},
 	})
@@ -499,7 +497,7 @@ func registerSignatures() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if a, ok := e.(*engine.Ally); ok {
 				a.Counters = 2
-				g.Logf("Iron Fist enters play with 2 mystic counters")
+				g.TLogf("c.ironFistEntersPlayWith2MysticCounters")
 			}
 			return nil
 		},
@@ -510,7 +508,7 @@ func registerSignatures() {
 				return nil
 			}
 			a.Counters--
-			g.Logf("Iron Fist removes a mystic counter (stun +1 damage)")
+			g.TLogf("c.ironFistRemovesAMysticCounterStun1Damage")
 			return []engine.Message{
 				engine.StunEntity{Target: w.Target},
 				engine.DamageEntity{Target: w.Target, Damage: 1, Source: a.Owner},
@@ -550,7 +548,7 @@ func registerSignatures() {
 				return []engine.Message{engine.DamageEntity{Target: target, Damage: 2, Source: pid}}
 			})
 			if len(choices) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask("Momentum Shift — deal 2 damage", choices...)})
+				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.momentumShiftDeal2Damage"), choices...)})
 			}
 			return msgs
 		},
@@ -581,7 +579,7 @@ func registerNemesis() {
 			for _, r := range milled.Def().Resources {
 				icon = r
 			}
-			g.Logf("Baron Mordo's attack discards %s [%s]", milled.Def().Name, icon)
+			g.TLogf("c.baronMordoSAttackDiscards", milled, icon)
 			var msgs []engine.Message
 			switch icon {
 			case "physical":
@@ -621,7 +619,7 @@ func registerNemesis() {
 			stolen := p.SenseDeck[0]
 			p.SenseDeck = p.SenseDeck[1:]
 			s.StoredCards = append(s.StoredCards, stolen)
-			g.Logf("Open the Dark Dimension steals %s", stolen.Def().Name)
+			g.TLogf("c.openTheDarkDimensionSteals", stolen)
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -636,7 +634,7 @@ func registerNemesis() {
 			for _, pl := range g.Players {
 				if len(pl.SenseDeck) > 0 || pl.HeroCode == "09001a" {
 					pl.SenseDeck = append(pl.SenseDeck, s.StoredCards...)
-					g.Logf("The stolen Invocation card returns")
+					g.TLogf("c.theStolenInvocationCardReturns")
 					return nil
 				}
 			}
@@ -650,7 +648,7 @@ func registerNemesis() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			// stay in play attached to the player
 			t.Target = p.ID
-			g.Logf("Counterspell attaches to %s", p.Name)
+			g.TLogf("c.counterspellAttachesTo", p.Name)
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -682,7 +680,7 @@ func registerNemesis() {
 				p.Discard = append(p.Discard, worst)
 			}
 			n := cardutil.Cost(worst.Def())
-			g.Logf("Thoughtcasting discards %s (cost %d)", worst.Def().Name, n)
+			g.TLogf("c.thoughtcastingDiscardsCost", worst, n)
 			if p.IsHero() {
 				return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: n, Source: t.ID}}
 			}
@@ -703,9 +701,9 @@ func registerObligation() {
 			penalty := []engine.Message{}
 			if p != nil {
 				p.CostDiscounts = append(p.CostDiscounts, engine.CostDiscount{Type: "event", Amount: -3})
-				g.Logf("%s's next event costs 3 additional resources", p.Name)
+				g.TLogf("c.sNextEventCosts3AdditionalResources", p.Name)
 			}
-			return cardutil.ExhaustOrPenalty(g, p, card, "Your next event costs 3 additional resources", penalty...)
+			return cardutil.ExhaustOrPenalty(g, p, card, engine.S("Your next event costs 3 additional resources"), penalty...)
 		},
 	})
 }

@@ -82,13 +82,13 @@ func specialQuestion(g *engine.Game, p *engine.Player) *engine.Question {
 	var choices []engine.Choice
 	for _, u := range ups {
 		choices = append(choices, engine.Choice{
-			Label: u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
+			Label: engine.S(u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
 		}.Msgs(specialExecute(g, u.ID)...))
 	}
 	if len(choices) == 0 {
 		return nil
 	}
-	return engine.Ask("Resolve the Special ability on 1 Black Panther upgrade", choices...)
+	return engine.Ask(engine.Tf("c.resolveTheSpecialAbilityOn1BlackPantherUpgrade"), choices...)
 }
 
 // registerBlackPanther installs the Black Panther / Shuri identity
@@ -120,7 +120,7 @@ func registerBlackPanther() {
 			if q == nil {
 				return nil
 			}
-			g.Logf("Black Panther's response — resolve a Black Panther upgrade's Special")
+			g.TLogf("c.blackPantherSResponseResolveABlackPantherUpgradeSSpecial")
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 		},
 		// Shuri — Inventor: Action: Exhaust Shuri → search your deck for
@@ -130,7 +130,7 @@ func registerBlackPanther() {
 		// costs 2, so the discount usually covers the whole cost.)
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Inventor — search your deck for a Black Panther or Tech upgrade and play it",
+				Label:        engine.Tf("c.inventorSearchYourDeckForABlackPantherOrTechUpgradeAndPlayIt"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -150,22 +150,22 @@ func registerBlackPanther() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Play " + def.Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Play " + def.Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.UpgradeEnterPlay{Player: pl.ID, Card: c},
 							engine.ShufflePlayerDeck{Player: pl.ID},
 						))
 					}
 					if len(choices) == 0 {
-						g.Logf("Inventor — no Black Panther or Tech upgrade in deck; shuffling")
+						g.TLogf("c.inventorNoBlackPantherOrTechUpgradeInDeckShuffling")
 						return []engine.Message{engine.ShufflePlayerDeck{Player: pl.ID}}
 					}
 					choices = append(choices, engine.Choice{
-						ID: "skip", Label: "Skip (still shuffle)", Kind: engine.ChoicePass,
+						ID: "skip", Label: engine.Tf("c.skipStillShuffle"), Kind: engine.ChoicePass,
 					}.Msgs(engine.ShufflePlayerDeck{Player: pl.ID}))
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Inventor — play a Black Panther or Tech upgrade from your deck", choices...),
+						Question: engine.Ask(engine.Tf("c.inventorPlayABlackPantherOrTechUpgradeFromYourDeck"), choices...),
 					}}
 				},
 			}}
@@ -214,7 +214,7 @@ func registerTChallaAlly() {
 			if q == nil {
 				return nil
 			}
-			g.Logf("T'Challa's response — resolve a Black Panther upgrade's Special")
+			g.TLogf("c.tChallaSResponseResolveABlackPantherUpgradeSSpecial")
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 		},
 	})
@@ -249,7 +249,7 @@ func registerClawedStrike() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Clawed Strike — deal 4 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.clawedStrikeDeal4DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -271,7 +271,7 @@ func registerOnTheProwl() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				ch := engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid})
 				if special != nil {
@@ -284,7 +284,7 @@ func registerOnTheProwl() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("On the Prowl — remove 3 threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.onTheProwlRemove3ThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -306,7 +306,7 @@ func registerWakandaForever() {
 				msgs = append(msgs, specialExecute(g, u.ID)...)
 			}
 			if len(msgs) == 0 {
-				g.Logf("Wakanda Forever! — no Black Panther upgrades in play")
+				g.TLogf("c.wakandaForeverNoBlackPantherUpgradesInPlay")
 			}
 			return msgs
 		},
@@ -324,7 +324,7 @@ func registerElephantsTrunk() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "The Elephant's Trunk — exhaust it and up to 2 other Wakanda cards: draw that many",
+				Label:        engine.Tf("c.theElephantSTrunkExhaustItAndUpTo2OtherWakandaCardsDrawThatM"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -338,7 +338,7 @@ func registerElephantsTrunk() {
 					var picks []engine.Choice
 					add := func(id engine.EntityID, code, name string) {
 						picks = append(picks, engine.Choice{
-							Label: name, Kind: engine.ChoiceCard, CardCode: code, SourceID: id,
+							Label: engine.S(name), Kind: engine.ChoiceCard, CardCode: code, SourceID: id,
 						}.Msgs(
 							engine.ExhaustEntity{ID: id},
 							engine.DrawCards{Player: pl.ID, N: 1},
@@ -361,7 +361,7 @@ func registerElephantsTrunk() {
 					}
 					msgs = append(msgs, engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.AskN("The Elephant's Trunk — exhaust up to 2 other Wakanda cards", 2, picks...),
+						Question: engine.AskN(engine.Tf("c.theElephantSTrunkExhaustUpTo2OtherWakandaCards"), 2, picks...),
 					})
 					return msgs
 				},
@@ -380,7 +380,7 @@ func registerQueenRamonda() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "Queen Ramonda — heal an alter-ego with the Wakanda trait equal to its REC",
+				Label:        engine.Tf("c.queenRamondaHealAnAlterEgoWithTheWakandaTraitEqualToItsRec"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -395,7 +395,7 @@ func registerQueenRamonda() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: q.Name + " (heal " + itoa(rec) + ")", Kind: engine.ChoiceTarget, SourceID: q.ID,
+							Label: engine.S(q.Name + " (heal " + itoa(rec) + ")"), Kind: engine.ChoiceTarget, SourceID: q.ID,
 						}.Msgs(engine.HealEntity{Target: q.ID, N: rec}))
 					}
 					if len(choices) == 0 {
@@ -403,7 +403,7 @@ func registerQueenRamonda() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   e.EOwner(),
-						Question: engine.Ask("Queen Ramonda — heal which alter-ego?", choices...),
+						Question: engine.Ask(engine.Tf("c.queenRamondaHealWhichAlterEgo"), choices...),
 					}}
 				},
 			}}
@@ -431,7 +431,7 @@ func registerAjaAdanna() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Aja-Adanna — shuffle 1 identity-specific card from your discard into your deck",
+				Label:   engine.Tf("c.ajaAdannaShuffle1IdentitySpecificCardFromYourDiscardIntoYour"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -447,7 +447,7 @@ func registerAjaAdanna() {
 						}
 						seen[c.Code] = true
 						choices = append(choices, engine.Choice{
-							Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.ShuffleIntoDeck{Player: pl.ID, CardID: c.ID}))
 					}
 					if len(choices) == 0 {
@@ -455,7 +455,7 @@ func registerAjaAdanna() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Aja-Adanna — shuffle which card into your deck?", choices...),
+						Question: engine.Ask(engine.Tf("c.ajaAdannaShuffleWhichCardIntoYourDeck"), choices...),
 					}}
 				},
 			}}
@@ -477,25 +477,25 @@ func registerKimoyoBeads() {
 				}
 				var discardChoices []engine.Choice
 				discardChoices = append(discardChoices, engine.Choice{
-					ID: "keep", Label: "Keep Kimoyo Beads", Kind: engine.ChoicePass,
+					ID: "keep", Label: engine.Tf("c.keepKimoyoBeads"), Kind: engine.ChoicePass,
 				})
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					enemy := g.Entity(id)
 					discardChoices = append(discardChoices, engine.Choice{
-						Label: "Discard → confuse " + enemy.EDef().Name, Kind: engine.ChoiceTarget,
+						Label: engine.S("Discard → confuse " + enemy.EDef().Name), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: enemy.ECode(),
 					}.Msgs(
 						engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 						engine.ConfuseEntity{Target: id},
 					))
 				}
-				discardQ := engine.Ask("Kimoyo Beads — discard it to confuse an enemy?", discardChoices...)
+				discardQ := engine.Ask(engine.Tf("c.kimoyoBeadsDiscardItToConfuseAnEnemy"), discardChoices...)
 				for i := range choices {
 					choices[i] = choices[i].WithThen(discardQ)
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   u.Owner,
-					Question: engine.Ask("Kimoyo Beads — remove 1 threat from a scheme", choices...),
+					Question: engine.Ask(engine.Tf("c.kimoyoBeadsRemove1ThreatFromAScheme"), choices...),
 				}}
 			})
 		},
@@ -512,9 +512,9 @@ func registerPantherClaws() {
 				var choices []engine.Choice
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					enemy := g.Entity(id)
-					discardQ := engine.Ask("Panther Claws — discard it to deal 3 additional damage?",
-						engine.Choice{ID: "keep", Label: "Keep Panther Claws", Kind: engine.ChoicePass},
-						engine.Choice{ID: "discard", Label: "Discard Panther Claws → +3 damage", Kind: engine.ChoiceLabel}.Msgs(
+					discardQ := engine.Ask(engine.Tf("c.pantherClawsDiscardItToDeal3AdditionalDamage"),
+						engine.Choice{ID: "keep", Label: engine.Tf("c.keepPantherClaws"), Kind: engine.ChoicePass},
+						engine.Choice{ID: "discard", Label: engine.Tf("c.discardPantherClaws3Damage"), Kind: engine.ChoiceLabel}.Msgs(
 							engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 							engine.DamageEntity{Target: id, Damage: 3, Source: u.ID},
 						),
@@ -531,7 +531,7 @@ func registerPantherClaws() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   u.Owner,
-					Question: engine.Ask("Panther Claws — deal 2 damage to an enemy", choices...),
+					Question: engine.Ask(engine.Tf("c.pantherClawsDeal2DamageToAnEnemy"), choices...),
 				}}
 			})
 		},
@@ -564,13 +564,13 @@ func registerSpiderBites() {
 						dmg = append(dmg, engine.DamageEntity{Target: id, Damage: 1, Source: u.ID})
 						stun = append(stun, engine.StunEntity{Target: id})
 					}
-					discardQ := engine.Ask("Spider Bites — discard it to stun each of those enemies?",
-						engine.Choice{ID: "keep", Label: "Keep Spider Bites", Kind: engine.ChoicePass},
-						engine.Choice{ID: "discard", Label: "Discard Spider Bites → stun them", Kind: engine.ChoiceLabel}.
+					discardQ := engine.Ask(engine.Tf("c.spiderBitesDiscardItToStunEachOfThoseEnemies"),
+						engine.Choice{ID: "keep", Label: engine.Tf("c.keepSpiderBites"), Kind: engine.ChoicePass},
+						engine.Choice{ID: "discard", Label: engine.Tf("c.discardSpiderBitesStunThem"), Kind: engine.ChoiceLabel}.
 							Msgs(append([]engine.Message{engine.DiscardControlled{Player: u.Owner, ID: u.ID}}, stun...)...),
 					)
 					choices = append(choices, engine.Choice{
-						Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID,
+						Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID,
 					}.Msgs(dmg...).WithThen(discardQ))
 				}
 				if len(choices) == 0 {
@@ -578,7 +578,7 @@ func registerSpiderBites() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   u.Owner,
-					Question: engine.Ask("Spider Bites — choose a player; 1 damage to the villain and their engaged minions", choices...),
+					Question: engine.Ask(engine.Tf("c.spiderBitesChooseAPlayer1DamageToTheVillainAndTheirEngagedMi"), choices...),
 				}}
 			})
 		},
@@ -596,9 +596,9 @@ func registerVibraniumSuit() {
 				var choices []engine.Choice
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					enemy := g.Entity(id)
-					discardQ := engine.Ask("Vibranium Suit — discard it to give your hero a tough status card?",
-						engine.Choice{ID: "keep", Label: "Keep Vibranium Suit", Kind: engine.ChoicePass},
-						engine.Choice{ID: "discard", Label: "Discard Vibranium Suit → tough", Kind: engine.ChoiceLabel}.Msgs(
+					discardQ := engine.Ask(engine.Tf("c.vibraniumSuitDiscardItToGiveYourHeroAToughStatusCard"),
+						engine.Choice{ID: "keep", Label: engine.Tf("c.keepVibraniumSuit"), Kind: engine.ChoicePass},
+						engine.Choice{ID: "discard", Label: engine.Tf("c.discardVibraniumSuitTough"), Kind: engine.ChoiceLabel}.Msgs(
 							engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 							engine.ToughEntity{Target: u.Owner},
 						),
@@ -616,7 +616,7 @@ func registerVibraniumSuit() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   u.Owner,
-					Question: engine.Ask("Vibranium Suit — move 1 damage from your hero to an enemy", choices...),
+					Question: engine.Ask(engine.Tf("c.vibraniumSuitMove1DamageFromYourHeroToAnEnemy"), choices...),
 				}}
 			})
 		},
@@ -629,7 +629,7 @@ func registerVibraniumSuit() {
 // Panther upgrades use, so both Wakanda Forever! events interoperate).
 func specialAbility(g *engine.Game, e engine.Entity, run func(u *engine.Upgrade) []engine.Message) []engine.Ability {
 	return []engine.Ability{{
-		Label: "Special", Type: engine.AbilityTrigger, Trigger: specialTrigger,
+		Label: engine.Tf("c.special"), Type: engine.AbilityTrigger, Trigger: specialTrigger,
 		Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 			u := g.Upgrades[self]
 			if u == nil {
@@ -667,7 +667,7 @@ func registerNemesis() {
 			if !ok || m.MinionID != e.EID() {
 				return nil
 			}
-			g.Logf("Klaw takes 1 boost card for this activation")
+			g.TLogf("c.klawTakes1BoostCardForThisActivation")
 			return []engine.Message{engine.BoostActivation{Enemy: e.EID(), N: 1}}
 		},
 	})
@@ -692,7 +692,7 @@ func registerNemesis() {
 				}
 				g.Minions[mn.ID] = mn
 				mn.EngagedWith = p.ID
-				g.Logf("Manipulated M.U.S.I.C. — M.U.S.I.C. enters play engaged with %s", p.Name)
+				g.TLogf("c.manipulatedMUSICMUSICEntersPlayEngagedWith", p.Name)
 				return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: p.ID}}
 			}
 			return nil
@@ -704,7 +704,7 @@ func registerNemesis() {
 			}
 			for _, id := range cardutil.SortedIDs(g.Minions) {
 				if mn := g.Minions[id]; mn != nil && mn.Code == "51034" {
-					g.Logf("Manipulated M.U.S.I.C. defeated — M.U.S.I.C. is discarded")
+					g.TLogf("c.manipulatedMUSICDefeatedMUSICIsDiscarded")
 					g.Delete(id)
 				}
 			}
@@ -734,7 +734,7 @@ func registerNemesis() {
 					MaxThreat: derefInt(card.Def().BaseThreat, 1) * 2,
 				}
 				g.SideSchemes[s.ID] = s
-				g.Logf("M.U.S.I.C. — Manipulated M.U.S.I.C. enters play")
+				g.TLogf("c.mUSICManipulatedMUSICEntersPlay")
 			}
 			return nil
 		},
@@ -751,7 +751,7 @@ func registerNemesis() {
 				n := ss.Threat
 				ss.Threat = 0
 				if g.MainScheme != nil {
-					g.Logf("M.U.S.I.C. defeated — %d threat moves to the main scheme", n)
+					g.TLogf("c.mUSICDefeatedThreatMovesToTheMainScheme", n)
 					return []engine.Message{engine.SchemeThreat{Scheme: g.MainScheme.ID, N: n, Source: e.EID()}}
 				}
 			}
@@ -778,7 +778,7 @@ func registerNemesis() {
 					msgs = append(msgs, engine.StunEntity{Target: id})
 				}
 			}
-			g.Logf("The Scream — %s's characters are stunned", p.Name)
+			g.TLogf("c.theScreamSCharactersAreStunned", p.Name)
 			return msgs
 		},
 		// Boost: you are stunned; if you were already stunned, take 1
@@ -846,7 +846,7 @@ func registerObligation() {
 			if p == nil {
 				return nil
 			}
-			g.Logf("T'Challa's Shadow — the doubt counters / +1 cost effect is not modeled; the obligation is discarded")
+			g.TLogf("c.tChallaSShadowTheDoubtCounters1CostEffectIsNotModeledTheObli")
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})

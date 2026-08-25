@@ -37,7 +37,7 @@ func registerMariaHill() {
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{
 				{
-					Label: "Reassignment — move 1 all-purpose counter between S.H.I.E.L.D. supports",
+					Label: engine.Tf("c.reassignmentMove1AllPurposeCounterBetweenSHIELDSupports"),
 					Type:  engine.AbilityAction, HeroOnly: true, OncePerRound: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						pl := g.Player(self)
@@ -51,7 +51,7 @@ func registerMariaHill() {
 									continue
 								}
 								choices = append(choices, engine.Choice{
-									Label: fmt.Sprintf("%s → %s", from.EDef().Name, to.EDef().Name),
+									Label: engine.S(fmt.Sprintf("%s → %s", from.EDef().Name, to.EDef().Name)),
 									Kind:  engine.ChoiceTarget, SourceID: to.ID, CardCode: to.Code,
 								}.Msgs(
 									engine.AddEntityCounter{ID: from.ID, N: -1},
@@ -63,11 +63,11 @@ func registerMariaHill() {
 							return nil
 						}
 						return []engine.Message{engine.AskQuestion{Player: pl.ID,
-							Question: engine.Ask("Reassignment — move which counter?", choices...)}}
+							Question: engine.Ask(engine.Tf("c.reassignmentMoveWhichCounter"), choices...)}}
 					},
 				},
 				{
-					Label: "Search your deck for a S.H.I.E.L.D. support",
+					Label: engine.Tf("c.searchYourDeckForASHIELDSupport"),
 					Type:  engine.AbilityAction, Exhaust: true, AlterEgoOnly: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						pl := g.Player(self)
@@ -79,7 +79,7 @@ func registerMariaHill() {
 							def := c.Def()
 							if def.Type == "support" && hasShieldTrait(def) {
 								choices = append(choices, engine.Choice{
-									Label: "Add " + def.Name + " to your hand",
+									Label: engine.S("Add " + def.Name + " to your hand"),
 									Kind:  engine.ChoiceCard, CardCode: c.Code,
 								}.Msgs(
 									engine.TakeDeckCard{Player: pl.ID, CardID: c.ID},
@@ -91,7 +91,7 @@ func registerMariaHill() {
 							return []engine.Message{engine.ShufflePlayerDeck{Player: pl.ID}}
 						}
 						return []engine.Message{engine.AskQuestion{Player: pl.ID,
-							Question: engine.Ask("Maria Hill — find a S.H.I.E.L.D. support", choices...)}}
+							Question: engine.Ask(engine.Tf("c.mariaHillFindASHIELDSupport"), choices...)}}
 					},
 				},
 			}
@@ -136,7 +136,7 @@ func registerMariaSignatures() {
 				return []engine.Message{engine.ThwartScheme{Scheme: id, N: n, Source: e.EOwner()}}
 			})...)
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask(fmt.Sprintf("All-Points Bulletin — resolve %d S.H.I.E.L.D. supports", n), choices...)}}
+				Question: engine.Ask(engine.Tf("c.allPointsBulletinResolveSHIELDSupports", n), choices...)}}
 		},
 	})
 
@@ -185,7 +185,7 @@ func registerMariaSignatures() {
 				msgs := []engine.Message{engine.DiscardControlled{Player: p.ID, ID: s.ID}}
 				msgs = append(msgs, allEnemyDamage(g, p.ID, n)...)
 				choices = append(choices, engine.Choice{
-					Label: fmt.Sprintf("Discard %s — %d damage to each enemy", s.EDef().Name, n),
+					Label: engine.Tf("c.discardDamageToEachEnemy", s, n),
 					Kind:  engine.ChoiceCard, SourceID: s.ID, CardCode: s.Code,
 				}.Msgs(msgs...))
 			}
@@ -193,7 +193,7 @@ func registerMariaSignatures() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("The Hard Call — discard which support?", choices...)}}
+				Question: engine.Ask(engine.Tf("c.theHardCallDiscardWhichSupport"), choices...)}}
 		},
 	})
 
@@ -221,7 +221,7 @@ func registerMariaSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "The Iliad — spend 1 mission counter", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.theIliadSpend1MissionCounter"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					if s == nil || s.Counters <= 0 {
@@ -242,11 +242,11 @@ func registerMariaSignatures() {
 					}
 					for _, pl := range g.Players {
 						choices = append(choices, engine.Choice{
-							Label: "Heal 3 damage from " + pl.Name, Kind: engine.ChoiceTarget, SourceID: pl.ID,
+							Label: engine.S("Heal 3 damage from " + pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 						}.Msgs(engine.AddEntityCounter{ID: self, N: -1}, engine.HealEntity{Target: pl.ID, N: 3}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: s.Owner,
-						Question: engine.Ask("The Iliad — choose a mission effect", choices...)}}
+						Question: engine.Ask(engine.Tf("c.theIliadChooseAMissionEffect"), choices...)}}
 				},
 			}}
 		},
@@ -266,7 +266,7 @@ func registerMariaSignatures() {
 	engine.RegisterBehavior("50011", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "S.H.I.E.L.D. Director — place 1 all-purpose counter",
+				Label: engine.Tf("c.sHIELDDirectorPlace1AllPurposeCounter"),
 				Type:  engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -314,7 +314,7 @@ func registerMariaNemesis() {
 			}
 			env := &engine.Environment{ID: g.NextEntityID("environment"), Code: "50032"}
 			g.Environments[env.ID] = env
-			g.Logf("Controlled Innocents enters play")
+			g.TLogf("c.controlledInnocentsEntersPlay")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -391,18 +391,18 @@ func registerMariaObligation() {
 			}
 			loss = append(loss, engine.ObligationResolve{Player: p.ID, Card: card})
 			choices := []engine.Choice{(engine.Choice{
-				ID: "pressure", Label: "Remove 1 counter from each S.H.I.E.L.D. support",
+				ID: "pressure", Label: engine.Tf("c.remove1CounterFromEachSHIELDSupport"),
 				Kind: engine.ChoiceLabel,
 			}).Msgs(loss...)}
 			if !p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "remove", Label: "Exhaust Maria Hill and remove Press Conference",
+					ID: "remove", Label: engine.Tf("c.exhaustMariaHillAndRemovePressConference"),
 					Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID},
 					engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Press Conference — choose", choices...)}}
+				Question: engine.Ask(engine.Tf("c.pressConferenceChoose"), choices...)}}
 		},
 	})
 }

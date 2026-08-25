@@ -43,14 +43,14 @@ func registerTreacheries() {
 				id := p.Supports[len(p.Supports)-1]
 				s := g.Supports[id]
 				g.Delete(id)
-				g.Logf("Caught Off Guard discards %s", s.EDef().Name)
+				g.TLogf("c.caughtOffGuardDiscards", s)
 			} else if len(p.Upgrades) > 0 {
 				id := p.Upgrades[len(p.Upgrades)-1]
 				u := g.Upgrades[id]
 				g.Delete(id)
-				g.Logf("Caught Off Guard discards %s", u.EDef().Name)
+				g.TLogf("c.caughtOffGuardDiscards", u)
 			} else {
-				g.Logf("Caught Off Guard has no target")
+				g.TLogf("c.caughtOffGuardHasNoTarget")
 			}
 			return nil
 		},
@@ -84,7 +84,7 @@ func registerTreacheries() {
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if g.MainScheme != nil {
 				g.MainScheme.AccelerationTokens++
-				g.Logf("Bomb Scare: acceleration token on %s", g.MainScheme.EDef().Name)
+				g.TLogf("c.bombScareAccelerationTokenOn", g.MainScheme)
 			}
 			return nil
 		},
@@ -104,19 +104,19 @@ func registerTreacheries() {
 			var threatChoice engine.Choice
 			if g.MainScheme != nil {
 				threatChoice = engine.Choice{
-					ID: "threat", Label: "Place 1 threat on the main scheme", Kind: engine.ChoiceLabel,
+					ID: "threat", Label: engine.Tf("c.place1ThreatOnTheMainScheme"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: e.EID()})
 			} else {
 				threatChoice = engine.Choice{
-					ID: "threat", Label: "Place 1 threat (no scheme)", Kind: engine.ChoicePass,
+					ID: "threat", Label: engine.Tf("c.place1ThreatNoScheme"), Kind: engine.ChoicePass,
 				}
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Hydra Bomber: take 2 damage or place 1 threat?",
+				Question: engine.Ask(engine.Tf("c.hydraBomberTake2DamageOrPlace1Threat"),
 					threatChoice,
 					engine.Choice{
-						ID: "damage", Label: "Take 2 damage", Kind: engine.ChoiceLabel,
+						ID: "damage", Label: engine.Tf("c.take2Damage"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.DamageEntity{Target: p.ID, Damage: 2, Source: e.EID()}),
 				),
 			}}
@@ -136,7 +136,7 @@ func registerTreacheries() {
 				}
 			}
 			if n == 0 {
-				g.Logf("Explosion fizzles (Bomb Scare not in play)")
+				g.TLogf("c.explosionFizzlesBombScareNotInPlay")
 				return nil
 			}
 			return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: n, Source: t.ID}}

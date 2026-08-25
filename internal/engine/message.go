@@ -236,7 +236,7 @@ type (
 	// Game end
 	GameOver struct {
 		Won    bool
-		Reason string
+		Reason Msg
 	}
 
 	// AskQuestion surfaces a question to a player and pauses the queue.

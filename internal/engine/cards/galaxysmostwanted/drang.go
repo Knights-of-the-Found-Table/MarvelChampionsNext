@@ -107,7 +107,7 @@ func registerDrangScenario() {
 			for id := range g.Villains {
 				if v := g.Villains[id]; v != nil && v.Code[:5] == "16058" {
 					t.Target = id
-					g.Logf("Drang's Spear attaches to Drang")
+					g.TLogf("c.drangSSpearAttachesToDrang")
 					return nil
 				}
 			}
@@ -119,7 +119,7 @@ func registerDrangScenario() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [mental][physical][physical] → discard Drang's Spear", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendMentalPhysicalPhysicalDiscardDrangSSpear"), Type: engine.AbilityAction,
 				CostIcons: "mental:1 physical:2",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -168,7 +168,7 @@ func milanoSchemeBehavior(n int) *engine.Behavior {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust the Milano → remove 3 threat", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustTheMilanoRemove3Threat"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{
 						engine.ExhaustEntity{ID: id},

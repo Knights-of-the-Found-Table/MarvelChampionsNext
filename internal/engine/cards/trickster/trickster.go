@@ -42,7 +42,7 @@ func registerTricksterMagic() {
 					AttackVal: ttInt(def.Attack, 1), ThwartVal: ttInt(def.Thwart, 1),
 				}
 				g.AddAlly(a, p.ID)
-				g.Logf("%s breaks free of the enchantment and joins %s!", def.Name, p.Name)
+				g.TLogf("c.breaksFreeOfTheEnchantmentAndJoins", def.Name, p.Name)
 				return []engine.Message{engine.AllyEnteredPlay{Ally: a.ID, Player: p.ID}}
 			},
 		})
@@ -121,7 +121,7 @@ func registerScenarios() {
 			for i, p := range g.Players {
 				if i < len(gazeCodes) {
 					g.SpawnAttachment(gazeCodes[i], p.ID)
-					g.Logf("%s is caught by a Hypnotic Gaze", p.Name)
+					g.TLogf("c.isCaughtByAHypnoticGaze", p.Name)
 				}
 			}
 			return nil
@@ -151,7 +151,7 @@ func registerScenarios() {
 			for i, code := range avatarCodes {
 				if i == kept {
 					if v := g.SpawnVillainFromCard(data.BaseCode(code)); v != nil {
-						g.Logf("%s steps out of the shadows", v.EDef().Name)
+						g.TLogf("c.stepsOutOfTheShadows", v)
 					}
 				} else {
 					g.SetAside = append(g.SetAside, engine.Card{ID: g.NextCardID(), Code: code})

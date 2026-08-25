@@ -57,7 +57,7 @@ func spawnSentinelFromDeck(g *engine.Game, pid engine.PlayerID, log string) []en
 				Tough: def.HasKeyword("Toughness"), Guard: def.HasKeyword("Guard"),
 			}
 			g.Minions[mn.ID] = mn
-			g.Logf("%s: %s engages %s", log, def.Name, g.Player(pid).Name)
+			g.TLogf("c.engages", log, def.Name, g.Player(pid).Name)
 			return []engine.Message{engine.MinionEntersPlay{MinionID: mn.ID, Player: pid}}
 		}
 		g.EncounterDiscard = append(g.EncounterDiscard, top)

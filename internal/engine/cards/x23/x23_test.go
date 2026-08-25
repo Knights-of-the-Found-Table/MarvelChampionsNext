@@ -118,7 +118,7 @@ func TestLauraKinneyRecursion(t *testing.T) {
 	if !ok || ask.Question == nil || len(ask.Question.Choices) != 1 {
 		t.Fatalf("Laura's action message = %#v, want a 1-choice question", msgs[0])
 	}
-	if !strings.Contains(ask.Question.Choices[0].Label, "Honey Badger") {
-		t.Fatalf("choice label = %q, want Honey Badger", ask.Question.Choices[0].Label)
+	if !strings.Contains(ask.Question.Choices[0].Label.Text, "Honey Badger") {
+		t.Fatalf("choice label = %q, want Honey Badger", ask.Question.Choices[0].Label.Text)
 	}
 }

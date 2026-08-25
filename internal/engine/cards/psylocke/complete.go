@@ -59,7 +59,7 @@ func registerPsylockeExtras() {
 					Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(msgs...))
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Concussive Blow — target:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.concussiveBlowTarget"), choices...)}}
 		},
 	})
 
@@ -138,7 +138,7 @@ func registerPsylockeExtras() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "IPAC — trade a facedown encounter for 2 cards", Type: engine.AbilityAction,
+				Label: engine.Tf("c.ipacTradeAFacedownEncounterFor2Cards"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -166,7 +166,7 @@ func registerPsylockeExtras() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "X-Bunker — dig the top card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.xBunkerDigTheTopCard"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -177,7 +177,7 @@ func registerPsylockeExtras() {
 					c := p.Deck[0]
 					p.Deck = p.Deck[1:]
 					p.Hand = append(p.Hand, c)
-					g.Logf("X-Bunker recovers %s", c.Def().Name)
+					g.TLogf("c.xBunkerRecovers", c)
 					return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 				},
 			}}
@@ -191,7 +191,7 @@ func registerPsylockeExtras() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Telepathy — remove 2 threat (mental x2)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.telepathyRemove2ThreatMentalX2"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true, CostIcons: "mental:2",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -203,10 +203,10 @@ func registerPsylockeExtras() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 2, Source: p.ID}))
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Telepathy — remove 2 threat from:", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.telepathyRemove2ThreatFrom"), choices...)}}
 				},
 			}}
 		},
@@ -217,7 +217,7 @@ func registerPsylockeExtras() {
 		Playable: func(g *engine.Game, p *engine.Player, def *data.CardDef) bool {
 			return g.EntityHasTrait(p.ID, "Psionic")
 		},
-		OnPlay: cardutil.ChooseEnemy("Psi-Bow Attack", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.psiBowAttack"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 4, nil
 		}),
 	})
@@ -236,7 +236,7 @@ func registerPsylockeExtras() {
 				return nil
 			}
 			c := p.Hand[0]
-			g.Logf("Domino swaps %s with the deck top", c.Def().Name)
+			g.TLogf("c.dominoSwapsWithTheDeckTop", c)
 			return []engine.Message{engine.SwapHandWithDeckTop{Player: p.ID, CardID: c.ID}}
 		},
 	})
@@ -262,7 +262,7 @@ func registerPsylockeExtras() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Telekinesis — 3 damage (mental x2)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.telekinesis3DamageMentalX2"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true, CostIcons: "mental:2",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -277,7 +277,7 @@ func registerPsylockeExtras() {
 							Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id,
 						}.Msgs(engine.DamageEntity{Target: id, Damage: 3, Source: p.ID}))
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Telekinesis — target:", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.telekinesisTarget"), choices...)}}
 				},
 			}}
 		},

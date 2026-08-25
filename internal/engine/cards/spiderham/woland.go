@@ -88,7 +88,7 @@ func registerWoLANDPlayers() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: "Remove " + fmt.Sprint(n) + " threat from " + s.EDef().Name,
+					Label: engine.S("Remove " + fmt.Sprint(n) + " threat from " + s.EDef().Name),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: p.ID}))
 			}
@@ -97,7 +97,7 @@ func registerWoLANDPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Lady Spider — remove "+fmt.Sprint(n)+" threat from a different scheme", append(choices, cardutil.Skip())...),
+				Question: engine.Ask(engine.S("Lady Spider — remove "+fmt.Sprint(n)+" threat from a different scheme"), append(choices, cardutil.Skip())...),
 			}}
 		},
 	})
@@ -106,7 +106,7 @@ func registerWoLANDPlayers() {
 	// from a scheme for each Web-Warrior card you control (including
 	// Spider-Man).
 	engine.RegisterBehavior("30013", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Spider-Man", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.spiderManChooseAScheme"), func(g *engine.Game, e engine.Entity) int {
 			p := g.Player(e.EOwner())
 			if p == nil {
 				return 0
@@ -196,7 +196,7 @@ func registerWoLANDPlayers() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Reveal " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.S("Reveal " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(
 					engine.EncounterTakeCard{CardID: c.ID},
 					engine.RevealEncounterCard{Player: pid, Card: c},
@@ -205,12 +205,12 @@ func registerWoLANDPlayers() {
 				))
 			}
 			if len(choices) == 0 {
-				g.Logf("One Way or Another — no side scheme in the encounter deck")
+				g.TLogf("c.oneWayOrAnotherNoSideSchemeInTheEncounterDeck")
 				return []engine.Message{engine.DrawCards{Player: pid, N: 3}, engine.ShuffleEncounterDeck{}}
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("One Way or Another — reveal a side scheme from the encounter deck (draw 3)", choices...),
+				Question: engine.Ask(engine.Tf("c.oneWayOrAnotherRevealASideSchemeFromTheEncounterDeckDraw3"), choices...),
 			}}
 		},
 	})
@@ -240,7 +240,7 @@ func registerWoLANDPlayers() {
 				attach := id
 				upgrade := u
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
+					Label: engine.S("Attach to " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
 				}.Msgs(engine.AttachUpgrade{ID: upgrade.ID, Target: attach}))
 			}
 			if len(choices) == 0 {
@@ -248,7 +248,7 @@ func registerWoLANDPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Followed — attach to a side scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.followedAttachToASideScheme"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -271,7 +271,7 @@ func registerWoLANDPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   u.Owner,
-				Question: engine.Ask("Followed — deal 4 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.followedDeal4DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -297,7 +297,7 @@ func registerWoLANDPlayers() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.S("Attach to " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			if len(choices) == 0 {
@@ -305,7 +305,7 @@ func registerWoLANDPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Overwatch — attach to a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.overwatchAttachToAScheme"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -334,7 +334,7 @@ func registerWoLANDPlayers() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: "Remove " + fmt.Sprint(amount) + " threat from " + s.EDef().Name,
+					Label: engine.S("Remove " + fmt.Sprint(amount) + " threat from " + s.EDef().Name),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: amount, Source: u.Owner}))
 			}
@@ -343,7 +343,7 @@ func registerWoLANDPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   u.Owner,
-				Question: engine.Ask("Overwatch — remove "+fmt.Sprint(amount)+" threat from a different scheme", choices...),
+				Question: engine.Ask(engine.S("Overwatch — remove "+fmt.Sprint(amount)+" threat from a different scheme"), choices...),
 			}}
 		},
 	})
@@ -368,12 +368,12 @@ func registerWoLANDPlayers() {
 			var choices []engine.Choice
 			for _, t := range []string{"minion", "treachery", "side_scheme", "environment", "attachment", "obligation"} {
 				choices = append(choices, engine.Choice{
-					ID: "guess-" + t, Label: t, Kind: engine.ChoiceLabel,
+					ID: "guess-" + t, Label: engine.S(t), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.GuessCheck{Player: m.Player, CardCode: m.Card.Code, Guess: t, Penalty: e.EID()}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   m.Player,
-				Question: engine.Ask("Scarlet Spider — name a card type (look at that card)", choices...),
+				Question: engine.Ask(engine.Tf("c.scarletSpiderNameACardTypeLookAtThatCard"), choices...),
 			}}
 		},
 	})
@@ -401,7 +401,7 @@ func registerWoLANDPlayers() {
 			code := a.Code
 			g.Delete(a.ID)
 			p.Hand = append(p.Hand, engine.Card{ID: g.NextCardID(), Code: code, Owner: p.ID})
-			g.Logf("SP//dr returns to %s's hand (excess consequential damage)", p.Name)
+			g.TLogf("c.spDrReturnsToSHandExcessConsequentialDamage", p.Name)
 			return nil
 		},
 	})
@@ -413,7 +413,7 @@ func registerWoLANDPlayers() {
 	engine.RegisterBehavior("30022", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Team-Building Exercise — your next card this phase costs 1 less", Type: engine.AbilityAction,
+				Label: engine.Tf("c.teamBuildingExerciseYourNextCardThisPhaseCosts1Less"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -452,12 +452,12 @@ func registerWoLANDPlayers() {
 			var choices []engine.Choice
 			for _, tp := range g.Players {
 				choices = append(choices, engine.Choice{
-					Label: tp.Name + " draws 1", Kind: engine.ChoiceLabel,
+					Label: engine.S(tp.Name + " draws 1"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DrawCards{Player: tp.ID, N: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   s.Owner,
-				Question: engine.Ask("Web of Life and Destiny — a Web-Warrior ally left play: choose a player to draw 1", choices...),
+				Question: engine.Ask(engine.Tf("c.webOfLifeAndDestinyAWebWarriorAllyLeftPlayChooseAPlayerToDra"), choices...),
 			}}
 		},
 	})
@@ -484,7 +484,7 @@ func registerWoLANDPlayers() {
 			if hasSpiderTitle(p.HeroDef().Name) || hasSpiderTitle(p.AlterEgoDef().Name) {
 				if !warriorAttachedTo(g, p.ID) {
 					choices = append(choices, engine.Choice{
-						Label: "Attach to " + p.HeroDef().Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+						Label: engine.S("Attach to " + p.HeroDef().Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 					}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: p.ID, GrantTrait: "web-warrior"}))
 				}
 			}
@@ -494,7 +494,7 @@ func registerWoLANDPlayers() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Attach to " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+					Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, GrantTrait: "web-warrior"}))
 			}
 			if len(choices) == 0 {
@@ -502,7 +502,7 @@ func registerWoLANDPlayers() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Warrior of the Great Web — attach to a character with \"Spider\" in its title", choices...),
+				Question: engine.Ask(engine.Tf("c.warriorOfTheGreatWebAttachToACharacterWithSpiderInItsTitle"), choices...),
 			}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -578,7 +578,7 @@ func registerWoLANDScheme() {
 						MaxHP: hp, AttackVal: atk, SchemeVal: sch, EngagedWith: pid,
 					}
 					g.Minions[mn.ID] = mn
-					g.Logf("Hunting the Spider-Totems — %s enters play engaged with %s", def.Name, g.Player(pid).Name)
+					g.TLogf("c.huntingTheSpiderTotemsEntersPlayEngagedWith", def.Name, g.Player(pid).Name)
 					msgs = append(msgs, engine.MinionEntersPlay{MinionID: mn.ID, Player: pid})
 				} else {
 					g.EncounterDiscard = append(g.EncounterDiscard, top)
@@ -602,7 +602,7 @@ func registerInheritors() {
 			return nil
 		}
 		if !webWarriorCharacterInPlay(g) {
-			g.Logf("%s finds no spider-totem to hunt (no Web-Warrior in play)", e.EDef().Name)
+			g.TLogf("c.findsNoSpiderTotemToHuntNoWebWarriorInPlay", e)
 			return nil
 		}
 		return effect(g, m.Player)
@@ -666,18 +666,18 @@ func registerInheritors() {
 				}
 				var choices []engine.Choice
 				choices = append(choices, engine.Choice{
-					Label: "Stun " + p.Name, Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.S("Stun " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.StunEntity{Target: p.ID}))
 				for _, id := range p.Allies {
 					if a := g.Allies[id]; a != nil {
 						choices = append(choices, engine.Choice{
-							Label: "Stun " + a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+							Label: engine.S("Stun " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 						}.Msgs(engine.StunEntity{Target: id}))
 					}
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Daemos — stun a character you control", choices...),
+					Question: engine.Ask(engine.Tf("c.daemosStunACharacterYouControl"), choices...),
 				}}
 			})
 		},
@@ -711,14 +711,14 @@ func registerInheritors() {
 				for _, id := range cardutil.SortedIDs(g.Supports) {
 					if s := g.Supports[id]; s != nil && s.Owner == pid {
 						choices = append(choices, engine.Choice{
-							Label: "Discard " + s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
+							Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
 						}.Msgs(engine.DiscardControlled{Player: pid, ID: id}))
 					}
 				}
 				for _, id := range cardutil.SortedIDs(g.Upgrades) {
 					if u := g.Upgrades[id]; u != nil && u.Owner == pid {
 						choices = append(choices, engine.Choice{
-							Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: u.Code,
+							Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: u.Code,
 						}.Msgs(engine.DiscardControlled{Player: pid, ID: id}))
 					}
 				}
@@ -727,7 +727,7 @@ func registerInheritors() {
 				}
 				return []engine.Message{engine.AskQuestion{
 					Player:   pid,
-					Question: engine.Ask("Karn — discard an upgrade or support you control", choices...),
+					Question: engine.Ask(engine.Tf("c.karnDiscardAnUpgradeOrSupportYouControl"), choices...),
 				}}
 			})
 		},
@@ -770,7 +770,7 @@ func registerInheritors() {
 				return inheritorReveal(g, e, msg, func(g *engine.Game, pid engine.PlayerID) []engine.Message {
 					if mn := g.Minions[e.EID()]; mn != nil {
 						mn.BoostCount++
-						g.Logf("Solus gains a facedown boost card")
+						g.TLogf("c.solusGainsAFacedownBoostCard")
 					}
 					return nil
 				})

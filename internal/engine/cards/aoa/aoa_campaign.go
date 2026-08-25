@@ -31,11 +31,11 @@ func missionTeam(g *engine.Game) *engine.Support {
 func makeMissionAttempt(g *engine.Game, p *engine.Player) []engine.Message {
 	s := missionScheme(g)
 	if s == nil {
-		g.Logf("No mission in play")
+		g.TLogf("c.noMissionInPlay")
 		return nil
 	}
 	s.Counters++
-	g.Logf("Mission attempt %d/4 — %s", s.Counters, s.EDef().Name)
+	g.TLogf("c.missionAttempt4", s.Counters, s)
 	var msgs []engine.Message
 	for _, id := range p.Allies {
 		if a := g.Allies[id]; a != nil && !a.Exhausted {
@@ -44,10 +44,10 @@ func makeMissionAttempt(g *engine.Game, p *engine.Player) []engine.Message {
 		}
 	}
 	if s.Counters >= 4 {
-		g.Logf("The mission succeeds!")
+		g.TLogf("c.theMissionSucceeds")
 		if mt := missionTeam(g); mt != nil {
 			g.Delete(mt.ID)
-			g.Logf("Mission Team leaves the game")
+			g.TLogf("c.missionTeamLeavesTheGame")
 		}
 		msgs = append(msgs, engine.ThwartScheme{Scheme: s.ID, N: s.Threat, Source: p.ID})
 	}
@@ -70,10 +70,10 @@ func registerAoaCampaign() {
 			// leaving play (it joins the mission board).
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Agent of Apocalypse — choose:",
-					engine.Choice{ID: "mission", Label: "Add it to the mission area", Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.agentOfApocalypseChoose"),
+					engine.Choice{ID: "mission", Label: engine.Tf("c.addItToTheMissionArea"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.MinionDefeated{MinionID: mn.ID}),
-					engine.Choice{ID: "attack", Label: "It activates against you", Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "attack", Label: engine.Tf("c.itActivatesAgainstYou"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.MinionActivates{MinionID: mn.ID, Player: p.ID}),
 				),
 			}}
@@ -96,10 +96,10 @@ func registerAoaCampaign() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Worldwide Crisis — choose:",
-					engine.Choice{ID: "threat", Label: "Place 3 threat on the Mission", Kind: engine.ChoiceLabel}.
+				Question: engine.Ask(engine.Tf("c.worldwideCrisisChoose"),
+					engine.Choice{ID: "threat", Label: engine.Tf("c.place3ThreatOnTheMission"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.ApplySchemeThreat{Scheme: missionID(g), N: 3, Source: t.ID}),
-					engine.Choice{ID: "dmg", Label: "Take 1 damage and surge", Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "dmg", Label: engine.Tf("c.take1DamageAndSurge"), Kind: engine.ChoiceLabel}.
 						Msgs(engine.DamageEntity{Target: p.ID, Damage: 1, Source: t.ID}, engine.RevealNextEncounter{Player: p.ID}),
 				),
 			}}
@@ -123,13 +123,13 @@ func registerAoaCampaign() {
 	engine.RegisterBehavior("45171", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Mission Team — reduce the next ally's cost by 2", Type: engine.AbilityAction,
+				Label: engine.Tf("c.missionTeamReduceTheNextAllySCostBy2"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.CostDiscountApply{Player: g.Supports[self].Owner, Amount: 2}}
 				},
 			}, {
-				Label: "Mission Team — make a mission attempt", Type: engine.AbilityAction,
+				Label: engine.Tf("c.missionTeamMakeAMissionAttempt"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return makeMissionAttempt(g, g.Player(g.Supports[self].Owner))
@@ -148,7 +148,7 @@ func registerAoaCampaign() {
 			if p == nil || g.MainScheme == nil {
 				return nil
 			}
-			g.Logf("Destiny foresees — 2 threat removed from the main scheme")
+			g.TLogf("c.destinyForesees2ThreatRemovedFromTheMainScheme")
 			return []engine.Message{engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 2, Source: p.ID}}
 		},
 	})
@@ -198,12 +198,12 @@ func registerAoaCampaign() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: a.EDef().Name, Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, ATK: 1, THW: 1, MaxHP: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Desperate Measures — attach to:", choices...),
+				Question: engine.Ask(engine.Tf("c.desperateMeasuresAttachTo"), choices...),
 			}}
 		},
 	})
@@ -255,7 +255,7 @@ func registerOverseers() {
 			MinionDamageable: func(g *engine.Game, m *engine.Minion, damage int) bool {
 				for _, o := range g.Minions {
 					if o != nil && o.ID != m.ID {
-						g.Logf("The overseer cannot take damage while another minion stands")
+						g.TLogf("c.theOverseerCannotTakeDamageWhileAnotherMinionStands")
 						return false
 					}
 				}

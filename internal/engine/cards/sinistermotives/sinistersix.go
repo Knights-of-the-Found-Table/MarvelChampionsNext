@@ -88,7 +88,7 @@ func registerSinisterSix() {
 				base := engine.BaseCodeOf(v.ECode())
 				g.SetAside = append(g.SetAside, engine.Card{ID: g.NextCardID(), Code: base})
 				delete(g.Villains, id)
-				g.Logf("%s waits on the bench", engine.DB.MustLookup(base).Name)
+				g.TLogf("c.waitsOnTheBench", engine.DB.MustLookup(base).Name)
 			}
 			// Active counter on the first member.
 			for _, id := range cardutil.SortedIDs(g.Villains) {
@@ -128,7 +128,7 @@ func registerSinisterSix() {
 			} else {
 				// Stay in play with fresh threat.
 				s.Threat = tw.N + 3
-				g.Logf("Light at the End flares back to life")
+				g.TLogf("c.lightAtTheEndFlaresBackToLife")
 			}
 			return nil
 		},
@@ -210,7 +210,7 @@ func advanceSixCounter(g *engine.Game, current engine.EntityID) []engine.Message
 	for i, id := range ids {
 		if id == current && i+1 < len(ids) {
 			g.ActiveVillain = ids[i+1]
-			g.Logf("The active counter moves to %s", g.Villains[ids[i+1]].EDef().Name)
+			g.TLogf("c.theActiveCounterMovesTo", g.Villains[ids[i+1]].EDef().Name)
 			return nil
 		}
 	}
@@ -243,7 +243,7 @@ func sixAmbush(g *engine.Game) []engine.Message {
 	v := g.SpawnVillainFromCard(pick)
 	if v != nil {
 		g.ActiveVillain = v.ID
-		g.LogMajorf("Ambush! %s joins the Sinister Six", v.EDef().Name)
+		g.TLogMajorf("c.ambushJoinsTheSinisterSix", v)
 	}
 	return nil
 }

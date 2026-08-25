@@ -119,7 +119,7 @@ func registerHerculesComplete() {
 	engine.RegisterBehavior("59023", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Recruitment Drive — discard: next ally is free", Type: engine.AbilityAction, AlterEgoOnly: true,
+				Label: engine.Tf("c.recruitmentDriveDiscardNextAllyIsFree"), Type: engine.AbilityAction, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					p := g.Player(s.Owner)
@@ -215,7 +215,7 @@ func registerHerculesComplete() {
 				}
 				if len(s.AttachedCards) == 0 {
 					return []engine.Ability{{
-						Label: "Avengers Compound — tuck an ally from your hand", Type: engine.AbilityAction, Exhaust: true,
+						Label: engine.Tf("c.avengersCompoundTuckAnAllyFromYourHand"), Type: engine.AbilityAction, Exhaust: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
 							p := g.Player(s.Owner)
@@ -228,7 +228,7 @@ func registerHerculesComplete() {
 									p.Hand = append(p.Hand[:i:i], p.Hand[i+1:]...)
 									s.AttachedCards = append(s.AttachedCards, card)
 									s.Counters = 1
-									g.Logf("%s waits at the compound", card.Def().Name)
+									g.TLogf("c.waitsAtTheCompound", card)
 									return nil
 								}
 							}
@@ -237,7 +237,7 @@ func registerHerculesComplete() {
 					}}
 				}
 				return []engine.Ability{{
-					Label: "Avengers Compound — deploy the tucked ally", Type: engine.AbilityAction, Exhaust: true,
+					Label: engine.Tf("c.avengersCompoundDeployTheTuckedAlly"), Type: engine.AbilityAction, Exhaust: true,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						s := g.Supports[self]
 						p := g.Player(s.Owner)
@@ -258,7 +258,7 @@ func registerHerculesComplete() {
 	engine.RegisterBehavior("59033", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Helicarrier — next card costs 1 less", Type: engine.AbilityAction, Exhaust: true,
+				Label: engine.Tf("c.helicarrierNextCardCosts1Less"), Type: engine.AbilityAction, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
 					return []engine.Message{engine.CostDiscountApply{Player: s.Owner, Amount: 1}}
@@ -290,7 +290,7 @@ func registerHerculesComplete() {
 	engine.RegisterBehavior("59042", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			if s := allVersusAll(g); s != nil {
-				g.Logf("All Versus All joins the fray")
+				g.TLogf("c.allVersusAllJoinsTheFray")
 			}
 			return nil
 		},

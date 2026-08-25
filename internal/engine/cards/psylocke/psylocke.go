@@ -83,18 +83,18 @@ func registerPsylocke() {
 				return nil
 			}
 			if len(ups) == 1 {
-				g.Logf("Psi-Energy Control — %s flips", ups[0].EDef().Name)
+				g.TLogf("c.psiEnergyControlFlips", ups[0].EDef().Name)
 				return []engine.Message{flipSignal(ups[0])}
 			}
 			var choices []engine.Choice
 			for _, u := range ups {
 				choices = append(choices, engine.Choice{
-					Label: "Flip " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
+					Label: engine.S("Flip " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
 				}.Msgs(flipSignal(u)))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Psi-Energy Control — flip 1 Psi-Energy upgrade", choices...),
+				Question: engine.Ask(engine.Tf("c.psiEnergyControlFlip1PsiEnergyUpgrade"), choices...),
 			}}
 		},
 	})
@@ -140,7 +140,7 @@ func psiFlipReact(self, other string) func(g *engine.Game, e engine.Entity, msg 
 			return nil
 		}
 		u.Code = other
-		g.Logf("%s flips to %s", u.EDef().Name, other)
+		g.TLogf("c.flipsTo", u, other)
 		return nil
 	}
 }
@@ -190,7 +190,7 @@ func registerFlurryOfBlades() {
 					return []engine.Message{engine.DamageEntity{Target: id, Damage: 2 * katanas, Source: pid}}
 				})
 				if len(dmgChoices) > 0 {
-					katanaQ = engine.Ask("Flurry of Blades — Psi-Katana damage to which enemy?", dmgChoices...)
+					katanaQ = engine.Ask(engine.Tf("c.flurryOfBladesPsiKatanaDamageToWhichEnemy"), dmgChoices...)
 				}
 			}
 			// Middle step: per-knife confuses (choose up to N enemies).
@@ -205,7 +205,7 @@ func registerFlurryOfBlades() {
 							confChoices[i] = confChoices[i].WithThen(katanaQ)
 						}
 					}
-					knifeQ = engine.AskN("Flurry of Blades — confuse enemies (one per Psi-Knife)", knives, confChoices...)
+					knifeQ = engine.AskN(engine.Tf("c.flurryOfBladesConfuseEnemiesOnePerPsiKnife"), knives, confChoices...)
 				}
 			}
 			// First step: 2 damage to an enemy.
@@ -226,7 +226,7 @@ func registerFlurryOfBlades() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Flurry of Blades — deal 2 damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.flurryOfBladesDeal2DamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -252,7 +252,7 @@ func registerMentalDetection() {
 					msgs = append(msgs, engine.DrawCards{Player: pid, N: draw})
 				}
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
@@ -260,7 +260,7 @@ func registerMentalDetection() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Mental Detection — remove threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.mentalDetectionRemoveThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -304,7 +304,7 @@ func registerTelepathicSuggestion() {
 				})
 				if len(dmgChoices) > 0 {
 					msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-						"Telepathic Suggestion — Psi-Katana damage to which enemy?", dmgChoices...)})
+						engine.Tf("c.telepathicSuggestionPsiKatanaDamageToWhichEnemy"), dmgChoices...)})
 				}
 			}
 			if knives := psiCount(g, p, "a"); knives > 0 {
@@ -313,7 +313,7 @@ func registerTelepathicSuggestion() {
 				})
 				if len(thwChoices) > 0 {
 					msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-						"Telepathic Suggestion — remove threat from which scheme?", thwChoices...)})
+						engine.Tf("c.telepathicSuggestionRemoveThreatFromWhichScheme"), thwChoices...)})
 				}
 			}
 			if msgs == nil {
@@ -335,7 +335,7 @@ func registerTrainingRegimen() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Training Regimen — search your deck for a Skill card",
+				Label:   engine.Tf("c.trainingRegimenSearchYourDeckForASkillCard"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -355,16 +355,16 @@ func registerTrainingRegimen() {
 							engine.ShufflePlayerDeck{Player: p.ID},
 						}
 						ch := engine.Choice{
-							Label: "Take " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(take...)
 						if p.IsHero() && len(p.Hand) > 0 {
 							var discards []engine.Choice
 							for _, h := range p.Hand {
 								discards = append(discards, engine.Choice{
-									Label: "Discard " + h.Def().Name, Kind: engine.ChoiceCard, CardCode: h.Code,
+									Label: engine.S("Discard " + h.Def().Name), Kind: engine.ChoiceCard, CardCode: h.Code,
 								}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{h}}))
 							}
-							ch = ch.WithThen(engine.Ask("Training Regimen — discard 1 card from your hand", discards...))
+							ch = ch.WithThen(engine.Ask(engine.Tf("c.trainingRegimenDiscard1CardFromYourHand"), discards...))
 						}
 						choices = append(choices, ch)
 					}
@@ -373,7 +373,7 @@ func registerTrainingRegimen() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   p.ID,
-						Question: engine.Ask("Training Regimen — take a Skill card from your deck", choices...),
+						Question: engine.Ask(engine.Tf("c.trainingRegimenTakeASkillCardFromYourDeck"), choices...),
 					}}
 				},
 			}}
@@ -401,7 +401,7 @@ func registerMartialArtsTraining() {
 			if p == nil || !p.IsHero() || m.Defender != p.ID || m.Undefended || m.Via != "" {
 				return nil
 			}
-			g.Logf("Martial Arts Training — %s readies", p.Name)
+			g.TLogf("c.martialArtsTrainingReadies", p.Name)
 			return []engine.Message{
 				engine.DiscardControlled{Player: p.ID, ID: u.ID},
 				engine.ReadyEntity{ID: p.ID},
@@ -437,10 +437,10 @@ func registerPsionicTraining() {
 			if len(choices) == 0 {
 				return nil
 			}
-			g.Logf("Psionic Training — confuse an enemy")
+			g.TLogf("c.psionicTrainingConfuseAnEnemy")
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Psionic Training — discard it to confuse an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.psionicTrainingDiscardItToConfuseAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -473,7 +473,7 @@ func registerWeaponsTraining() {
 					msgs = append(msgs, engine.ReadyEntity{ID: w.ID})
 				}
 			}
-			g.Logf("Weapons Training — weapon upgrades ready")
+			g.TLogf("c.weaponsTrainingWeaponUpgradesReady")
 			return msgs
 		},
 	})
@@ -505,7 +505,7 @@ func registerNemesis() {
 			}
 			mn.AttackVal += x
 			mn.SchemeVal += x
-			g.Logf("Chimera — +%d ATK/+x SCH for this activation", x)
+			g.TLogf("c.chimeraAtkXSchForThisActivation", x)
 			return nil
 		},
 	})
@@ -527,7 +527,7 @@ func registerNemesis() {
 				if s.Threat > s.MaxThreat {
 					s.Threat = s.MaxThreat
 				}
-				g.Logf("Interdimensional Plunder — +%d threat (upgrades in play)", n)
+				g.TLogf("c.interdimensionalPlunderThreatUpgradesInPlay", n)
 			}
 			return nil
 		},
@@ -547,10 +547,10 @@ func registerNemesis() {
 			g.Delete(t.ID)
 			x := mentalResourcesControlled(g, p)
 			if x == 0 {
-				g.Logf("Telekinetic Dragon — no mental resources; surge")
+				g.TLogf("c.telekineticDragonNoMentalResourcesSurge")
 				return []engine.Message{engine.RevealNextEncounter{Player: p.ID}}
 			}
-			g.Logf("Telekinetic Dragon — %d damage to %s", x, p.Name)
+			g.TLogf("c.telekineticDragonDamageTo", x, p.Name)
 			return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: x, Source: t.ID}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
@@ -615,7 +615,7 @@ func registerObligation() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Discard " + c.Def().Name + " → remove Body Swapped from the game",
+					Label: engine.S("Discard " + c.Def().Name + " → remove Body Swapped from the game"),
 					Kind:  engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(
 					engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
@@ -623,11 +623,11 @@ func registerObligation() {
 				))
 			}
 			choices = append(choices, engine.Choice{
-				ID: "discard", Label: "Discard Body Swapped", Kind: engine.ChoicePass,
+				ID: "discard", Label: engine.Tf("c.discardBodySwapped"), Kind: engine.ChoicePass,
 			}.Msgs(engine.ObligationResolve{Player: p.ID, Card: card}))
 			msgs = append(msgs, engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Body Swapped — discard a Psionic card to remove it, or discard it", choices...),
+				Question: engine.Ask(engine.Tf("c.bodySwappedDiscardAPsionicCardToRemoveItOrDiscardIt"), choices...),
 			})
 			return msgs
 		},

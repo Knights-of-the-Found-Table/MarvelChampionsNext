@@ -67,7 +67,7 @@ func registerVenomGoblin() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [energy][mental][physical] → discard We Are One", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendEnergyMentalPhysicalDiscardWeAreOne"), Type: engine.AbilityAction,
 				CostIcons: "energy:1 mental:1 physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -131,7 +131,7 @@ func gliderMove(g *engine.Game, least bool) []engine.Message {
 		}
 	}
 	g.GliderCounter = pick
-	g.Logf("The glider swoops over %s", manhattanName(g, pick))
+	g.TLogf("c.theGliderSwoopsOver", manhattanName(g, pick))
 	return resolveManhattanOn(g, pick)
 }
 
@@ -299,19 +299,19 @@ func registerSMModulars() {
 			var opts []engine.Choice
 			if g.MainScheme != nil {
 				opts = append(opts, engine.Choice{
-					ID: "accel", Label: "Place 1 acceleration token on the main scheme", Kind: engine.ChoiceLabel,
+					ID: "accel", Label: engine.Tf("c.place1AccelerationTokenOnTheMainScheme"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.AddAccelerationToken{Scheme: g.MainScheme.ID}))
 			}
 			if !p.Exhausted {
 				opts = append(opts, engine.Choice{
-					ID: "exhaust", Label: "Exhaust your identity + spend 1 resource", Kind: engine.ChoiceLabel,
+					ID: "exhaust", Label: engine.Tf("c.exhaustYourIdentitySpend1Resource"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}))
 			}
 			if len(opts) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Now or Never: choose one", opts...)}}
+				Question: engine.Ask(engine.Tf("c.nowOrNeverChooseOne"), opts...)}}
 		},
 	})
 
@@ -323,7 +323,7 @@ func registerSMModulars() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Spend 1 resource → deal 3 damage to Common Criminal (reward on kill)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1ResourceDeal3DamageToCommonCriminalRewardOnKill"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return append([]engine.Message{
@@ -358,7 +358,7 @@ func registerSMModulars() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Spend 2 resources → remove threat equal to your REC", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend2ResourcesRemoveThreatEqualToYourRec"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Cost: 2,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -394,7 +394,7 @@ func registerSMModulars() {
 			g.Delete(t.ID)
 			for i, c := range p.ObligationDeck {
 				_ = i
-				g.Logf("Loose Ends dredges up %s", c.Def().Name)
+				g.TLogf("c.looseEndsDredgesUp", c)
 				p.ObligationDeck = engine.CardList{}
 				return []engine.Message{engine.RevealEncounterCard{Player: p.ID, Card: c}}
 			}
@@ -424,7 +424,7 @@ func registerSMModulars() {
 				return nil
 			}
 			g.UsedThisRound["27136"] = true
-			g.Logf("Advanced Glider: %s strikes again", g.Villains[w.Enemy].EDef().Name)
+			g.TLogf("c.advancedGliderStrikesAgain", g.Villains[w.Enemy].EDef().Name)
 			return []engine.Message{engine.VillainActivates{VillainID: w.Enemy, Player: w.Player}}
 		},
 	})
@@ -545,7 +545,7 @@ func registerSMModulars() {
 		OnAttach: villainAttach(),
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard your highest-cost upgrade → discard Arm Cannon", Type: engine.AbilityAction,
+				Label: engine.Tf("c.discardYourHighestCostUpgradeDiscardArmCannon"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
 					if p == nil || len(p.Upgrades) == 0 {
@@ -723,13 +723,13 @@ func registerSMModulars() {
 			case engine.MinionDefeated:
 				if env := g.Environments[e.EID()]; env != nil && env.Counters > 0 {
 					env.Counters--
-					g.Logf("Public Outcry: %d notoriety counters left", env.Counters)
+					g.TLogf("c.publicOutcryNotorietyCountersLeft", env.Counters)
 				}
 			case engine.SchemeDefeated:
 				if msg.(engine.SchemeDefeated).Scheme != e.EID() {
 					if env := g.Environments[e.EID()]; env != nil && env.Counters > 0 {
 						env.Counters--
-						g.Logf("Public Outcry: %d notoriety counters left", env.Counters)
+						g.TLogf("c.publicOutcryNotorietyCountersLeft", env.Counters)
 					}
 				}
 			}
@@ -786,7 +786,7 @@ func registerSMModulars() {
 			for id := range g.Allies {
 				if a := g.Allies[id]; a != nil && a.Code[:5] == "27190" {
 					t.Target = id
-					g.Logf("Snitches Get Stitches attaches to Venom")
+					g.TLogf("c.snitchesGetStitchesAttachesToVenom")
 					return nil
 				}
 			}
@@ -809,12 +809,12 @@ func registerSMModulars() {
 				return nil
 			}
 			u.Counters--
-			return cardutil.ChooseEnemy("Compact Darts: deal 1 damage",
+			return cardutil.ChooseEnemy(engine.Tf("c.compactDartsDeal1Damage"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 1, nil })(g, e)
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 1 resource → place 3 dart counters", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1ResourcePlace3DartCounters"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Cost: 1, OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AddEntityCounter{ID: self, N: 3}}
@@ -831,7 +831,7 @@ func registerSMModulars() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 1 resource → -1 damage from each enemy attack this phase", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1Resource1DamageFromEachEnemyAttackThisPhase"), Type: engine.AbilityAction,
 				HeroOnly: true, Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.ApplyStatBonus{Target: e.EOwner(), DEF: 1}}
@@ -847,7 +847,7 @@ func registerSMModulars() {
 	engine.RegisterBehavior("27185", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Propulsion Gauntlet + take 2 indirect damage → ready your hero", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustPropulsionGauntletTake2IndirectDamageReadyYourHero"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{

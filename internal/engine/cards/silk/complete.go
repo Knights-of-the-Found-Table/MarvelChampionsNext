@@ -49,7 +49,7 @@ func registerSilkComplete() {
 	engine.RegisterBehavior("52017", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Dr. Sinclair — heal equal to REC and clear a status", Type: engine.AbilityAction,
+				Label: engine.Tf("c.drSinclairHealEqualToRecAndClearAStatus"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true, Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -82,7 +82,7 @@ func registerSilkComplete() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Stun Gun — 1 charge: stun a minion; 2: stun the villain", Type: engine.AbilityAction,
+				Label: engine.Tf("c.stunGun1ChargeStunAMinion2StunTheVillain"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -94,18 +94,18 @@ func registerSilkComplete() {
 					for _, id := range enemiesOf(g) {
 						target := id
 						if g.Minions[id] != nil && u.Counters >= 1 {
-							choices = append(choices, engine.Choice{Label: "Stun " + g.Minions[id].EDef().Name + " (1 charge)", Kind: engine.ChoiceTarget, SourceID: id}.
+							choices = append(choices, engine.Choice{Label: engine.S("Stun " + g.Minions[id].EDef().Name + " (1 charge)"), Kind: engine.ChoiceTarget, SourceID: id}.
 								Msgs(engine.AddEntityCounter{ID: self, N: -1}, engine.StunEntity{Target: target}))
 						}
 						if g.Villains[id] != nil && u.Counters >= 2 {
-							choices = append(choices, engine.Choice{Label: "Stun the villain (2 charges)", Kind: engine.ChoiceTarget, SourceID: id}.
+							choices = append(choices, engine.Choice{Label: engine.Tf("c.stunTheVillain2Charges"), Kind: engine.ChoiceTarget, SourceID: id}.
 								Msgs(engine.AddEntityCounter{ID: self, N: -2}, engine.StunEntity{Target: target}))
 						}
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Stun Gun — stun whom?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.stunGunStunWhom"), choices...)}}
 				},
 			}}
 		},
@@ -119,9 +119,9 @@ func registerSilkComplete() {
 			}
 			top, _ := g.PeekEncounterTop()
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"Madame Web — top of the encounter deck: "+top.Def().Name,
-				engine.Choice{Label: "Discard it", Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
-				engine.Choice{Label: "Leave it", Kind: engine.ChoicePass},
+				engine.S("Madame Web — top of the encounter deck: "+top.Def().Name),
+				engine.Choice{Label: engine.Tf("c.discardIt"), Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
+				engine.Choice{Label: engine.Tf("c.leaveIt"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -189,7 +189,7 @@ func registerSilkComplete() {
 					if a := g.Allies[aid]; a != nil && aid != e.EID() && a.EDef().HasTrait("web-warrior") {
 						g.Delete(aid)
 						p.Hand = append(p.Hand, engine.Card{ID: g.NextCardID(), Code: a.Code, Owner: p.ID})
-						g.Logf("%s swings back to %s's hand", a.EDef().Name, p.Name)
+						g.TLogf("c.swingsBackToSHand", a, p.Name)
 						return nil
 					}
 				}
@@ -242,7 +242,7 @@ func registerSilkComplete() {
 			}
 			mn.Counters++
 			mn.MaxHP += 2
-			g.Logf("Atlas grows (%d growth counters)", mn.Counters)
+			g.TLogf("c.atlasGrowsGrowthCounters", mn.Counters)
 			return nil
 		},
 	})

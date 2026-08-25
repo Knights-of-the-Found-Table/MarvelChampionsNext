@@ -36,7 +36,7 @@ func ratings(g *engine.Game, base string, n int) {
 		return
 	}
 	env.Counters += n
-	g.Logf("%s gains %d ratings counters (%d)", env.EDef().Name, n, env.Counters)
+	g.TLogf("c.gainsRatingsCounters", env, n, env.Counters)
 	if env.Counters >= 5*len(g.Players) {
 		if env.Code == base+"a" {
 			env.Code = base + "b"
@@ -44,7 +44,7 @@ func ratings(g *engine.Game, base string, n int) {
 			env.Code = base + "a"
 		}
 		env.Counters = 0
-		g.Logf("The crowd flips %s!", env.EDef().Name)
+		g.TLogf("c.theCrowdFlips", env)
 	}
 }
 
@@ -85,7 +85,7 @@ func registerMaGog() {
 				v.Damage = v.MaxHP - 10*len(g.Players)
 			}
 			ratings(g, "39004", 3*len(g.Players))
-			g.Logf("MaGog powers through! His hit points reset (the crowd goes wild)")
+			g.TLogf("c.magogPowersThroughHisHitPointsResetTheCrowdGoesWild")
 			return false
 		},
 	})
@@ -262,7 +262,7 @@ func registerSpiral() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "The Search for Spiral — take 2 damage → remove 3 threat", Type: engine.AbilityAction,
+				Label: engine.Tf("c.theSearchForSpiralTake2DamageRemove3Threat"), Type: engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{
@@ -287,7 +287,7 @@ func registerSpiral() {
 						break
 					}
 				}
-				g.Logf("Spiral is cornered!")
+				g.TLogf("c.spiralIsCornered")
 			}
 			return []engine.Message{engine.RevealNextEncounter{Player: p.ID}}
 		},
@@ -310,7 +310,7 @@ func registerSpiral() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Spiral's Swords — spend [physical][physical] → remove 1 sword counter", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spiralSSwordsSpendPhysicalPhysicalRemove1SwordCounter"), Type: engine.AbilityAction,
 				Cost: 2, CostIcons: "physical:2",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					t := g.Attachments[self]
@@ -407,7 +407,7 @@ func registerMojoVillain() {
 					if divert > 0 {
 						s.Threat -= divert
 						remaining := damage - divert
-						g.Logf("Undercover Mojo absorbs %d damage", divert)
+						g.TLogf("c.undercoverMojoAbsorbsDamage", divert)
 						if remaining > 0 {
 							v.Damage += remaining
 						}
@@ -450,7 +450,7 @@ func registerMojoVillain() {
 					}
 				}
 				if hits > 0 {
-					g.Logf("The ratings war deals %s %d damage", p.Name, hits)
+					g.TLogf("c.theRatingsWarDealsDamage", p.Name, hits)
 					return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: hits, Source: v.ID}}
 				}
 				return nil
@@ -477,7 +477,7 @@ func registerMojoVillain() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Major Domo — spend [energy][mental][physical] → discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.majorDomoSpendEnergyMentalPhysicalDiscard"), Type: engine.AbilityAction,
 				Cost: 3, CostIcons: "energy:1 mental:1 physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -534,16 +534,16 @@ func registerMojoVillain() {
 		ResolveTreachery: func(g *engine.Game, t *engine.Treachery, p *engine.Player) []engine.Message {
 			g.Delete(t.ID)
 			choices := []engine.Choice{
-				engine.Choice{ID: "scheme", Label: "Mojo schemes", Kind: engine.ChoiceLabel},
-				engine.Choice{ID: "damage", Label: "Take 1 damage (threat on your identity approximated)", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "scheme", Label: engine.Tf("c.mojoSchemes"), Kind: engine.ChoiceLabel},
+				engine.Choice{ID: "damage", Label: engine.Tf("c.take1DamageThreatOnYourIdentityApproximated"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.DamageEntity{Target: p.ID, Damage: 1, Source: t.ID}),
 			}
 			choices = append(choices, engine.Choice{
-				ID: "spend", Label: "Spend 2 resources (discard 2 cards)", Kind: engine.ChoiceLabel,
+				ID: "spend", Label: engine.Tf("c.spend2ResourcesDiscard2Cards"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.DiscardCards{Player: p.ID, Cards: handTake(p, 2)}))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Director's Directions — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.directorSDirectionsChoose"), choices...),
 			}}
 		},
 	})

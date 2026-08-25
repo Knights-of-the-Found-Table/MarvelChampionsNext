@@ -46,7 +46,7 @@ func addSecret(g *engine.Game, n int) {
 		}
 		lowest.Counters++
 	}
-	g.Logf("Secret counters spread across the executive board (%d total)", secretTotal(g))
+	g.TLogf("c.secretCountersSpreadAcrossTheExecutiveBoardTotal", secretTotal(g))
 }
 
 // removeSecrets strips n secret counters from the board.
@@ -76,7 +76,7 @@ func registerZemo() {
 				removeSecrets(g, 3)
 				v.Damage = 0
 				v.MaxHP = resetHP
-				g.Logf("Baron Zemo slips behind his conspirators (secrets left: %d)", secretTotal(g))
+				g.TLogf("c.baronZemoSlipsBehindHisConspiratorsSecretsLeft", secretTotal(g))
 				return false
 			}
 			return true
@@ -95,7 +95,7 @@ func registerZemo() {
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
 			if v := g.Villains[target]; v != nil {
 				v.AttackVal += 2
-				g.Logf("Baron Zemo wields his sword (+2 ATK)")
+				g.TLogf("c.baronZemoWieldsHisSword2Atk")
 			}
 			return nil
 		},
@@ -105,7 +105,7 @@ func registerZemo() {
 	// as a 3-ATK / 1-SCH mercenary minion.
 	engine.RegisterBehavior("50171", &engine.Behavior{
 		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
-			g.Logf("A reluctant hero is forced into the fight")
+			g.TLogf("c.aReluctantHeroIsForcedIntoTheFight")
 			return nil
 		},
 	})
@@ -135,7 +135,7 @@ func registerZemo() {
 	engine.RegisterBehavior("50173", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
 			removeSecrets(g, len(g.Players))
-			g.Logf("Divided Loyalties crumbles — secrets spill (%d left)", secretTotal(g))
+			g.TLogf("c.dividedLoyaltiesCrumblesSecretsSpillLeft", secretTotal(g))
 			return nil
 		},
 	})
@@ -144,7 +144,7 @@ func registerZemo() {
 	engine.RegisterBehavior("50174", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
 			removeSecrets(g, len(g.Players))
-			g.Logf("Undermine Support crumbles — secrets spill (%d left)", secretTotal(g))
+			g.TLogf("c.undermineSupportCrumblesSecretsSpillLeft", secretTotal(g))
 			return nil
 		},
 	})
@@ -192,7 +192,7 @@ func registerZemo() {
 						n = c
 					}
 					discard = append(discard, engine.Choice{
-						Label: "Discard " + a.EDef().Name + " — remove " + strconv.Itoa(n) + " secrets", Kind: engine.ChoiceTarget, SourceID: aid,
+						Label: engine.S("Discard " + a.EDef().Name + " — remove " + strconv.Itoa(n) + " secrets"), Kind: engine.ChoiceTarget, SourceID: aid,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: aid}))
 				}
 			}
@@ -203,14 +203,14 @@ func registerZemo() {
 						n = c
 					}
 					discard = append(discard, engine.Choice{
-						Label: "Discard " + s.EDef().Name + " — remove " + strconv.Itoa(n) + " secrets", Kind: engine.ChoiceTarget, SourceID: sid,
+						Label: engine.S("Discard " + s.EDef().Name + " — remove " + strconv.Itoa(n) + " secrets"), Kind: engine.ChoiceTarget, SourceID: sid,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: sid}))
 				}
 			}
 			if len(discard) > 0 {
-				discard = append(discard, engine.Choice{Label: "Refuse — the villain schemes", Kind: engine.ChoicePass}.
+				discard = append(discard, engine.Choice{Label: engine.Tf("c.refuseTheVillainSchemes"), Kind: engine.ChoicePass}.
 					Msgs(engine.VillainActivates{VillainID: firstVillainID(g), Player: p.ID}))
-				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("The Ends Justify the Means — discard a card you control?", discard...)}}
+				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.theEndsJustifyTheMeansDiscardACardYouControl"), discard...)}}
 			}
 			return []engine.Message{engine.VillainActivates{VillainID: firstVillainID(g), Player: p.ID}}
 		},
@@ -247,7 +247,7 @@ func registerZemo() {
 	// 50179 Arrest Warrant obligation.
 	engine.RegisterBehavior("50179", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			g.Logf("Arrest Warrant dogs the heroes")
+			g.TLogf("c.arrestWarrantDogsTheHeroes")
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}
 		},
 	})
@@ -270,7 +270,7 @@ func registerZemo() {
 			}
 			s := g.SideSchemes[e.EID()]
 			s.Threat += n
-			g.Logf("Disavowed gains %d threat", n)
+			g.TLogf("c.disavowedGainsThreat", n)
 			return nil
 		},
 	})
@@ -290,7 +290,7 @@ func registerZemo() {
 					return nil
 				}
 				return []engine.Ability{{
-					Label: env.EDef().Name + " — spend 2 matching resources: remove 1 secret counter, then " + entry.label,
+					Label: engine.S(env.EDef().Name + " — spend 2 matching resources: remove 1 secret counter, then " + entry.label),
 					Type:  engine.AbilityAction, HeroOnly: true, Cost: 2,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						env := g.Environments[self]

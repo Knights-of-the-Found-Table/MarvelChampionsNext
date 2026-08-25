@@ -69,7 +69,7 @@ func registerScenario() {
 				}
 				if n > 0 {
 					msgs = append(msgs, engine.AddAccelerationToken{Scheme: s.ID})
-					g.Logf("%d side scheme(s) discarded; an acceleration token is added", n)
+					g.TLogf("c.sideSchemeSDiscardedAnAccelerationTokenIsAdded", n)
 				}
 				if kid := findKangByBase(g, "11001"); kid != "" {
 					delete(g.Villains, kid) // Kang I leaves
@@ -94,7 +94,7 @@ func registerScenario() {
 		OnVillainDefeated: func(g *engine.Game, v *engine.Villain) []engine.Message {
 			base := v.Code[:5]
 			delete(g.Villains, v.ID)
-			g.Logf("%s is removed from the game", v.EDef().Name)
+			g.TLogf("log.removedFromGame", v)
 			switch base {
 			case "11001", "11034":
 				// Kang I defeated: the scheme advances to stage 2.
@@ -144,7 +144,7 @@ func spawnKang(g *engine.Game, base string) *engine.Villain {
 		Tough:     def.HasKeyword("Toughness"),
 	}
 	g.Villains[v.ID] = v
-	g.Logf("%s enters play", def.Name)
+	g.TLogf("c.entersPlay", def.Name)
 	return v
 }
 
@@ -169,7 +169,7 @@ func spawnSchemeMsg(g *engine.Game, code string) []engine.Message {
 		MaxThreat: deref(def.Threat, 6),
 	}
 	g.SideSchemes[s.ID] = s
-	g.Logf("%s enters play (threat %d)", def.Name, s.Threat)
+	g.TLogf("c.entersPlayThreat", def.Name, s.Threat)
 	return nil
 }
 
@@ -187,7 +187,7 @@ func registerKangs() {
 		engine.RegisterBehavior(base, &engine.Behavior{
 			VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 				if len(g.Minions) > 0 {
-					g.Logf("%s cannot take damage while a minion is in play", v.EDef().Name)
+					g.TLogf("c.cannotTakeDamageWhileAMinionIsInPlay", v)
 					return false
 				}
 				return kangDamageable(g, v, damage)
@@ -218,7 +218,7 @@ func kangDamageable(g *engine.Game, v *engine.Villain, damage int) bool {
 	}
 	for _, s := range g.SideSchemes {
 		if s.Code[:5] == "11023" {
-			g.Logf("%s cannot take damage while Kang's Dominion is in play", v.EDef().Name)
+			g.TLogf("c.cannotTakeDamageWhileKangSDominionIsInPlay", v)
 			return false
 		}
 	}
@@ -233,27 +233,27 @@ func conquerorActivate() func(g *engine.Game, v *engine.Villain, p *engine.Playe
 			// Scheme as normal.
 			if v.Confused {
 				v.Confused = false
-				g.Logf("%s is confused; scheme canceled", v.EDef().Name)
+				g.TLogf("log.confusedCanceled", v)
 				return nil
 			}
-			g.Logf("%s schemes against %s", v.EDef().Name, p.Name)
+			g.TLogf("log.schemesAgainst", v, p.Name)
 			g.Push(engine.DealBoost{Enemy: v.ID})
 			g.Push(engine.RevealBoost{Enemy: v.ID})
 			return []engine.Message{engine.ApplyVillainScheme{VillainID: v.ID, Player: p.ID}}
 		}
 		if v.Stunned {
 			v.Stunned = false
-			g.Logf("%s is stunned; attack canceled", v.EDef().Name)
+			g.TLogf("log.stunnedCanceled", v)
 			return nil
 		}
-		g.Logf("%s attacks %s", v.EDef().Name, p.Name)
+		g.TLogf("log.attacks", v, p.Name)
 		g.Push(engine.DealBoost{Enemy: v.ID})
 		g.Push(engine.RevealBoost{Enemy: v.ID})
 		g.Push(engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-			v.EDef().Name+": place 1 threat on the main scheme or take +2 ATK?",
-			engine.Choice{ID: "threat", Label: "Place 1 threat on the main scheme", Kind: engine.ChoiceLabel}.
+			engine.S(v.EDef().Name+": place 1 threat on the main scheme or take +2 ATK?"),
+			engine.Choice{ID: "threat", Label: engine.Tf("c.place1ThreatOnTheMainScheme"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.SchemeThreat{Scheme: mainScheme(g), N: 1, Source: v.ID}),
-			engine.Choice{ID: "atk", Label: "Kang gets +2 ATK for this attack", Kind: engine.ChoiceLabel}.
+			engine.Choice{ID: "atk", Label: engine.Tf("c.kangGets2AtkForThisAttack"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.BoostActivation{Enemy: v.ID, N: 2}),
 		)})
 		g.Push(engine.AskAttack{Enemy: v.ID, Player: p.ID, Trigger: engine.TriggerVillainAttacksYou})
@@ -326,13 +326,13 @@ func registerMinions() {
 			var picks []engine.Choice
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
-					picks = append(picks, engine.Choice{Label: "Discard " + a.EDef().Name, Kind: engine.ChoiceCard, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Discard " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil {
-					picks = append(picks, engine.Choice{Label: "Discard " + s.EDef().Name, Kind: engine.ChoiceCard, CardCode: s.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -340,7 +340,7 @@ func registerMinions() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Apocryphus: discard which ally or support?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.apocryphusDiscardWhichAllyOrSupport"), picks...)}}
 		},
 		Boost: func(g *engine.Game, card engine.Card) []engine.Message {
 			return []engine.Message{engine.ExhaustEntity{ID: engine.PlayerID(card.Owner)}}
@@ -375,7 +375,7 @@ func registerMinions() {
 		c := p.Hand[i]
 		p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 		p.Discard = append(p.Discard, c)
-		g.Logf("%s discards %s at random (Wildrun)", p.Name, c.Def().Name)
+		g.TLogf("c.discardsAtRandomWildrun", p.Name, c)
 		return nil
 	}
 	engine.RegisterBehavior("11044", &engine.Behavior{
@@ -433,7 +433,7 @@ func registerSchemes() {
 					c := p.Hand[i]
 					p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 					p.Discard = append(p.Discard, c)
-					g.Logf("%s discards %s at random", p.Name, c.Def().Name)
+					g.TLogf("c.discardsAtRandom", p.Name, c)
 				} else {
 					msgs = append(msgs, engine.SchemeThreat{Scheme: e.EID(), N: 2, Source: p.ID})
 				}
@@ -493,7 +493,7 @@ func registerSchemes() {
 			if d, ok := msg.(engine.SchemeDefeated); ok && d.Scheme == e.EID() {
 				if s := g.SideSchemes[e.EID()]; s != nil {
 					g.EncounterDeck = append(g.EncounterDeck, engine.Card{ID: g.NextCardID(), Code: s.Code})
-					g.Logf("Time Portal shuffles back into the encounter deck")
+					g.TLogf("c.timePortalShufflesBackIntoTheEncounterDeck")
 				}
 			}
 			return nil
@@ -514,7 +514,7 @@ func registerSchemes() {
 					}
 				}
 				g.EncounterDiscard = kept
-				g.Logf("Each Temporal card in the encounter discard shuffles back")
+				g.TLogf("c.eachTemporalCardInTheEncounterDiscardShufflesBack")
 			}
 			return nil
 		},
@@ -539,13 +539,13 @@ func registerTreacheries() {
 			var picks []engine.Choice
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
-					picks = append(picks, engine.Choice{Label: "Discard " + a.EDef().Name, Kind: engine.ChoiceCard, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Discard " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil {
-					picks = append(picks, engine.Choice{Label: "Discard " + s.EDef().Name, Kind: engine.ChoiceCard, CardCode: s.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -553,7 +553,7 @@ func registerTreacheries() {
 				return []engine.Message{engine.RevealNextEncounter{Player: p.ID}}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Energy Blast: discard which ally or support?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.energyBlastDiscardWhichAllyOrSupport"), picks...)}}
 		},
 	})
 
@@ -658,7 +658,7 @@ func registerObligations() {
 	// Weakened: 1 damage (of the basic-power penalty).
 	engine.RegisterBehavior("11018", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
-			g.Logf("Weakened: %s takes 1 damage", p.Name)
+			g.TLogf("c.weakenedTakes1Damage", p.Name)
 			return []engine.Message{
 				engine.DamageEntity{Target: p.ID, Damage: 1, Source: engine.EntityID("11018")},
 				engine.ObligationResolve{Player: p.ID, Card: card},
@@ -750,7 +750,7 @@ func registerAttachments() {
 			}
 			g.Delete(a.ID)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
-			g.Logf("Future Weapon is discarded after the attack")
+			g.TLogf("c.futureWeaponIsDiscardedAfterTheAttack")
 			return nil
 		},
 	})
@@ -765,7 +765,7 @@ func temporalShieldCheck(g *engine.Game, v *engine.Villain) bool {
 		if a.Code[:5] == "11014" && a.Target == v.ID {
 			g.Delete(id)
 			g.EncounterDiscard = append(g.EncounterDiscard, engine.Card{ID: g.NextCardID(), Code: a.Code})
-			g.Logf("Temporal Shield prevents all damage from this attack and is discarded")
+			g.TLogf("c.temporalShieldPreventsAllDamageFromThisAttackAndIsDiscarded")
 			return true
 		}
 	}
@@ -802,14 +802,14 @@ func registerConquerorFinal() {
 			var opts []engine.Choice
 			if g.MainScheme != nil {
 				opts = append(opts, engine.Choice{
-					ID: "threat", Label: "Place 1 threat on the main scheme", Kind: engine.ChoiceLabel,
+					ID: "threat", Label: engine.Tf("c.place1ThreatOnTheMainScheme"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: 1, Source: e.EID()}))
 			}
 			opts = append(opts, engine.Choice{
-				ID: "atk", Label: "Kang gets +2 ATK for this attack", Kind: engine.ChoiceLabel,
+				ID: "atk", Label: engine.Tf("c.kangGets2AtkForThisAttack"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.BoostActivation{Enemy: e.EID(), N: 2}))
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Kang demands tribute: choose one", opts...)}}
+				Question: engine.Ask(engine.Tf("c.kangDemandsTributeChooseOne"), opts...)}}
 		},
 	})
 }

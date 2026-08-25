@@ -10,13 +10,13 @@ import (
 // redacted per viewer; the pending question is only included for the player
 // being asked (and for spectators it is omitted entirely).
 type GameView struct {
-	ID       int64  `json:"id"`
-	Name     string `json:"name"`
-	Scenario string `json:"scenario"`
-	Round    int    `json:"round"`
-	Over     bool   `json:"over"`
-	Won      bool   `json:"won"`
-	Reason   string `json:"reason,omitempty"`
+	ID       int64      `json:"id"`
+	Name     string     `json:"name"`
+	Scenario string     `json:"scenario"`
+	Round    int        `json:"round"`
+	Over     bool       `json:"over"`
+	Won      bool       `json:"won"`
+	Reason   engine.Msg `json:"reason,omitempty"`
 
 	Villains    []VillainView `json:"villains"`
 	MainScheme  *SchemeView   `json:"mainScheme"`
@@ -26,9 +26,9 @@ type GameView struct {
 	// Attachments are cards attached to entities (host id resolves the
 	// stacking position on the board); Treacheries are persistent in-play
 	// treacheries; Environments sit in the encounter area.
-	Attachments  []AttachmentView `json:"attachments,omitempty"`
-	Treacheries  []AttachmentView `json:"treacheries,omitempty"`
-	Environments []EntityLite     `json:"environments,omitempty"`
+	Attachments  []AttachmentView  `json:"attachments,omitempty"`
+	Treacheries  []AttachmentView  `json:"treacheries,omitempty"`
+	Environments []EntityLite      `json:"environments,omitempty"`
 	Log          []engine.LogEntry `json:"log"`
 
 	// Question is the pending question when it belongs to the viewer.
@@ -56,16 +56,16 @@ type VillainView struct {
 }
 
 type SchemeView struct {
-	ID        string `json:"id"`
-	Code      string `json:"code"`
-	Name      string `json:"name"`
-	Threat    int    `json:"threat"`
-	MaxThreat int    `json:"maxThreat"`
-	Stage     int    `json:"stage,omitempty"`
-	Crisis    bool   `json:"crisis,omitempty"`
-	Hazard    int    `json:"hazard,omitempty"`
-	PlayerSide bool  `json:"playerSide,omitempty"`
-	Acceleration int `json:"acceleration,omitempty"`
+	ID           string `json:"id"`
+	Code         string `json:"code"`
+	Name         string `json:"name"`
+	Threat       int    `json:"threat"`
+	MaxThreat    int    `json:"maxThreat"`
+	Stage        int    `json:"stage,omitempty"`
+	Crisis       bool   `json:"crisis,omitempty"`
+	Hazard       int    `json:"hazard,omitempty"`
+	PlayerSide   bool   `json:"playerSide,omitempty"`
+	Acceleration int    `json:"acceleration,omitempty"`
 }
 
 type MinionView struct {
@@ -106,37 +106,37 @@ type CardRef struct {
 }
 
 type PlayerView struct {
-	ID        string     `json:"id"`
-	Name      string     `json:"name"`
-	UserID    string     `json:"userId,omitempty"`
-	Side      string     `json:"side"`
-	HeroCode  string     `json:"heroCode"`
-	AlterEgo  string     `json:"alterEgoCode"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	UserID   string `json:"userId,omitempty"`
+	Side     string `json:"side"`
+	HeroCode string `json:"heroCode"`
+	AlterEgo string `json:"alterEgoCode"`
 	// 当前面的卡牌名（title 展示用，区别于玩家名）。
 	HeroName     string `json:"heroName,omitempty"`
 	AlterEgoName string `json:"alterEgoName,omitempty"`
-	HP        int        `json:"hp"`
-	MaxHP     int        `json:"maxHp"`
-	Exhausted bool       `json:"exhausted"`
-	Stunned   bool       `json:"stunned"`
-	Confused  bool       `json:"confused"`
-	Tough     bool       `json:"tough"`
-	FirstPlayer bool     `json:"firstPlayer"`
-	KOed      bool       `json:"koed"`
-	FormChanged bool     `json:"formChanged"`
+	HP           int    `json:"hp"`
+	MaxHP        int    `json:"maxHp"`
+	Exhausted    bool   `json:"exhausted"`
+	Stunned      bool   `json:"stunned"`
+	Confused     bool   `json:"confused"`
+	Tough        bool   `json:"tough"`
+	FirstPlayer  bool   `json:"firstPlayer"`
+	KOed         bool   `json:"koed"`
+	FormChanged  bool   `json:"formChanged"`
 
 	// Hand is only populated for the owning viewer.
-	Hand  []CardRef `json:"hand,omitempty"`
-	HandSize int    `json:"handSize"`
-	DeckCount  int  `json:"deckCount"`
-	DiscardCount int `json:"discardCount"`
-	SenseDeckCount int `json:"senseDeckCount,omitempty"`
-	DiscardTop *CardRef `json:"discardTop,omitempty"`
+	Hand           []CardRef `json:"hand,omitempty"`
+	HandSize       int       `json:"handSize"`
+	DeckCount      int       `json:"deckCount"`
+	DiscardCount   int       `json:"discardCount"`
+	SenseDeckCount int       `json:"senseDeckCount,omitempty"`
+	DiscardTop     *CardRef  `json:"discardTop,omitempty"`
 
-	Allies   []AllyView    `json:"allies"`
-	Supports []EntityLite  `json:"supports"`
-	Upgrades []EntityLite  `json:"upgrades"`
-	EncounterDown int      `json:"encounterDown"`
+	Allies        []AllyView   `json:"allies"`
+	Supports      []EntityLite `json:"supports"`
+	Upgrades      []EntityLite `json:"upgrades"`
+	EncounterDown int          `json:"encounterDown"`
 }
 
 type EntityLite struct {
@@ -231,12 +231,12 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			Side: p.Side, HeroCode: p.HeroCode, AlterEgo: p.AlterEgoCode,
 			HeroName:     engine.DB.MustLookup(p.HeroCode).Name,
 			AlterEgoName: engine.DB.MustLookup(p.AlterEgoCode).Name,
-			HP: max(0, p.HP()), MaxHP: p.MaxHP,
+			HP:           max(0, p.HP()), MaxHP: p.MaxHP,
 			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough > 0,
 			FirstPlayer: p.FirstPlayer, KOed: p.KOed, FormChanged: p.FormChanged,
 			HandSize: len(p.Hand), DeckCount: len(p.Deck), DiscardCount: len(p.Discard), EncounterDown: len(p.EncounterDown),
 			SenseDeckCount: len(p.SenseDeck),
-			UserID: owners[string(p.ID)],
+			UserID:         owners[string(p.ID)],
 		}
 		if viewerUserID != "" && pv.UserID == viewerUserID {
 			for _, c := range p.Hand {
@@ -247,17 +247,17 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			top := p.Discard[len(p.Discard)-1]
 			pv.DiscardTop = &CardRef{ID: top.ID, Code: top.Code, Name: top.Def().Name}
 		}
-			for _, id := range p.Allies {
-				if a := g.Allies[id]; a != nil {
-					pv.Allies = append(pv.Allies, AllyView{
-						ID: string(a.ID), Code: a.Code, Name: a.EDef().Name,
-						HP: max(0, a.HP()), MaxHP: a.MaxHP,
-						Attack: a.AttackVal, Thwart: a.ThwartVal,
-						Exhausted: a.Exhausted, Stunned: a.Stunned,
-						Confused: a.Confused, Tough: a.Tough, Counters: a.Counters,
-					})
-				}
+		for _, id := range p.Allies {
+			if a := g.Allies[id]; a != nil {
+				pv.Allies = append(pv.Allies, AllyView{
+					ID: string(a.ID), Code: a.Code, Name: a.EDef().Name,
+					HP: max(0, a.HP()), MaxHP: a.MaxHP,
+					Attack: a.AttackVal, Thwart: a.ThwartVal,
+					Exhausted: a.Exhausted, Stunned: a.Stunned,
+					Confused: a.Confused, Tough: a.Tough, Counters: a.Counters,
+				})
 			}
+		}
 		for _, id := range p.Supports {
 			if s := g.Supports[id]; s != nil {
 				pv.Supports = append(pv.Supports, EntityLite{ID: string(s.ID), Code: s.Code, Name: s.EDef().Name, Exhausted: s.Exhausted, Counters: s.Counters})

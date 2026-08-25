@@ -1,8 +1,6 @@
 package captainamerica
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -25,7 +23,7 @@ func registerSignatures() {
 // scheme.
 func registerAgent13() {
 	engine.RegisterBehavior("03002", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Agent 13", func(g *engine.Game, e engine.Entity) int {
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Agent 13"), func(g *engine.Game, e engine.Entity) int {
 			return 2
 		}),
 	})
@@ -39,7 +37,7 @@ func registerFearlessDetermination() {
 			pid := e.EOwner()
 			if p := g.Player(pid); p != nil {
 				p.BonusTHW++
-				g.Logf("%s gets +1 THW until the end of the phase", p.Name)
+				g.TLogf("c.gets1ThwUntilTheEndOfThePhase", p.Name)
 			}
 			return []engine.Message{engine.DrawCards{Player: pid, N: 1}}
 		},
@@ -72,7 +70,7 @@ func registerHeroicStrike() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask(prompt, choices...),
+				Question: engine.Ask(engine.S(prompt), choices...),
 			}}
 		},
 	})
@@ -125,7 +123,7 @@ func registerShieldToss() {
 				}
 			}
 			if shield == "" {
-				g.Logf("Shield Toss needs Captain America's Shield in play")
+				g.TLogf("c.shieldTossNeedsCaptainAmericaSShieldInPlay")
 				return nil
 			}
 			if len(g.Enemies()) == 0 || len(p.Hand) == 0 {
@@ -147,7 +145,7 @@ func shieldTossEnemyStep(g *engine.Game, p *engine.Player, shield engine.EntityI
 	}
 	var choices []engine.Choice
 	choices = append(choices, engine.Choice{
-		ID: "done", Label: fmt.Sprintf("Finish Shield Toss (%d damage queued)", 4*len(enemies)), Kind: engine.ChoicePass,
+		ID: "done", Label: engine.Tf("c.finishShieldTossDamageQueued", 4*len(enemies)), Kind: engine.ChoicePass,
 	}.Msgs(shieldTossEffects(p, shield, cards, enemies)...))
 	for _, id := range cardutil.SortedEnemyIDs(g) {
 		if picked[id] {
@@ -159,7 +157,7 @@ func shieldTossEnemyStep(g *engine.Game, p *engine.Player, shield engine.EntityI
 			SourceID: id, CardCode: enemy.ECode(),
 		}.WithThen(shieldTossCardStep(g, p, shield, cards, append(enemies, id))))
 	}
-	return engine.Ask("Shield Toss — choose an enemy to hit for 4", choices...)
+	return engine.Ask(engine.Tf("c.shieldTossChooseAnEnemyToHitFor4"), choices...)
 }
 
 // shieldTossCardStep asks which card to discard for the just-picked enemy.
@@ -174,15 +172,15 @@ func shieldTossCardStep(g *engine.Game, p *engine.Player, shield engine.EntityID
 			continue
 		}
 		choices = append(choices, engine.Choice{
-			Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.WithThen(shieldTossEnemyStep(g, p, shield, append(cards, c), enemies)))
 	}
 	// A discard is mandatory per enemy; if the hand ran dry the chain
 	// simply ends here with the accumulated effects.
 	choices = append(choices, engine.Choice{
-		ID: "done", Label: "Finish (no more cards to discard)", Kind: engine.ChoicePass,
+		ID: "done", Label: engine.Tf("c.finishNoMoreCardsToDiscard"), Kind: engine.ChoicePass,
 	}.Msgs(shieldTossEffects(p, shield, cards, enemies)...))
-	return engine.Ask("Shield Toss — discard a card for this enemy", choices...)
+	return engine.Ask(engine.Tf("c.shieldTossDiscardACardForThisEnemy"), choices...)
 }
 
 func shieldTossEffects(p *engine.Player, shield engine.EntityID, cards []engine.Card, enemies []engine.EntityID) []engine.Message {
@@ -203,7 +201,7 @@ func registerStevesApartment() {
 	engine.RegisterBehavior("03007", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Exhaust Steve's Apartment → draw 1 card and heal 1 damage",
+				Label:        engine.Tf("c.exhaustSteveSApartmentDraw1CardAndHeal1Damage"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -226,7 +224,7 @@ func registerHelmet() {
 			p.Damage = p.MaxHP - 1
 			g.Delete(u.ID)
 			p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
-			g.Logf("Captain America's Helmet saves %s (1 HP); the helmet is discarded", p.Name)
+			g.TLogf("c.captainAmericaSHelmetSaves1HpTheHelmetIsDiscarded", p.Name)
 			return true
 		},
 	})

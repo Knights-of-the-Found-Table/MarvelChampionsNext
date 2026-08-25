@@ -79,12 +79,12 @@ func registerNova() {
 			}
 			card := *target
 			return []engine.Message{engine.AskQuestion{Player: a.Owner, Question: engine.Ask(
-				"Exhaust Ms. Marvel + 1 damage → return "+card.Def().Name+" to hand?",
-				engine.Choice{ID: "use", Label: "Use Ms. Marvel", Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "28002"}.
+				engine.S("Exhaust Ms. Marvel + 1 damage → return "+card.Def().Name+" to hand?"),
+				engine.Choice{ID: "use", Label: engine.Tf("c.useMsMarvel"), Kind: engine.ChoiceAbility, SourceID: e.EID(), CardCode: "28002"}.
 					Msgs(engine.ExhaustEntity{ID: e.EID()},
 						engine.DamageEntity{Target: e.EID(), Damage: 1, Source: e.EID()},
 						engine.ReturnDiscardCard{Player: a.Owner, CardID: card.ID}),
-				engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass},
+				engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass},
 			)}}
 		},
 	})
@@ -105,13 +105,13 @@ func registerNova() {
 	engine.RegisterBehavior("28004", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Lightspeed Flight: remove 3 threat from which scheme?", schemePicks(g, 3, e.EOwner())...)}}
+				engine.Tf("c.lightspeedFlightRemove3ThreatFromWhichScheme"), schemePicks(g, 3, e.EOwner())...)}}
 		},
 	})
 
 	// Pot Shot: 4 damage.
 	engine.RegisterBehavior("28005", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Pot Shot: deal 4 damage to which enemy?",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.potShotDeal4DamageToWhichEnemy"),
 			func(g *engine.Game, e engine.Entity) (int, []engine.Message) { return 4, nil }),
 	})
 
@@ -121,7 +121,7 @@ func registerNova() {
 	engine.RegisterBehavior("28006", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			g.UsedThisRound["nova-force"] = true
-			g.Logf("Unleash Nova Force active until the end of the round")
+			g.TLogf("c.unleashNovaForceActiveUntilTheEndOfTheRound")
 			return nil
 		},
 	})
@@ -134,7 +134,7 @@ func registerNova() {
 	engine.RegisterBehavior("28008", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Jesse Alexander → shuffle a Worldmind back, draw 1", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustJesseAlexanderShuffleAWorldmindBackDraw1"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -176,7 +176,7 @@ func registerNova() {
 				def := c.Def()
 				if def.Type == "event" && def.Aspect == "aggression" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -184,7 +184,7 @@ func registerNova() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("The Locust: add which Aggression event to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.theLocustAddWhichAggressionEventToHand"), picks...)}}
 		},
 	})
 
@@ -201,7 +201,7 @@ func registerNova() {
 			if !ok || ba.Player != e.EOwner() {
 				return nil
 			}
-			return cardutil.ChooseEnemy("Pitchback: deal 4 damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.pitchbackDeal4DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 4, nil })(
 				g, &engine.EventCard{Code: "28012", Owner: e.EOwner()})
 		},
@@ -211,7 +211,7 @@ func registerNova() {
 	// mill 2, keeping Aggression cards).
 	engine.RegisterBehavior("28013", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			msgs := cardutil.ChooseEnemy("No Quarter: deal 4 damage to which enemy?",
+			msgs := cardutil.ChooseEnemy(engine.Tf("c.noQuarterDeal4DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 4, nil })(g, e)
 			p := g.Player(e.EOwner())
 			if p == nil {
@@ -234,10 +234,10 @@ func registerNova() {
 	// 2-damage question after the first target is a minion).
 	engine.RegisterBehavior("28014", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			return cardutil.ChooseEnemy("One by One: deal 2 damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.oneByOneDeal2DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					if mn := g.Minions[engine.EntityID(tgt.EID().String())]; mn != nil && mn.HP() <= 2 {
-						second := cardutil.ChooseEnemy("One by One chains: deal 2 damage to which enemy?",
+						second := cardutil.ChooseEnemy(engine.Tf("c.oneByOneChainsDeal2DamageToWhichEnemy"),
 							func(g *engine.Game, t2 engine.Entity) (int, []engine.Message) { return 2, nil })(g, e)
 						return 2, second
 					}
@@ -300,13 +300,13 @@ func registerNova() {
 	engine.RegisterBehavior("28020", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Champions Mobile Bunker → a champion draws 2, discards 2", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustChampionsMobileBunkerAChampionDraws2Discards2"), Type: engine.AbilityAction,
 				Exhaust: true, HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var picks []engine.Choice
 					for _, q := range g.Players {
 						if g.EntityHasTrait(q.ID, "champion") {
-							picks = append(picks, engine.Choice{Label: q.Name, Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							picks = append(picks, engine.Choice{Label: engine.S(q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(engine.DrawCards{Player: q.ID, N: 2},
 									engine.BunkerDiscard{Player: q.ID}))
 						}
@@ -315,7 +315,7 @@ func registerNova() {
 						return nil
 					}
 					return []engine.Message{engine.AskQuestion{Player: g.Entity(self).EOwner(),
-						Question: engine.Ask("Which champion identity?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.whichChampionIdentity"), picks...)}}
 				},
 			}}
 		},
@@ -343,7 +343,7 @@ func registerNova() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Yaw and Roll: remove 3 threat from which scheme?", schemePicks(g, 3, e.EOwner())...)}}
+				engine.Tf("c.yawAndRollRemove3ThreatFromWhichScheme"), schemePicks(g, 3, e.EOwner())...)}}
 		},
 	})
 
@@ -376,7 +376,7 @@ func registerNemesis() {
 					mn.AttackVal += 3
 				}
 			}
-			g.Logf("Armored Assault: each tough enemy gets +3 ATK")
+			g.TLogf("c.armoredAssaultEachToughEnemyGets3Atk")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -472,7 +472,7 @@ func registerNemesis() {
 					g.EncounterDiscard = append(g.EncounterDiscard, c)
 				}
 			}
-			g.Logf("The War's Been Brought mills %d encounter card(s)", n)
+			g.TLogf("c.theWarSBeenBroughtMillsEncounterCardS", n)
 			return nil
 		},
 	})

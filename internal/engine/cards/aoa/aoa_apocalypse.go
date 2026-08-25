@@ -40,7 +40,7 @@ func registerApocalypse() {
 				return nil
 			}
 			g.MainScheme.Threat = 0
-			g.Logf("%s clears the main scheme and transforms!", v.EDef().Name)
+			g.TLogf("c.clearsTheMainSchemeAndTransforms", v)
 			return []engine.Message{engine.AdvanceVillainStage{VillainID: v.ID}}
 		},
 		VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
@@ -64,7 +64,7 @@ func registerApocalypse() {
 				x = g.MainScheme.Threat
 			}
 			g.MainScheme.Threat -= x
-			g.Logf("Apocalypse sheds his trinkets and endures! (%d threat removed from the scheme)", x)
+			g.TLogf("c.apocalypseShedsHisTrinketsAndEnduresThreatRemovedFromTheSche", x)
 			return false
 		},
 	}
@@ -220,7 +220,7 @@ func registerApocalypse() {
 					g.EncounterDiscard = append(g.EncounterDiscard, c)
 				}
 			}
-			g.Logf("The Apocalypse Solution discards %d encounter cards", n)
+			g.TLogf("c.theApocalypseSolutionDiscardsEncounterCards", n)
 			return nil
 		},
 	})
@@ -234,7 +234,7 @@ func attachToApocalypse(g *engine.Game, code string) {
 	t := &engine.Attachment{ID: g.NextEntityID(engine.KindAttachment), Code: code, Target: v.ID}
 	g.Attachments[t.ID] = t
 	v.Attachments = append(v.Attachments, t.ID)
-	g.Logf("%s attaches to Apocalypse", t.EDef().Name)
+	g.TLogf("c.attachesToApocalypse", t)
 }
 
 func removeCard(list engine.CardList, c engine.Card) engine.CardList {
@@ -296,7 +296,7 @@ func changeApocForm(g *engine.Game, form string) []engine.Message {
 		return nil
 	}
 	v.Code = code
-	g.Logf("Apocalypse changes to %s form", form)
+	g.TLogf("c.apocalypseChangesToForm", form)
 	switch form {
 	case "Biomorph":
 		var msgs []engine.Message
@@ -329,7 +329,7 @@ func registerEnSabahNur() {
 				return nil
 			}
 			g.MainScheme.Counters++
-			g.Logf("The pyramid gains a power counter (%d)", g.MainScheme.Counters)
+			g.TLogf("c.thePyramidGainsAPowerCounter", g.MainScheme.Counters)
 			if g.MainScheme.Counters >= 4 {
 				g.MainScheme.Counters -= 4
 				p := g.Player(cardutil.FirstPlayerID(g))
@@ -557,14 +557,14 @@ func registerClanAkkaba() {
 	ritualThreat := func(g *engine.Game, n int) []engine.Message {
 		if s := ancientRitual(g); s != nil {
 			s.Threat += n
-			g.Logf("Ancient Ritual gains %d threat (%d)", n, s.Threat)
+			g.TLogf("c.ancientRitualGainsThreat", n, s.Threat)
 			if s.Threat >= 10 {
 				s.Threat -= 5
 				var msgs []engine.Message
 				for _, p := range g.Players {
 					msgs = append(msgs, engine.DealEncounterToPlayer{Player: p.ID})
 				}
-				g.Logf("Ancient Ritual pays out — each player takes a facedown encounter card")
+				g.TLogf("c.ancientRitualPaysOutEachPlayerTakesAFacedownEncounterCard")
 				return msgs
 			}
 		}

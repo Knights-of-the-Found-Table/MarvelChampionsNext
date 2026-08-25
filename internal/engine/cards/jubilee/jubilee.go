@@ -3,8 +3,6 @@
 package jubilee
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -40,7 +38,7 @@ func registerJubilee() {
 	engine.RegisterBehavior("47001", &engine.Behavior{HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 		if p.IsHero() {
 			return []engine.Ability{{
-				Label: "Like, totally! — exhaust Jubilee to generate a wild resource",
+				Label: engine.Tf("c.likeTotallyExhaustJubileeToGenerateAWildResource"),
 				Type:  engine.AbilityAction, HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					// Identity resources are not enumerated by the payment prompt.
@@ -51,7 +49,7 @@ func registerJubilee() {
 			}}
 		}
 		return []engine.Ability{{
-			Label: "Mall Rat — find Shopping Spree", Type: engine.AbilityAction, AlterEgoOnly: true, OncePerTurn: true,
+			Label: engine.Tf("c.mallRatFindShoppingSpree"), Type: engine.AbilityAction, AlterEgoOnly: true, OncePerTurn: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				pl := g.Player(self)
 				if pl == nil {
@@ -88,7 +86,7 @@ func registerJubileeSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Shopping Spree — exhaust your identity to remove 1 threat",
+				Label: engine.Tf("c.shoppingSpreeExhaustYourIdentityToRemove1Threat"),
 				Type:  engine.AbilityAction, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					scheme := g.SideSchemes[self]
@@ -115,20 +113,20 @@ func registerJubileeSignatures() {
 			var choices []engine.Choice
 			for _, c := range p.Deck {
 				if c.Def().HasTrait("item") {
-					choices = append(choices, engine.Choice{Label: "Put " + c.Def().Name + " into play", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.S("Put " + c.Def().Name + " into play"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}}))
 				}
 			}
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("item") {
-					choices = append(choices, engine.Choice{Label: "Put " + c.Def().Name + " into play", Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.S("Put " + c.Def().Name + " into play"), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}, engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}}))
 				}
 			}
 			if len(choices) == 0 {
 				return nil
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Shopping Spree — put an Item into play", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.shoppingSpreePutAnItemIntoPlay"), choices...)}}
 		},
 	})
 
@@ -154,7 +152,7 @@ func registerJubileeSignatures() {
 		if n == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.AskN("Blinding Flash — choose enemies", n, choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.AskN(engine.Tf("c.blindingFlashChooseEnemies"), n, choices...)}}
 	}})
 
 	firecracker := &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -169,7 +167,7 @@ func registerJubileeSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask("Firecracker — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask(engine.Tf("c.firecrackerChooseAnEnemy"), choices...)}}
 	}}
 	engine.RegisterBehavior("47007", firecracker)
 	engine.RegisterBehavior("47007a", firecracker)
@@ -184,7 +182,7 @@ func registerJubileeSignatures() {
 				return []engine.Message{engine.ConfuseEntity{Target: id}}
 			})
 			if len(enemies) > 0 {
-				confuse = engine.Ask("Flash of Light — confuse an enemy", enemies...)
+				confuse = engine.Ask(engine.Tf("c.flashOfLightConfuseAnEnemy"), enemies...)
 			}
 		}
 		choices := cardutil.SchemeChoices(g, func(id engine.EntityID) []engine.Message {
@@ -198,7 +196,7 @@ func registerJubileeSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask("Flash of Light — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask(engine.Tf("c.flashOfLightChooseAScheme"), choices...)}}
 	}}
 	engine.RegisterBehavior("47008", flash)
 	engine.RegisterBehavior("47008a", flash)
@@ -217,7 +215,7 @@ func registerJubileeSignatures() {
 		n = min(n, len(additional))
 		var follow *engine.Question
 		if n > 0 {
-			follow = engine.AskN("Grande Finale — choose additional fireworks", n, additional...)
+			follow = engine.AskN(engine.Tf("c.grandeFinaleChooseAdditionalFireworks"), n, additional...)
 		}
 		base := cardutil.EnemyChoices(g, 2, ev.Owner, func(id engine.EntityID) []engine.Message {
 			return []engine.Message{engine.DamageEntity{Target: id, Damage: 2, Source: ev.Owner}}
@@ -230,7 +228,7 @@ func registerJubileeSignatures() {
 		if len(base) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask("Grande Finale — choose the first target", base...)}}
+		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask(engine.Tf("c.grandeFinaleChooseTheFirstTarget"), base...)}}
 	}})
 	engine.RegisterBehavior("47010", &engine.Behavior{})
 	engine.RegisterBehavior("47010a", &engine.Behavior{})
@@ -260,7 +258,7 @@ func eventAccessoryReaction(code, trait string, damage bool) func(*engine.Game, 
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask(fmt.Sprintf("%s — choose a target", e.EDef().Name), choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask(engine.Tf("c.chooseATarget", e), choices...)}}
 	}
 }
 

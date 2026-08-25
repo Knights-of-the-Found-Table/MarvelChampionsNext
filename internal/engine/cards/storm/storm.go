@@ -81,13 +81,13 @@ func weatherChoices(g *engine.Game, p *engine.Player, prompt string) []engine.Me
 		}
 		def := engine.DB.MustLookup(code)
 		choices = append(choices, engine.Choice{
-			Label: def.Name, Kind: engine.ChoiceCard, CardCode: code,
+			Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: code,
 		}.Msgs(engine.AddEntityCounter{ID: p.ID, N: weatherSignal(code)}))
 	}
 	if len(choices) == 0 {
 		return nil
 	}
-	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(prompt, choices...)}}
+	return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S(prompt), choices...)}}
 }
 
 func clearWeatherStatuses(g *engine.Game) []engine.Message {
@@ -165,14 +165,14 @@ func weatherSpecial(g *engine.Game, p *engine.Player) []engine.Message {
 			return []engine.Message{engine.ThwartScheme{Scheme: id, N: 2, Source: p.ID}}
 		})
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Hurricane — choose a scheme", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.hurricaneChooseAScheme"), choices...)})
 		}
 	case "36004":
 		choices := cardutil.EnemyChoices(g, 2, p.ID, func(id engine.EntityID) []engine.Message {
 			return []engine.Message{engine.DamageEntity{Target: id, Damage: 2, Source: p.ID}}
 		})
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Thunderstorm — choose an enemy", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.thunderstormChooseAnEnemy"), choices...)})
 		}
 	case "36005":
 		var choices []engine.Choice
@@ -182,11 +182,11 @@ func weatherSpecial(g *engine.Game, p *engine.Player) []engine.Message {
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: mn.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code,
+				Label: engine.S(mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code,
 			}.Msgs(engine.AddEntityCounter{ID: id, N: blankMinionSignal}))
 		}
 		if len(choices) > 0 {
-			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask("Blizzard — choose a non-Elite minion", choices...)})
+			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.blizzardChooseANonEliteMinion"), choices...)})
 		}
 	}
 	return append(msgs, stormCapeMessages(g, p)...)
@@ -204,7 +204,7 @@ func swapWeather(g *engine.Game, p *engine.Player, code string) []engine.Message
 	g.Supports[s.ID] = s
 	p.Supports = append(p.Supports, s.ID)
 	adjustWeatherAttack(g, code, 1)
-	g.Logf("%s puts %s into play from the Weather deck", p.Name, s.EDef().Name)
+	g.TLogf("c.putsIntoPlayFromTheWeatherDeck", p.Name, s)
 	msgs := []engine.Message{}
 	if code == "36002" {
 		msgs = append(msgs, clearWeatherStatuses(g)...)
@@ -222,7 +222,7 @@ func registerStorm() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Weather Control — swap Weather and resolve its Special",
+				Label: engine.Tf("c.weatherControlSwapWeatherAndResolveItsSpecial"),
 				Type:  engine.AbilityAction, HeroOnly: true, OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return weatherChoices(g, g.Player(self), "Weather Control — choose Weather")
@@ -319,7 +319,7 @@ func registerStormSignatures() {
 	})
 	engine.RegisterBehavior("36008", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: "Ororo's Garden — heal 2 damage", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
+			Label: engine.Tf("c.ororoSGardenHeal2Damage"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				s := g.Supports[self]
 				if s == nil {
@@ -346,7 +346,7 @@ func registerStormSignatures() {
 		}
 		// The engine has no split-threat chooser, so all 3 threat is removed
 		// from one selected scheme.
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Torrential Rain — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.torrentialRainChooseAScheme"), choices...)}}
 	}})
 	engine.RegisterBehavior("36011", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -360,7 +360,7 @@ func registerStormSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Lightning Bolt — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.lightningBoltChooseAnEnemy"), choices...)}}
 	}})
 	engine.RegisterBehavior("36012", &engine.Behavior{DefenseEvent: func(g *engine.Game, p *engine.Player, e *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
 		var msgs []engine.Message
@@ -391,9 +391,9 @@ func registerStormSignatures() {
 				}
 			}
 			msgs = append(msgs, weatherSpecial(g, p)...)
-			choices = append(choices, engine.Choice{Label: targetPlayer.Name, Kind: engine.ChoiceTarget, SourceID: targetPlayer.ID}.Msgs(msgs...))
+			choices = append(choices, engine.Choice{Label: engine.S(targetPlayer.Name), Kind: engine.ChoiceTarget, SourceID: targetPlayer.ID}.Msgs(msgs...))
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Blast of Wind — choose a player", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.blastOfWindChooseAPlayer"), choices...)}}
 	}})
 }
 
@@ -489,7 +489,7 @@ func registerStormNemesis() {
 		for _, id := range targets {
 			enemy := g.Entity(id)
 			choices = append(choices, engine.Choice{
-				Label: enemy.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
+				Label: engine.S(enemy.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
 			}.Msgs(
 				engine.DamageEntity{Target: p.ID, Damage: maxATK, Source: id},
 				engine.DamageEntity{Target: id, Damage: p.AttackStat(g), Source: p.ID},
@@ -498,6 +498,6 @@ func registerStormNemesis() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Knife Fight — choose an enemy with the highest ATK", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.knifeFightChooseAnEnemyWithTheHighestAtk"), choices...)}}
 	}})
 }

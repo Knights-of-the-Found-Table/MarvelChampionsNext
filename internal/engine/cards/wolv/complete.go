@@ -58,7 +58,7 @@ func registerRemainingWolv() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: "Discard " + t.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: t.Code,
+					Label: engine.S("Discard " + t.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: t.Code,
 				}.Msgs(engine.DiscardAttachmentMsg{ID: id}))
 			}
 			if len(choices) == 0 {
@@ -66,7 +66,7 @@ func registerRemainingWolv() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Sunfire — discard an attachment (spend [energy])", append(choices, cardutil.Skip())...),
+				Question: engine.Ask(engine.Tf("c.sunfireDiscardAnAttachmentSpendEnergy"), append(choices, cardutil.Skip())...),
 			}}
 		},
 	})
@@ -87,7 +87,7 @@ func registerRemainingWolv() {
 			}
 			g.Delete(u.ID)
 			p.Discard = append(p.Discard, engine.Card{ID: g.NextCardID(), Code: u.Code, Owner: p.ID})
-			g.Logf("Battle Fury — %s readies after the takedown", p.Name)
+			g.TLogf("c.battleFuryReadiesAfterTheTakedown", p.Name)
 			return []engine.Message{
 				engine.DamageEntity{Target: p.ID, Damage: 1, Source: p.ID},
 				engine.ReadyEntity{ID: p.ID},
@@ -118,7 +118,7 @@ func registerRemainingWolv() {
 
 	// 35017 Outta My Way!: 3 damage (5 vs guard/patrol).
 	engine.RegisterBehavior("35017", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Outta My Way!", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.outtaMyWay"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 3, nil
 		}),
 	})
@@ -156,7 +156,7 @@ func registerRemainingWolv() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Precision Strike", choices...),
+				Question: engine.Ask(engine.Tf("c.precisionStrike"), choices...),
 			}}
 		},
 	})
@@ -210,7 +210,7 @@ func registerRemainingWolv() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Weapon X — take 1 damage, dig for a signature card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.weaponXTake1DamageDigForASignatureCard"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(g.ActiveTurn)
@@ -223,7 +223,7 @@ func registerRemainingWolv() {
 							p.Deck = append(p.Deck[:i], p.Deck[i+1:]...)
 							c.Owner = p.ID
 							p.Hand = append(p.Hand, c)
-							g.Logf("Weapon X finds %s", c.Def().Name)
+							g.TLogf("c.weaponXFinds", c)
 							return []engine.Message{engine.DamageEntity{Target: p.ID, Damage: 1, Source: p.ID}}
 						}
 						p.Discard = append(p.Discard, c)
@@ -264,7 +264,7 @@ func registerRemainingWolv() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Fastball Special", choices...),
+				Question: engine.Ask(engine.Tf("c.fastballSpecial"), choices...),
 			}}
 		},
 	})
@@ -278,14 +278,14 @@ func registerRemainingWolv() {
 	engine.RegisterBehavior("35027", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			choices := []engine.Choice{engine.Choice{
-				ID: "exhaust", Label: "Exhaust Logan → remove from the game", Kind: engine.ChoiceLabel,
+				ID: "exhaust", Label: engine.Tf("c.exhaustLoganRemoveFromTheGame"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true})}
 			choices = append(choices, engine.Choice{
-				ID: "suffer", Label: "You are stunned and confused → discard", Kind: engine.ChoiceLabel,
+				ID: "suffer", Label: engine.Tf("c.youAreStunnedAndConfusedDiscard"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.StunEntity{Target: p.ID}, engine.ConfuseEntity{Target: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Past Demons — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.pastDemonsChoose"), choices...),
 			}}
 		},
 	})
@@ -298,7 +298,7 @@ func registerRemainingWolv() {
 			for _, s := range g.SideSchemes {
 				if s != nil && s.Code == "35029" {
 					if mn.HP()-damage <= 0 {
-						g.Logf("Omega Red cannot be defeated while the Carbonadium Synthesizer is in play")
+						g.TLogf("c.omegaRedCannotBeDefeatedWhileTheCarbonadiumSynthesizerIsInPl")
 						return false
 					}
 				}
@@ -411,7 +411,7 @@ func registerRemainingWolv() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   s.Owner,
-				Question: engine.Ask("Command Center — deal 2 damage", choices...),
+				Question: engine.Ask(engine.Tf("c.commandCenterDeal2Damage"), choices...),
 			}}
 		},
 	})
@@ -433,7 +433,7 @@ func registerRemainingWolv() {
 			g.EncounterDeck = g.EncounterDeck[1:]
 			g.EncounterDiscard = append(g.EncounterDiscard, top)
 			if cardutil.BoostOf(top) >= 3 {
-				g.Logf("Longshot's lucky hit defeats %s", mn.EDef().Name)
+				g.TLogf("c.longshotSLuckyHitDefeats", mn)
 				return []engine.Message{engine.DamageEntity{Target: mn.ID, Damage: 99, Source: a.Owner}}
 			}
 			return nil
@@ -456,7 +456,7 @@ func registerRemainingWolv() {
 			c := p.Hand[i]
 			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
 			p.Discard = append(p.Discard, c)
-			g.Logf("Lady Deathstrike makes %s discard %s", p.Name, c.Def().Name)
+			g.TLogf("c.ladyDeathstrikeMakesDiscard", p.Name, c)
 			return nil
 		},
 	})
@@ -523,7 +523,7 @@ func registerRemainingWolv() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Adamantium Upgrades — spend [energy][mental][physical] → discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.adamantiumUpgradesSpendEnergyMentalPhysicalDiscard"), Type: engine.AbilityAction,
 				Cost: 3, CostIcons: "energy:1 mental:1 physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}

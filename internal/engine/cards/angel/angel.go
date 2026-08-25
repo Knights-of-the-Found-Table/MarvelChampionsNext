@@ -38,13 +38,13 @@ func registerAngel() {
 				return nil
 			}
 			g.UsedThisRound["42001-aerial"] = true
-			g.Logf("Angel of Life: draw 1")
+			g.TLogf("c.angelOfLifeDraw1")
 			return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 		},
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{{
 				// Regrowth — heal 1 (limit once per round).
-				Label:        "Regrowth — heal 1 damage",
+				Label:        engine.Tf("c.regrowthHeal1Damage"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -79,18 +79,18 @@ func registerSignatures() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 			}
 			if len(choices) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask("Adaptive Plumage — remove 3 threat", choices...)})
+				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.adaptivePlumageRemove3Threat"), choices...)})
 			}
 			confuse := cardutil.EnemyChoices(g, 0, pid, func(t engine.EntityID) []engine.Message {
 				return []engine.Message{engine.ConfuseEntity{Target: t}}
 			})
 			if len(confuse) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask("Adaptive Plumage — confuse an enemy", confuse...)})
+				msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.adaptivePlumageConfuseAnEnemy"), confuse...)})
 			}
 			return msgs
 		},
@@ -105,7 +105,7 @@ func registerSignatures() {
 			}
 			var extra []engine.Message
 			if v := g.Villains[against]; v != nil && v.BoostCount > 0 {
-				g.Logf("Aerial Agility ignores %d boost icons", v.BoostCount)
+				g.TLogf("c.aerialAgilityIgnoresBoostIcons", v.BoostCount)
 				v.BoostCount = 0
 			}
 			return engine.Defends{Defender: p.ID, Against: against, Undefended: true}, extra, true
@@ -129,12 +129,12 @@ func registerSignatures() {
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					choices = append(choices, engine.Choice{
-						Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: s.ECode(),
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 2, Source: pid}))
 				}
 				if len(choices) > 0 {
-					msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask("Metamorphosis — remove 2 threat", choices...)})
+					msgs = append(msgs, engine.AskQuestion{Player: pid, Question: engine.Ask(engine.Tf("c.metamorphosisRemove2Threat"), choices...)})
 				}
 			} else {
 				msgs = append(msgs, engine.DrawCards{Player: pid, N: 1})
@@ -145,12 +145,12 @@ func registerSignatures() {
 
 	// 42006 Natural Flight: remove 4 threat.
 	engine.RegisterBehavior("42006", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("Natural Flight", func(g *engine.Game, e engine.Entity) int { return 4 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Natural Flight"), func(g *engine.Game, e engine.Entity) int { return 4 }),
 	})
 
 	// 42007 Razor Dive: deal 6 damage (overkill/piercing not modeled).
 	engine.RegisterBehavior("42007", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Razor Dive — deal 6 damage", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.razorDiveDeal6Damage"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 6, nil
 		}),
 	})
@@ -167,7 +167,7 @@ func registerSignatures() {
 			if p == nil || !m.Card.Def().HasTrait("aerial") {
 				return nil
 			}
-			g.Logf("Avian Anatomy returns %s", m.Card.Def().Name)
+			g.TLogf("c.avianAnatomyReturns", m.Card)
 			return []engine.Message{engine.ReturnDiscardCard{Player: p.ID, CardID: m.Card.ID}}
 		},
 	})
@@ -191,7 +191,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:   "Worthington Industries — shuffle an AERIAL card into your deck",
+				Label:   engine.Tf("c.worthingtonIndustriesShuffleAnAerialCardIntoYourDeck"),
 				Type:    engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
@@ -205,13 +205,13 @@ func registerSignatures() {
 							msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 						}
 						choices = append(choices, engine.Choice{
-							Label: "Shuffle in " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Worthington Industries — which AERIAL card?", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.worthingtonIndustriesWhichAerialCard"), choices...)}}
 				},
 			}}
 		},
@@ -222,7 +222,7 @@ func registerSignatures() {
 	engine.RegisterBehavior("42010", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label:    "Techno-Organic Wings — ready your hero",
+				Label:    engine.Tf("c.technoOrganicWingsReadyYourHero"),
 				Type:     engine.AbilityAction,
 				Exhaust:  true,
 				HeroOnly: true,
@@ -253,7 +253,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "Angel's Aerie — heal 1 per fatigue counter",
+				Label:        engine.Tf("c.angelSAerieHeal1PerFatigueCounter"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -338,7 +338,7 @@ func millUntilEvent(g *engine.Game, p *engine.Player) int {
 	}
 	if len(milled) > 0 {
 		p.Discard = append(p.Discard, milled...)
-		g.Logf("Milled %d cards; event cost %d", len(milled), n)
+		g.TLogf("c.milledCardsEventCost", len(milled), n)
 	}
 	return n
 }
@@ -363,8 +363,8 @@ func registerObligation() {
 			msgs = append(msgs, engine.DealEncounterToPlayer{Player: cardutil.FirstPlayerID(g)})
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
-				Question: engine.Ask("Apocalyptic Influence",
-					engine.Choice{ID: "ok", Label: "Resolve", Kind: engine.ChoiceLabel}.Msgs(msgs...),
+				Question: engine.Ask(engine.Tf("c.apocalypticInfluence"),
+					engine.Choice{ID: "ok", Label: engine.Tf("c.resolve"), Kind: engine.ChoiceLabel}.Msgs(msgs...),
 				),
 			}}
 		},

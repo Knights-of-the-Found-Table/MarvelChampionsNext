@@ -67,10 +67,10 @@ func addPursuit(g *engine.Game, n int) []engine.Message {
 		return nil
 	}
 	env.Counters += n
-	g.Logf("Pursued by the Past gains %d pursuit counter(s) (%d)", n, env.Counters)
+	g.TLogf("c.pursuedByThePastGainsPursuitCounterS", n, env.Counters)
 	if env.Counters >= len(g.Players)+3 {
 		env.Counters = 0
-		g.Logf("Your past catches up with you!")
+		g.TLogf("c.yourPastCatchesUpWithYou")
 		var msgs []engine.Message
 		for _, p := range g.Players {
 			for _, id := range p.NemesisInPlay {
@@ -178,7 +178,7 @@ func registerUnus() {
 				if mn != nil && mn.EDef().HasTrait("Infinite") {
 					t.Target = mn.ID
 					mn.MaxHP += 2
-					g.Logf("Genetic Experiments buffs %s (+2 HP)", mn.EDef().Name)
+					g.TLogf("c.geneticExperimentsBuffs2Hp", mn)
 					return nil
 				}
 			}
@@ -239,7 +239,7 @@ func registerUnus() {
 				mn := g.Minions[e.EID()]
 				if mn != nil {
 					mn.MaxHP += 3
-					g.Logf("Infinite Soldier gains +3 hit points")
+					g.TLogf("c.infiniteSoldierGains3HitPoints")
 				}
 			}
 			return nil
@@ -267,7 +267,7 @@ func registerUnus() {
 				return nil
 			}
 			s.Threat += 3
-			g.Logf("Gene Pool gains 3 threat (%d/%d)", s.Threat, s.MaxThreat)
+			g.TLogf("c.genePoolGains3Threat", s.Threat, s.MaxThreat)
 			return nil
 		},
 	})
@@ -284,14 +284,14 @@ func registerDystopianNightmare() {
 			for i, c := range p.Hand {
 				hc := c
 				choices = append(choices, engine.Choice{
-					ID: "d-" + hc.ID, Label: "Discard " + hc.Def().Name, Kind: engine.ChoiceCard,
+					ID: "d-" + hc.ID, Label: engine.S("Discard " + hc.Def().Name), Kind: engine.ChoiceCard,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{hc}},
 					engine.ObligationResolve{Player: p.ID, Card: card}))
 				_ = i
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Hunted — discard a card to remove this obligation?", choices...),
+				Question: engine.Ask(engine.Tf("c.huntedDiscardACardToRemoveThisObligation"), choices...),
 			}}
 		},
 	})

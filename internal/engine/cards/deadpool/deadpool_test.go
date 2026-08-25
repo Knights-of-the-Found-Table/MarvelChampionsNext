@@ -126,11 +126,11 @@ func TestBreakTheFourthWall(t *testing.T) {
 	}
 	var foundEvent, foundDecline bool
 	for _, c := range search.Choices {
-		if strings.Contains(c.Label, "Maximum Effort") {
+		if strings.Contains(c.Label.Text, "Maximum Effort") {
 			foundEvent = true
 		}
-		if strings.Contains(c.Label, "Cable") || strings.Contains(c.Label, "Montage") {
-			t.Fatalf("search should not offer %q (not a Deadpool event)", c.Label)
+		if strings.Contains(c.Label.Text, "Cable") || strings.Contains(c.Label.Text, "Montage") {
+			t.Fatalf("search should not offer %q (not a Deadpool event)", c.Label.Text)
 		}
 		if c.Kind == engine.ChoicePass {
 			foundDecline = true
@@ -172,7 +172,7 @@ func TestMaximumEffortChoices(t *testing.T) {
 	}
 	for _, c := range ask.Question.Choices {
 		if c.Then == nil || len(c.Then.Choices) == 0 {
-			t.Fatalf("choice %q should chain into an enemy target question", c.Label)
+			t.Fatalf("choice %q should chain into an enemy target question", c.Label.Text)
 		}
 	}
 

@@ -40,7 +40,7 @@ func registerJubileeExtras() {
 	engine.RegisterBehavior("47013", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Disguise — remove 2 threat", Type: engine.AbilityAction,
+				Label: engine.Tf("c.disguiseRemove2Threat"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -52,10 +52,10 @@ func registerJubileeExtras() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: s.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id,
+							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
 						}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ThwartScheme{Scheme: id, N: 2, Source: p.ID}))
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Disguise — remove 2 threat from:", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.disguiseRemove2ThreatFrom"), choices...)}}
 				},
 			}}
 		},
@@ -63,7 +63,7 @@ func registerJubileeExtras() {
 
 	// 47014 Waylay: 4 damage after thwarting (approximated: immediate 4).
 	engine.RegisterBehavior("47014", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Waylay", func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.waylay"), func(g *engine.Game, e engine.Entity) (int, []engine.Message) {
 			return 4, nil
 		}),
 	})
@@ -130,7 +130,7 @@ func registerJubileeExtras() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Cell Phone — boosted basic power (+1)", Type: engine.AbilityAction,
+				Label: engine.Tf("c.cellPhoneBoostedBasicPower1"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -188,7 +188,7 @@ func registerJubileeExtras() {
 					Label: cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.ConfuseEntity{Target: id}, engine.DamageEntity{Target: id, Damage: 4, Source: p.ID}))
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Unlikely Duo — target:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.unlikelyDuoTarget"), choices...)}}
 		},
 	})
 
@@ -229,7 +229,7 @@ func registerArcade() {
 		MinionDamageable: func(g *engine.Game, m *engine.Minion, damage int) bool {
 			for _, s := range g.SideSchemes {
 				if s != nil && s.EDef().HasTrait("Trap!") {
-					g.Logf("Arcade cannot take damage while a Trap! is in play")
+					g.TLogf("c.arcadeCannotTakeDamageWhileATrapIsInPlay")
 					return false
 				}
 			}

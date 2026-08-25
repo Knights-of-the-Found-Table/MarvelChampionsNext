@@ -69,7 +69,7 @@ func registerPhoenix() {
 			// we just make sure the player has the Restrained trait and
 			// the Phoenix Force upgrade is registered with Counters = 0.
 			p.ExtraTraits = append(p.ExtraTraits, "restrained")
-			g.Logf("Phoenix starts with the Restrained trait")
+			g.TLogf("c.phoenixStartsWithTheRestrainedTrait")
 			return nil
 		},
 	})
@@ -97,7 +97,7 @@ func registerPhoenixForce() {
 				return nil
 			}
 			p.ExtraTraits = append(p.ExtraTraits, "restrained")
-			g.Logf("Phoenix Force grants the Restrained trait to %s", p.Name)
+			g.TLogf("c.phoenixForceGrantsTheRestrainedTraitTo", p.Name)
 			return nil
 		},
 		// The flip: when a counter is removed and Counters hits 0, swap
@@ -132,7 +132,7 @@ func registerPhoenixForce() {
 			if !hasTrait(p.ExtraTraits, "unleashed") {
 				p.ExtraTraits = append(p.ExtraTraits, "unleashed")
 			}
-			g.Logf("Phoenix Force flips — %s becomes Unleashed", p.Name)
+			g.TLogf("c.phoenixForceFlipsBecomesUnleashed", p.Name)
 			return nil
 		},
 	})
@@ -188,7 +188,7 @@ func addCountersToPhoenixForce(g *engine.Game, pid engine.PlayerID, n int) []eng
 			return []engine.Message{engine.AddEntityCounter{ID: id, N: n}}
 		}
 	}
-	g.Logf("Phoenix Force is not in play; counters not added")
+	g.TLogf("c.phoenixForceIsNotInPlayCountersNotAdded")
 	return nil
 }
 
@@ -205,7 +205,7 @@ func registerWhiteHotRoom() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label:        "White Hot Room — exhaust: place a counter on Phoenix Force or heal 2",
+				Label:        engine.Tf("c.whiteHotRoomExhaustPlaceACounterOnPhoenixForceOrHeal2"),
 				Type:         engine.AbilityAction,
 				Exhaust:      true,
 				AlterEgoOnly: true,
@@ -214,18 +214,18 @@ func registerWhiteHotRoom() {
 					pf, hasPF := phoenixForceID(g, pid)
 					var opts []engine.Choice
 					if hasPF {
-						opts = append(opts, engine.Choice{ID: "counter", Label: "Place 1 power counter on Phoenix Force", Kind: engine.ChoiceLabel}.Msgs(
+						opts = append(opts, engine.Choice{ID: "counter", Label: engine.Tf("c.place1PowerCounterOnPhoenixForce"), Kind: engine.ChoiceLabel}.Msgs(
 							engine.ExhaustEntity{ID: self},
 							engine.AddEntityCounter{ID: pf, N: 1},
 						))
 					}
-					opts = append(opts, engine.Choice{ID: "heal", Label: "Heal 2 damage from Jean Grey", Kind: engine.ChoiceLabel}.Msgs(
+					opts = append(opts, engine.Choice{ID: "heal", Label: engine.Tf("c.heal2DamageFromJeanGrey"), Kind: engine.ChoiceLabel}.Msgs(
 						engine.ExhaustEntity{ID: self},
 						engine.HealEntity{Target: pid, N: 2},
 					))
 					return []engine.Message{engine.AskQuestion{
 						Player:   pid,
-						Question: engine.Ask("White Hot Room — choose", opts...),
+						Question: engine.Ask(engine.Tf("c.whiteHotRoomChoose"), opts...),
 					}}
 				},
 			}}
@@ -304,7 +304,7 @@ func registerRiseFromTheAshes() {
 					return []engine.Message{engine.AddEntityCounter{ID: pfID, N: -u.Counters}}
 				}
 			}
-			g.Logf("Rise from the Ashes saves %s from defeat and is removed from the game", p.Name)
+			g.TLogf("c.riseFromTheAshesSavesFromDefeatAndIsRemovedFromTheGame", p.Name)
 			return nil
 		},
 	})
@@ -345,7 +345,7 @@ func registerTelekineticAttack() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Telekinetic Attack — deal damage to an enemy", choices...),
+				Question: engine.Ask(engine.Tf("c.telekineticAttackDealDamageToAnEnemy"), choices...),
 			}}
 		},
 	})
@@ -374,7 +374,7 @@ func registerPsychicBlast() {
 					msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 4, Source: pid})
 				}
 			}
-			g.Logf("Psychic Blast — 4 damage to the villain%s", unleashTail(p))
+			g.TLogf("c.psychicBlast4DamageToTheVillain", unleashTail(p))
 			return msgs
 		},
 	})
@@ -409,7 +409,7 @@ func registerTelepathicTrickery() {
 			if hasTrait(p.ExtraTraits, "unleashed") {
 				for _, id := range append(cardutil.SortedIDs(g.Villains), cardutil.SortedIDs(g.Minions)...) {
 					schemes = append(schemes, engine.Choice{
-						Label:    "Unleashed bonus: stun and confuse",
+						Label:    engine.Tf("c.unleashedBonusStunAndConfuse"),
 						Kind:     engine.ChoiceLabel,
 						SourceID: id,
 					}.Msgs(
@@ -420,7 +420,7 @@ func registerTelepathicTrickery() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Telepathic Trickery — remove 4 threat from a scheme", schemes...),
+				Question: engine.Ask(engine.Tf("c.telepathicTrickeryRemove4ThreatFromAScheme"), schemes...),
 			}}
 		},
 	})
@@ -442,15 +442,15 @@ func registerPhoenixFirebird() {
 				return nil
 			}
 			opts := []engine.Choice{
-				engine.Choice{ID: "ready", Label: "Remove 1 power counter → ready Phoenix", Kind: engine.ChoiceLabel}.Msgs(
+				engine.Choice{ID: "ready", Label: engine.Tf("c.remove1PowerCounterReadyPhoenix"), Kind: engine.ChoiceLabel}.Msgs(
 					engine.AddEntityCounter{ID: pfID, N: -1},
 					engine.ReadyEntity{ID: pid},
 				),
-				engine.Choice{ID: "charge", Label: "Place 2 power counters on Phoenix Force", Kind: engine.ChoiceLabel}.Msgs(engine.AddEntityCounter{ID: pfID, N: 2}),
+				engine.Choice{ID: "charge", Label: engine.Tf("c.place2PowerCountersOnPhoenixForce"), Kind: engine.ChoiceLabel}.Msgs(engine.AddEntityCounter{ID: pfID, N: 2}),
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Phoenix Firebird — choose", opts...),
+				Question: engine.Ask(engine.S("Phoenix Firebird — choose"), opts...),
 			}}
 		},
 	})
@@ -476,22 +476,22 @@ func registerPsychicRapport() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "cyclops" {
 					discardOpts = append(discardOpts, engine.Choice{
-						Label: "Return " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S("Return " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: pid, CardID: c.ID}))
 				}
 			}
 			opts := []engine.Choice{
-				engine.Choice{ID: "ready", Label: "Ready Phoenix", Kind: engine.ChoiceLabel}.Msgs(engine.ReadyEntity{ID: pid}),
+				engine.Choice{ID: "ready", Label: engine.Tf("c.readyPhoenix"), Kind: engine.ChoiceLabel}.Msgs(engine.ReadyEntity{ID: pid}),
 			}
 			if hasPF {
-				opts = append(opts, engine.Choice{ID: "counters", Label: "Place 2 power counters on Phoenix Force", Kind: engine.ChoiceLabel}.Msgs(engine.AddEntityCounter{ID: pfID, N: 2}))
+				opts = append(opts, engine.Choice{ID: "counters", Label: engine.Tf("c.place2PowerCountersOnPhoenixForce"), Kind: engine.ChoiceLabel}.Msgs(engine.AddEntityCounter{ID: pfID, N: 2}))
 			}
 			if len(discardOpts) > 0 {
-				opts = append(opts, engine.Choice{ID: "discard", Label: "Return a Cyclops card from your discard", Kind: engine.ChoiceLabel}.WithThen(engine.Ask("Psychic Rapport — choose a Cyclops card", discardOpts...)))
+				opts = append(opts, engine.Choice{ID: "discard", Label: engine.Tf("c.returnACyclopsCardFromYourDiscard"), Kind: engine.ChoiceLabel}.WithThen(engine.Ask(engine.Tf("c.psychicRapportChooseACyclopsCard"), discardOpts...)))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Psychic Rapport — choose", opts...),
+				Question: engine.Ask(engine.Tf("c.psychicRapportChoose"), opts...),
 			}}
 		},
 	})
@@ -536,7 +536,7 @@ func registerDarkPhoenix() {
 		// prioritize Consume the World; the "search" effect is
 		// data-driven.
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			g.Logf("Dark Phoenix enters play — search the encounter deck for Consume the World")
+			g.TLogf("c.darkPhoenixEntersPlaySearchTheEncounterDeckForConsumeTheWorl")
 			return nil
 		},
 	})
@@ -561,7 +561,7 @@ func registerConsumeTheWorld() {
 				return nil
 			}
 			if ss.Threat >= 12 {
-				g.Logf("Consume the World reaches 12 threat — players lose the game")
+				g.TLogf("c.consumeTheWorldReaches12ThreatPlayersLoseTheGame")
 			}
 			return nil
 		},

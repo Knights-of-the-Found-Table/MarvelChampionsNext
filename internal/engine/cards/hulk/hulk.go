@@ -30,7 +30,7 @@ func registerHulk() {
 			if p == nil || !p.IsHero() || len(p.Hand) == 0 {
 				return nil
 			}
-			g.Logf("Enraged — %s discards their hand", p.Name)
+			g.TLogf("c.enragedDiscardsTheirHand", p.Name)
 			return []engine.Message{engine.DiscardCards{
 				Player: p.ID,
 				Cards:  append(engine.CardList(nil), p.Hand...),
@@ -42,7 +42,7 @@ func registerHulk() {
 		// hand, so the drawn card itself cannot be the one discarded.
 		HeroAbilities: func(g *engine.Game, p *engine.Player) []engine.Ability {
 			return []engine.Ability{{
-				Label:        "Experimental Research — draw 1, then discard 1",
+				Label:        engine.Tf("c.experimentalResearchDraw1ThenDiscard1"),
 				Type:         engine.AbilityAction,
 				AlterEgoOnly: true,
 				OncePerRound: true,
@@ -57,7 +57,7 @@ func registerHulk() {
 					var choices []engine.Choice
 					for _, c := range pl.Hand {
 						choices = append(choices, engine.Choice{
-							Label: "Draw 1, discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.S("Draw 1, discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DrawCards{Player: pl.ID, N: 1},
 							engine.DiscardCards{Player: pl.ID, Cards: engine.CardList{c}},
@@ -65,7 +65,7 @@ func registerHulk() {
 					}
 					return []engine.Message{engine.AskQuestion{
 						Player:   pl.ID,
-						Question: engine.Ask("Experimental Research — draw 1, then discard which card?", choices...),
+						Question: engine.Ask(engine.Tf("c.experimentalResearchDraw1ThenDiscardWhichCard"), choices...),
 					}}
 				},
 			}}
@@ -106,7 +106,7 @@ func registerCrushingBlow() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Crushing Blow — deal damage equal to your ATK", choices...),
+				Question: engine.Ask(engine.Tf("c.crushingBlowDealDamageEqualToYourAtk"), choices...),
 			}}
 		},
 	})
@@ -123,7 +123,7 @@ func registerSubOrbitalLeap() {
 			if g.MainScheme != nil {
 				id := g.MainScheme.ID
 				choices = append(choices, engine.Choice{
-					Label: "Remove 3 threat from " + g.MainScheme.EDef().Name, Kind: engine.ChoiceLabel,
+					Label: engine.S("Remove 3 threat from " + g.MainScheme.EDef().Name), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 			}
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
@@ -133,7 +133,7 @@ func registerSubOrbitalLeap() {
 				}
 				id := id
 				choices = append(choices, engine.Choice{
-					Label: "Remove 3 threat from " + ss.EDef().Name, Kind: engine.ChoiceLabel,
+					Label: engine.S("Remove 3 threat from " + ss.EDef().Name), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 			}
 			if len(choices) == 0 {
@@ -141,7 +141,7 @@ func registerSubOrbitalLeap() {
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   pid,
-				Question: engine.Ask("Sub-Orbital Leap — remove 3 threat from a scheme", choices...),
+				Question: engine.Ask(engine.Tf("c.subOrbitalLeapRemove3ThreatFromAScheme"), choices...),
 			}}
 		},
 	})
@@ -163,7 +163,7 @@ func registerThunderclap() {
 				msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 3, Source: pid})
 			}
 			if len(msgs) == 0 {
-				g.Logf("Thunderclap — no enemies in play")
+				g.TLogf("c.thunderclapNoEnemiesInPlay")
 			}
 			return msgs
 		},
@@ -181,7 +181,7 @@ func registerUnstoppableForce() {
 			if p == nil {
 				return nil
 			}
-			g.Logf("Unstoppable Force readies %s", p.Name)
+			g.TLogf("c.unstoppableForceReadies", p.Name)
 			return []engine.Message{engine.ReadyEntity{ID: p.ID}}
 		},
 	})
@@ -233,7 +233,7 @@ func registerNemesis() {
 			}
 			msgs := []engine.Message{engine.MillPlayerDeck{Player: m.Player, N: 1}}
 			if physical {
-				g.Logf("Abomination — a physical resource was discarded: %s takes 2 damage", p.Name)
+				g.TLogf("c.abominationAPhysicalResourceWasDiscardedTakes2Damage", p.Name)
 				msgs = append(msgs, engine.DamageEntity{Target: p.ID, Damage: 2, Source: e.EID()})
 			}
 			return msgs
@@ -263,7 +263,7 @@ func registerNemesis() {
 				}
 			}
 			if best < 0 {
-				g.Logf("Clash of the Titans — no enemies in play; gains surge")
+				g.TLogf("c.clashOfTheTitansNoEnemiesInPlayGainsSurge")
 				return nil
 			}
 			var target engine.EntityID
@@ -283,7 +283,7 @@ func registerNemesis() {
 			if target == "" {
 				return nil
 			}
-			g.Logf("Clash of the Titans — the strongest enemy strikes the strongest hero")
+			g.TLogf("c.clashOfTheTitansTheStrongestEnemyStrikesTheStrongestHero")
 			return []engine.Message{engine.DamageEntity{Target: target, Damage: best, Source: enemyID}}
 		},
 	})

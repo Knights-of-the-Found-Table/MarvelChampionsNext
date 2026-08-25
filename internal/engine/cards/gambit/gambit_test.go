@@ -53,7 +53,7 @@ func TestChargeDeCard(t *testing.T) {
 	var charge *engine.Ability
 	for i := range b.HeroAbilities(g, p) {
 		abs := b.HeroAbilities(g, p)
-		if strings.Contains(abs[i].Label, "Charge de Card") {
+		if strings.Contains(abs[i].Label.Text, "Charge de Card") {
 			charge = &abs[i]
 			break
 		}

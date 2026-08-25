@@ -13,7 +13,7 @@ import (
 var techniqueSpecials = map[string]func(g *engine.Game, u *engine.Upgrade) []engine.Message{
 	"22004": func(g *engine.Game, u *engine.Upgrade) []engine.Message {
 		return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask(
-			"Cutthroat Ambition: remove 3 threat from which scheme?", schemePicks(g, 3, u.Owner)...)}}
+			engine.Tf("c.cutthroatAmbitionRemove3ThreatFromWhichScheme"), schemePicks(g, 3, u.Owner)...)}}
 	},
 	"22005": func(g *engine.Game, u *engine.Upgrade) []engine.Message {
 		var picks []engine.Choice
@@ -23,22 +23,22 @@ var techniqueSpecials = map[string]func(g *engine.Game, u *engine.Upgrade) []eng
 				continue
 			}
 			picks = append(picks,
-				engine.Choice{Label: "Stun " + cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+				engine.Choice{Label: engine.Tf("c.stun2", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 					Msgs(engine.StunEntity{Target: id}),
-				engine.Choice{Label: "Confuse " + cardutil.EnemyLabel(enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+				engine.Choice{Label: engine.Tf("c.confuse2", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 					Msgs(engine.ConfuseEntity{Target: id}))
 		}
 		if len(picks) == 0 {
 			return nil
 		}
 		return []engine.Message{engine.AskQuestion{Player: u.Owner,
-			Question: engine.Ask("Evasive Maneuvering: stun or confuse which enemy?", picks...)}}
+			Question: engine.Ask(engine.Tf("c.evasiveManeuveringStunOrConfuseWhichEnemy"), picks...)}}
 	},
 	"22006": func(g *engine.Game, u *engine.Upgrade) []engine.Message {
 		return []engine.Message{engine.ToughEntity{Target: u.Owner}}
 	},
 	"22007": func(g *engine.Game, u *engine.Upgrade) []engine.Message {
-		return cardutil.ChooseEnemy("Weapons Master: deal 4 damage to which enemy?",
+		return cardutil.ChooseEnemy(engine.Tf("c.weaponsMasterDeal4DamageToWhichEnemy"),
 			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 4, nil })(
 			g, &engine.EventCard{Code: "22007", Owner: u.Owner})
 	},
@@ -47,7 +47,7 @@ var techniqueSpecials = map[string]func(g *engine.Game, u *engine.Upgrade) []eng
 		if len(g.EncounterDeck) > 0 {
 			c, _ := g.DrawEncounter()
 			g.EncounterDiscard = append(g.EncounterDiscard, c)
-			g.Logf("Wide Stance discards %s from the encounter deck", c.Def().Name)
+			g.TLogf("c.wideStanceDiscardsFromTheEncounterDeck", c)
 		}
 		return nil
 	},
@@ -105,14 +105,14 @@ func registerNebula() {
 				}
 				var msgs []engine.Message
 				msgs = append(msgs, sp(g, u)...)
-				picks = append(picks, engine.Choice{Label: u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+				picks = append(picks, engine.Choice{Label: engine.S(u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 					Msgs(msgs...))
 			}
 			if len(picks) == 0 {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Gamora: resolve which technique's Special?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.gamoraResolveWhichTechniqueSSpecial"), picks...)}}
 		},
 	})
 
@@ -158,13 +158,13 @@ func registerNebula() {
 			for _, c := range p.Discard {
 				def := c.Def()
 				if def.Type == "upgrade" && def.HasTrait("technique") {
-					shufflePicks = append(shufflePicks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+					shufflePicks = append(shufflePicks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
 			msgs := []engine.Message{}
 			if len(shufflePicks) > 0 {
-				q := engine.AskN("Combat Ready: shuffle up to 2 techniques into your deck?", min(2, len(shufflePicks)), shufflePicks...)
+				q := engine.AskN(engine.Tf("c.combatReadyShuffleUpTo2TechniquesIntoYourDeck"), min(2, len(shufflePicks)), shufflePicks...)
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: q})
 			}
 			// Mill until a technique, put it into play + resolve.
@@ -201,13 +201,13 @@ func registerNebula() {
 				}
 				var msgs []engine.Message
 				msgs = append(msgs, sp(g, u)...)
-				picks = append(picks, engine.Choice{Label: u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+				picks = append(picks, engine.Choice{Label: engine.S(u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 					Msgs(msgs...))
 			}
 			if len(picks) == 0 {
 				return nil
 			}
-			q := engine.AskN("Lethal Intent: resolve which techniques?", len(picks), picks...)
+			q := engine.AskN(engine.Tf("c.lethalIntentResolveWhichTechniques"), len(picks), picks...)
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: q}}
 		},
 	})
@@ -227,7 +227,7 @@ func registerNebula() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Eros: confuse which minion?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.erosConfuseWhichMinion"), picks...)}}
 		},
 	})
 
@@ -297,7 +297,7 @@ func registerNebula() {
 			if n <= 0 {
 				return nil
 			}
-			return cardutil.ChooseEnemy("Brains Over Brawn: deal damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.brainsOverBrawnDealDamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(
 				g, &engine.EventCard{Code: "22018", Owner: p.ID})
 		},
@@ -347,7 +347,7 @@ func registerNebula() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust your alter-ego → remove from the game", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustYourAlterEgoRemoveFromTheGame"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
@@ -361,12 +361,12 @@ func registerNebula() {
 				var subs []engine.Choice
 				for _, id := range p.Upgrades {
 					if u := g.Upgrades[id]; u != nil && u.EDef().HasTrait("technique") {
-						subs = append(subs, engine.Choice{Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+						subs = append(subs, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 							Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 					}
 				}
-				picks = append(picks, engine.Choice{ID: "discard", Label: "Discard 2 techniques", Kind: engine.ChoiceCard}.
-					WithThen(engine.AskN("Discard which 2 techniques?", 2, subs...)))
+				picks = append(picks, engine.Choice{ID: "discard", Label: engine.Tf("c.discard2Techniques"), Kind: engine.ChoiceCard}.
+					WithThen(engine.AskN(engine.Tf("c.discardWhich2Techniques"), 2, subs...)))
 			}
 			if len(picks) == 0 {
 				return []engine.Message{
@@ -375,7 +375,7 @@ func registerNebula() {
 				}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Inferiority Complex:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.inferiorityComplex"), picks...)}}
 		},
 	})
 
@@ -390,7 +390,7 @@ func registerNebula() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil && a.EDef().HasTrait("guardian") {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, ATK: 2}))
 				}
 			}
@@ -398,7 +398,7 @@ func registerNebula() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Attach Energy Spear to which guardian ally?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.attachEnergySpearToWhichGuardianAlly"), picks...)}}
 		},
 	})
 
@@ -428,7 +428,7 @@ func registerNebula() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Exhaust + counter → shuffle a Protection event from discard", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustCounterShuffleAProtectionEventFromDiscard"), Type: engine.AbilityAction,
 				Exhaust: true, AlterEgoOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					s := g.Supports[self]
@@ -440,7 +440,7 @@ func registerNebula() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "protection" {
-							picks = append(picks, engine.Choice{Label: def.Name, Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -449,7 +449,7 @@ func registerNebula() {
 					}
 					return append([]engine.Message{engine.AddEntityCounter{ID: self, N: -1}},
 						engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-							"Shuffle which Protection event into your deck?", picks...)})
+							engine.Tf("c.shuffleWhichProtectionEventIntoYourDeck"), picks...)})
 				},
 			}}
 		},
@@ -463,17 +463,17 @@ func registerNebula() {
 				return nil
 			}
 			var picks []engine.Choice
-			picks = append(picks, engine.Choice{Label: p.Name + " (identity)", Kind: engine.ChoiceTarget, SourceID: p.ID}.
+			picks = append(picks, engine.Choice{Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID}.
 				Msgs(engine.AttachUpgrade{ID: e.EID(), Target: p.ID, MaxHP: 1, GrantTrait: "guardian"}))
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil {
-					picks = append(picks, engine.Choice{Label: a.EDef().Name, Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, MaxHP: 1, GrantTrait: "guardian"}))
 				}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Attach Honorary Guardian to which character?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.attachHonoraryGuardianToWhichCharacter"), picks...)}}
 		},
 	})
 }
@@ -487,7 +487,7 @@ func registerNemesis() {
 				if p.HeroCode[:5] == "22001" {
 					p.BonusTHW--
 					p.BonusATK--
-					g.Logf("Self-Preservation: %s gets -1 THW / -1 ATK", p.Name)
+					g.TLogf("c.selfPreservationGets1Thw1Atk", p.Name)
 				}
 			}
 			return nil
@@ -530,12 +530,12 @@ func registerNemesis() {
 			var picks []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil {
-					picks = append(picks, engine.Choice{Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+					picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Gamora: discard which upgrade?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.gamoraDiscardWhichUpgrade"), picks...)}}
 		},
 	})
 
@@ -558,7 +558,7 @@ func registerNemesis() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard an upgrade you control → discard Lethal Weapon", Type: engine.AbilityAction,
+				Label: engine.Tf("c.discardAnUpgradeYouControlDiscardLethalWeapon"), Type: engine.AbilityAction,
 				HeroOnly: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Attachments[self]
@@ -579,13 +579,13 @@ func registerNemesis() {
 					var picks []engine.Choice
 					for _, id := range p.Upgrades {
 						if u := g.Upgrades[id]; u != nil {
-							picks = append(picks, engine.Choice{Label: "Discard " + u.EDef().Name, Kind: engine.ChoiceCard, CardCode: u.Code}.
+							picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
 								Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 						}
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask("Discard which upgrade?", append(picks,
-							engine.Choice{ID: "go", Label: "Discard Lethal Weapon", Kind: engine.ChoiceLabel}.
+						Question: engine.Ask(engine.Tf("c.discardWhichUpgrade"), append(picks,
+							engine.Choice{ID: "go", Label: engine.Tf("c.discardLethalWeapon"), Kind: engine.ChoiceLabel}.
 								Msgs(engine.DiscardAttachmentMsg{ID: self}))...)}}
 				},
 			}}

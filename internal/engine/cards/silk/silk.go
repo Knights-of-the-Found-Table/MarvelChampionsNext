@@ -118,13 +118,13 @@ func registerSignatures() {
 				discardTucked(p, i)
 				n = 9
 			}
-			choices = append(choices, engine.Choice{Label: enemy.EDef().Name, Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+			choices = append(choices, engine.Choice{Label: engine.S(enemy.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 				Msgs(engine.DamageEntity{Target: id, Damage: n, Source: p.ID}))
 		}
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Swinging Silk Kick — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.swingingSilkKickChooseAnEnemy"), choices...)}}
 	}})
 	engine.RegisterBehavior("52004", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 		p := g.Player(e.EOwner())
@@ -139,7 +139,7 @@ func registerSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Wallcrawl — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.wallcrawlChooseAScheme"), choices...)}}
 	}})
 	engine.RegisterBehavior("52005", &engine.Behavior{React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 		m, ok := msg.(engine.SchemeDefeated)
@@ -150,7 +150,7 @@ func registerSignatures() {
 		n := min(2, len(g.EncounterDeck))
 		var choices []engine.Choice
 		for _, c := range g.EncounterDeck[:n] {
-			choices = append(choices, engine.Choice{Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+			choices = append(choices, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 				Msgs(engine.DiscardEncounterCard{Card: c}))
 		}
 		if len(choices) == 0 {
@@ -158,29 +158,29 @@ func registerSignatures() {
 		}
 		// DiscardEncounterCard is the movement approximation; the identity's
 		// tuck store cannot be addressed from a serialized choice.
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Get the Scoop — tuck one of the top cards", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.getTheScoopTuckOneOfTheTopCards"), choices...)}}
 	}})
 	engine.RegisterBehavior("52006", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: "Albert Moon — tuck encounter card or heal", Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
+			Label: engine.Tf("c.albertMoonTuckEncounterCardOrHeal"), Type: engine.AbilityAction, AlterEgoOnly: true, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				s := g.Supports[self]
 				p := g.Player(s.Owner)
 				var choices []engine.Choice
 				if len(g.EncounterDeck) > 0 {
 					c := g.EncounterDeck[0]
-					choices = append(choices, engine.Choice{ID: "tuck", Label: "Tuck " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{ID: "tuck", Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.DiscardEncounterCard{Card: c}))
 				}
-				choices = append(choices, engine.Choice{ID: "heal", Label: "Heal for tucked cards", Kind: engine.ChoiceLabel}.
+				choices = append(choices, engine.Choice{ID: "heal", Label: engine.Tf("c.healForTuckedCards"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.HealEntity{Target: p.ID, N: len(p.SenseDeck)}))
-				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Albert Moon — choose", choices...)}}
+				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.albertMoonChoose"), choices...)}}
 			},
 		}}
 	}})
 	engine.RegisterBehavior("52007", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 		return []engine.Ability{{
-			Label: "J. Jonah Jameson — remove 2 threat", Type: engine.AbilityAction, Exhaust: true,
+			Label: engine.Tf("c.jJonahJamesonRemove2Threat"), Type: engine.AbilityAction, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				s := g.Supports[self]
 				p := g.Player(s.Owner)
@@ -190,7 +190,7 @@ func registerSignatures() {
 				if len(choices) == 0 {
 					return nil
 				}
-				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("J. Jonah Jameson — choose a side scheme", choices...)}}
+				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.jJonahJamesonChooseASideScheme"), choices...)}}
 			},
 		}}
 	}})
@@ -204,7 +204,7 @@ func registerSignatures() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Organic Webbing — discard tucked card and ready Silk", Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
+				Label: engine.Tf("c.organicWebbingDiscardTuckedCardAndReadySilk"), Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					p := g.Player(u.Owner)

@@ -80,7 +80,7 @@ func registerCWLeaders() {
 		engine.RegisterBehavior(code, &engine.Behavior{
 			EnemyStatBonus: cwLeaderSCH,
 			VillainStage: func(g *engine.Game, v *engine.Villain, nextStage int) []engine.Message {
-				g.Logf("%s calls in reinforcements — he cannot be damaged this phase (approximated)", v.EDef().Name)
+				g.TLogf("c.callsInReinforcementsHeCannotBeDamagedThisPhaseApproximated", v)
 				return cwDealAll(g)
 			},
 		})
@@ -201,7 +201,7 @@ func registerCWLeaders() {
 	engine.RegisterBehavior("56082", &engine.Behavior{
 		SideSchemeDefeated: func(g *engine.Game, s *engine.SideScheme) []engine.Message {
 			g.ShuffleEncounterDeck()
-			g.Logf("The Fifty State Initiative's remnants shuffle back in")
+			g.TLogf("c.theFiftyStateInitiativeSRemnantsShuffleBackIn")
 			return nil
 		},
 	})
@@ -312,7 +312,7 @@ func registerCWLeaders() {
 				return nil
 			}
 			t.Counters++
-			g.Logf("Energy Channel holds %d energy counters", t.Counters)
+			g.TLogf("c.energyChannelHoldsEnergyCounters", t.Counters)
 			if t.Counters >= 4 {
 				t.Counters = 0
 				if v := g.Villains[t.Target]; v != nil {
@@ -363,7 +363,7 @@ func registerCWLeaders() {
 	engine.RegisterBehavior("56106", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			p.ExtraTraits = append(p.ExtraTraits, "unregistered")
-			g.Logf("%s is flagged Unregistered", p.Name)
+			g.TLogf("c.isFlaggedUnregistered", p.Name)
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}}
 		},
 	})
@@ -431,7 +431,7 @@ func registerCWLeaders() {
 	engine.RegisterBehavior("56114", &engine.Behavior{
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			p.ExtraTraits = append(p.ExtraTraits, "unregistered")
-			g.Logf("%s is flagged Unregistered", p.Name)
+			g.TLogf("c.isFlaggedUnregistered", p.Name)
 			return []engine.Message{engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}}
 		},
 	})
@@ -479,7 +479,7 @@ func registerCWLeaders() {
 			for _, p := range g.Players {
 				p.ExtraTraits = append(p.ExtraTraits, "unregistered")
 			}
-			g.Logf("Everyone is flagged Unregistered")
+			g.TLogf("c.everyoneIsFlaggedUnregistered")
 			return nil
 		},
 	})
@@ -535,7 +535,7 @@ func registerCWLeaders() {
 				return nil
 			}
 			t.Target = m.Player
-			g.Logf("Cap's Shield is flung at the attacker")
+			g.TLogf("c.capSShieldIsFlungAtTheAttacker")
 			return nil
 		},
 	})
@@ -690,7 +690,7 @@ func registerCWLeaders() {
 				return nil
 			}
 			t.Counters++
-			g.Logf("Finesse gains a skill counter (%d)", t.Counters)
+			g.TLogf("c.finesseGainsASkillCounter", t.Counters)
 			return nil
 		},
 	})

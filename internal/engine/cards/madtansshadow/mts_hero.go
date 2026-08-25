@@ -37,7 +37,7 @@ func registerMTSHeroCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: "Discard chi counters → +2 ATK each until end of phase", Type: engine.AbilityAction,
+				Label: engine.Tf("c.discardChiCounters2AtkEachUntilEndOfPhase"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					if a := g.Allies[self]; a != nil {
 						n := a.Counters
@@ -76,7 +76,7 @@ func registerMTSHeroCards() {
 				c := p.Deck[i]
 				if c.Def().Type == "event" {
 					picks = append(picks, engine.Choice{
-						Label: c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -84,7 +84,7 @@ func registerMTSHeroCards() {
 				return []engine.Message{engine.ShufflePlayerDeck{Player: p.ID}}
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Kaluu: add which event to hand?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.kaluuAddWhichEventToHand"), picks...)}}
 		},
 	})
 
@@ -112,7 +112,7 @@ func registerMTSHeroCards() {
 			if total <= 0 {
 				return nil
 			}
-			return cardutil.ChooseEnemy("Mass Attack: choose an enemy",
+			return cardutil.ChooseEnemy(engine.Tf("c.massAttackChooseAnEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) {
 					return total, nil
 				})(g, e)
@@ -141,7 +141,7 @@ func registerMTSHeroCards() {
 	engine.RegisterBehavior("21020", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Avengers Tower → next Avenger ally this phase costs 1 less", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustAvengersTowerNextAvengerAllyThisPhaseCosts1Less"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					p := g.Player(e.EOwner())
@@ -158,17 +158,17 @@ func registerMTSHeroCards() {
 	engine.RegisterBehavior("21021", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Exhaust Avengers Mansion → a player draws 1 card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.exhaustAvengersMansionAPlayerDraws1Card"), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					var picks []engine.Choice
 					for _, p := range g.Players {
 						picks = append(picks, engine.Choice{
-							ID: string(p.ID), Label: p.Name, Kind: engine.ChoiceLabel,
+							ID: string(p.ID), Label: engine.S(p.Name), Kind: engine.ChoiceLabel,
 						}.Msgs(engine.DrawCards{Player: p.ID, N: 1}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: g.ActiveTurn,
-						Question: engine.Ask("Avengers Mansion: who draws?", picks...)}}
+						Question: engine.Ask(engine.Tf("c.avengersMansionWhoDraws2"), picks...)}}
 				},
 			}}
 		},
@@ -239,14 +239,14 @@ func registerMTSHeroCards() {
 			}
 			n := min(5, len(p.Deck))
 			return append([]engine.Message{engine.MillPlayerDeck{Player: p.ID, N: n}},
-				cardutil.ChooseEnemy("Magic Attack: deal damage",
+				cardutil.ChooseEnemy(engine.Tf("c.magicAttackDealDamage"),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)...)
 		},
 	})
 
 	// 21044 Uppercut: 5 damage.
 	engine.RegisterBehavior("21044", &engine.Behavior{
-		OnPlay: cardutil.ChooseEnemy("Uppercut: deal 5 damage",
+		OnPlay: cardutil.ChooseEnemy(engine.Tf("c.uppercutDeal5Damage2"),
 			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 5, nil }),
 	})
 
@@ -275,7 +275,7 @@ func registerMTSHeroCards() {
 
 	// 21049 For Justice!: remove 3 threat.
 	engine.RegisterBehavior("21049", &engine.Behavior{
-		OnPlay: cardutil.ChooseScheme("For Justice!", func(g *engine.Game, s engine.Entity) int { return 3 }),
+		OnPlay: cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "For Justice!"), func(g *engine.Game, s engine.Entity) int { return 3 }),
 	})
 
 	// 21050 Zone of Silence: mill up to 4 → threat removal per card.
@@ -287,7 +287,7 @@ func registerMTSHeroCards() {
 			}
 			n := min(4, len(p.Deck))
 			return append([]engine.Message{engine.MillPlayerDeck{Player: p.ID, N: n}},
-				cardutil.ChooseScheme("Zone of Silence", func(g *engine.Game, s engine.Entity) int { return n })(g, e)...)
+				cardutil.ChooseScheme(engine.Tf("c.chooseAScheme", "Zone of Silence"), func(g *engine.Game, s engine.Entity) int { return n })(g, e)...)
 		},
 	})
 

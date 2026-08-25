@@ -55,7 +55,7 @@ func registerSabretooth() {
 					if v.Damage < 0 {
 						v.Damage = 0
 					}
-					g.Logf("Sabretooth heals %d (boost icons on %s)", heal, top.Def().Name)
+					g.TLogf("c.sabretoothHealsBoostIconsOn", heal, top)
 				}
 				return nil
 			},
@@ -110,7 +110,7 @@ func registerSabretooth() {
 			if !ok || m.Scheme != e.EID() || g.MainScheme == nil {
 				return nil
 			}
-			g.Logf("Find the Senator — Robert Kelly is safe; the main scheme advances")
+			g.TLogf("c.findTheSenatorRobertKellyIsSafeTheMainSchemeAdvances")
 			if g.MainScheme.Stage == 1 {
 				return []engine.Message{engine.ReplaceMainScheme{Scheme: g.MainScheme.ID}}
 			}
@@ -135,7 +135,7 @@ func registerSabretooth() {
 					return nil
 				}
 				return []engine.Ability{{
-					Label: "Discard " + t.EDef().Name + " — spend [energy][mental][physical]", Type: engine.AbilityAction,
+					Label: engine.S("Discard " + t.EDef().Name + " — spend [energy][mental][physical]"), Type: engine.AbilityAction,
 					Cost: 3, CostIcons: "energy:1 mental:1 physical:1",
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -155,16 +155,16 @@ func registerSabretooth() {
 				return nil
 			}
 			choices := []engine.Choice{engine.Choice{
-				ID: "take", Label: "Deal 1 damage to Robert Kelly", Kind: engine.ChoiceLabel,
+				ID: "take", Label: engine.Tf("c.deal1DamageToRobertKelly"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.DamageEntity{Target: kelly.ID, Damage: 1, Source: t.ID})}
 			if p.IsHero() && !p.Exhausted {
 				choices = append(choices, engine.Choice{
-					ID: "prevent", Label: "Exhaust your hero → prevent", Kind: engine.ChoiceLabel,
+					ID: "prevent", Label: engine.Tf("c.exhaustYourHeroPrevent"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}))
 			}
 			return []engine.Message{engine.AskQuestion{
 				Player:   p.ID,
-				Question: engine.Ask("Sabretooth Strikes — choose:", choices...),
+				Question: engine.Ask(engine.Tf("c.sabretoothStrikesChoose"), choices...),
 			}}
 		},
 	})

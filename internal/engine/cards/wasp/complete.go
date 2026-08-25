@@ -48,12 +48,12 @@ func registerWasp() {
 			}
 			// Reactions run pre-flip: alter-ego → hero asks the form.
 			if !p.IsHero() {
-				giant := engine.Choice{ID: "giant", Label: "Giant form", Kind: engine.ChoiceForm}
-				tiny := engine.Choice{ID: "tiny", Label: "Tiny form", Kind: engine.ChoiceForm}
+				giant := engine.Choice{ID: "giant", Label: engine.Tf("c.giantForm"), Kind: engine.ChoiceForm}
+				tiny := engine.Choice{ID: "tiny", Label: engine.Tf("c.tinyForm"), Kind: engine.ChoiceForm}
 				giant = giant.Msgs(engine.SetAntForm{Player: pid, Form: "giant"})
 				tiny = tiny.Msgs(engine.SetAntForm{Player: pid, Form: "tiny"})
 				return []engine.Message{engine.AskQuestion{Player: pid,
-					Question: engine.Ask("Which hero form?", giant, tiny)}}
+					Question: engine.Ask(engine.Tf("c.whichHeroForm"), giant, tiny)}}
 			}
 			return []engine.Message{engine.SetAntForm{Player: pid, Form: ""}}
 		},
@@ -92,7 +92,7 @@ func registerWasp() {
 				n = 4
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Giant Help: remove threat from which scheme?", schemePicks(g, n, e.EOwner())...)}}
+				engine.Tf("c.giantHelpRemoveThreatFromWhichScheme"), schemePicks(g, n, e.EOwner())...)}}
 		},
 	})
 
@@ -104,7 +104,7 @@ func registerWasp() {
 			if p != nil && form(p) == "tiny" {
 				n = 8
 			}
-			return cardutil.ChooseEnemy("Pinpoint Strike: deal damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.pinpointStrikeDealDamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return n, nil })(g, e)
 		},
 	})
@@ -128,11 +128,11 @@ func registerWasp() {
 				return nil
 			}
 			if form(p) == "tiny" {
-				return cardutil.ChooseEnemy("Wasp Sting (tiny): deal 5 damage to which enemy?",
+				return cardutil.ChooseEnemy(engine.Tf("c.waspStingTinyDeal5DamageToWhichEnemy"),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 5, nil })(g, e)
 			}
 			if form(p) == "giant" {
-				return cardutil.ChooseEnemy("Wasp Sting (giant): deal 4 damage to which enemy?",
+				return cardutil.ChooseEnemy(engine.Tf("c.waspStingGiantDeal4DamageToWhichEnemy"),
 					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 4, nil })(g, e)
 			}
 			return nil
@@ -211,7 +211,7 @@ func registerWasp() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),
-				Question: engine.Ask("Into the Fray: damage which minion?", picks...)}}
+				Question: engine.Ask(engine.Tf("c.intoTheFrayDamageWhichMinion"), picks...)}}
 		},
 	})
 
@@ -219,7 +219,7 @@ func registerWasp() {
 	// approximated to play-time when a form is set).
 	engine.RegisterBehavior("13014", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
-			return cardutil.ChooseEnemy("Surprise Attack: deal 3 damage to which enemy?",
+			return cardutil.ChooseEnemy(engine.Tf("c.surpriseAttackDeal3DamageToWhichEnemy"),
 				func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 3, nil })(g, e)
 		},
 	})
@@ -243,7 +243,7 @@ func registerWasp() {
 					a.PermATK++
 				}
 			}
-			g.Logf("Boot Camp: each ally gets +1 ATK")
+			g.TLogf("c.bootCampEachAllyGets1Atk")
 			return nil
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -287,10 +287,10 @@ func registerWasp() {
 	engine.RegisterBehavior("13019", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(), Question: engine.Ask(
-				"Spider-Man gets +2 to which power this phase?",
-				engine.Choice{ID: "thw", Label: "+2 THW", Kind: engine.ChoiceLabel}.
+				engine.Tf("c.spiderManGets2ToWhichPowerThisPhase"),
+				engine.Choice{ID: "thw", Label: engine.Tf("c.2Thw"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.AllyStatBonus{Ally: e.EID(), THW: 2}),
-				engine.Choice{ID: "atk", Label: "+2 ATK", Kind: engine.ChoiceLabel}.
+				engine.Choice{ID: "atk", Label: engine.Tf("c.2Atk"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.AllyStatBonus{Ally: e.EID(), ATK: 2}),
 			)}}
 		},
@@ -317,14 +317,14 @@ func registerWasp() {
 		ResolveObligation: func(g *engine.Game, p *engine.Player, card engine.Card) []engine.Message {
 			var picks []engine.Choice
 			if !p.Exhausted {
-				picks = append(picks, engine.Choice{ID: "exhaust", Label: "Exhaust Nadia → remove from the game", Kind: engine.ChoiceLabel}.
+				picks = append(picks, engine.Choice{ID: "exhaust", Label: engine.Tf("c.exhaustNadiaRemoveFromTheGame"), Kind: engine.ChoiceLabel}.
 					Msgs(engine.ExhaustEntity{ID: p.ID},
 						engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
-			picks = append(picks, engine.Choice{ID: "discard", Label: "Discard mental cards + take 1 damage", Kind: engine.ChoiceLabel}.
+			picks = append(picks, engine.Choice{ID: "discard", Label: engine.Tf("c.discardMentalCardsTake1Damage"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.ObligationResolve{Player: p.ID, Card: card}))
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("Red Dreams:", picks...)}}
+				Question: engine.Ask(engine.Tf("c.redDreams"), picks...)}}
 		},
 	})
 
@@ -352,7 +352,7 @@ func registerWasp() {
 			var avengers []engine.Choice
 			for _, q := range g.Players {
 				if !q.Exhausted && g.EntityHasTrait(q.ID, "avenger") {
-					avengers = append(avengers, engine.Choice{Label: "Exhaust " + q.Name + " (identity)", Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					avengers = append(avengers, engine.Choice{Label: engine.S("Exhaust " + q.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 						Msgs(engine.ExhaustEntity{ID: q.ID}))
 				}
 			}
@@ -360,18 +360,18 @@ func registerWasp() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && !a.Exhausted && a.EDef().HasTrait("avenger") {
-						avengers = append(avengers, engine.Choice{Label: "Exhaust " + a.EDef().Name, Kind: engine.ChoiceCard, CardCode: a.Code}.
+						avengers = append(avengers, engine.Choice{Label: engine.S("Exhaust " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
 							Msgs(engine.ExhaustEntity{ID: id}))
 					}
 				}
 			}
 			msgs := []engine.Message{}
 			if len(avengers) > 0 {
-				q := engine.AskN("All for One: exhaust which Avengers?", len(avengers), avengers...)
+				q := engine.AskN(engine.Tf("c.allForOneExhaustWhichAvengers"), len(avengers), avengers...)
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: q})
 			}
 			msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				"All for One: deal 3 (+1 per exhausted Avenger) to which enemy?",
+				engine.Tf("c.allForOneDeal31PerExhaustedAvengerToWhichEnemy"),
 				cardutil.EnemyChoices(g, 3, p.ID, func(t engine.EntityID) []engine.Message {
 					return []engine.Message{engine.AllForOneDamage{Player: p.ID, Target: t}}
 				})...)})
@@ -406,7 +406,7 @@ func registerNemesis() {
 					code := mn.Code
 					g.Delete(e.EID())
 					g.EncounterDeck = append(g.EncounterDeck, engine.Card{ID: g.NextCardID(), Code: code})
-					g.Logf("Beetle shuffles back into the encounter deck")
+					g.TLogf("c.beetleShufflesBackIntoTheEncounterDeck")
 				}
 			}
 			return nil

@@ -23,7 +23,7 @@ func spawnSideScheme(g *engine.Game, code string, perHero int) *engine.SideSchem
 		MaxThreat: maxT,
 	}
 	g.SideSchemes[s.ID] = s
-	g.Logf("%s enters play", def.Name)
+	g.TLogf("c.entersPlay", def.Name)
 	return s
 }
 
@@ -114,7 +114,7 @@ func registerHela() {
 			}
 			ally := &engine.Ally{ID: g.NextEntityID("ally"), Code: "21139a", Owner: cardutil.FirstPlayerID(g), MaxHP: 8, AttackVal: 2, ThwartVal: 2}
 			g.AddAlly(ally, cardutil.FirstPlayerID(g))
-			g.Logf("Odin joins the first player")
+			g.TLogf("c.odinJoinsTheFirstPlayer")
 			return nil
 		},
 	})
@@ -214,14 +214,14 @@ func registerHela() {
 			var opts []engine.Choice
 			if best != "" {
 				opts = append(opts, engine.Choice{
-					ID: "strip", Label: "Discard your highest-cost support/upgrade", Kind: engine.ChoiceLabel,
+					ID: "strip", Label: engine.Tf("c.discardYourHighestCostSupportUpgrade"), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DiscardControlled{Player: p.ID, ID: best}))
 			}
 			opts = append(opts, engine.Choice{
-				ID: "dmg", Label: "Take damage equal to your board size", Kind: engine.ChoiceLabel,
+				ID: "dmg", Label: engine.Tf("c.takeDamageEqualToYourBoardSize"), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.DamageEntity{Target: p.ID, Damage: total, Source: t.ID}))
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
-				Question: engine.Ask("No Place for the Living: choose one", opts...)}}
+				Question: engine.Ask(engine.Tf("c.noPlaceForTheLivingChooseOne"), opts...)}}
 		},
 	})
 	engine.RegisterBehavior("21155", &engine.Behavior{
@@ -272,7 +272,7 @@ func registerHela() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [energy][physical] → discard Frozen", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendEnergyPhysicalDiscardFrozen"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, CostIcons: "energy:1 physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -411,7 +411,7 @@ func registerLoki() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [energy][mental] → discard Seduced", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendEnergyMentalDiscardSeduced"), Type: engine.AbilityAction,
 				AlterEgoOnly: true, CostIcons: "energy:1 mental:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -443,7 +443,7 @@ func swapLoki(g *engine.Game) []engine.Message {
 	}
 	nv := g.SpawnVillainFromCard(engine.BaseCodeOf(pick.Code))
 	if nv != nil {
-		g.LogMajorf("Loki swaps to %s", nv.EDef().Name)
+		g.TLogMajorf("c.lokiSwapsTo", nv)
 	}
 	return nil
 }
@@ -495,7 +495,7 @@ func registerCampaignSchemes() {
 				g.Upgrades[u.ID] = u
 				p.Upgrades = append(p.Upgrades, u.ID)
 			}
-			g.Logf("Each player gains a Norn Stone")
+			g.TLogf("c.eachPlayerGainsANornStone")
 			return msgs
 		},
 	})
@@ -518,7 +518,7 @@ func registerCampaignSchemes() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Ready your hero, flip this card", Type: engine.AbilityAction,
+				Label: engine.Tf("c.readyYourHeroFlipThisCard"), Type: engine.AbilityAction,
 				HeroOnly: true, OncePerRound: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.ReadyEntity{ID: e.EOwner()}}
@@ -549,7 +549,7 @@ func registerCampaignSchemes() {
 	engine.RegisterBehavior("21190", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend 1 resource → ready Lady Sif", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spend1ResourceReadyLadySif"), Type: engine.AbilityAction,
 				Cost: 1,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.ReadyEntity{ID: self}}
@@ -599,7 +599,7 @@ func registerMTSScenarios() {
 			s.Threat = 0
 			if tower := g.EnvironmentByCode("21100a"); tower != nil {
 				tower.Counters += 6 * len(g.Players)
-				g.Logf("The siege deals %d damage to Avengers Tower", 6*len(g.Players))
+				g.TLogf("c.theSiegeDealsDamageToAvengersTower", 6*len(g.Players))
 			}
 			return nil
 		},
@@ -636,7 +636,7 @@ func registerMTSScenarios() {
 					v.Code = "21137"
 					def := v.EDef()
 					v.MaxHP = derefInt(def.HP, 10)
-					g.LogMajorf("Hela rises again — wounded but furious")
+					g.TLogMajorf("c.helaRisesAgainWoundedButFurious")
 					return nil
 				}
 			}

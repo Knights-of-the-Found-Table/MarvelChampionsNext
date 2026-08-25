@@ -160,7 +160,7 @@ func registerWinterComplete() {
 	engine.RegisterBehavior("54019", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Man on the Wall — discount per engaged minion", Type: engine.AbilityAction,
+				Label: engine.Tf("c.manOnTheWallDiscountPerEngagedMinion"), Type: engine.AbilityAction,
 				HeroOnly: true, Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
@@ -197,12 +197,12 @@ func registerWinterComplete() {
 				return nil
 			}
 			var choices []engine.Choice
-			choices = append(choices, engine.Choice{Label: "Draw 2 cards", Kind: engine.ChoicePass}.Msgs(engine.DrawCards{Player: p.ID, N: 2}))
+			choices = append(choices, engine.Choice{Label: engine.Tf("c.draw2Cards"), Kind: engine.ChoicePass}.Msgs(engine.DrawCards{Player: p.ID, N: 2}))
 			if g.MainScheme != nil {
-				choices = append(choices, engine.Choice{Label: "Remove 3 threat from the main scheme", Kind: engine.ChoicePass}.
+				choices = append(choices, engine.Choice{Label: engine.Tf("c.remove3ThreatFromTheMainScheme"), Kind: engine.ChoicePass}.
 					Msgs(engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 3, Source: e.EID()}))
 			}
-			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Nick Fury, Sr. — choose one:", choices...)}}
+			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.nickFurySrChooseOne"), choices...)}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
 			if _, ok := msg.(engine.EndRound); !ok {
@@ -281,7 +281,7 @@ func registerWinterComplete() {
 			if !ok || m.Enemy != e.EID() {
 				return nil
 			}
-			g.Logf("Blizzard's victim is encased in ice")
+			g.TLogf("c.blizzardSVictimIsEncasedInIce")
 			return []engine.Message{engine.StunEntity{Target: m.Player}}
 		},
 	})

@@ -19,7 +19,7 @@ func registerEbonyMaw() {
 				for _, env := range g.Environments {
 					if env != nil && env.EDef().HasTrait("spell") && env.Counters > 0 {
 						env.Counters--
-						g.Logf("%s loses an invocation counter", env.EDef().Name)
+						g.TLogf("c.losesAnInvocationCounter", env)
 					}
 				}
 				return msgs
@@ -154,7 +154,7 @@ func registerEbonyMaw() {
 		},
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Spend [energy][physical] → discard Restrained", Type: engine.AbilityAction,
+				Label: engine.Tf("c.spendEnergyPhysicalDiscardRestrained"), Type: engine.AbilityAction,
 				CostIcons: "energy:1 physical:1",
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}
@@ -170,14 +170,14 @@ func registerEbonyMaw() {
 			for _, p := range g.Players {
 				opts = append(opts,
 					engine.Choice{
-						ID: "dmg" + string(p.ID), Label: p.Name + " takes 2 damage", Kind: engine.ChoiceLabel,
+						ID: "dmg" + string(p.ID), Label: engine.S(p.Name + " takes 2 damage"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.DamageEntity{Target: p.ID, Damage: 2, Source: e.EID()}),
 					engine.Choice{
-						ID: "thr" + string(p.ID), Label: "Place 2 threat here (" + p.Name + ")", Kind: engine.ChoiceLabel,
+						ID: "thr" + string(p.ID), Label: engine.S("Place 2 threat here (" + p.Name + ")"), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.SchemeThreat{Scheme: e.EID(), N: 2, Source: e.EID()}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: cardutil.FirstPlayerID(g),
-				Question: engine.Ask("Reactor Overload: each player chooses", opts...)}}
+				Question: engine.Ask(engine.Tf("c.reactorOverloadEachPlayerChooses"), opts...)}}
 		},
 	})
 }
@@ -240,7 +240,7 @@ func registerTowerDefense() {
 			for id := range g.Villains {
 				if v := g.Villains[id]; v != nil && !v.Tough {
 					v.Tough = true
-					g.Logf("%s gains a tough status card", v.EDef().Name)
+					g.TLogf("c.gainsAToughStatusCard", v)
 				}
 			}
 			return nil
@@ -281,7 +281,7 @@ func registerTowerDefense() {
 				}
 				if tower := g.EnvironmentByCode("21100a"); tower != nil {
 					tower.Counters++
-					g.Logf("Avengers Tower takes 1 damage (%d)", tower.Counters)
+					g.TLogf("c.avengersTowerTakes1Damage", tower.Counters)
 					return nil
 				}
 				return []engine.Message{engine.BoostActivation{Enemy: e.EID(), N: 2}}
@@ -289,7 +289,7 @@ func registerTowerDefense() {
 			VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 				for _, o := range g.Villains {
 					if o != nil && o != v && o.Code[:5] == "21095" && o.HP() > 0 {
-						g.Logf("Proxima cannot be defeated while Corvus Glaive lives")
+						g.TLogf("c.proximaCannotBeDefeatedWhileCorvusGlaiveLives")
 						return false
 					}
 				}
@@ -314,13 +314,13 @@ func registerTowerDefense() {
 					return nil
 				}
 				tower.Counters++
-				g.Logf("Avengers Tower takes 1 damage (%d)", tower.Counters)
+				g.TLogf("c.avengersTowerTakes1Damage", tower.Counters)
 				return nil
 			},
 			VillainDamageable: func(g *engine.Game, v *engine.Villain, damage int) bool {
 				for _, o := range g.Villains {
 					if o != nil && o != v && o.Code[:5] == "21092" && o.HP() > 0 {
-						g.Logf("Corvus cannot be defeated while Proxima Midnight lives")
+						g.TLogf("c.corvusCannotBeDefeatedWhileProximaMidnightLives")
 						return false
 					}
 				}
@@ -349,7 +349,7 @@ func registerTowerDefense() {
 			}
 			if env.Counters >= 9*len(g.Players) {
 				env.Counters = 0
-				g.LogMajorf("Avengers Tower collapses! (reset — loss condition approximated)")
+				g.TLogMajorf("c.avengersTowerCollapsesResetLossConditionApproximated")
 			}
 			return nil
 		},
@@ -371,7 +371,7 @@ func registerTowerDefense() {
 			} else {
 				g.ActiveVillain = ids[0]
 			}
-			g.Logf("Focused Defense: the active villain is now %s", g.Villains[g.ActiveVillain].EDef().Name)
+			g.TLogf("c.focusedDefenseTheActiveVillainIsNow", g.Villains[g.ActiveVillain].EDef().Name)
 			return nil
 		},
 	})
@@ -436,7 +436,7 @@ func registerTowerDefense() {
 			g.Delete(t.ID)
 			if tower := g.EnvironmentByCode("21100a"); tower != nil {
 				tower.Counters += 3
-				g.Logf("Avengers Tower takes 3 damage (%d)", tower.Counters)
+				g.TLogf("c.avengersTowerTakes3Damage", tower.Counters)
 			}
 			return nil
 		},
@@ -488,7 +488,7 @@ func registerThanos() {
 				// Shuffle discard into deck, remove half from the game.
 				p.Deck = append(p.Deck, p.Discard...)
 				p.Discard = nil
-				g.Logf("%s's discard pile is shuffled away by Balance the Scales (deck-halving approximated)", p.Name)
+				g.TLogf("c.sDiscardPileIsShuffledAwayByBalanceTheScalesDeckHalvingAppro", p.Name)
 			}
 			return msgs
 		},
@@ -588,7 +588,7 @@ func registerThanos() {
 			for _, env := range g.Environments {
 				if env != nil && env.EDef().HasTrait("infinity stone") {
 					g.Delete(env.ID)
-					g.Logf("%s is discarded", env.EDef().Name)
+					g.TLogf("log.discarded", env)
 					return nil
 				}
 			}
@@ -667,7 +667,7 @@ func revealStone(g *engine.Game) []engine.Message {
 	c := g.SetAside[0]
 	g.SetAside = g.SetAside[1:]
 	g.SpawnEnvironment(c.Code)
-	g.LogMajorf("The %s reveals!", c.Def().Name)
+	g.TLogMajorf("c.theReveals", c)
 	return nil
 }
 

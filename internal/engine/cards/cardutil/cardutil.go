@@ -34,14 +34,14 @@ func SortedEnemyIDs(g *engine.Game) []engine.EntityID {
 }
 
 // EnemyLabel renders an enemy with its remaining HP for choice lists.
-func EnemyLabel(e engine.Entity) string {
+func EnemyLabel(e engine.Entity) engine.Msg {
 	switch t := e.(type) {
 	case *engine.Villain:
-		return engine.Tf("m.hp", t.EDef().Name, t.HP(), t.MaxHP)
+		return engine.Tf("m.hp", t, t.HP(), t.MaxHP)
 	case *engine.Minion:
-		return engine.Tf("m.hp", t.EDef().Name, t.HP(), t.MaxHP)
+		return engine.Tf("m.hp", t, t.HP(), t.MaxHP)
 	}
-	return e.EDef().Name
+	return engine.S(e.EDef().Name)
 }
 
 // EnemyChoices lists all enemies as damage targets.
@@ -76,7 +76,7 @@ func SchemeChoices(g *engine.Game, mk func(scheme engine.EntityID) []engine.Mess
 	for _, id := range g.Schemes() {
 		s := g.Entity(id)
 		out = append(out, engine.Choice{
-			Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+			Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 			SourceID: id, CardCode: s.ECode(),
 		}.Msgs(mk(id)...))
 	}
@@ -85,7 +85,7 @@ func SchemeChoices(g *engine.Game, mk func(scheme engine.EntityID) []engine.Mess
 
 // ChooseEnemy builds an OnPlay hook that asks for an enemy and deals damage
 // to it; the callback returns the damage plus optional extra messages.
-func ChooseEnemy(prompt string, f func(g *engine.Game, e engine.Entity) (int, []engine.Message)) func(g *engine.Game, e engine.Entity) []engine.Message {
+func ChooseEnemy(prompt engine.Msg, f func(g *engine.Game, e engine.Entity) (int, []engine.Message)) func(g *engine.Game, e engine.Entity) []engine.Message {
 	return func(g *engine.Game, e engine.Entity) []engine.Message {
 		pid := e.EOwner()
 		if len(g.Enemies()) == 0 {
@@ -108,8 +108,9 @@ func ChooseEnemy(prompt string, f func(g *engine.Game, e engine.Entity) (int, []
 }
 
 // ChooseScheme builds an OnPlay hook that asks for a scheme and removes
-// threat from it.
-func ChooseScheme(name string, amount func(g *engine.Game, e engine.Entity) int) func(g *engine.Game, e engine.Entity) []engine.Message {
+// threat from it. prompt is the full question prompt (call sites pass
+// engine.Tf keys such as "For Justice! — choose a scheme").
+func ChooseScheme(prompt engine.Msg, amount func(g *engine.Game, e engine.Entity) int) func(g *engine.Game, e engine.Entity) []engine.Message {
 	return func(g *engine.Game, e engine.Entity) []engine.Message {
 		pid := e.EOwner()
 		schemes := g.Schemes()
@@ -120,19 +121,19 @@ func ChooseScheme(name string, amount func(g *engine.Game, e engine.Entity) int)
 		for _, id := range schemes {
 			s := g.Entity(id)
 			choices = append(choices, engine.Choice{
-				Label: s.EDef().Name, Kind: engine.ChoiceTarget,
+				Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(engine.ThwartScheme{Scheme: id, N: amount(g, e), Source: pid}))
 		}
 		return []engine.Message{engine.AskQuestion{
 			Player:   pid,
-			Question: engine.Ask(name+" — choose a scheme", choices...),
+			Question: engine.Ask(prompt, choices...),
 		}}
 	}
 }
 
 // ChooseMinion builds an OnPlay hook that deals damage to a chosen minion.
-func ChooseMinion(prompt string, dmg int) func(g *engine.Game, e engine.Entity) []engine.Message {
+func ChooseMinion(prompt engine.Msg, dmg int) func(g *engine.Game, e engine.Entity) []engine.Message {
 	return func(g *engine.Game, e engine.Entity) []engine.Message {
 		pid := e.EOwner()
 		choices := MinionChoices(g, func(target engine.EntityID) []engine.Message {
@@ -150,7 +151,7 @@ func ChooseMinion(prompt string, dmg int) func(g *engine.Game, e engine.Entity) 
 
 // Skip returns the standard pass choice.
 func Skip() engine.Choice {
-	return engine.Choice{ID: "skip", Label: "Skip", Kind: engine.ChoicePass}
+	return engine.Choice{ID: "skip", Label: engine.Tf("c.skip"), Kind: engine.ChoicePass}
 }
 
 // FirstPlayerID returns the first player's id.
@@ -186,7 +187,7 @@ func Cost(def *data.CardDef) int {
 // alter-ego form. Choose: exhaust your identity → remove this obligation
 // from the game, or apply the penalty and discard it." penaltyMsgs run after
 // the obligation is discarded (surge riders etc. are safe to include).
-func ExhaustOrPenalty(g *engine.Game, p *engine.Player, card engine.Card, penaltyLabel string, penaltyMsgs ...engine.Message) []engine.Message {
+func ExhaustOrPenalty(g *engine.Game, p *engine.Player, card engine.Card, penaltyLabel engine.Msg, penaltyMsgs ...engine.Message) []engine.Message {
 	var removeMsgs []engine.Message
 	if p.IsHero() && !p.FormChanged && !p.Exhausted {
 		removeMsgs = append(removeMsgs, engine.ChangeForm{Player: p.ID})
@@ -195,14 +196,13 @@ func ExhaustOrPenalty(g *engine.Game, p *engine.Player, card engine.Card, penalt
 		engine.ExhaustEntity{ID: p.ID},
 		engine.ObligationResolve{Player: p.ID, Card: card, Remove: true},
 	)
-	name := card.Def().Name
 	penalty := append([]engine.Message{engine.ObligationResolve{Player: p.ID, Card: card}}, penaltyMsgs...)
 	return []engine.Message{engine.AskQuestion{
 		Player: p.ID,
-		Question: engine.Ask(name+" — choose:",
+		Question: engine.Ask(engine.Tf("c.choose", card),
 			engine.Choice{
 				ID:    "remove",
-				Label: "Exhaust " + p.AlterEgoDef().Name + " → remove " + name + " from the game",
+				Label: engine.Tf("c.exhaustRemoveFromTheGame", p.AlterEgoDef(), card),
 				Kind:  engine.ChoiceLabel,
 			}.Msgs(removeMsgs...),
 			engine.Choice{

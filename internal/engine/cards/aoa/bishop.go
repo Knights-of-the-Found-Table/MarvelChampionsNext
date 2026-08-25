@@ -2,8 +2,6 @@
 package aoa
 
 import (
-	"fmt"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -92,7 +90,7 @@ func registerBishop() {
 				var choices []engine.Choice
 				for _, c := range p.Discard {
 					if c.Def().HasTrait("temporal") {
-						choices = append(choices, engine.Choice{Label: "Return " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.
+						choices = append(choices, engine.Choice{Label: engine.S("Return " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 				}
@@ -100,7 +98,7 @@ func registerBishop() {
 					return nil
 				}
 				return []engine.Message{engine.AskQuestion{Player: p.ID,
-					Question: engine.Ask("Temporally Displaced — return a Temporal card", choices...)}}
+					Question: engine.Ask(engine.Tf("c.temporallyDisplacedReturnATemporalCard"), choices...)}}
 			}
 			return nil
 		},
@@ -111,7 +109,7 @@ func registerBishopSignatures() {
 	registerBishopAlly := func(code, icon string) {
 		engine.RegisterBehavior(code, &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: "Discard a resource card → ready " + e.EDef().Name,
+				Label: engine.S("Discard a resource card → ready " + e.EDef().Name),
 				Type:  engine.AbilityAction, OncePerTurn: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -128,12 +126,12 @@ func registerBishopSignatures() {
 								break
 							}
 						}
-						choices = append(choices, engine.Choice{Label: "Discard " + c.Def().Name, Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(msgs...))
+						choices = append(choices, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Ready "+a.EDef().Name, choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S("Ready "+a.EDef().Name), choices...)}}
 				},
 			}}
 		}})
@@ -142,7 +140,7 @@ func registerBishopSignatures() {
 	registerBishopAlly("45003", "energy")
 
 	engine.RegisterBehavior("45004", &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-		return []engine.Ability{{Label: "Bishop's Rifle — damage for each resource card in hand", Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
+		return []engine.Ability{{Label: engine.Tf("c.bishopSRifleDamageForEachResourceCardInHand"), Type: engine.AbilityAction, HeroOnly: true, Exhaust: true,
 			Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 				u := g.Upgrades[self]
 				if u == nil {
@@ -155,7 +153,7 @@ func registerBishopSignatures() {
 				if len(choices) == 0 {
 					return nil
 				}
-				return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask("Bishop's Rifle — choose an enemy", choices...)}}
+				return []engine.Message{engine.AskQuestion{Player: u.Owner, Question: engine.Ask(engine.Tf("c.bishopSRifleChooseAnEnemy"), choices...)}}
 			}}}
 	}})
 
@@ -164,7 +162,7 @@ func registerBishopSignatures() {
 
 	engine.RegisterBehavior("45006", &engine.Behavior{
 		Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
-			return []engine.Ability{{Label: "Super-Charged — discard a resource card", Type: engine.AbilityAction,
+			return []engine.Ability{{Label: engine.Tf("c.superChargedDiscardAResourceCard"), Type: engine.AbilityAction,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					u := g.Upgrades[self]
 					if u == nil {
@@ -174,13 +172,13 @@ func registerBishopSignatures() {
 					var choices []engine.Choice
 					for _, c := range resourceCards(p.Hand) {
 						n := len(c.Def().Resources)
-						choices = append(choices, engine.Choice{Label: fmt.Sprintf("Discard %s — %d charge", c.Def().Name, n), Kind: engine.ChoiceCard, CardCode: c.Code}.
+						choices = append(choices, engine.Choice{Label: engine.Tf("c.discardCharge", c, n), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}, engine.AddEntityCounter{ID: u.ID, N: n}))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Super-Charged — choose a resource card", choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.superChargedChooseAResourceCard"), choices...)}}
 				}}}
 		},
 		React: func(g *engine.Game, e engine.Entity, msg engine.Message) []engine.Message {
@@ -210,7 +208,7 @@ func registerBishopSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask("Concussive Blast — choose an enemy", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask(engine.Tf("c.concussiveBlastChooseAnEnemy"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("45008", &engine.Behavior{OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
@@ -225,7 +223,7 @@ func registerBishopSignatures() {
 		if len(choices) == 0 {
 			return nil
 		}
-		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask("Command Authority — choose a scheme", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: ev.Owner, Question: engine.Ask(engine.Tf("c.commandAuthorityChooseAScheme"), choices...)}}
 	}})
 
 	engine.RegisterBehavior("45009", &engine.Behavior{DefenseEvent: func(g *engine.Game, p *engine.Player, e *engine.EventCard, against engine.EntityID) (engine.Defends, []engine.Message, bool) {
@@ -253,12 +251,12 @@ func registerBishopObligation() {
 			penalty = append(penalty, engine.DealEncounterToPlayer{Player: p.ID})
 		}
 		penalty = append(penalty, engine.ObligationResolve{Player: p.ID, Card: card})
-		choices := []engine.Choice{engine.Choice{ID: "fear", Label: "Discard each resource card from your hand", Kind: engine.ChoiceLabel}.Msgs(penalty...)}
+		choices := []engine.Choice{engine.Choice{ID: "fear", Label: engine.Tf("c.discardEachResourceCardFromYourHand"), Kind: engine.ChoiceLabel}.Msgs(penalty...)}
 		if !p.IsHero() && !p.Exhausted {
-			choices = append(choices, engine.Choice{ID: "remove", Label: "Exhaust Lucas Bishop and remove Fear the Future", Kind: engine.ChoiceLabel}.
+			choices = append(choices, engine.Choice{ID: "remove", Label: engine.Tf("c.exhaustLucasBishopAndRemoveFearTheFuture"), Kind: engine.ChoiceLabel}.
 				Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 		}
-		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask("Fear the Future — choose", choices...)}}
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.fearTheFutureChoose"), choices...)}}
 	}})
 }
 
