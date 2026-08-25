@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { get, post, getToken, type Choice, type GameView, type Question } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
 import { useChoiceLabel } from '../i18n/labels'
@@ -14,6 +14,7 @@ import '../style/board.css'
 
 export default function Game() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const gameId = Number(id)
   const t = useT()
   const choiceLabel = useChoiceLabel()
@@ -350,10 +351,13 @@ export default function Game() {
             onToggle={() => setPanelOpen((v) => !v)}
           />
         ) : view.over ? (
-          <div className="question">
+          <div className="question game-over-panel">
             <p className={view.won ? 'victory' : 'defeat'}>
               {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {view.reason}
             </p>
+            <button className="primary" onClick={() => navigate('/')}>
+              {t('game.backHome')}
+            </button>
           </div>
         ) : null}
       </div>
