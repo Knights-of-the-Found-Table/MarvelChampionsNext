@@ -85,7 +85,7 @@ var messages = map[string]map[Lang]string{
 	"log.losesThreat":                  {LangEn: "%s loses %d threat (now %d)", LangZh: "%s 减少 %d 点威胁（现为 %d）"},
 	"log.losesThreatMax":               {LangEn: "%s loses %d threat (now %d/%d)", LangZh: "%s 减少 %d 点威胁（现为 %d/%d）"},
 	"log.mainSchemeDefeated":           {LangEn: "Main scheme %s is defeated", LangZh: "主线密谋 %s 被击败"},
-	"log.mainSchemeFlips":              {LangEn: "Main scheme flips to stage %s (threat %d/%d)", LangZh: "主线密谋翻到阶段 %s（威胁 %d/%d）"},
+	"log.mainSchemeFlips":              {LangEn: "Main scheme %s flips to stage %s (threat %d/%d)", LangZh: "主线密谋 %s 翻到阶段 %s（威胁 %d/%d）"},
 	"log.mainSchemeReveals":            {LangEn: "Main scheme: %s reveals stage %s", LangZh: "主线密谋 %s 揭示阶段 %s"},
 	"log.mulligansAway":                {LangEn: "%s mulligans %s away", LangZh: "%s 调度换掉了 %s"},
 	"log.nextCardCostsLess":            {LangEn: "%s's next card this phase costs %d less", LangZh: "%s 本阶段的下一张牌费用减少 %d"},

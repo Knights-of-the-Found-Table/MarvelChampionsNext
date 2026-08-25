@@ -1312,7 +1312,9 @@ func (g *Game) spawnMainScheme(stages []string, stage int) *MainScheme {
 		Hazard:     def.Hazards,
 	}
 	g.MainScheme = s
-	g.tlogMajorf("log.mainSchemeReveals", def.Name, s.EDef().StageLabel)
+	// The scheme itself is the name arg (a-face code at this point), so
+	// clients can show a card preview when hovering the line.
+	g.tlogMajorf("log.mainSchemeReveals", s, s.EDef().StageLabel)
 	if b := behavior(s.Code); b.MainSchemeRevealed != nil {
 		g.Push(b.MainSchemeRevealed(g, s)...)
 	}

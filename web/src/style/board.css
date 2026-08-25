@@ -1046,6 +1046,40 @@
   color: #8494a7;
 }
 
+/* 日志等处的卡名引用：虚线下划线提示可悬浮，hover 出卡图预览（card-zoom 层） */
+.card-arg {
+  border-bottom: 1px dotted #6f8db4;
+  cursor: help;
+  color: #bcd3ec;
+}
+
+/* 主计谋 a 面故事弹窗：非阻塞，仅作展示 */
+.scheme-story {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 320;
+}
+
+.scheme-story-body {
+  width: min(480px, 94vw);
+  max-height: 88vh;
+  overflow: auto;
+  background: rgba(16, 20, 27, 0.97);
+  border: 1px solid #46586c;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.scheme-story-cards {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
 /* 错误 toast：独立显示，不挤占顶栏 */
 .error-toast {
   position: absolute;

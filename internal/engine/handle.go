@@ -718,8 +718,10 @@ func (g *Game) handle(msg Message) {
 		if g.MainScheme != nil && m.Scheme == g.MainScheme.ID {
 			s := g.MainScheme
 			s.Code = s.StageCodes[s.Stage-1]
-			g.tlogMajorf("log.mainSchemeFlips",
-				s.EDef().StageLabel, s.Threat, s.MaxThreat)
+			// The scheme is the first arg (now the b-face code): hovering
+			// the line shows the flipped-to face, and clients watch for
+			// this entry to pop the a-face story that was just turned away.
+			g.tlogMajorf("log.mainSchemeFlips", s, s.EDef().StageLabel, s.Threat, s.MaxThreat)
 			// b-face "When Revealed" effects resolve at the flip. Exact-key
 			// lookup, and only for true b-face codes: single-code stages
 			// ("04061") already fired their base registration at the spawn

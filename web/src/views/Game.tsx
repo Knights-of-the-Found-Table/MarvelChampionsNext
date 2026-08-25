@@ -6,9 +6,10 @@ import { useChoiceLabel, useEngineMsg } from '../i18n/labels'
 import type { GameEvt } from '../board/fx'
 import type { PlacedCard } from '../board/layout'
 import { initSfx, playSfx, setSfxMuted, sfxSettings } from '../audio/sfx'
-import { CardImage } from '../cards'
+import { aFaceCode, CardImage } from '../cards'
 import Board from '../components/Board'
 import ChatPanel from '../components/ChatPanel'
+import MsgText from '../components/MsgText'
 import QuestionPanel from '../components/QuestionPanel'
 import ReportBugButton from '../components/ReportBugButton'
 import TutorialOverlay from '../components/TutorialOverlay'
@@ -70,6 +71,52 @@ export default function Game() {
       playSfx(view.won ? 'victory' : 'defeat')
     }
   }, [view])
+
+  // 主计谋 a 面故事：主计谋以 a 面（剧情介绍）进场随即翻到 b 面，玩家来
+  // 不及读。检测快照日志里新出现的 log.mainSchemeFlips 条目（seq 单调递
+  // 增，可跨快照 diff），以非阻塞弹窗展示刚被翻走的 a 面；之后随时可在
+  // 对局记录里悬浮翻面行的卡名回看。
+  const [stories, setStories] = useState<Array<{ aCode: string; name: string }>>([])
+  const lastSeqRef = useRef<number | null>(null)
+  // 已弹过故事的翻面 seq：撤销会回退 seq、重放时同一 seq 再次出现；旧快照
+  // 乱序到达（初始 GET 晚于 WS 帧）也会重放旧 seq——都按已展示跳过。
+  const shownFlipsRef = useRef<Set<number>>(new Set())
+  useEffect(() => {
+    if (!view) return
+    const log = view.log ?? []
+    const maxSeq = log.reduce((m, e) => Math.max(m, e.seq ?? 0), 0)
+    const seen = lastSeqRef.current
+    lastSeqRef.current = maxSeq
+    if (seen === null) {
+      // 首个快照：其中的翻面都算已展示（开局翻面由下面的开局规则补弹，
+      // 中途加入的对局不弹），避免之后乱序到达的旧帧重复触发。
+      for (const e of log) {
+        if (e.seq && e.key === 'log.mainSchemeFlips') shownFlipsRef.current.add(e.seq)
+      }
+      // 开局翻面已包含在首个快照里，diff 不到——第 1 轮直接展示当前阶段
+      // 的故事；中途加入/刷新的对局不弹（记录里悬浮可看）。
+      if (!view.over && view.round <= 1 && view.mainScheme) {
+        const a = aFaceCode(view.mainScheme.code)
+        if (a) setStories((s) => [...s, { aCode: a, name: view.mainScheme!.name }])
+      }
+      return
+    }
+    for (const e of log) {
+      if (!e.seq || e.seq <= seen || e.key !== 'log.mainSchemeFlips') continue
+      if (shownFlipsRef.current.has(e.seq)) continue
+      shownFlipsRef.current.add(e.seq)
+      const arg = e.args?.find((a) => a.k === 'card')
+      const a = arg?.code ? aFaceCode(arg.code) : null
+      if (a) setStories((s) => [...s, { aCode: a, name: arg?.s ?? a }])
+    }
+  }, [view])
+
+  // 换对局（路由参数变化复用组件）时复位故事弹窗状态
+  useEffect(() => {
+    lastSeqRef.current = null
+    shownFlipsRef.current = new Set()
+    setStories([])
+  }, [gameId])
 
   const connect = useCallback(() => {
     const token = getToken() ?? ''
@@ -307,7 +354,7 @@ export default function Game() {
             <div className="log-body">
               {(view.log ?? []).slice().reverse().map((e, i) => (
                 <div key={i} className={`log-line log-${e.level || 'info'}`}>
-                  {em({ key: e.key, args: e.args, text: e.text })}
+                  <MsgText m={{ key: e.key, args: e.args, text: e.text }} />
                 </div>
               ))}
             </div>
@@ -373,6 +420,23 @@ export default function Game() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+        {/* 主计谋 a 面故事：非阻塞弹窗（不等待任何作答），点遮罩/关闭继续；
+            连续翻面依次排队展示 */}
+        {stories.length > 0 && (
+          <div className="scheme-story" onClick={() => setStories((s) => s.slice(1))}>
+            <div className="scheme-story-body" onClick={(e) => e.stopPropagation()}>
+              <div className="row space-between">
+                <strong>{lname(zh, stories[0].aCode, stories[0].name)}</strong>
+                <button className="linklike" onClick={() => setStories((s) => s.slice(1))}>
+                  {t('pile.close')}
+                </button>
+              </div>
+              <div className="scheme-story-cards">
+                <CardImage code={stories[0].aCode} size="lg" />
+              </div>
             </div>
           </div>
         )}

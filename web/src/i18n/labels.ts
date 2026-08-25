@@ -37,19 +37,9 @@ export function loadCatalog(lang: Lang): Promise<Catalog | null> {
   return catalogPromises[lang]
 }
 
-// ---- sprintf: %s %d %% 及 Go 显式序号 %[1]s ------------------------------
+// ---- 动词匹配: %s %d %% 及 Go 显式序号 %[1]s ------------------------------
 
 const VERB = /%(?:\[(\d+)\])?([a-zA-Z%])/g
-
-function sprintf(format: string, args: string[]): string {
-  let next = 0
-  return format.replace(VERB, (whole, idx: string | undefined, verb: string) => {
-    if (verb === '%') return '%'
-    const n = idx ? parseInt(idx, 10) - 1 : next++
-    const a = args[n]
-    return a === undefined ? whole : a
-  })
-}
 
 // ---- 消息渲染 -------------------------------------------------------------
 
@@ -61,27 +51,54 @@ export function asMsg(m: MsgWire | string | undefined | null): MsgWire {
 // cardName 按当前语言解析卡名：zh 查译名表，en/缺译回退 arg.s。
 type CardNamer = (code: string, fallback: string) => string
 
-function renderArg(a: ArgWire, lang: Lang, cardName: CardNamer): string {
-  if (a.k === 'i') return String(a.i ?? 0)
-  if (a.k === 'card') return cardName(a.code ?? '', a.s ?? '')
-  if (a.k === 'msg' && a.msg) return formatMsg(a.msg, lang, cardName)
-  return a.s ?? ''
+// 消息渲染的中间形态：文本片段、卡名引用（code 可悬浮出卡图预览）或嵌套
+// 消息。formatMsg 把它拼成字符串；React 侧（MsgText 组件）按片段类型渲染，
+// 卡名片段带 hover 卡图。
+export type MsgPart = { t: string } | { card: { code: string; name: string } } | { msg: MsgWire }
+
+function argPart(a: ArgWire | undefined, lang: Lang, cardName: CardNamer): MsgPart {
+  if (!a) return { t: '' }
+  if (a.k === 'i') return { t: String(a.i ?? 0) }
+  if (a.k === 'card') return { card: { code: a.code ?? '', name: cardName(a.code ?? '', a.s ?? '') } }
+  if (a.k === 'msg' && a.msg) return { msg: a.msg }
+  return { t: a.s ?? '' }
+}
+
+function msgParts(m: MsgWire, lang: Lang, cardName: CardNamer): MsgPart[] {
+  const fmt = m.key ? catalogs[lang]?.[m.key] : undefined
+  if (!fmt) return [{ t: m.text }]
+  const args = m.args ?? []
+  const parts: MsgPart[] = []
+  let next = 0
+  let last = 0
+  for (const match of fmt.matchAll(VERB)) {
+    const idx = match.index ?? 0
+    if (idx > last) parts.push({ t: fmt.slice(last, idx) })
+    last = idx + match[0].length
+    if (match[2] === '%') {
+      parts.push({ t: '%' })
+      continue
+    }
+    const explicit = match[1]
+    const n = explicit ? parseInt(explicit, 10) - 1 : next++
+    // 缺参时保留动词原文（与 sprintf 的回退一致），多出的参数忽略。
+    parts.push(args[n] !== undefined ? argPart(args[n], lang, cardName) : { t: match[0] })
+  }
+  if (last < fmt.length) parts.push({ t: fmt.slice(last) })
+  return parts
 }
 
 export function formatMsg(m: MsgWire, lang: Lang, cardName: CardNamer): string {
-  const fmt = m.key ? catalogs[lang]?.[m.key] : undefined
-  if (!fmt) return m.text
-  const args = (m.args ?? []).map((a) => renderArg(a, lang, cardName))
-  return sprintf(fmt, args)
+  return msgParts(m, lang, cardName)
+    .map((p) => ('t' in p ? p.t : 'card' in p ? p.card.name : formatMsg(p.msg, lang, cardName)))
+    .join('')
 }
 
 // ---- React 绑定 -----------------------------------------------------------
 
-// useEngineMsg 返回 (m) => string：按当前语言渲染结构化消息。目录异步加载，
-// 未就绪时先渲染 en 兜底文本，加载完成后触发重渲染。
-export function useEngineMsg(): (m: MsgWire | string | undefined | null) => string {
+// 目录异步加载；未就绪时调用方先渲染 en 兜底文本，加载完成后由此触发重渲染。
+function useCatalogTick(): void {
   const lang = useLang()
-  const zhMap = useZhMap()
   const [, force] = useState(0)
   useEffect(() => {
     let alive = true
@@ -93,8 +110,28 @@ export function useEngineMsg(): (m: MsgWire | string | undefined | null) => stri
       catalogListeners.delete(bump)
     }
   }, [lang])
-  const cardName: CardNamer = (code, fallback) => zhMap?.[code]?.name ?? fallback
+}
+
+function useCardNamer(): CardNamer {
+  const zhMap = useZhMap()
+  return (code, fallback) => zhMap?.[code]?.name ?? fallback
+}
+
+// useEngineMsg 返回 (m) => string：按当前语言渲染结构化消息。
+export function useEngineMsg(): (m: MsgWire | string | undefined | null) => string {
+  const lang = useLang()
+  const cardName = useCardNamer()
+  useCatalogTick()
   return (m) => formatMsg(asMsg(m), lang, cardName)
+}
+
+// useMsgParts 返回 (m) => MsgPart[]：与 useEngineMsg 同源，但保留卡名片段
+// 的结构，供 React 侧（MsgText）给卡名接上 hover 卡图预览。
+export function useMsgParts(): (m: MsgWire | string | undefined | null) => MsgPart[] {
+  const lang = useLang()
+  const cardName = useCardNamer()
+  useCatalogTick()
+  return (m) => msgParts(asMsg(m), lang, cardName)
 }
 
 export function useChoiceLabel(): (c: Choice) => string {

@@ -210,12 +210,15 @@ export interface PlayerView {
   encounterDown: number
 }
 
-// One line of the in-game event journal: level is minor | info | major.
+// One line of the in-game event journal: level is minor | info | major; seq
+// is the server's monotonic entry number (absent on legacy saves) used to
+// diff snapshots.
 export interface LogEntry {
   level: string
   text: string
   key?: string
   args?: ArgWire[]
+  seq?: number
 }
 
 // Public table talk; separate from LogEntry and never part of game state.

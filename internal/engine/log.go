@@ -23,8 +23,13 @@ const maxLogEntries = 500
 // structured, language-neutral form the client renders in the viewer's
 // locale; Text is the canonical English rendering (also the fallback for
 // entries written before the catalog existed, and for plain logf calls).
+// Seq is a monotonic per-game sequence number (entries from pre-seq saves
+// keep 0) letting clients diff two snapshots and spot the lines that are
+// new — e.g. to pop the main scheme's a-face story on a stage flip even
+// after the 500-entry cap starts trimming the journal head.
 type LogEntry struct {
 	Level string `json:"level"`
+	Seq   int    `json:"seq,omitempty"`
 	Key   string `json:"key,omitempty"`
 	Args  []Arg  `json:"args,omitempty"`
 	Text  string `json:"text"`
@@ -68,6 +73,14 @@ func (g *Game) addLog(level, text string) {
 }
 
 func (g *Game) appendLog(e LogEntry) {
+	// Seq derives from the last entry so it survives save/load round-trips
+	// and undo snapshots (a restored journal just keeps counting from its
+	// own tail) without persisting a separate counter.
+	if n := len(g.Log); n > 0 {
+		e.Seq = g.Log[n-1].Seq + 1
+	} else {
+		e.Seq = 1
+	}
 	g.Log = append(g.Log, e)
 	if len(g.Log) > maxLogEntries {
 		g.Log = g.Log[len(g.Log)-maxLogEntries:]

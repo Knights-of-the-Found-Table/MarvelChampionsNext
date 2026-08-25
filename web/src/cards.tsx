@@ -240,3 +240,11 @@ export function fallbackDataUrl(code: string): string {
   </svg>`
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg)
 }
+
+// 主计谋的进场面代码：与引擎 spawnMainScheme 的 BaseCode(code)+"a" 同一
+// 约定，从阶段代码（b 面或无后缀的裸代码）推回 a 面代码。形状不符时返回
+// null（不弹故事）。
+export function aFaceCode(code: string): string | null {
+  if (!/^\d{5}[abc]?$/.test(code)) return null
+  return (code.length === 6 ? code.slice(0, 5) : code) + 'a'
+}

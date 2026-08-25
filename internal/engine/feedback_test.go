@@ -143,6 +143,41 @@ func TestDefenderQuestionTakeChoiceHighlightsIdentity(t *testing.T) {
 	}
 }
 
+// The main-scheme reveal/flip journal lines must carry the scheme as a
+// structured card arg (its a face at spawn, the b face at the flip) so
+// clients can show a card preview when hovering the line, and journal Seq
+// numbers must be strictly increasing for snapshot diffing.
+func TestSchemeJournalCarriesCardArgsAndSeq(t *testing.T) {
+	g := newRulesGame(t, 42)
+
+	var reveal, flip *engine.LogEntry
+	for i := range g.Log {
+		switch g.Log[i].Key {
+		case "log.mainSchemeReveals":
+			reveal = &g.Log[i]
+		case "log.mainSchemeFlips":
+			flip = &g.Log[i]
+		}
+	}
+	if reveal == nil || flip == nil {
+		t.Fatal("setup should journal both the scheme reveal and the stage flip")
+	}
+	if reveal.Args[0].Kind != "card" || reveal.Args[0].Code != "01097a" {
+		t.Fatalf("reveal arg0 = %s/%s, want card 01097a", reveal.Args[0].Kind, reveal.Args[0].Code)
+	}
+	if flip.Args[0].Kind != "card" || flip.Args[0].Code != "01097b" {
+		t.Fatalf("flip arg0 = %s/%s, want card 01097b", flip.Args[0].Kind, flip.Args[0].Code)
+	}
+
+	last := 0
+	for i, e := range g.Log {
+		if e.Seq <= last {
+			t.Fatalf("log[%d] seq = %d, want > %d (strictly increasing)", i, e.Seq, last)
+		}
+		last = e.Seq
+	}
+}
+
 // Klaw main scheme stage 1B (01116b): its When Revealed — discard
 // encounter cards until a minion is discarded, put it into play engaged
 // with the first player — must resolve during setup, right after the
