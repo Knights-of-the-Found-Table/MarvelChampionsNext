@@ -127,6 +127,12 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
     }, ZOOM_DELAY_MS)
   }
 
+  function show() {
+    clearTimer()
+    setSide(position())
+    setVisible(true)
+  }
+
   function hide() {
     clearTimer()
     setVisible(false)
@@ -148,7 +154,7 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
 
   const overlay = visible
     ? createPortal(
-        <div className={`card-zoom card-zoom-${side}`} aria-hidden="true">
+        <div className={`card-zoom card-zoom-${side} ${coarsePointer ? 'card-zoom-touch' : ''}`} aria-hidden="true">
           <img
             src={cardUrl(code, lang)}
             alt=""
@@ -165,7 +171,7 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
       )
     : null
 
-  return { onEnter, hide, overlay }
+  return { onEnter, show, hide, overlay }
 }
 
 // `zoom={false}` lets a parent row own the preview: it calls useCardZoom

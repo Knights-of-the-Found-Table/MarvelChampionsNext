@@ -4,6 +4,22 @@ import { get, allCards, CardInfo, Deck } from '../api'
 import { CardImage, useCardZoom } from '../cards'
 import { lname, lsubname, useT, useZhMap } from '../i18n'
 
+function useOutsideClose(active: boolean, close: () => void) {
+  useEffect(() => {
+    if (!active) return
+    const onDown = (ev: PointerEvent) => {
+      const target = ev.target as HTMLElement | null
+      if (target?.closest('.deck-row, .deck-hero')) return
+      close()
+    }
+    window.addEventListener('pointerdown', onDown)
+    return () => window.removeEventListener('pointerdown', onDown)
+  }, [active, close])
+}
+
+const coarsePointer =
+  typeof window.matchMedia === 'function' && window.matchMedia('(hover: none) and (pointer: coarse)').matches
+
 const TYPE_ORDER = ['ally', 'event', 'support', 'upgrade', 'resource', 'player_side_scheme']
 
 interface DeckEntry {
@@ -11,14 +27,20 @@ interface DeckEntry {
   count: number
 }
 
-function DeckCardRow({ info, count }: DeckEntry) {
-  const thumbRef = useRef<HTMLSpanElement | null>(null)
-  const zoom = useCardZoom(info.code, thumbRef)
+function DeckCardRow({ info, count, onPreview }: DeckEntry & { onPreview: (code: string) => void }) {
+  const rowRef = useRef<HTMLDivElement | null>(null)
+  const zoom = useCardZoom(info.code, rowRef)
   const zh = useZhMap()
   return (
-    <div className="card row deck-row" onMouseEnter={zoom.onEnter} onMouseLeave={zoom.hide}>
+    <div
+      className="card row deck-row"
+      ref={rowRef}
+      onMouseEnter={zoom.onEnter}
+      onMouseLeave={zoom.hide}
+      onClick={() => onPreview(info.code)}
+    >
       <span className="deck-count">{count}x</span>
-      <span className="deck-thumb" ref={thumbRef}>
+      <span className="deck-thumb">
         <CardImage code={info.code} size="xs" zoom={false} />
       </span>
       <div style={{ flex: 1 }}>
@@ -40,6 +62,7 @@ export default function DeckDetail() {
   const zh = useZhMap()
   const [deck, setDeck] = useState<Deck | null>(null)
   const [catalog, setCatalog] = useState<Record<string, CardInfo>>({})
+  const [previewCode, setPreviewCode] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -88,6 +111,17 @@ export default function DeckDetail() {
 
   const hero = catalog[deck.investigatorCode]
   const heroName = hero ? lname(zh, hero.code, hero.name) : deck.investigatorCode
+  const heroZoomRef = useRef<HTMLDivElement | null>(null)
+  const heroZoom = useCardZoom(deck.investigatorCode, heroZoomRef)
+  const previewRef = useRef<HTMLDivElement | null>(null)
+  const previewZoom = useCardZoom(previewCode ?? deck.investigatorCode, previewRef)
+  useOutsideClose(previewCode !== null, () => setPreviewCode(null))
+  useEffect(() => {
+    if (previewCode && coarsePointer) previewZoom.show()
+    else previewZoom.hide()
+    // previewZoom identity changes with code; only react to the requested code.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewCode, coarsePointer])
   const maxCost = Math.max(1, ...stats.costBuckets)
   const grouped = new Map<string, DeckEntry[]>()
   for (const e of entries) {
@@ -104,8 +138,14 @@ export default function DeckDetail() {
   return (
     <section>
       <h2>{deck.name}</h2>
-      <div className="card row deck-hero">
-        <CardImage code={deck.investigatorCode} size="lg" />
+      <div
+        className="card row deck-hero"
+        ref={heroZoomRef}
+        onMouseEnter={heroZoom.onEnter}
+        onMouseLeave={heroZoom.hide}
+        onClick={() => setPreviewCode(deck.investigatorCode)}
+      >
+        <CardImage code={deck.investigatorCode} size="lg" zoom={false} />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           <div>
             <strong>{heroName}</strong>
@@ -153,7 +193,7 @@ export default function DeckDetail() {
           </h3>
           <div className="deck-list">
             {grouped.get(key)!.map((e) => (
-              <DeckCardRow key={e.info.code} info={e.info} count={e.count} />
+              <DeckCardRow key={e.info.code} info={e.info} count={e.count} onPreview={setPreviewCode} />
             ))}
           </div>
         </div>
@@ -161,6 +201,9 @@ export default function DeckDetail() {
       <p className="muted">
         <Link to="/decks">{t('deck.back')}</Link>
       </p>
+      {heroZoom.overlay}
+      {previewCode && coarsePointer && <div ref={previewRef} className="preview-anchor" />}
+      {previewCode && coarsePointer && previewZoom.overlay}
     </section>
   )
 }
