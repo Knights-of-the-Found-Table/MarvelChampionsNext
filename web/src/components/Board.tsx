@@ -44,6 +44,8 @@ export default function Board({
   onCardClick,
   onEndTurn,
   onRecover,
+  onUndo,
+  undoDisabled = false,
 }: {
   view: GameView
   events?: GameEvt[]
@@ -52,6 +54,8 @@ export default function Board({
   onCardClick?: (card: PlacedCard) => void
   onEndTurn?: () => void
   onRecover?: () => void
+  onUndo?: () => void
+  undoDisabled?: boolean
 }) {
   // 高亮 + 暗幕只在"必须立即操作"的问题上启用：回合主菜单（含 end_turn
   // 选项）里的出牌/技能随时可做，不高亮不压暗；选目标、支付、防御这类
@@ -75,6 +79,17 @@ export default function Board({
   const recoverBtn =
     onRecover && heroCard
       ? { x: heroCard.x - 160 * btnScale - 14, y: heroCard.y + CARD_H * btnScale - 50 }
+      : null
+  // 撤销锚在弃牌堆旁（无回合限制，任何阶段都可反悔）；与结束回合同时
+  // 出现时叠在其正上方，组成同一组桌游 token。
+  const undoBtn =
+    onUndo && discardPile
+      ? {
+          x: discardPile.x + 140 * btnScale + 18,
+          y: endTurnBtn
+            ? endTurnBtn.y - 46 * btnScale
+            : discardPile.y + CARD_H * btnScale - 50,
+        }
       : null
   const posRef = useRef(new Map(cards.map((c) => [c.id, c])))
   const prevViewRef = useRef<GameView | null>(null)
@@ -248,6 +263,12 @@ export default function Board({
             <button className="board-action-btn endturn" style={{ left: endTurnBtn.x, top: endTurnBtn.y }} onClick={onEndTurn}>
               <span className="abi-icon">⏭</span>
               <span className="abi-text">{t('q.endTurn')}</span>
+            </button>
+          )}
+          {undoBtn && (
+            <button className="board-action-btn undo" style={{ left: undoBtn.x, top: undoBtn.y }} onClick={onUndo} disabled={undoDisabled}>
+              <span className="abi-icon">⟲</span>
+              <span className="abi-text">{t('game.undo')}</span>
             </button>
           )}
           <EffectsLayer floaters={floaters} arrows={arrows} />

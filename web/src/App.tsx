@@ -13,10 +13,10 @@ export default function App() {
       <header className="topbar">
         <span className="brand">{t('brand')}</span>
         <nav>
+          <ReportBugButton />
           <NavLink to="/">{t('nav.games')}</NavLink>
           <NavLink to="/new">{t('nav.new')}</NavLink>
           <NavLink to="/decks">{t('nav.decks')}</NavLink>
-          <ReportBugButton />
           <select
             aria-label="Language"
             value={lang}

@@ -11,7 +11,6 @@ import Board from '../components/Board'
 import ChatPanel from '../components/ChatPanel'
 import MsgText from '../components/MsgText'
 import QuestionPanel from '../components/QuestionPanel'
-import ReportBugButton from '../components/ReportBugButton'
 import TutorialOverlay from '../components/TutorialOverlay'
 import '../style/board.css'
 
@@ -310,10 +309,12 @@ export default function Game() {
         onCardClick={onCardClick}
         onEndTurn={endTurnChoice ? () => pick(endTurnChoice) : undefined}
         onRecover={recoverChoice ? () => pick(recoverChoice) : undefined}
+        onUndo={undo}
+        undoDisabled={view.over}
       />
       <div className="board-hud">
         <ChatPanel gameId={gameId} incoming={chatMessage} />
-        {/* 左侧操作条：返回主页（二次确认）+ 报告 bug */}
+        {/* 左侧操作条：返回主页（二次确认） */}
         <div className="hud-left">
           <button
             className={`hud-home ${confirmHome ? 'confirm' : ''}`}
@@ -323,7 +324,6 @@ export default function Game() {
             <span aria-hidden="true">{confirmHome ? '⚠️' : '🏠'}</span>
             <span>{confirmHome ? t('game.backHomeConfirm') : t('game.backHome')}</span>
           </button>
-          <ReportBugButton className="hud-report-bug" />
         </div>
         <div className="hud-top">
           <strong>{lname(zh, view.mainScheme?.code ?? '', view.scenario)}</strong>
@@ -353,9 +353,6 @@ export default function Game() {
             title={t('game.anim')}
           >
             {animOn ? '✨' : '⏹'}
-          </button>
-          <button className="hud-undo" onClick={undo} disabled={view.over}>
-            {t('game.undo')}
           </button>
         </div>
         <div className="hud-log">
