@@ -920,8 +920,9 @@ func iconCount(def *data.CardDef) int {
 // card contributes when paying for a card of that aspect (data-driven:
 // parsed from the printed English name, EName — zh overlays replace Name,
 // so matching Name here would silently disable the doubling for Chinese
-// games). "The Power of the Mind" (40028) instead doubles while paying
-// for a PSIONIC card.
+// games). "The Power in All of Us" (13024) doubles for Basic (gray) cards,
+// "The Power of the Mind" (40028) for PSIONIC cards, "The Power of Flight"
+// (42022) for AERIAL cards.
 func powerOfBonus(paying, target *data.CardDef) int {
 	name := paying.EName
 	if name == "" {

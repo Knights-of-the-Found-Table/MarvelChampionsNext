@@ -80,3 +80,43 @@ func TestCostDiscountPenalty(t *testing.T) {
 		t.Fatalf("penalty should be spent, left %+v", p.CostDiscounts)
 	}
 }
+
+// TestPowerInAllOfUsDoublesForBasic: The Power in All of Us (13024) pays 2
+// when the card being paid for is Basic (gray) and only 1 otherwise, end
+// to end through the payment question's validateSelection branch.
+func TestPowerInAllOfUsDoublesForBasic(t *testing.T) {
+	basic := Card{ID: "card-basic", Code: "01093"}   // Tenacity: basic upgrade, cost 2
+	aspect := Card{ID: "card-aspect", Code: "01053"} // Relentless Assault: aggression event, cost 2
+	power := Card{ID: "card-power", Code: "13024"}
+	if bd := DB.MustLookup(basic.Code); bd.Aspect != "basic" || bd.Cost == nil || *bd.Cost != 2 {
+		t.Fatalf("fixture drift: 01093 = %s cost %v", bd.Aspect, bd.Cost)
+	}
+	if ad := DB.MustLookup(aspect.Code); ad.Aspect != "aggression" || ad.Cost == nil || *ad.Cost != 2 {
+		t.Fatalf("fixture drift: 01053 = %s cost %v", ad.Aspect, ad.Cost)
+	}
+
+	payWithPowerAlone := func(target Card, cost int) error {
+		g, p := newDiscountGame()
+		p.Hand = CardList{target, power}
+		q := g.paymentQuestion(p, target, cost)
+		q.assignIDs("")
+		var path string
+		for i := range q.Choices {
+			if q.Choices[i].CardCode == power.Code {
+				path = q.Choices[i].ID
+			}
+		}
+		if path == "" {
+			t.Fatal("13024 not offered as a payment choice")
+		}
+		_, err := g.resolveChooseN(q, []string{path})
+		return err
+	}
+
+	if err := payWithPowerAlone(basic, 2); err != nil {
+		t.Fatalf("13024 alone should cover a 2-cost basic card (doubled to 2): %v", err)
+	}
+	if err := payWithPowerAlone(aspect, 2); err == nil {
+		t.Fatal("13024 should count 1 toward an aggression card: expected a payment error")
+	}
+}
