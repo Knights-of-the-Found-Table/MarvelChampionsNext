@@ -48,6 +48,11 @@ import (
 //    BoostEntersPlay 等），逻辑只读字段。支付图标的线上形态是
 //    Question.PayIcons / Choice.Icons / ctx["abilityIcons"]，前端绝不
 //    反向解析渲染文本。
+//  - 严禁游戏逻辑读 def.Name 做判断：Name 会被 zh 覆盖层替换，匹配即
+//    静默失效（powerOfBonus 第四次教训——"The Power in All of Us" 在
+//    中文局无法翻倍，且其英文名不匹配 "The Power of " 前缀，英文局
+//    也从未生效）。印刷名判断一律读 def.EName（加载期固化，覆盖层
+//    不动它）。
 //  - 严禁把用户语言渲染进存储或 API（旧存档中的 en 文本按原样显示即可）。
 //
 // 【目录】i18n_catalog.go（手写核心文案）+ i18n_cards_catalog.go（卡牌包批量
