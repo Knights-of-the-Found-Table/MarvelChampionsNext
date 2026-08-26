@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom'
 import { allCards, zhCardDetails, type CardInfo, type ZhCardDetail } from './api'
 import { useLang, type Lang } from './i18n'
 import { uiCatalog } from './i18n/catalog'
+import { ResText } from './components/ResourceIcon'
 
 interface Manifest {
   [code: string]: string
@@ -268,7 +269,11 @@ function CardTextOverlay({ code }: { code: string }) {
           .join(' · ')}
         {traits ? ` · ${traits}` : ''}
       </div>
-      {text ? <p>{stripTags(text)}</p> : null}
+      {text ? (
+        <p>
+          <ResText text={stripTags(text)} />
+        </p>
+      ) : null}
     </div>
   )
 }

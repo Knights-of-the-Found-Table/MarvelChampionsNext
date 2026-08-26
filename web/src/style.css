@@ -505,8 +505,20 @@ a.button {
 }
 
 .deck-pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
   flex-shrink: 0;
-  font-size: 0.75rem;
+}
+
+.deck-pips .pip {
+  display: inline-flex;
+}
+
+/* 资源代币图标：贴纸风白描边 + 硬投影，日志/提示/牌组详情共用。 */
+.res-icon {
+  vertical-align: -0.14em;
+  filter: drop-shadow(0.7px 1.1px 0 rgba(28, 12, 7, 0.45));
 }
 
 /* 阵营配色：名称 / 费用徽章 / 圆点共用。 */

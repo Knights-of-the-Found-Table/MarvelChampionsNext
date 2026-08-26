@@ -3,6 +3,7 @@ import type { Choice, Question } from '../api'
 import { CardImage, useCardZoom } from '../cards'
 import { useT } from '../i18n'
 import { useChoiceLabel, useEngineMsg } from '../i18n/labels'
+import { ResText, ResourceIcon } from './ResourceIcon'
 
 function usePromptText(q: Question): string {
   const em = useEngineMsg()
@@ -42,7 +43,9 @@ function ChoiceButton({
       onMouseLeave={choice.cardCode ? zoom.hide : undefined}
     >
       {choice.cardCode && <CardImage code={choice.cardCode} size="xs" zoom={false} />}
-      <span>{choiceLabel(choice)}</span>
+      <span>
+        <ResText text={choiceLabel(choice)} />
+      </span>
       {choice.cardCode && zoom.overlay}
     </button>
   )
@@ -85,7 +88,9 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
   return (
     <div className="question card">
       <div className="row space-between">
-        <strong>{promptText}</strong>
+        <strong>
+          <ResText text={promptText} />
+        </strong>
         <div className="row">
           {onBack && (
             <button className="linklike" onClick={onBack}>
@@ -108,8 +113,8 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
                 const wild = selectedIcons.get('wild') ?? 0
                 const met = got >= n || got + wild >= n
                 return (
-                  <span key={icon} className={`payment-icon ${met ? 'met' : 'missing'}`}>
-                    {t(`res.${icon}`)} {Math.min(got + wild, n)}/{n}
+                  <span key={icon} className={`payment-icon ${met ? 'met' : 'missing'}`} title={t(`res.${icon}`)}>
+                    <ResourceIcon icon={icon} size={13} /> {Math.min(got + wild, n)}/{n}
                   </span>
                 )
               })}

@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router-dom'
 import { get, allCards, CardInfo, Deck } from '../api'
 import { CardImage, useCardZoom } from '../cards'
 import { lname, lsubname, useT, useZhMap } from '../i18n'
+import { ResText, ResourceIcon } from '../components/ResourceIcon'
 
 function useOutsideClose(active: boolean, close: () => void) {
   useEffect(() => {
@@ -25,7 +26,6 @@ const coarsePointer =
 
 const TYPE_ORDER = ['ally', 'event', 'support', 'upgrade', 'resource', 'player_side_scheme']
 const ASPECT_ORDER = ['hero', 'aggression', 'justice', 'leadership', 'protection', 'basic']
-const RES_GLYPH: Record<string, string> = { energy: '⚡', physical: '👊', mental: '🧠', wild: '⭐' }
 
 interface DeckEntry {
   info: CardInfo
@@ -76,7 +76,7 @@ function DeckCardRow({ info, count, onPreview }: DeckEntry & { onPreview: (code:
       <span className="deck-pips">
         {(info.resources ?? []).map((r, i) => (
           <span key={i} className="pip" title={t(`res.${r}`)}>
-            {RES_GLYPH[r] ?? '◆'}
+            <ResourceIcon icon={r} size={13} />
           </span>
         ))}
       </span>
@@ -131,10 +131,18 @@ export default function DeckDetail() {
   // 所有 hooks 必须在下面的 error/loading 早退 return 之前调用：牌组是
   // 异步加载的，deck=null 的首帧与加载完成的第二帧 hook 数量必须一致，
   // 否则 React 报 "Rendered more hooks than during the previous render"。
+  // 导入数据的英雄代码有 base（01010）与带尾缀（01010a）两种历史形态，
+  // 目录里只有带尾缀的身份卡，两种都兜住。
+  const heroCode = deck
+    ? catalog[deck.investigatorCode]?.code ??
+      catalog[`${deck.investigatorCode}a`]?.code ??
+      catalog[deck.investigatorCode.replace(/a$/, '')]?.code ??
+      deck.investigatorCode
+    : ''
   const heroZoomRef = useRef<HTMLDivElement | null>(null)
-  const heroZoom = useCardZoom(deck?.investigatorCode ?? '', heroZoomRef)
+  const heroZoom = useCardZoom(heroCode, heroZoomRef)
   const previewRef = useRef<HTMLDivElement | null>(null)
-  const previewZoom = useCardZoom(previewCode ?? deck?.investigatorCode ?? '', previewRef)
+  const previewZoom = useCardZoom(previewCode ?? heroCode, previewRef)
   useOutsideClose(previewCode !== null, () => setPreviewCode(null))
   useEffect(() => {
     if (previewCode && coarsePointer) previewZoom.show()
@@ -146,7 +154,7 @@ export default function DeckDetail() {
   if (error) return <section><h2>{t('deck.title')}</h2><p className="error">{error}</p></section>
   if (!deck) return <section><p className="muted">{t('deck.loading')}</p></section>
 
-  const hero = catalog[deck.investigatorCode]
+  const hero = catalog[heroCode] ?? catalog[`${heroCode}a`]
   const heroName = hero ? lname(zh, hero.code, hero.name) : deck.investigatorCode
   const heroSub = hero ? lsubname(zh, hero.code, hero.subname ?? '') : ''
   // 扩充需求含英雄本身的扩充。
@@ -189,7 +197,7 @@ export default function DeckDetail() {
           ref={heroZoomRef}
           onMouseEnter={heroZoom.onEnter}
           onMouseLeave={heroZoom.hide}
-          onClick={() => setPreviewCode(deck.investigatorCode)}
+          onClick={() => setPreviewCode(heroCode)}
         >
           <div className={`dhp-header ${aspectClass(hero?.aspect)}`}>
             <strong>
@@ -213,7 +221,7 @@ export default function DeckDetail() {
               </div>
               {hero?.text && (
                 <div className="dhp-text">
-                  {hero.text.replace(/<[^>]*>/g, '')}
+                  <ResText text={hero.text.replace(/<[^>]*>/g, '')} />
                 </div>
               )}
               {hero && (
@@ -222,7 +230,7 @@ export default function DeckDetail() {
                 </div>
               )}
             </div>
-            <CardImage code={deck.investigatorCode} size="lg" zoom={false} />
+            <CardImage code={heroCode} size="lg" zoom={false} />
           </div>
           <div className="dhp-foot">
             <div className="dhp-foot-cell">

@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import type { MsgWire } from '../api'
 import { useCardZoom } from '../cards'
 import { useMsgParts, type MsgPart } from '../i18n/labels'
+import { ResText } from './ResourceIcon'
 
 // 单个卡名片段：自带锚点 ref，hover 出与 GameCard 一致的 card-zoom 层。
 function CardArg({ code, name }: { code: string; name: string }) {
@@ -25,7 +26,7 @@ export default function MsgText({ m }: { m: MsgWire | string }) {
     <>
       {parts.map((p: MsgPart, i: number) =>
         't' in p ? (
-          p.t
+          <ResText key={i} text={p.t} />
         ) : 'card' in p ? (
           <CardArg key={i} code={p.card.code} name={p.card.name} />
         ) : (
