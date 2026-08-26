@@ -175,6 +175,17 @@
   height: 100%;
 }
 
+/* 横版顶牌：元素本身就是旋转后的占位（竖堆框放横牌），居中于 127×176
+   堆框并仅旋转 90°，边框/描边不参与任何缩放。 */
+.gcard-img.pile-top.pile-top-landscape {
+  width: 176px;
+  height: 127px;
+  left: -24.5px;
+  top: 24.5px;
+  object-fit: cover;
+  transform: rotate(90deg);
+}
+
 .pile-count {
   position: absolute;
   top: -12px;

@@ -367,22 +367,19 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
                 src={cardUrl(safeCode, lang)}
                 alt={card.title}
                 draggable={false}
-                // 横版卡图（主/支线密谋）在竖直弃牌堆里按实体牌横放：旋转
-                // 90° 并按堆框高度等比缩放，而不是 object-fit:cover 的竖切。
+                // 横版卡图（主/支线密谋）在竖直弃牌堆里按实体牌横放：把元素
+                // 本身换成旋转后的占位（176×127 居中，.pile-top-landscape），
+                // 仅 rotate 90°。不能在 127×176 元素上 scale 放大——那会把
+                // 边框/描边一起放大成超出牌堆的大空心框。
                 onLoad={(e) => {
                   const img = e.currentTarget
-                  if (img.naturalWidth > img.naturalHeight) {
-                    const ratio = img.naturalWidth / img.naturalHeight
-                    const drawnW = Math.min(127, 176 * ratio)
-                    const scale = 176 / drawnW
-                    img.style.objectFit = 'contain'
-                    img.style.transform = `rotate(90deg) scale(${scale.toFixed(3)})`
-                  }
+                  img.classList.toggle('pile-top-landscape', img.naturalWidth > img.naturalHeight)
                 }}
                 onError={(e) => {
                   const img = e.currentTarget
                   if (!img.dataset.fallback) {
                     img.dataset.fallback = '1'
+                    img.classList.remove('pile-top-landscape')
                     img.src = fallbackDataUrl(safeCode)
                   }
                 }}
