@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"regexp"
 	"testing"
 	"time"
 
@@ -150,9 +151,12 @@ func TestImportDeckFromTextAndFetchDetail(t *testing.T) {
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("import text deck: %d %v", resp.StatusCode, body)
 	}
-	deckID := int64(body["id"].(float64))
+	deckID := body["id"].(string)
+	if len(deckID) != 16 {
+		t.Fatalf("deck id should be a 16-char token, got %q", deckID)
+	}
 
-	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/decks/%d", base, deckID), token, nil)
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/decks/%s", base, deckID), token, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("get deck: %d %v", resp.StatusCode, body)
 	}
@@ -166,7 +170,7 @@ func TestImportDeckFromTextAndFetchDetail(t *testing.T) {
 
 	// another user must not see the deck
 	_, b2 := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: "txtuser2", Password: "secret123"})
-	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/decks/%d", base, deckID), b2["token"].(string), nil)
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/decks/%s", base, deckID), b2["token"].(string), nil)
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("foreign deck should 404: %d %v", resp.StatusCode, body)
 	}
@@ -221,18 +225,21 @@ func TestFullGameFlow(t *testing.T) {
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("import deck: %d %v", resp.StatusCode, body)
 	}
-	deckID := int64(body["id"].(float64))
+	deckID := body["id"].(string)
 
 	// create game
 	resp, body = doJSON(t, "POST", base+"/api/v1/marvel/games", token, createGameRequest{
-		DeckIDs:    []int64{deckID},
+		DeckIDs:    []string{deckID},
 		ScenarioID: "01097",
 	})
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("create game: %d %v", resp.StatusCode, body)
 	}
 	view := body
-	gameID := int64(view["id"].(float64))
+	gameID := view["id"].(string)
+	if len(gameID) != 16 {
+		t.Fatalf("game id should be a 16-char token, got %q", gameID)
+	}
 	// The game opens in setup (round 0) paused on the mulligan question.
 	if view["round"].(float64) != 0 {
 		t.Fatalf("expected round 0 during setup, got %v", view["round"])
@@ -244,7 +251,7 @@ func TestFullGameFlow(t *testing.T) {
 	// answer loop: always pick the first choice
 	answered := 0
 	for i := 0; i < 200; i++ {
-		resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%d", base, gameID), token, nil)
+		resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%s", base, gameID), token, nil)
 		if resp.StatusCode != http.StatusOK {
 			t.Fatalf("view: %d", resp.StatusCode)
 		}
@@ -308,7 +315,7 @@ func TestFullGameFlow(t *testing.T) {
 				paths = []string{c["id"].(string)}
 			}
 		}
-		resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%d/answer", base, gameID), token, answerRequest{Paths: paths})
+		resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/answer", base, gameID), token, answerRequest{Paths: paths})
 		if resp.StatusCode != http.StatusOK {
 			t.Fatalf("answer %v: %d %v", paths, resp.StatusCode, body)
 		}
@@ -320,13 +327,13 @@ func TestFullGameFlow(t *testing.T) {
 	}
 
 	// undo once
-	resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%d/undo", base, gameID), token, nil)
+	resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/undo", base, gameID), token, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("undo: %d %v", resp.StatusCode, body)
 	}
 
 	// replay log
-	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%d/replay", base, gameID), token, nil)
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%s/replay", base, gameID), token, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("replay: %d", resp.StatusCode)
 	}
@@ -350,17 +357,17 @@ func TestHandRedaction(t *testing.T) {
 		Slots:            map[string]int{"01088": 3, "01089": 3, "01090": 3, "01005": 2, "01006": 1, "01002": 1},
 	}
 	_, bd := doJSON(t, "POST", base+"/api/v1/marvel/decks", t1, deck)
-	deckID := int64(bd["id"].(float64))
+	deckID := bd["id"].(string)
 
-	resp, body := doJSON(t, "POST", base+"/api/v1/marvel/games", t1, createGameRequest{DeckIDs: []int64{deckID}, ScenarioID: "01097"})
+	resp, body := doJSON(t, "POST", base+"/api/v1/marvel/games", t1, createGameRequest{DeckIDs: []string{deckID}, ScenarioID: "01097"})
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("create game: %d %v", resp.StatusCode, body)
 	}
 	view := body
-	gameID := int64(view["id"].(float64))
+	gameID := view["id"].(string)
 
 	// u2 sees no hand codes and no question
-	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%d", base, gameID), t2, nil)
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%s", base, gameID), t2, nil)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("spectator view: %d", resp.StatusCode)
 	}
@@ -380,8 +387,97 @@ func TestHandRedaction(t *testing.T) {
 	}
 
 	// u2 cannot answer u1's question
-	resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%d/answer", base, gameID), t2, answerRequest{Paths: []string{"0"}})
+	resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/answer", base, gameID), t2, answerRequest{Paths: []string{"0"}})
 	if resp.StatusCode == http.StatusOK {
 		t.Fatal("u2 must not answer u1's question")
+	}
+}
+
+// TestOpaqueIdentifiers pins the anti-enumeration contract: game and deck
+// identities in URLs and payloads are 16-char URL-safe tokens, sequential
+// ids never resolve, and the replay payload leaks no numeric deck ids.
+func TestOpaqueIdentifiers(t *testing.T) {
+	ts, _ := newTestServer(t)
+	base := ts.URL
+
+	tokenRE := regexp.MustCompile(`^[A-Za-z0-9_-]{16}$`)
+
+	_, b := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: "opaque", Password: "secret123"})
+	token := b["token"].(string)
+
+	_, bd := doJSON(t, "POST", base+"/api/v1/marvel/decks", token, importDeckRequest{
+		Name:             "Deck",
+		InvestigatorCode: "01001a",
+		Slots:            map[string]int{"01088": 3, "01089": 3, "01090": 3, "01005": 2, "01006": 1, "01002": 1},
+	})
+	deckID := bd["id"].(string)
+	if !tokenRE.MatchString(deckID) {
+		t.Fatalf("deck id not a token: %q", deckID)
+	}
+
+	_, bg := doJSON(t, "POST", base+"/api/v1/marvel/games", token, createGameRequest{DeckIDs: []string{deckID}, ScenarioID: "01097"})
+	gameID := bg["id"].(string)
+	if !tokenRE.MatchString(gameID) {
+		t.Fatalf("game id not a token: %q", gameID)
+	}
+
+	// sequential ids must not resolve anywhere (method-matched so routing
+	// itself answers 404, not 405)
+	numericCases := []struct{ method, path string }{
+		{"GET", "/api/v1/marvel/games/1"},
+		{"GET", "/api/v1/marvel/games/1/replay"},
+		{"GET", "/api/v1/marvel/games/1/pile?player=p&pile=deck"},
+		{"POST", "/api/v1/marvel/games/1/answer"},
+		{"POST", "/api/v1/marvel/games/1/join"},
+		{"GET", "/api/v1/marvel/decks/1"},
+	}
+	for _, tc := range numericCases {
+		resp, _ := doJSON(t, tc.method, base+tc.path, token, map[string]any{})
+		if resp.StatusCode != http.StatusNotFound {
+			t.Fatalf("numeric path should 404: %s %s -> %d", tc.method, tc.path, resp.StatusCode)
+		}
+	}
+
+	// well-formed but unknown tokens 404 too
+	resp, _ := doJSON(t, "GET", base+"/api/v1/marvel/games/aaaaaaaaaaaaaaaa", token, nil)
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("unknown token should 404: %d", resp.StatusCode)
+	}
+
+	// the games list only carries tokens
+	req, _ := http.NewRequest("GET", base+"/api/v1/marvel/games", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	lresp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("list games: %v", err)
+	}
+	var games []map[string]any
+	_ = json.NewDecoder(lresp.Body).Decode(&games)
+	lresp.Body.Close()
+	if len(games) == 0 {
+		t.Fatal("expected the created game in the list")
+	}
+	for _, g := range games {
+		if !tokenRE.MatchString(g["id"].(string)) {
+			t.Fatalf("list exposed a non-token id: %v", g["id"])
+		}
+	}
+
+	// replay exposes deck tokens, not numeric deck ids
+	_, br := doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%s/replay", base, gameID), token, nil)
+	rawReplay, err := json.Marshal(br)
+	if err != nil {
+		t.Fatalf("replay re-marshal: %v", err)
+	}
+	if bytes.Contains(rawReplay, []byte(`"deckId"`)) {
+		t.Fatal("replay leaked numeric deckId")
+	}
+	players, _ := br["players"].([]any)
+	if len(players) == 0 {
+		t.Fatal("replay missing players")
+	}
+	p0 := players[0].(map[string]any)
+	if !tokenRE.MatchString(p0["deck"].(string)) {
+		t.Fatalf("replay player deck not a token: %v", p0["deck"])
 	}
 }

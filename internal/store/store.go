@@ -4,7 +4,9 @@
 package store
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -44,6 +46,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE TABLE IF NOT EXISTS decks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token TEXT,                   -- opaque public identifier (URL-safe)
   user_id INTEGER NOT NULL REFERENCES users(id),
   name TEXT NOT NULL,
   investigator_code TEXT NOT NULL,
@@ -52,6 +55,7 @@ CREATE TABLE IF NOT EXISTS decks (
 );
 CREATE TABLE IF NOT EXISTS games (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token TEXT,                   -- opaque public identifier (URL-safe)
   name TEXT NOT NULL,
   scenario_id TEXT NOT NULL,
   difficulty TEXT NOT NULL DEFAULT 'standard',
@@ -83,7 +87,88 @@ CREATE TABLE IF NOT EXISTS game_actions (
   PRIMARY KEY (game_id, seq)
 );
 `)
+	if err != nil {
+		return err
+	}
+	// 库里出现过 id 的表都要有公开 token 列（老库在此处一次性补齐）。
+	if err := s.ensureTokenColumn("decks"); err != nil {
+		return err
+	}
+	return s.ensureTokenColumn("games")
+}
+
+// ensureTokenColumn adds the opaque `token` column to a table created before
+// it existed, backfills one random token per row, and indexes it. Idempotent:
+// safe to run on every boot.
+func (s *Store) ensureTokenColumn(table string) error {
+	// table comes from literal call sites, never user input.
+	rows, err := s.db.Query(`PRAGMA table_info(` + table + `)`)
+	if err != nil {
+		return err
+	}
+	hasToken := false
+	for rows.Next() {
+		var cid int
+		var name, ctype string
+		var notNull int
+		var dflt, pk any
+		if err := rows.Scan(&cid, &name, &ctype, &notNull, &dflt, &pk); err != nil {
+			rows.Close()
+			return err
+		}
+		if name == "token" {
+			hasToken = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	rows.Close()
+	if !hasToken {
+		if _, err := s.db.Exec(`ALTER TABLE ` + table + ` ADD COLUMN token TEXT`); err != nil {
+			return err
+		}
+	}
+	backfill, err := s.db.Query(`SELECT id FROM ` + table + ` WHERE token IS NULL OR token = ''`)
+	if err != nil {
+		return err
+	}
+	var pending []int64
+	for backfill.Next() {
+		var id int64
+		if err := backfill.Scan(&id); err != nil {
+			backfill.Close()
+			return err
+		}
+		pending = append(pending, id)
+	}
+	if err := backfill.Err(); err != nil {
+		backfill.Close()
+		return err
+	}
+	backfill.Close()
+	for _, id := range pending {
+		tok, err := newToken()
+		if err != nil {
+			return err
+		}
+		if _, err := s.db.Exec(`UPDATE `+table+` SET token = ? WHERE id = ?`, tok, id); err != nil {
+			return err
+		}
+	}
+	_, err = s.db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_` + table + `_token ON ` + table + `(token)`)
 	return err
+}
+
+// newToken returns an unguessable 16-char URL-safe identifier (96 bits of
+// entropy) used in place of sequential ids in public URLs and API payloads.
+func newToken() (string, error) {
+	var buf [12]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return "", fmt.Errorf("generate token: %w", err)
+	}
+	return base64.RawURLEncoding.EncodeToString(buf[:]), nil
 }
 
 // ---------------------------------------------------------------- users
@@ -128,8 +213,11 @@ func (s *Store) UserByID(id int64) (*User, error) {
 
 // ---------------------------------------------------------------- decks
 
+// Deck's public identity is Token (serialized as "id"); the sequential int64
+// primary key never leaves the server.
 type Deck struct {
-	ID               int64          `json:"id"`
+	ID               int64          `json:"-"`
+	Token            string         `json:"id"`
 	UserID           int64          `json:"userId"`
 	Name             string         `json:"name"`
 	InvestigatorCode string         `json:"investigatorCode"`
@@ -137,57 +225,83 @@ type Deck struct {
 	CreatedAt        string         `json:"createdAt"`
 }
 
-func (s *Store) CreateDeck(userID int64, name, investigatorCode string, slots map[string]int) (int64, error) {
+func (s *Store) CreateDeck(userID int64, name, investigatorCode string, slots map[string]int) (*Deck, error) {
 	slotsJSON, err := json.Marshal(slots)
-	if err != nil {
-		return 0, err
-	}
-	res, err := s.db.Exec(
-		`INSERT INTO decks (user_id, name, investigator_code, slots, created_at) VALUES (?, ?, ?, ?, ?)`,
-		userID, name, investigatorCode, string(slotsJSON), time.Now().UTC().Format(time.RFC3339),
-	)
-	if err != nil {
-		return 0, err
-	}
-	return res.LastInsertId()
-}
-
-func (s *Store) DecksForUser(userID int64) ([]Deck, error) {
-	rows, err := s.db.Query(`SELECT id, user_id, name, investigator_code, slots, created_at FROM decks WHERE user_id = ? ORDER BY id DESC`, userID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []Deck
-	for rows.Next() {
-		d := Deck{}
-		var slots string
-		if err := rows.Scan(&d.ID, &d.UserID, &d.Name, &d.InvestigatorCode, &slots, &d.CreatedAt); err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal([]byte(slots), &d.Slots); err != nil {
-			return nil, err
-		}
-		out = append(out, d)
+	tok, err := newToken()
+	if err != nil {
+		return nil, err
 	}
-	return out, rows.Err()
+	res, err := s.db.Exec(
+		`INSERT INTO decks (token, user_id, name, investigator_code, slots, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+		tok, userID, name, investigatorCode, string(slotsJSON), time.Now().UTC().Format(time.RFC3339),
+	)
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	return &Deck{
+		ID:               id,
+		Token:            tok,
+		UserID:           userID,
+		Name:             name,
+		InvestigatorCode: investigatorCode,
+		Slots:            slots,
+		CreatedAt:        time.Now().UTC().Format(time.RFC3339),
+	}, nil
 }
 
-func (s *Store) DeckByID(id int64) (*Deck, error) {
+const deckColumns = `id, token, user_id, name, investigator_code, slots, created_at`
+
+func scanDeck(scanner interface{ Scan(dest ...any) error }) (*Deck, error) {
 	d := &Deck{}
 	var slots string
-	err := s.db.QueryRow(`SELECT id, user_id, name, investigator_code, slots, created_at FROM decks WHERE id = ?`, id).
-		Scan(&d.ID, &d.UserID, &d.Name, &d.InvestigatorCode, &slots, &d.CreatedAt)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, ErrNotFound
-	}
-	if err != nil {
+	if err := scanner.Scan(&d.ID, &d.Token, &d.UserID, &d.Name, &d.InvestigatorCode, &slots, &d.CreatedAt); err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal([]byte(slots), &d.Slots); err != nil {
 		return nil, err
 	}
 	return d, nil
+}
+
+func (s *Store) DecksForUser(userID int64) ([]Deck, error) {
+	rows, err := s.db.Query(`SELECT `+deckColumns+` FROM decks WHERE user_id = ? ORDER BY id DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []Deck
+	for rows.Next() {
+		d, err := scanDeck(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, *d)
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) DeckByID(id int64) (*Deck, error) {
+	d, err := scanDeck(s.db.QueryRow(`SELECT `+deckColumns+` FROM decks WHERE id = ?`, id))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	return d, err
+}
+
+// DeckByToken resolves an opaque public deck identifier.
+func (s *Store) DeckByToken(token string) (*Deck, error) {
+	d, err := scanDeck(s.db.QueryRow(`SELECT `+deckColumns+` FROM decks WHERE token = ?`, token))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	return d, err
 }
 
 func (s *Store) DeleteDeck(userID, deckID int64) error {
@@ -203,8 +317,11 @@ func (s *Store) DeleteDeck(userID, deckID int64) error {
 
 // ---------------------------------------------------------------- games
 
+// GameRow's public identity is Token (serialized as "id"); the sequential
+// int64 primary key never leaves the server.
 type GameRow struct {
-	ID         int64  `json:"id"`
+	ID         int64  `json:"-"`
+	Token      string `json:"id"`
 	Name       string `json:"name"`
 	ScenarioID string `json:"scenarioId"`
 	Difficulty string `json:"difficulty"`
@@ -218,20 +335,24 @@ type GameRow struct {
 type GamePlayer struct {
 	Slot     int    `json:"slot"`
 	UserID   *int64 `json:"userId,omitempty"`
-	DeckID   int64  `json:"deckId"`
+	DeckID   int64  `json:"-"` // internal; the replay API maps it to the deck token
 	HeroBase string `json:"heroBase"`
 }
 
 func (s *Store) CreateGame(name, scenarioID, difficulty string, seed int64, state string, players []GamePlayer) (int64, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
+	tok, err := newToken()
+	if err != nil {
+		return 0, err
+	}
 	tx, err := s.db.Begin()
 	if err != nil {
 		return 0, err
 	}
 	defer tx.Rollback()
 	res, err := tx.Exec(
-		`INSERT INTO games (name, scenario_id, difficulty, seed, state, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
-		name, scenarioID, difficulty, seed, state, now, now,
+		`INSERT INTO games (token, name, scenario_id, difficulty, seed, state, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
+		tok, name, scenarioID, difficulty, seed, state, now, now,
 	)
 	if err != nil {
 		return 0, err
@@ -258,30 +379,45 @@ func nullableInt64(p *int64) any {
 	return *p
 }
 
-func (s *Store) GameByID(id int64) (*GameRow, error) {
+const gameColumns = `id, token, name, scenario_id, difficulty, seed, state, status, created_at, updated_at`
+
+func scanGame(scanner interface{ Scan(dest ...any) error }) (*GameRow, error) {
 	g := &GameRow{}
-	err := s.db.QueryRow(
-		`SELECT id, name, scenario_id, difficulty, seed, state, status, created_at, updated_at FROM games WHERE id = ?`, id,
-	).Scan(&g.ID, &g.Name, &g.ScenarioID, &g.Difficulty, &g.Seed, &g.State, &g.Status, &g.CreatedAt, &g.UpdatedAt)
+	err := scanner.Scan(&g.ID, &g.Token, &g.Name, &g.ScenarioID, &g.Difficulty, &g.Seed, &g.State, &g.Status, &g.CreatedAt, &g.UpdatedAt)
+	return g, err
+}
+
+func (s *Store) GameByID(id int64) (*GameRow, error) {
+	g, err := scanGame(s.db.QueryRow(`SELECT `+gameColumns+` FROM games WHERE id = ?`, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
 	return g, err
 }
 
+// GameIDByToken resolves an opaque public game identifier to its internal id.
+func (s *Store) GameIDByToken(token string) (int64, error) {
+	var id int64
+	err := s.db.QueryRow(`SELECT id FROM games WHERE token = ?`, token).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, ErrNotFound
+	}
+	return id, err
+}
+
 func (s *Store) ListGames() ([]GameRow, error) {
-	rows, err := s.db.Query(`SELECT id, name, scenario_id, difficulty, seed, state, status, created_at, updated_at FROM games ORDER BY id DESC LIMIT 100`)
+	rows, err := s.db.Query(`SELECT ` + gameColumns + ` FROM games ORDER BY id DESC LIMIT 100`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var out []GameRow
 	for rows.Next() {
-		var g GameRow
-		if err := rows.Scan(&g.ID, &g.Name, &g.ScenarioID, &g.Difficulty, &g.Seed, &g.State, &g.Status, &g.CreatedAt, &g.UpdatedAt); err != nil {
+		g, err := scanGame(rows)
+		if err != nil {
 			return nil, err
 		}
-		out = append(out, g)
+		out = append(out, *g)
 	}
 	return out, rows.Err()
 }

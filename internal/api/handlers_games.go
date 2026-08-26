@@ -13,10 +13,10 @@ import (
 )
 
 type createGameRequest struct {
-	DeckIDs    []int64 `json:"deckIds"`
-	ScenarioID string  `json:"scenarioId"`
-	Name       string  `json:"name"`
-	Difficulty string  `json:"difficulty"`
+	DeckIDs    []string `json:"deckIds"` // opaque deck tokens
+	ScenarioID string   `json:"scenarioId"`
+	Name       string   `json:"name"`
+	Difficulty string   `json:"difficulty"`
 }
 
 func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
@@ -53,10 +53,10 @@ func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
 
 	specs := make([]engine.PlayerSpec, 0, len(req.DeckIDs))
 	players := make([]store.GamePlayer, 0, len(req.DeckIDs))
-	for i, deckID := range req.DeckIDs {
-		deck, err := s.Store.DeckByID(deckID)
+	for i, deckToken := range req.DeckIDs {
+		deck, err := s.Store.DeckByToken(deckToken)
 		if err != nil {
-			writeErr(w, http.StatusBadRequest, fmt.Sprintf("deck %d not found", deckID))
+			writeErr(w, http.StatusBadRequest, fmt.Sprintf("deck %s not found", deckToken))
 			return
 		}
 		heroBase := engine.BaseCodeOf(deck.InvestigatorCode)
@@ -120,7 +120,7 @@ func (s *Server) handleListGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	type gameList struct {
-		ID         int64  `json:"id"`
+		ID         string `json:"id"` // opaque public token
 		Name       string `json:"name"`
 		ScenarioID string `json:"scenarioId"`
 		Status     string `json:"status"`
@@ -128,15 +128,14 @@ func (s *Server) handleListGames(w http.ResponseWriter, r *http.Request) {
 	}
 	out := make([]gameList, 0, len(games))
 	for _, g := range games {
-		out = append(out, gameList{ID: g.ID, Name: g.Name, ScenarioID: g.ScenarioID, Status: g.Status, UpdatedAt: g.UpdatedAt})
+		out = append(out, gameList{ID: g.Token, Name: g.Name, ScenarioID: g.ScenarioID, Status: g.Status, UpdatedAt: g.UpdatedAt})
 	}
 	writeJSON(w, http.StatusOK, out)
 }
 
 func (s *Server) handleGameView(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	view, err := s.Rooms.View(gameID, userID(r))
@@ -157,9 +156,8 @@ func (s *Server) handleJoinGame(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusUnauthorized, "invalid user")
 		return
 	}
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	var req joinRequest
@@ -190,9 +188,8 @@ type answerRequest struct {
 }
 
 func (s *Server) handleAnswer(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	var req answerRequest
@@ -213,9 +210,8 @@ func (s *Server) handleAnswer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleUndo(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	if err := s.Rooms.Undo(gameID, userID(r)); err != nil {
@@ -231,9 +227,8 @@ func (s *Server) handleUndo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	row, err := s.Store.GameByID(gameID)
@@ -251,20 +246,34 @@ func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "store failed")
 		return
 	}
+	// 脱敏：数字 deckId 不出网，换成牌组的公开 token。
+	type replayPlayer struct {
+		Slot     int    `json:"slot"`
+		UserID   *int64 `json:"userId,omitempty"`
+		Deck     string `json:"deck"`
+		HeroBase string `json:"heroBase"`
+	}
+	outPlayers := make([]replayPlayer, 0, len(players))
+	for _, p := range players {
+		rp := replayPlayer{Slot: p.Slot, UserID: p.UserID, HeroBase: p.HeroBase}
+		if d, err := s.Store.DeckByID(p.DeckID); err == nil {
+			rp.Deck = d.Token
+		}
+		outPlayers = append(outPlayers, rp)
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"seed":       row.Seed,
 		"scenarioId": row.ScenarioID,
 		"difficulty": row.Difficulty,
-		"players":    players,
+		"players":    outPlayers,
 		"actions":    actions,
 	})
 }
 
 // handleStream upgrades to WebSocket and streams state updates.
 func (s *Server) handleStream(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	// Viewer identity: valid token optional (spectators allowed).
@@ -317,9 +326,8 @@ func (s *Server) handleStream(w http.ResponseWriter, r *http.Request) {
 
 // handleChatHistory returns the room's recent public table-talk messages.
 func (s *Server) handleChatHistory(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	messages, err := s.Rooms.ChatHistory(gameID)
@@ -334,9 +342,8 @@ func (s *Server) handleChatHistory(w http.ResponseWriter, r *http.Request) {
 // the existing per-game WebSocket stream. Chat never changes game state, so
 // it bypasses answers, persistence, and undo snapshots by design.
 func (s *Server) handleChatSend(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	var req struct {
@@ -369,9 +376,8 @@ func (s *Server) handleChatSend(w http.ResponseWriter, r *http.Request) {
 // viewer. Deck listings are shuffled server-side (see rooms.PileList), so
 // the draw order is never revealed.
 func (s *Server) handlePileList(w http.ResponseWriter, r *http.Request) {
-	gameID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid game id")
+	gameID, ok := s.pathGame(w, r)
+	if !ok {
 		return
 	}
 	player := r.URL.Query().Get("player")

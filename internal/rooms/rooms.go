@@ -12,8 +12,9 @@ import (
 
 // Room holds an active game and its subscribers.
 type Room struct {
-	ID   int64
-	Name string
+	ID    int64  // internal sequential id, never leaves the server
+	Token string // opaque public identifier exposed to clients
+	Name  string
 
 	mu   sync.Mutex
 	game *engine.Game
@@ -61,7 +62,7 @@ func (m *Manager) Get(gameID int64) (*Room, error) {
 			owners[string(g.Players[i].ID)] = fmt.Sprint(*p.UserID)
 		}
 	}
-	r := &Room{ID: gameID, Name: row.Name, game: g, owners: owners, subs: map[chan []byte]string{}}
+	r := &Room{ID: gameID, Token: row.Token, Name: row.Name, game: g, owners: owners, subs: map[chan []byte]string{}}
 	m.rooms[gameID] = r
 	return r, nil
 }
@@ -177,7 +178,7 @@ func (m *Manager) Subscribe(gameID int64, viewerUserID string) (chan []byte, fun
 		}
 	}
 	// initial view
-	if v := BuildView(r.ID, r.Name, r.game, viewerUserID, r.owners); v != nil {
+	if v := BuildView(r.Token, r.Name, r.game, viewerUserID, r.owners); v != nil {
 		if b, err := json.Marshal(map[string]any{"type": "state", "view": v}); err == nil {
 			select {
 			case ch <- b:
@@ -196,12 +197,12 @@ func (m *Manager) View(gameID int64, userID string) (*GameView, error) {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return BuildView(r.ID, r.Name, r.game, userID, r.owners), nil
+	return BuildView(r.Token, r.Name, r.game, userID, r.owners), nil
 }
 
 func (r *Room) broadcast() {
 	for ch, viewer := range r.subs {
-		v := BuildView(r.ID, r.Name, r.game, viewer, r.owners)
+		v := BuildView(r.Token, r.Name, r.game, viewer, r.owners)
 		b, err := json.Marshal(map[string]any{"type": "state", "view": v})
 		if err != nil {
 			continue

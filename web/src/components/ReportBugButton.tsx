@@ -8,7 +8,7 @@ export default function ReportBugButton({ className = '' }: { className?: string
   const t = useT()
 
   function reportBug() {
-    const gameId = window.location.pathname.match(/^\/games\/(\d+)/)?.[1] ?? ''
+    const gameId = window.location.pathname.match(/^\/games\/([^/]+)/)?.[1] ?? ''
     const context = [
       `- URL: ${window.location.href}`,
       `- Game ID: ${gameId || 'N/A'}`,

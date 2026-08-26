@@ -57,7 +57,7 @@ export default function Decks() {
     }
   }
 
-  async function remove(e: React.MouseEvent, id: number) {
+  async function remove(e: React.MouseEvent, id: string) {
     e.stopPropagation()
     try {
       await del(`/marvel/decks/${id}`)

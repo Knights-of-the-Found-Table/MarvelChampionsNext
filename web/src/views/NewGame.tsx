@@ -9,7 +9,7 @@ export default function NewGame() {
   const [decks, setDecks] = useState<Deck[]>([])
   const [scenarios, setScenarios] = useState<ScenarioInfo[]>([])
   const [playerCount, setPlayerCount] = useState(1)
-  const [deckIds, setDeckIds] = useState<(number | null)[]>([null, null, null, null])
+  const [deckIds, setDeckIds] = useState<(string | null)[]>([null, null, null, null])
   const [scenarioId, setScenarioId] = useState('')
   const [difficulty, setDifficulty] = useState('standard')
   const [name, setName] = useState('')
@@ -32,7 +32,7 @@ export default function NewGame() {
     setError('')
     setBusy(true)
     try {
-      const chosen = deckIds.slice(0, playerCount).filter((x): x is number => x !== null)
+      const chosen = deckIds.slice(0, playerCount).filter((x): x is string => x !== null)
       const view = await post<GameView>('/marvel/games', {
         deckIds: chosen,
         scenarioId,
@@ -75,7 +75,7 @@ export default function NewGame() {
             <select
               value={deckIds[i] ?? ''}
               onChange={(e) =>
-                setDeckIds((ids) => ids.map((x, j) => (j === i ? Number(e.target.value) : x)))
+                setDeckIds((ids) => ids.map((x, j) => (j === i ? e.target.value : x)))
               }
             >
               {decks.length === 0 && <option value="">{t('newgame.importFirst')}</option>}

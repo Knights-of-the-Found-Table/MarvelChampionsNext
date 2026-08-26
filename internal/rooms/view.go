@@ -10,7 +10,8 @@ import (
 // redacted per viewer; the pending question is only included for the player
 // being asked (and for spectators it is omitted entirely).
 type GameView struct {
-	ID       int64      `json:"id"`
+	// ID is the game's opaque public token (URL-safe), not the DB key.
+	ID       string     `json:"id"`
 	Name     string     `json:"name"`
 	Scenario string     `json:"scenario"`
 	Round    int        `json:"round"`
@@ -170,9 +171,9 @@ type AttachmentView struct {
 // BuildView projects the engine state for a viewer. viewerUserID empty =
 // spectator. ownerUserID maps a player id to the owning user (may be empty
 // while unclaimed).
-func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owners map[string]string) *GameView {
+func BuildView(token, name string, g *engine.Game, viewerUserID string, owners map[string]string) *GameView {
 	v := &GameView{
-		ID:       id,
+		ID:       token,
 		Name:     name,
 		Scenario: g.Scenario().Name,
 		Round:    g.Round,

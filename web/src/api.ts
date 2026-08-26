@@ -234,7 +234,7 @@ export interface ChatMessage {
 }
 
 export interface GameView {
-  id: number
+  id: string
   name: string
   scenario: string
   round: number
@@ -258,7 +258,7 @@ export interface GameView {
 }
 
 export interface Deck {
-  id: number
+  id: string
   name: string
   investigatorCode: string
   slots: Record<string, number>
@@ -321,7 +321,7 @@ export interface ScenarioInfo {
 }
 
 export interface GameListItem {
-  id: number
+  id: string
   name: string
   scenarioId: string
   status: string

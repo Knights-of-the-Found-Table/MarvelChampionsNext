@@ -185,12 +185,12 @@ func (s *Server) handleImportDeck(w http.ResponseWriter, r *http.Request) {
 	if req.Name == "" {
 		req.Name = "Unnamed deck"
 	}
-	deckID, err := s.Store.CreateDeck(id, req.Name, req.InvestigatorCode, req.Slots)
+	deck, err := s.Store.CreateDeck(id, req.Name, req.InvestigatorCode, req.Slots)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "store failed")
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"id": deckID, "name": req.Name})
+	writeJSON(w, http.StatusCreated, map[string]any{"id": deck.Token, "name": deck.Name})
 }
 
 func (s *Server) handleGetDeck(w http.ResponseWriter, r *http.Request) {
@@ -199,12 +199,7 @@ func (s *Server) handleGetDeck(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusUnauthorized, "invalid user")
 		return
 	}
-	deckID, err := pathID(r)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid deck id")
-		return
-	}
-	deck, err := s.Store.DeckByID(deckID)
+	deck, err := s.Store.DeckByToken(r.PathValue("id"))
 	if err != nil || deck.UserID != uid {
 		writeErr(w, http.StatusNotFound, "deck not found")
 		return
@@ -235,12 +230,12 @@ func (s *Server) handleDeleteDeck(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusUnauthorized, "invalid user")
 		return
 	}
-	deckID, err := pathID(r)
+	deck, err := s.Store.DeckByToken(r.PathValue("id"))
 	if err != nil {
-		writeErr(w, http.StatusBadRequest, "invalid deck id")
+		writeErr(w, http.StatusNotFound, "deck not found")
 		return
 	}
-	if err := s.Store.DeleteDeck(id, deckID); err != nil {
+	if err := s.Store.DeleteDeck(id, deck.ID); err != nil {
 		writeErr(w, http.StatusNotFound, "deck not found")
 		return
 	}

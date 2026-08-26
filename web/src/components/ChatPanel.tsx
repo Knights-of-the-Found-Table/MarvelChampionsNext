@@ -3,7 +3,7 @@ import { get, post, type ChatMessage } from '../api'
 import { useT } from '../i18n'
 
 interface Props {
-  gameId: number
+  gameId: string
   incoming: ChatMessage | null
 }
 

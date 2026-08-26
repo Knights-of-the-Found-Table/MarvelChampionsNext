@@ -21,7 +21,7 @@ export default function Games() {
     refresh()
   }, [])
 
-  async function join(id: number) {
+  async function join(id: string) {
     try {
       await post(`/marvel/games/${id}/join`, {})
       navigate(`/games/${id}`)
@@ -43,7 +43,6 @@ export default function Games() {
       <table className="games-table">
         <thead>
           <tr>
-            <th>#</th>
             <th>{t('games.colName')}</th>
             <th>{t('games.colScenario')}</th>
             <th>{t('games.colStatus')}</th>
@@ -53,7 +52,6 @@ export default function Games() {
         <tbody>
           {games.map((g) => (
             <tr key={g.id}>
-              <td>{g.id}</td>
               <td>{g.name}</td>
               <td>{g.scenarioId}</td>
               <td>{t(`status.${g.status}`)}</td>

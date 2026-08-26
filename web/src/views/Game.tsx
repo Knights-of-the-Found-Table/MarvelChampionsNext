@@ -17,7 +17,7 @@ import '../style/board.css'
 export default function Game() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const gameId = Number(id)
+  const gameId = id ?? ''
   const t = useT()
   const choiceLabel = useChoiceLabel()
   const em = useEngineMsg()

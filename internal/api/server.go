@@ -126,13 +126,15 @@ func userID(r *http.Request) string {
 	return v
 }
 
-func pathID(r *http.Request) (int64, error) {
-	idStr := r.PathValue("id")
-	var id int64
-	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
-		return 0, fmt.Errorf("invalid id")
+// pathGame resolves the {id} path value as an opaque game token. On miss it
+// writes the error response and returns ok=false; sequential ids never match.
+func (s *Server) pathGame(w http.ResponseWriter, r *http.Request) (int64, bool) {
+	gameID, err := s.Store.GameIDByToken(r.PathValue("id"))
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "game not found")
+		return 0, false
 	}
-	return id, nil
+	return gameID, true
 }
 
 func (s *Server) issueToken(userID int64) (string, error) {
