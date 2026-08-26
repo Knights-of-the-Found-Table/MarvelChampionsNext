@@ -64,14 +64,14 @@ export default function NewGame() {
           >
             {[1, 2, 3, 4].map((n) => (
               <option key={n} value={n}>
-                {n === 1 ? t('newgame.playersOne') : t('newgame.playersMany', { n })}
+                {n === 1 ? t('newgame.playersOne') : t('newgame.playersMany', n)}
               </option>
             ))}
           </select>
         </label>
         {Array.from({ length: playerCount }).map((_, i) => (
           <label key={i}>
-            {t('newgame.playerDeck', { n: i + 1 })}
+            {t('newgame.playerDeck', i + 1)}
             <select
               value={deckIds[i] ?? ''}
               onChange={(e) =>

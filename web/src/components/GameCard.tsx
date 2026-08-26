@@ -164,15 +164,15 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
           <div className="portrait-name">{displayTitle}</div>
         )}
 
-        {/* 状态芯片 */}
+        {/* 状态芯片（title 用 status.* 文案） */}
         <div className="gcard-tokens">
-          {card.stunned && <span className="tok tok-stun" title="Stunned">✳</span>}
-          {card.confused && <span className="tok tok-confuse" title="Confused">?</span>}
-          {card.tough && <span className="tok tok-tough" title="Tough">◆</span>}
-          {card.guard && <span className="tok tok-guard" title="Guard">▲</span>}
-          {card.firstPlayer && <span className="tok tok-first" title="First player">★</span>}
+          {card.stunned && <span className="tok tok-stun" title={t('status.stunned')}>✳</span>}
+          {card.confused && <span className="tok tok-confuse" title={t('status.confused')}>?</span>}
+          {card.tough && <span className="tok tok-tough" title={t('status.tough')}>◆</span>}
+          {card.guard && <span className="tok tok-guard" title={t('status.guard')}>▲</span>}
+          {card.firstPlayer && <span className="tok tok-first" title={t('status.first')}>★</span>}
           {Array.from({ length: Math.min(card.acceleration ?? 0, 6) }).map((_, i) => (
-            <span key={i} className="tok tok-accel" title="Acceleration">⏩</span>
+            <span key={i} className="tok tok-accel" title={t('status.acceleration')}>⏩</span>
           ))}
         </div>
 
@@ -216,7 +216,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
         {/* 危机/危害 */}
         {(card.crisis || (card.hazard ?? 0) > 0) && (
           <div className="gcard-schemetags">
-            {card.crisis && <span className="tag tag-crisis">危</span>}
+            {card.crisis && <span className="tag tag-crisis">{t('game.crisis')}</span>}
             {(card.hazard ?? 0) > 0 && <TaggedNumber className="tag tag-hazard" label={t('stat.hazard')}>☠{card.hazard}</TaggedNumber>}
           </div>
         )}
@@ -242,9 +242,9 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
   // 牌库/弃牌堆 title：{玩家名}的牌库 / {玩家名}的弃牌堆
   const displayTitle =
     card.label === 'deck'
-      ? t('pile.deckTitle', { name: card.title })
+      ? t('pile.deckTitle', card.title)
       : card.label === 'discard'
-        ? t('pile.discardTitle', { name: card.title })
+        ? t('pile.discardTitle', card.title)
         : card.label === 'encounter'
           ? t('pile.encounter')
           : card.label === 'encounter-discard'

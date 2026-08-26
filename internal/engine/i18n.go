@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	cati18n "github.com/Knights-of-the-Found-Table/marvelchampionsnext/i18n"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 )
 
@@ -23,8 +24,10 @@ import (
 // 接口上不存在任何“客户端语言”状态；不同浏览器可各选语言。
 //
 // 【正确做法】
-//  1. 新文案：在 i18n_catalog.go 增加条目（en/zh 都必须填，zh≠en），
-//     调用点写 Tf("命名空间.语义键", 参数...)。键名稳定，一经发布不再改动。
+//  1. 新文案：在仓库根 i18n/messages.json 增加条目（en/zh 都必须填，
+//     zh≠en），调用点写 Tf("命名空间.语义键", 参数...)。键名稳定，一经
+//     发布不再改动。前端界面用的键（nav.*/game.*/type.* 等）也进同一文件，
+//     前端 t() 与引擎 Tf() 共用同一目录。
 //  2. 参数顺序：zh 译文可用 %[1]s、%[2]d 显式序号自由调换语序；
 //     en/zh 的动词类型与参数个数必须一致（TestMessageArgConsistency 强制）。
 //  3. 卡牌/实体名：把 Card、Entity 或 *data.CardDef 值本身作为参数传入
@@ -55,9 +58,12 @@ import (
 //    不动它）。
 //  - 严禁把用户语言渲染进存储或 API（旧存档中的 en 文本按原样显示即可）。
 //
-// 【目录】i18n_catalog.go（手写核心文案）+ i18n_cards_catalog.go（卡牌包批量
-// 迁移条目，键空间 c.*）在 init 时合并进 messages；/api/locales 由服务端
-// 直接从合并后的目录导出，前端与引擎共享同一份事实源。
+// 【目录】前后端共享的单一事实源是仓库根 i18n/messages.json（每键 en/zh
+// 成对；引擎 UI 文案与前端界面文案都在里面），由根级 i18n 包 //go:embed
+// 嵌入。新增/修改文案只改那个 JSON，en 与 zh 同处一条、漏译在结构上不可
+// 能发生。服务端 /api/locales 直接从该目录导出，前端运行时拉取同一份。
+// 完备性（双语非空且 zh≠en）与动词一致性（TestMessageArgConsistency）
+// 由 internal/engine 的测试强制。
 
 // Lang 是目录语言标识。引擎内部渲染（Msg.Text）固定以 en 为基准，
 // zh 条目仅供 /api/locales 导出与测试使用。
@@ -67,6 +73,17 @@ const (
 	LangEn Lang = "en"
 	LangZh Lang = "zh"
 )
+
+// messages 由共享事实源构建，形态与迁移前的手写 catalog 一致
+// （键 → 语言 → 格式串），存量查找逻辑不变。
+var messages = func() map[string]map[Lang]string {
+	all := cati18n.All()
+	out := make(map[string]map[Lang]string, len(all))
+	for k, e := range all {
+		out[k] = map[Lang]string{LangEn: e.En, LangZh: e.Zh}
+	}
+	return out
+}()
 
 var uiLang = LangEn
 

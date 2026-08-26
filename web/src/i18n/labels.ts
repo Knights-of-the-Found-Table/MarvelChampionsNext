@@ -2,40 +2,16 @@
 //
 // 服务端是语言中立的：它下发 消息键 + 结构化参数（{k:"card", code} 表卡名
 // 引用、{k:"i"} 表整数、{k:"msg"} 表嵌套消息），由这里按当前语言渲染：
-//   1. GET /api/v1/locales/{lang} 取格式串目录（服务端 Go 目录为唯一事实源）；
+//   1. 目录来自共享的单一事实源（仓库根 i18n/messages.json），经
+//      i18n/catalog.ts 在启动时装载（LangProvider 门控保证先于渲染）；
 //   2. 卡名参数按 code 查当前语言译名（zh 用 zh-cards.json，en 用服务端
 //      内嵌的 en 名兜底），正对应「{field: card_name, card_code}」的约定；
-//   3. 目录未命中或缺参时回退服务端 en 文本（gettext 缺译惯例）。
+//   3. 键在目录中未命中（服务端比本页缓存新等）时回退服务端 en 文本
+//      （gettext 缺译惯例）。
 // 绝不做「拿英文成品文本再匹配翻译」——服务端已删除该方案，前端同样禁止。
-import { useEffect, useState } from 'react'
-import { get, type ArgWire, type Choice, type MsgWire } from '../api'
+import type { ArgWire, Choice, MsgWire } from '../api'
 import { useLang, useZhMap, type Lang } from '../i18n'
-
-type Catalog = Record<string, string>
-
-const catalogs: Record<Lang, Catalog | null> = { en: null, zh: null }
-const catalogPromises: Record<Lang, Promise<Catalog | null> | null> = { en: null, zh: null }
-const catalogListeners = new Set<() => void>()
-
-export function loadCatalog(lang: Lang): Promise<Catalog | null> {
-  if (catalogs[lang]) return Promise.resolve(catalogs[lang])
-  if (!catalogPromises[lang]) {
-    catalogPromises[lang] = get<Catalog>(`/locales/${lang}`)
-      .then((c) => {
-        catalogPromises[lang] = null
-        if (c) {
-          catalogs[lang] = c
-          for (const l of catalogListeners) l()
-        }
-        return catalogs[lang]
-      })
-      .catch(() => {
-        catalogPromises[lang] = null
-        return null
-      })
-  }
-  return catalogPromises[lang]
-}
+import { uiCatalog } from './catalog'
 
 // ---- 动词匹配: %s %d %% 及 Go 显式序号 %[1]s ------------------------------
 
@@ -65,7 +41,8 @@ function argPart(a: ArgWire | undefined, lang: Lang, cardName: CardNamer): MsgPa
 }
 
 function msgParts(m: MsgWire, lang: Lang, cardName: CardNamer): MsgPart[] {
-  const fmt = m.key ? catalogs[lang]?.[m.key] : undefined
+  // LangProvider 门控下目录已就绪；极端时序（未命中）回退 en 兜底文本。
+  const fmt = m.key ? uiCatalog(lang)?.[m.key] : undefined
   if (!fmt) return [{ t: m.text }]
   const args = m.args ?? []
   const parts: MsgPart[] = []
@@ -94,34 +71,16 @@ export function formatMsg(m: MsgWire, lang: Lang, cardName: CardNamer): string {
     .join('')
 }
 
-// ---- React 绑定 -----------------------------------------------------------
-
-// 目录异步加载；未就绪时调用方先渲染 en 兜底文本，加载完成后由此触发重渲染。
-function useCatalogTick(): void {
-  const lang = useLang()
-  const [, force] = useState(0)
-  useEffect(() => {
-    let alive = true
-    const bump = () => alive && force((n) => n + 1)
-    catalogListeners.add(bump)
-    loadCatalog(lang)
-    return () => {
-      alive = false
-      catalogListeners.delete(bump)
-    }
-  }, [lang])
-}
-
 function useCardNamer(): CardNamer {
   const zhMap = useZhMap()
   return (code, fallback) => zhMap?.[code]?.name ?? fallback
 }
 
-// useEngineMsg 返回 (m) => string：按当前语言渲染结构化消息。
+// useEngineMsg 返回 (m) => string：按当前语言渲染结构化消息。目录由
+// LangProvider 门控先行装载，这里直接同步渲染、不再有加载后补刷新。
 export function useEngineMsg(): (m: MsgWire | string | undefined | null) => string {
   const lang = useLang()
   const cardName = useCardNamer()
-  useCatalogTick()
   return (m) => formatMsg(asMsg(m), lang, cardName)
 }
 
@@ -130,7 +89,6 @@ export function useEngineMsg(): (m: MsgWire | string | undefined | null) => stri
 export function useMsgParts(): (m: MsgWire | string | undefined | null) => MsgPart[] {
   const lang = useLang()
   const cardName = useCardNamer()
-  useCatalogTick()
   return (m) => msgParts(asMsg(m), lang, cardName)
 }
 

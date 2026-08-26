@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { allCards, zhCardDetails, type CardInfo, type ZhCardDetail } from './api'
 import { useLang, type Lang } from './i18n'
-import { en as enStrings, zh as zhStrings, type MsgKey } from './i18n/strings'
+import { uiCatalog } from './i18n/catalog'
 
 interface Manifest {
   [code: string]: string
@@ -211,8 +211,9 @@ if (typeof window !== 'undefined') {
 
 // 叠加面板：直接铺在放大卡图上。zh 模式优先用 zh-cards-full.json 的
 // 中文卡名/正文/特性（按需拉取、会话级缓存），en 用 /marvel/cards 目录；
-// 类型/阵营经 strings 字典本地化，缺失键回退原文。目录 allCards() 同样
-// 会话级缓存，首次按住 Ctrl 悬浮时拉取一次。
+// 类型/阵营经共享目录（/locales 装载，见 i18n/catalog.ts）本地化，
+// 缺失键回退原文。目录 allCards() 同样会话级缓存，首次按住 Ctrl 悬浮时
+// 拉取一次。
 function CardTextOverlay({ code }: { code: string }) {
   const lang = useLang()
   const [info, setInfo] = useState<CardInfo | null>(null)
@@ -249,9 +250,9 @@ function CardTextOverlay({ code }: { code: string }) {
       </div>
     ) : null
   }
-  const dict = lang === 'zh' ? zhStrings : enStrings
-  const typeLabel = info ? dict[(`type.${info.type}`) as MsgKey] ?? info.type : ''
-  const aspectLabel = info?.aspect ? dict[(`aspect.${info.aspect}`) as MsgKey] ?? info.aspect : ''
+  const dict = uiCatalog(lang) ?? {}
+  const typeLabel = info ? dict[`type.${info.type}`] ?? info.type : ''
+  const aspectLabel = info?.aspect ? dict[`aspect.${info.aspect}`] ?? info.aspect : ''
   const name = zh?.name ?? info?.name ?? code
   const traits = zh?.traits ?? (info?.traits?.length ? info.traits.join(' ') : '')
   const text = zh?.text ?? info?.text ?? ''

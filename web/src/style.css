@@ -556,3 +556,30 @@ a.button {
 .log-line.log-minor {
   opacity: 0.55;
 }
+
+/* 启动门控：/locales 文案目录装载完成前的整页加载态（无文字，语言无关）。 */
+.boot-gate {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.boot-gate[aria-busy='true']::before {
+  content: '';
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #9aa4ad;
+  border-top-color: transparent;
+  animation: boot-spin 0.9s linear infinite;
+}
+
+@keyframes boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

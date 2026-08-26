@@ -38,6 +38,8 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("GET /api/v1/marvel/cards", s.handleCards)
 	mux.HandleFunc("GET /api/v1/marvel/heroes", s.handleHeroes)
 	mux.HandleFunc("GET /api/v1/marvel/scenarios", s.handleScenarios)
+	mux.HandleFunc("GET /api/v1/locales/manifest", s.handleLocalesManifest)
+	mux.HandleFunc("GET /api/v1/locales/{lang}/{hash}", s.handleLocalesVersioned)
 	mux.HandleFunc("GET /api/v1/locales/{lang}", s.handleLocales)
 
 	mux.HandleFunc("GET /api/v1/marvel/decks", s.auth(s.handleListDecks))

@@ -34,7 +34,7 @@ func parseVerbs(f string) ([]int, []string, bool) {
 // TestMessageCatalogComplete 要求每个键都有非空 en/zh 两条,且译文确实
 // 与原文不同（防止复制原文当译文）。
 func TestMessageCatalogComplete(t *testing.T) {
-	if len(messages) < 2000 {
+	if len(messages) < 2700 {
 		t.Fatalf("catalog unexpectedly small: %d keys", len(messages))
 	}
 	for key, m := range messages {

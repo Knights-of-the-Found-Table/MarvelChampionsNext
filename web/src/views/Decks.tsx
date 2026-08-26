@@ -104,10 +104,7 @@ export default function Decks() {
             <div style={{ flex: 1 }}>
               <strong>{d.name}</strong>
               <div className="muted">
-                {t('decks.cardStats', {
-                  types: Object.keys(d.slots).length,
-                  total: Object.values(d.slots).reduce((a, b) => a + b, 0),
-                })}
+                {t('decks.cardStats', Object.keys(d.slots).length, Object.values(d.slots).reduce((a, b) => a + b, 0))}
               </div>
             </div>
             <button className="danger" onClick={(e) => remove(e, d.id)}>

@@ -154,7 +154,7 @@ export default function DeckDetail() {
           <div>
             <strong>{heroName}</strong>
             <span className="muted">
-              {' '}{t('deck.heroStats', { total: stats.total, distinct: entries.length })}
+              {' '}{t('deck.heroStats', stats.total, entries.length)}
             </span>
           </div>
           <div className="row wrap">
@@ -181,7 +181,7 @@ export default function DeckDetail() {
           </div>
           <div className="cost-curve">
             {stats.costBuckets.map((n, i) => (
-              <div key={i} className="cost-col" title={t('deck.costTitle', { cost: i === 5 ? '5+' : i, n })}>
+              <div key={i} className="cost-col" title={t('deck.costTitle', i === 5 ? '5+' : i, n)}>
                 <div className="cost-bar" style={{ height: `${Math.round((n / maxCost) * 100)}%` }} />
                 <span className="muted">{i === 5 ? '5+' : i}</span>
               </div>

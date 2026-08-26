@@ -73,7 +73,7 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
         <span className="q-toggle">▸</span>
         <span className="q-prompt">{promptText}</span>
         <span className="muted">
-          {t('q.choiceCount', { n: current.choices.length })}
+          {t('q.choiceCount', current.choices.length)}
         </span>
         {isMulti && selected.size > 0 && (
           <span className="q-selected-count">{selected.size}</span>
@@ -97,8 +97,8 @@ export default function QuestionPanel({ current, selected, onPick, onBack, onCon
           </button>
           {isMulti && (
             <span className="muted">
-              {t('q.selected', { n: selected.size })}
-              {need > 1 ? ` ${t('q.need', { n: need })}` : ''}
+              {t('q.selected', selected.size)}
+              {need > 1 ? ` ${t('q.need', need)}` : ''}
             </span>
           )}
           {requiredIcons.length > 0 && (

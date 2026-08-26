@@ -327,13 +327,13 @@ export default function Game() {
         </div>
         <div className="hud-top">
           <strong>{lname(zh, view.mainScheme?.code ?? '', view.scenario)}</strong>
-          <span className="muted">· {t('game.round', { n: view.round })}</span>
+          <span className="muted">· {t('game.round', view.round)}</span>
           {view.over ? (
             <span className={view.won ? 'victory' : 'defeat'}>
               {t(view.won ? 'game.victory' : 'game.defeat')}
             </span>
           ) : view.waitingFor ? (
-            <span className="muted">{t('game.waitingFor', { name: view.waitingFor })}</span>
+            <span className="muted">{t('game.waitingFor', view.waitingFor)}</span>
           ) : null}
         </div>
         {/* 错误 toast：独立于顶栏，右下角显示 */}
@@ -373,7 +373,7 @@ export default function Game() {
         {/* 多选确认条：棋盘点选支付卡后出现 */}
         {isMulti && selected.size > 0 && (
           <div className="confirm-bar">
-            <span className="muted">{t('q.selected', { n: selected.size })}</span>
+            <span className="muted">{t('q.selected', selected.size)}</span>
             <button className="primary" onClick={confirmMulti}>
               {t('q.confirm')}
             </button>
