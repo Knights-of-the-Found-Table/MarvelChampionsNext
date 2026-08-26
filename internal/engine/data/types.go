@@ -13,8 +13,12 @@ import (
 // Trait, keyword and encounter-set values are plain normalized strings: the
 // engine never needs generated enums to support new packs.
 type CardDef struct {
-	Code     string `json:"code"`
-	Name     string `json:"name"`
+	Code string `json:"code"`
+	Name string `json:"name"`
+	// EName is the immutable English print name captured at load; zh
+	// overlays replace Name but never EName, so game logic that keys off
+	// the printed name (The Power of X doubling) must read EName.
+	EName    string `json:"ename,omitempty"`
 	Subname  string `json:"subname,omitempty"`
 	PackCode string `json:"packCode"`
 	PackName string `json:"packName"`
@@ -276,6 +280,7 @@ func parseTraits(s string) []string {
 func normalize(def *CardDef, raw rawCard) {
 	def.Code = raw.Code
 	def.Name = raw.Name
+	def.EName = raw.Name
 	def.Subname = raw.Subname
 	def.PackCode = raw.PackCode
 	def.PackName = raw.PackName

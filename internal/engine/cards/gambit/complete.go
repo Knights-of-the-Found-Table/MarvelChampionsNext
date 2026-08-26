@@ -267,7 +267,7 @@ func registerRemainingGambit() {
 				i++
 			}
 			for _, id := range p.Supports {
-				if s := g.Supports[id]; s != nil && s.EDef().Name == "X-Mansion" {
+				if s := g.Supports[id]; s != nil && s.EDef().EName == "X-Mansion" {
 					return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 				}
 			}
@@ -412,7 +412,7 @@ func registerRemainingGambit() {
 				i++
 			}
 			for _, id := range p.Supports {
-				if s := g.Supports[id]; s != nil && s.EDef().Name == "X-Mansion" {
+				if s := g.Supports[id]; s != nil && s.EDef().EName == "X-Mansion" {
 					return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
 				}
 			}

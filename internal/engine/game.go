@@ -918,13 +918,20 @@ func iconCount(def *data.CardDef) int {
 
 // powerOfBonus returns the extra icon a "The Power of <Aspect>" resource
 // card contributes when paying for a card of that aspect (data-driven:
-// parsed from the card name). "The Power of the Mind" (40028) instead
-// doubles while paying for a PSIONIC card.
+// parsed from the printed English name, EName — zh overlays replace Name,
+// so matching Name here would silently disable the doubling for Chinese
+// games). "The Power of the Mind" (40028) instead doubles while paying
+// for a PSIONIC card.
 func powerOfBonus(paying, target *data.CardDef) int {
-	if target == nil || !strings.HasPrefix(paying.Name, "The Power of ") {
+	name := paying.EName
+	if name == "" {
+		name = paying.Name // test fixtures without EName
+	}
+	isPowerCard := strings.HasPrefix(name, "The Power of ") || name == "The Power in All of Us"
+	if target == nil || !isPowerCard {
 		return 0
 	}
-	switch paying.Name {
+	switch name {
 	case "The Power of the Mind":
 		if target.HasTrait("Psionic") {
 			return 1
@@ -946,7 +953,7 @@ func powerOfBonus(paying, target *data.CardDef) int {
 		}
 		return 0
 	}
-	aspect := strings.ToLower(strings.TrimPrefix(paying.Name, "The Power of "))
+	aspect := strings.ToLower(strings.TrimPrefix(name, "The Power of "))
 	if target.Aspect == aspect {
 		return 1
 	}

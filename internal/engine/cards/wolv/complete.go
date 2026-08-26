@@ -249,7 +249,7 @@ func registerRemainingWolv() {
 				if a == nil {
 					continue
 				}
-				if a.Code == "35021" || a.Code == "32048" || a.EDef().Name == "Wolverine" || a.EDef().Name == "Colossus" {
+				if a.Code == "35021" || a.Code == "32048" || a.EDef().EName == "Wolverine" || a.EDef().EName == "Colossus" {
 					total += a.AttackVal + a.BonusATK + a.PermATK
 				}
 			}

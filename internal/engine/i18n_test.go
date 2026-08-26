@@ -117,6 +117,26 @@ func TestResourcePayment(t *testing.T) {
 	}
 }
 
+// TestPowerDoublingUnderZhOverlay: the zh overlay replaces Name with the
+// Chinese translation; doubling must still key off the immutable English
+// EName (regression: Mockingbird cost 3 could not be paid with 凝聚力量).
+func TestPowerDoublingUnderZhOverlay(t *testing.T) {
+	basicAlly := &data.CardDef{Code: "01083", Name: "仿声鸟", EName: "Mockingbird", Type: "ally", Aspect: "basic"}
+	powerAll := &data.CardDef{Code: "13024", Name: "凝聚力量", EName: "The Power in All of Us", Type: "resource", Resources: []string{"wild"}}
+	if got := iconCount(powerAll) + powerOfBonus(powerAll, basicAlly); got != 2 {
+		t.Fatalf("The Power in All of Us should pay 2 for a basic card under zh overlay, got %d", got)
+	}
+	aspectCard := &data.CardDef{Code: "x", Name: "正义卡", EName: "Justice Card", Type: "event", Aspect: "justice"}
+	if got := iconCount(powerAll) + powerOfBonus(powerAll, aspectCard); got != 1 {
+		t.Fatalf("The Power in All of Us should pay 1 for a Justice card, got %d", got)
+	}
+	zhLeadership := &data.CardDef{Code: "62017", Name: "领袖之力", EName: "The Power of Leadership", Type: "resource", Resources: []string{"wild"}}
+	leadershipTarget := &data.CardDef{Code: "y", Name: "领袖事件", EName: "Leadership Event", Type: "event", Aspect: "leadership"}
+	if got := iconCount(zhLeadership) + powerOfBonus(zhLeadership, leadershipTarget); got != 2 {
+		t.Fatalf("The Power of Leadership should pay 2 for Leadership under zh overlay, got %d", got)
+	}
+}
+
 // TestI18nFallback 缺失的键回退键名本身（gettext 惯例）。
 func TestI18nFallback(t *testing.T) {
 	if got := Tf("no.such.key"); got.Text != "no.such.key" {
