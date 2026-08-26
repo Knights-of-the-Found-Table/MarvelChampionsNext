@@ -902,13 +902,16 @@
   position: absolute;
   right: 0;
   bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 48px;
   height: 48px;
+  padding: 0;
   border-radius: 50%;
   border: 1px solid rgba(224, 162, 63, 0.5);
   background: linear-gradient(180deg, rgba(40, 54, 66, 0.92), rgba(14, 22, 30, 0.95));
   color: #f4e7c9;
-  font-size: 22px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48);
 }
 

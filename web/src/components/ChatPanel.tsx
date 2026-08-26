@@ -108,7 +108,10 @@ export default function ChatPanel({ gameId, incoming }: Props) {
         </div>
       )}
       <button className="chat-fab" onClick={() => setOpen((v) => !v)} aria-label={t('chat.title')}>
-        💬
+        {/* 内联 SVG 气泡：emoji 字形的光学中心偏移会导致圆钮内对不齐。 */}
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+          <path d="M4 2h16a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-7.6l-4.7 3.6a1 1 0 0 1-1.7-.8V17H4a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3Z" />
+        </svg>
         {unread > 0 && <span className="chat-unread">{unread > 99 ? '99+' : unread}</span>}
       </button>
     </div>
