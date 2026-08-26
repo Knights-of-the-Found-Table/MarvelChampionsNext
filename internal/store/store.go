@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -94,7 +95,51 @@ CREATE TABLE IF NOT EXISTS game_actions (
 	if err := s.ensureTokenColumn("decks"); err != nil {
 		return err
 	}
-	return s.ensureTokenColumn("games")
+	if err := s.ensureTokenColumn("games"); err != nil {
+		return err
+	}
+	// 大厅字段：玩家人数上限与房主（老库默认单人/无房主）。
+	if err := s.ensureColumn("games", "player_count INTEGER NOT NULL DEFAULT 1"); err != nil {
+		return err
+	}
+	return s.ensureColumn("games", "host_user_id INTEGER NOT NULL DEFAULT 0")
+}
+
+// columnExists reports whether a table has the named column.
+func (s *Store) columnExists(table, column string) (bool, error) {
+	rows, err := s.db.Query(`PRAGMA table_info(` + table + `)`)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cid int
+		var name, ctype string
+		var notNull int
+		var dflt, pk any
+		if err := rows.Scan(&cid, &name, &ctype, &notNull, &dflt, &pk); err != nil {
+			return false, err
+		}
+		if name == column {
+			return true, nil
+		}
+	}
+	return false, rows.Err()
+}
+
+// ensureColumn adds a column declaration ("name TYPE CONSTRAINTS") when the
+// table predates it. table/decl come from literal call sites only.
+func (s *Store) ensureColumn(table, decl string) error {
+	col, _, _ := strings.Cut(decl, " ")
+	exists, err := s.columnExists(table, col)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+	_, err = s.db.Exec(`ALTER TABLE ` + table + ` ADD COLUMN ` + decl)
+	return err
 }
 
 // ensureTokenColumn adds the opaque `token` column to a table created before
@@ -102,29 +147,10 @@ CREATE TABLE IF NOT EXISTS game_actions (
 // safe to run on every boot.
 func (s *Store) ensureTokenColumn(table string) error {
 	// table comes from literal call sites, never user input.
-	rows, err := s.db.Query(`PRAGMA table_info(` + table + `)`)
+	hasToken, err := s.columnExists(table, "token")
 	if err != nil {
 		return err
 	}
-	hasToken := false
-	for rows.Next() {
-		var cid int
-		var name, ctype string
-		var notNull int
-		var dflt, pk any
-		if err := rows.Scan(&cid, &name, &ctype, &notNull, &dflt, &pk); err != nil {
-			rows.Close()
-			return err
-		}
-		if name == "token" {
-			hasToken = true
-		}
-	}
-	if err := rows.Err(); err != nil {
-		rows.Close()
-		return err
-	}
-	rows.Close()
 	if !hasToken {
 		if _, err := s.db.Exec(`ALTER TABLE ` + table + ` ADD COLUMN token TEXT`); err != nil {
 			return err
@@ -320,16 +346,18 @@ func (s *Store) DeleteDeck(userID, deckID int64) error {
 // GameRow's public identity is Token (serialized as "id"); the sequential
 // int64 primary key never leaves the server.
 type GameRow struct {
-	ID         int64  `json:"-"`
-	Token      string `json:"id"`
-	Name       string `json:"name"`
-	ScenarioID string `json:"scenarioId"`
-	Difficulty string `json:"difficulty"`
-	Seed       int64  `json:"seed"`
-	State      string `json:"-"`
-	Status     string `json:"status"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
+	ID          int64  `json:"-"`
+	Token       string `json:"id"`
+	Name        string `json:"name"`
+	ScenarioID  string `json:"scenarioId"`
+	Difficulty  string `json:"difficulty"`
+	Seed        int64  `json:"seed"`
+	State       string `json:"-"`
+	Status      string `json:"status"` // lobby | active | finished
+	HostUserID  int64  `json:"-"`      // lobby owner; 0 for pre-lobby-era rows
+	PlayerCount int    `json:"playerCount"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type GamePlayer struct {
@@ -339,7 +367,9 @@ type GamePlayer struct {
 	HeroBase string `json:"heroBase"`
 }
 
-func (s *Store) CreateGame(name, scenarioID, difficulty string, seed int64, state string, players []GamePlayer) (int64, error) {
+// CreateGame inserts a game row. status is 'active' for solo games (state
+// already built) or 'lobby' for multiplayer games (state built at start).
+func (s *Store) CreateGame(name, scenarioID, difficulty string, seed int64, state, status string, hostUserID int64, playerCount int, players []GamePlayer) (int64, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
 	tok, err := newToken()
 	if err != nil {
@@ -351,8 +381,8 @@ func (s *Store) CreateGame(name, scenarioID, difficulty string, seed int64, stat
 	}
 	defer tx.Rollback()
 	res, err := tx.Exec(
-		`INSERT INTO games (token, name, scenario_id, difficulty, seed, state, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
-		tok, name, scenarioID, difficulty, seed, state, now, now,
+		`INSERT INTO games (token, name, scenario_id, difficulty, seed, state, status, host_user_id, player_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		tok, name, scenarioID, difficulty, seed, state, status, hostUserID, playerCount, now, now,
 	)
 	if err != nil {
 		return 0, err
@@ -379,11 +409,11 @@ func nullableInt64(p *int64) any {
 	return *p
 }
 
-const gameColumns = `id, token, name, scenario_id, difficulty, seed, state, status, created_at, updated_at`
+const gameColumns = `id, token, name, scenario_id, difficulty, seed, state, status, host_user_id, player_count, created_at, updated_at`
 
 func scanGame(scanner interface{ Scan(dest ...any) error }) (*GameRow, error) {
 	g := &GameRow{}
-	err := scanner.Scan(&g.ID, &g.Token, &g.Name, &g.ScenarioID, &g.Difficulty, &g.Seed, &g.State, &g.Status, &g.CreatedAt, &g.UpdatedAt)
+	err := scanner.Scan(&g.ID, &g.Token, &g.Name, &g.ScenarioID, &g.Difficulty, &g.Seed, &g.State, &g.Status, &g.HostUserID, &g.PlayerCount, &g.CreatedAt, &g.UpdatedAt)
 	return g, err
 }
 
@@ -459,6 +489,44 @@ func (s *Store) ClaimPlayerSlot(gameID int64, slot int, userID int64) error {
 		return fmt.Errorf("slot %d not available", slot)
 	}
 	return nil
+}
+
+// JoinLobbySlot claims a lobby slot for a user with their chosen deck. The
+// row is upserted so an already-joined player can change their deck.
+func (s *Store) JoinLobbySlot(gameID, userID, deckID int64, heroBase string, slot int) error {
+	var existing int
+	err := s.db.QueryRow(`SELECT slot FROM game_players WHERE game_id = ? AND user_id = ?`, gameID, userID).Scan(&existing)
+	if err == nil {
+		_, err = s.db.Exec(`UPDATE game_players SET deck_id = ?, hero_base = ? WHERE game_id = ? AND user_id = ?`, deckID, heroBase, gameID, userID)
+		return err
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	_, err = s.db.Exec(
+		`INSERT INTO game_players (game_id, slot, user_id, deck_id, hero_base) VALUES (?, ?, ?, ?, ?)`,
+		gameID, slot, userID, deckID, heroBase,
+	)
+	return err
+}
+
+// RemoveLobbyPlayer drops a joined player from a lobby (host kick).
+func (s *Store) RemoveLobbyPlayer(gameID int64, slot int) error {
+	res, err := s.db.Exec(`DELETE FROM game_players WHERE game_id = ? AND slot = ?`, gameID, slot)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// StartGame flips a lobby to an active game with freshly built engine state.
+func (s *Store) StartGame(gameID, seed int64, state string) error {
+	_, err := s.db.Exec(`UPDATE games SET seed = ?, state = ?, status = 'active', updated_at = ? WHERE id = ?`,
+		seed, state, time.Now().UTC().Format(time.RFC3339), gameID)
+	return err
 }
 
 // ---------------------------------------------------------------- snapshots

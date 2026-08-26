@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { post, setToken } from '../api'
 import { useT } from '../i18n'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const t = useT()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [username, setUsername] = useState('')
@@ -20,7 +21,8 @@ export default function Login() {
       const path = mode === 'login' ? '/authenticate' : '/register'
       const resp = await post<{ token: string }>(path, { username, password })
       setToken(resp.token)
-      navigate('/')
+      // 登录前访问的路径（如朋友发来的邀请链接）登录后原地返回。
+      navigate((location.state as { from?: string } | null)?.from ?? '/')
     } catch (err) {
       setError(String((err as Error).message || err))
     } finally {

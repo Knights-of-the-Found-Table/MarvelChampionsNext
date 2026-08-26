@@ -623,3 +623,82 @@ a.button {
     transform: rotate(360deg);
   }
 }
+
+/* 对局大厅（邀请界面）：邀请链接 + 玩家列表 + 选牌组/开始。 */
+.lobby {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lobby .card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.lobby-invite {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.lobby-invite input {
+  flex: 1;
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 0.9rem;
+}
+
+.lobby-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.lobby-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.lobby-row.open {
+  border-style: dashed;
+  opacity: 0.65;
+}
+
+.lobby-row .grow {
+  flex: 1;
+}
+
+.tag-host {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  color: var(--warn);
+  font-size: 0.75rem;
+}
+
+.lobby-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.7rem;
+}
+
+.lobby-picker {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.lobby-picker select {
+  flex: 1;
+}

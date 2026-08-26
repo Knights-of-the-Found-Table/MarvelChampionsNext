@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { get, post, GameListItem } from '../api'
+import { Link } from 'react-router-dom'
+import { get, GameListItem } from '../api'
 import { useT } from '../i18n'
 
 export default function Games() {
-  const navigate = useNavigate()
   const t = useT()
   const [games, setGames] = useState<GameListItem[]>([])
   const [error, setError] = useState('')
@@ -20,15 +19,6 @@ export default function Games() {
   useEffect(() => {
     refresh()
   }, [])
-
-  async function join(id: string) {
-    try {
-      await post(`/marvel/games/${id}/join`, {})
-      navigate(`/games/${id}`)
-    } catch (err) {
-      setError(String((err as Error).message))
-    }
-  }
 
   return (
     <section>
@@ -57,11 +47,8 @@ export default function Games() {
               <td>{t(`status.${g.status}`)}</td>
               <td>
                 <Link to={`/games/${g.id}`}>
-                  {g.status === 'finished' ? t('games.review') : g.status === 'lobby' ? t('games.spectate') : t('games.open')}
-                </Link>{' '}
-                {g.status === 'lobby' && (
-                  <button onClick={() => join(g.id)}>{t('games.join')}</button>
-                )}
+                  {g.status === 'finished' ? t('games.review') : t('games.open')}
+                </Link>
               </td>
             </tr>
           ))}

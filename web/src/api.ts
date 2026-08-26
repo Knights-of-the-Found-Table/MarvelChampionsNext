@@ -327,3 +327,30 @@ export interface GameListItem {
   status: string
   updatedAt: string
 }
+
+// Lobby projection served by GET /games/{id}/lobby while the game waits for
+// players; the endpoint 404s once started so pollers switch to the board.
+export interface LobbyDeck {
+  id: string
+  name: string
+  heroCode: string
+}
+
+export interface LobbyPlayer {
+  userId: string
+  username: string
+  slot: number
+  host: boolean
+  deck: LobbyDeck | null
+}
+
+export interface LobbyView {
+  id: string
+  name: string
+  scenarioId: string
+  difficulty: string
+  status: string
+  playerCount: number
+  players: LobbyPlayer[]
+  openSlots: number
+}

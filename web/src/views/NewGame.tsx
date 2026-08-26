@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { get, post, Deck, ScenarioInfo, GameView } from '../api'
+import { get, post, Deck, ScenarioInfo } from '../api'
 import { useT } from '../i18n'
 
 export default function NewGame() {
@@ -33,8 +33,9 @@ export default function NewGame() {
     setBusy(true)
     try {
       const chosen = deckIds.slice(0, playerCount).filter((x): x is string => x !== null)
-      const view = await post<GameView>('/marvel/games', {
-        deckIds: chosen,
+      const view = await post<{ id: string }>('/marvel/games', {
+        deckIds: playerCount === 1 ? chosen : [],
+        playerCount,
         scenarioId,
         difficulty,
         name: name || undefined,
@@ -69,13 +70,13 @@ export default function NewGame() {
             ))}
           </select>
         </label>
-        {Array.from({ length: playerCount }).map((_, i) => (
-          <label key={i}>
-            {t('newgame.playerDeck', i + 1)}
+        {playerCount === 1 ? (
+          <label>
+            {t('newgame.playerDeck', 1)}
             <select
-              value={deckIds[i] ?? ''}
+              value={deckIds[0] ?? ''}
               onChange={(e) =>
-                setDeckIds((ids) => ids.map((x, j) => (j === i ? e.target.value : x)))
+                setDeckIds((ids) => ids.map((x, j) => (j === 0 ? e.target.value : x)))
               }
             >
               {decks.length === 0 && <option value="">{t('newgame.importFirst')}</option>}
@@ -86,7 +87,9 @@ export default function NewGame() {
               ))}
             </select>
           </label>
-        ))}
+        ) : (
+          <p className="muted">{t('newgame.lobbyHint')}</p>
+        )}
         <label>
           {t('newgame.scenario')}
           <select value={scenarioId} onChange={(e) => setScenarioId(e.target.value)}>

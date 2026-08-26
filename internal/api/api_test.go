@@ -481,3 +481,137 @@ func TestOpaqueIdentifiers(t *testing.T) {
 		t.Fatalf("replay player deck not a token: %v", p0["deck"])
 	}
 }
+
+// TestLobbyFlow covers the multiplayer invite flow: scenario-only creation,
+// per-player deck choice through the invite token, the host's kick and
+// start-with-fewer powers, and the lobby's 404-on-start poll contract.
+func TestLobbyFlow(t *testing.T) {
+	ts, _ := newTestServer(t)
+	base := ts.URL
+
+	const testSlots = `{"01088":3,"01089":3,"01090":3,"01005":2,"01006":1,"01002":1}`
+	var tokens [4]string // auth tokens, index 0 = host
+	var decks [4]string  // each user's own deck token
+	for i := 0; i < 4; i++ {
+		_, b := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: fmt.Sprintf("lobby%d", i), Password: "secret123"})
+		tokens[i] = b["token"].(string)
+		_, bd := doJSON(t, "POST", base+"/api/v1/marvel/decks", tokens[i], importDeckRequest{
+			Name:             fmt.Sprintf("Deck %d", i),
+			InvestigatorCode: "01001a",
+			Slots:            map[string]int{"01088": 3, "01089": 3, "01090": 3, "01005": 2, "01006": 1, "01002": 1},
+		})
+		decks[i] = bd["id"].(string)
+	}
+	_ = testSlots
+
+	// host creates a 3-player lobby: scenario only, no decks
+	resp, body := doJSON(t, "POST", base+"/api/v1/marvel/games", tokens[0], createGameRequest{
+		PlayerCount: 3,
+		ScenarioID:  "01097",
+	})
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("create lobby: %d %v", resp.StatusCode, body)
+	}
+	if body["status"] != "lobby" || body["openSlots"].(float64) != 2 {
+		t.Fatalf("lobby shape: %v", body)
+	}
+	gameToken := body["id"].(string)
+	players := body["players"].([]any)
+	if len(players) != 1 {
+		t.Fatalf("expected synthetic host entry, got %v", players)
+	}
+	hostEntry := players[0].(map[string]any)
+	if hostEntry["host"] != true || hostEntry["username"] != "lobby0" {
+		t.Fatalf("host entry: %v", hostEntry)
+	}
+
+	join := func(user, deck string) (*http.Response, map[string]any) {
+		return doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/join", base, gameToken), user, joinRequest{Deck: deck})
+	}
+
+	// using someone else's deck is rejected
+	if resp, _ = join(tokens[0], decks[1]); resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("foreign deck should 403: %d", resp.StatusCode)
+	}
+
+	// u1 joins with their own deck (slot 1)
+	resp, body = join(tokens[1], decks[1])
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("join: %d %v", resp.StatusCode, body)
+	}
+	if ps := body["players"].([]any); len(ps) != 2 {
+		t.Fatalf("players after join: %v", ps)
+	}
+
+	// u2 joins (slot 2) → full; u3 cannot join
+	if resp, _ = join(tokens[2], decks[2]); resp.StatusCode != http.StatusOK {
+		t.Fatalf("join u2: %d", resp.StatusCode)
+	}
+	resp, _ = join(tokens[3], decks[3])
+	if resp.StatusCode != http.StatusConflict {
+		t.Fatalf("full lobby should 409: %d", resp.StatusCode)
+	}
+
+	// join without a deck (the old request shape) is rejected in the lobby
+	resp, _ = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/join", base, gameToken), tokens[3], map[string]any{})
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("deck-less join should 400: %d", resp.StatusCode)
+	}
+
+	// only the host can kick; the host itself is not removable
+	resp, _ = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/kick", base, gameToken), tokens[1], kickRequest{Slot: 2})
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("non-host kick should 403: %d", resp.StatusCode)
+	}
+	resp, _ = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/kick", base, gameToken), tokens[0], kickRequest{Slot: 0})
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("kicking the host should 400: %d", resp.StatusCode)
+	}
+	resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/kick", base, gameToken), tokens[0], kickRequest{Slot: 2})
+	if resp.StatusCode != http.StatusOK || body["openSlots"].(float64) != 1 {
+		t.Fatalf("kick: %d %v", resp.StatusCode, body)
+	}
+
+	// start requires the host's own deck
+	resp, _ = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/start", base, gameToken), tokens[0], map[string]any{})
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("start without host deck should 400: %d", resp.StatusCode)
+	}
+
+	// host picks their deck, then starts with 2 of 3 configured players
+	if resp, _ = join(tokens[0], decks[0]); resp.StatusCode != http.StatusOK {
+		t.Fatalf("host deck pick: %d", resp.StatusCode)
+	}
+	resp, body = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/start", base, gameToken), tokens[0], map[string]any{})
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("start: %d %v", resp.StatusCode, body)
+	}
+	if view := body; view["id"] != gameToken {
+		t.Fatalf("started view id: %v", view["id"])
+	}
+	if ps := body["players"].([]any); len(ps) != 2 {
+		t.Fatalf("expected 2 of 3 players, got %d", len(ps))
+	}
+	if _, ok := body["question"]; !ok {
+		t.Fatal("host should receive the pending question after start")
+	}
+
+	// the lobby is gone: polls 404, joins and starts are rejected
+	resp, _ = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%s/lobby", base, gameToken), tokens[0], nil)
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("lobby after start should 404: %d", resp.StatusCode)
+	}
+	if resp, _ = join(tokens[3], decks[3]); resp.StatusCode != http.StatusConflict {
+		t.Fatalf("join after start should 409: %d", resp.StatusCode)
+	}
+	resp, _ = doJSON(t, "POST", fmt.Sprintf("%s/api/v1/marvel/games/%s/start", base, gameToken), tokens[0], map[string]any{})
+	if resp.StatusCode != http.StatusConflict {
+		t.Fatalf("double start should 409: %d", resp.StatusCode)
+	}
+
+	// a user who never joined spectates the started game
+	resp, body = doJSON(t, "GET", fmt.Sprintf("%s/api/v1/marvel/games/%s", base, gameToken), tokens[3], nil)
+	if resp.StatusCode != http.StatusOK || body["question"] != nil {
+		t.Fatalf("spectator view: %d %v", resp.StatusCode, body["question"])
+	}
+}
