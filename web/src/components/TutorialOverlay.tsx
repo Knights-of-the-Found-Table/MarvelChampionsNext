@@ -4,6 +4,9 @@ import { useT } from '../i18n'
 
 interface Props {
   view: GameView | null
+  // suppressed 为 true 时（剧情弹窗等更高优先级弹窗激活中）暂时隐藏
+  // 教程层——它是 fixed inset:0 的全屏层，不隐藏会吃掉弹窗的触摸事件。
+  suppressed?: boolean
 }
 
 interface Step {
@@ -14,7 +17,7 @@ interface Step {
 }
 
 // 对局内新手教学：不进规则引擎，只根据当前视图给下一步提示。
-export default function TutorialOverlay({ view }: Props) {
+export default function TutorialOverlay({ view, suppressed = false }: Props) {
   const t = useT()
   const storageKey = 'mc-tutorial-seen-v1'
   const [active, setActive] = useState(false)
@@ -95,7 +98,7 @@ export default function TutorialOverlay({ view }: Props) {
       <button className="tutorial-toggle" onClick={open} title={t('tutorial.open')}>
         ?
       </button>
-      {active && step && (
+      {active && !suppressed && step && (
         <div className="tutorial-overlay" role="dialog" aria-label={t('tutorial.open')}>
           <div className="tutorial-card">
             <div className="tutorial-head">

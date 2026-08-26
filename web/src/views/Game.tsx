@@ -339,7 +339,7 @@ export default function Game() {
         {/* 错误 toast：独立于顶栏，右下角显示 */}
         {error && <div className="error-toast">{error}</div>}
         <div className="hud-controls">
-          <TutorialOverlay view={view} />
+          <TutorialOverlay view={view} suppressed={stories.length > 0} />
           <button
             className={`hud-toggle ${sfxOn ? 'on' : ''}`}
             onClick={toggleSfx}

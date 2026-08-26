@@ -1053,14 +1053,16 @@
   color: #bcd3ec;
 }
 
-/* 主计谋 a 面故事弹窗：非阻塞，仅作展示 */
+/* 主计谋 a 面故事弹窗：非阻塞，仅作展示。fixed + 高层级：必须压过
+   tutorial-overlay（fixed inset:0 z-index:500 的全屏层），否则手机端
+   教程激活时剧情弹窗的关闭按钮永远点不到。 */
 .scheme-story {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(4, 6, 10, 0.72);
   display: grid;
   place-items: center;
-  z-index: 320;
+  z-index: 600;
 }
 
 .scheme-story-body {
