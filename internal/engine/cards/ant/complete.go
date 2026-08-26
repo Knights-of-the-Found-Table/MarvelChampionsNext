@@ -6,6 +6,8 @@
 package ant
 
 import (
+	"strings"
+
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 )
@@ -679,6 +681,9 @@ func attachPickMsg(g *engine.Game, e engine.Entity, name string, hp int) engine.
 		if a == nil {
 			continue
 		}
+		if name == "Power Gloves" && !hasTrait(a, "avenger") {
+			continue
+		}
 		picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 			Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, MaxHP: hp}))
 	}
@@ -686,6 +691,22 @@ func attachPickMsg(g *engine.Game, e engine.Entity, name string, hp int) engine.
 		return nil
 	}
 	return engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S("Attach "+name+" to which ally?"), picks...)}
+}
+
+func hasTrait(e engine.Entity, want string) bool {
+	for _, t := range e.EDef().Traits {
+		if strings.EqualFold(t, want) {
+			return true
+		}
+	}
+	if a, ok := e.(*engine.Ally); ok {
+		for _, t := range a.ExtraTraits {
+			if strings.EqualFold(t, want) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func baseMnATK(mn *engine.Minion) int {

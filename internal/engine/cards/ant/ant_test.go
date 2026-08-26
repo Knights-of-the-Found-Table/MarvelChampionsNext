@@ -122,3 +122,35 @@ func promptOf(pq *engine.PendingQuestion) string {
 	}
 	return pq.Question.Prompt
 }
+
+// TestPowerGlovesOnlyAttachesToAvengers: Mockingbird (01083) is not an
+// Avenger in print, while Blade (21019) is; the attach question must offer
+// Blade but not Mockingbird. Honorary Avenger's dynamic ExtraTraits are
+// included by the helper.
+func TestPowerGlovesOnlyAttachesToAvengers(t *testing.T) {
+	g := newAntGame(t, 23, nil)
+	p := g.Players[0]
+	mock := &engine.Ally{ID: engine.EntityID(g.NextCardID()), Code: "01083", Owner: p.ID, MaxHP: 3}
+	blade := &engine.Ally{ID: engine.EntityID(g.NextCardID()), Code: "21019", Owner: p.ID, MaxHP: 2}
+	g.Allies[mock.ID] = mock
+	g.Allies[blade.ID] = blade
+	p.Allies = append(p.Allies, mock.ID, blade.ID)
+
+	up := &engine.Upgrade{ID: engine.EntityID(g.NextCardID()), Code: "12017", Owner: p.ID}
+	g.Upgrades[up.ID] = up
+	b := engine.LookupBehavior("12017")
+	if b == nil || b.OnPlay == nil {
+		t.Fatal("Power Gloves behavior missing")
+	}
+	out := b.OnPlay(g, up)
+	if len(out) != 1 {
+		t.Fatalf("expected attach question, got %#v", out)
+	}
+	aq, ok := out[0].(engine.AskQuestion)
+	if !ok || len(aq.Question.Choices) != 1 {
+		t.Fatalf("expected one attach choice, got %#v", out)
+	}
+	if aq.Question.Choices[0].SourceID != blade.ID {
+		t.Fatalf("Power Gloves offered %s, want Blade %s", aq.Question.Choices[0].SourceID, blade.ID)
+	}
+}
