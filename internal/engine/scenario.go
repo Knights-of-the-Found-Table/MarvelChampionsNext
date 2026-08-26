@@ -63,42 +63,102 @@ func Scenarios() []*ScenarioDef {
 }
 
 // VillainStageCodes derives the stage codes of a villain base code from the
-// card data: villain cards in the same card set sharing the base code,
-// ordered by stage number. For double-sided villains (Green Goblin / Norman
-// Osborn) the b-side code is used.
+// card data. Two conventions coexist:
+//
+//   - Double-sided villains (base+"b" is a villain card, e.g. Green Goblin
+//     02001b): the chain is exactly the sides of that one code, a before b
+//     (Norman Osborn → Green Goblin). Later stages are scenario-driven.
+//   - Single-sided villains: stage II/III cards are separate codes sharing
+//     the printed English name within the set (Rhino 01094/01095/01096;
+//     Civil War leaders I–IV). Lettered markers ("A1"/"B1") are alternate
+//     scenario variants and never chain; alternate a/c forms of one stage
+//     collapse to the primary's side.
 func VillainStageCodes(base string) []string {
-	def, ok := DB.Lookup(base + "b")
-	if ok && def.Type == "villain" {
+	singleSided := true
+	if def, ok := DB.Lookup(base + "b"); ok && def.Type == "villain" {
 		base = base + "b"
+		singleSided = false
 	}
 	primary, ok := DB.Lookup(base)
 	if !ok {
 		return nil
 	}
-	var stages []*data.CardDef
+	var family []*data.CardDef
 	for _, c := range DB.InSet(primary.CardSet) {
 		if (c.Type != "villain" && c.Type != "leader") || c.CardSet != primary.CardSet {
 			continue
 		}
-		if data.BaseCode(c.Code) != data.BaseCode(base) {
+		if singleSided && !sameVillainStageFamily(c, primary, base) {
 			continue
 		}
-		stages = append(stages, c)
+		if !singleSided && data.BaseCode(c.Code) != data.BaseCode(base) {
+			continue
+		}
+		family = append(family, c)
 	}
-	sort.Slice(stages, func(i, j int) bool {
-		if stages[i].Stage == nil || stages[j].Stage == nil {
-			return stages[i].StageLabel < stages[j].StageLabel
+	if !singleSided {
+		// Persona sides of one code, a/b order.
+		sort.Slice(family, func(i, j int) bool {
+			return sideOrder(family[i].Code) < sideOrder(family[j].Code)
+		})
+		codes := make([]string, len(family))
+		for i, c := range family {
+			codes[i] = c.Code
 		}
-		if *stages[i].Stage != *stages[j].Stage {
-			return *stages[i].Stage < *stages[j].Stage
+		return codes
+	}
+	// One progression entry per stage value: alternate forms of the same
+	// stage (En Sabah Nur's a/c Apocalypse forms) collapse; keep the
+	// primary's side, falling back to a stage's only card.
+	primarySide := sideOrder(base)
+	byStage := map[string]*data.CardDef{}
+	var order []string
+	for _, c := range family {
+		key := c.StageLabel
+		if c.Stage != nil {
+			key = fmt.Sprintf("%03d", *c.Stage)
 		}
-		return sideOrder(stages[i].Code) < sideOrder(stages[j].Code)
+		cur, seen := byStage[key]
+		if !seen {
+			byStage[key] = c
+			order = append(order, key)
+			continue
+		}
+		if sideOrder(c.Code) == primarySide && sideOrder(cur.Code) != primarySide {
+			byStage[key] = c
+		}
+	}
+	sort.SliceStable(order, func(i, j int) bool {
+		a, b := byStage[order[i]], byStage[order[j]]
+		if a.Stage != nil && b.Stage != nil {
+			return *a.Stage < *b.Stage
+		}
+		return a.StageLabel < b.StageLabel
 	})
-	codes := make([]string, len(stages))
-	for i, s := range stages {
-		codes[i] = s.Code
+	codes := make([]string, 0, len(order))
+	for _, key := range order {
+		codes = append(codes, byStage[key].Code)
 	}
 	return codes
+}
+
+// sameVillainStageFamily reports whether candidate c is a progression stage
+// of the primary villain card.
+func sameVillainStageFamily(c, primary *data.CardDef, base string) bool {
+	// Sides of one code chain (persona flips: 45081a/b War).
+	if data.BaseCode(c.Code) == data.BaseCode(base) {
+		return true
+	}
+	if c.EName != primary.EName {
+		return false
+	}
+	// Same name: roman/numeric markers are progression stages ("I"→"II"→
+	// "III"); lettered markers (A1/B1) or marker-less cards are variants.
+	if c.Stage == nil || primary.Stage == nil {
+		return false
+	}
+	// Alternate a/c forms of one stage do not chain; keep the primary side.
+	return sideOrder(c.Code) == sideOrder(base)
 }
 
 func sideOrder(code string) string {

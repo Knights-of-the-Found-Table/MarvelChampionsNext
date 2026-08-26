@@ -14,21 +14,22 @@ import (
 func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 	all := engine.DB.All()
 	type cardOut struct {
-		Code       string `json:"code"`
-		Name       string `json:"name"`
-		Subname    string `json:"subname,omitempty"`
-		PackCode   string `json:"packCode"`
-		PackName   string `json:"packName,omitempty"`
-		Type       string `json:"type"`
-		Category   string `json:"category"`
-		Aspect     string `json:"aspect,omitempty"`
-		CardSet    string `json:"cardSet,omitempty"`
-		Cost       *int   `json:"cost,omitempty"`
-		Unique     bool   `json:"unique"`
-		Traits     []string `json:"traits,omitempty"`
-		Resources []string `json:"resources,omitempty"`
-		Quantity   int    `json:"quantity,omitempty"`
-		Implemented bool  `json:"implemented"`
+		Code        string   `json:"code"`
+		Name        string   `json:"name"`
+		Subname     string   `json:"subname,omitempty"`
+		PackCode    string   `json:"packCode"`
+		PackName    string   `json:"packName,omitempty"`
+		Type        string   `json:"type"`
+		Category    string   `json:"category"`
+		Aspect      string   `json:"aspect,omitempty"`
+		CardSet     string   `json:"cardSet,omitempty"`
+		Cost        *int     `json:"cost,omitempty"`
+		Unique      bool     `json:"unique"`
+		Traits      []string `json:"traits,omitempty"`
+		Text        string   `json:"text,omitempty"`
+		Resources   []string `json:"resources,omitempty"`
+		Quantity    int      `json:"quantity,omitempty"`
+		Implemented bool     `json:"implemented"`
 	}
 	out := make([]cardOut, 0, len(all))
 	for _, def := range all {
@@ -36,8 +37,8 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 			Code: def.Code, Name: def.Name, Subname: def.Subname,
 			PackCode: def.PackCode, PackName: def.PackName, Type: def.Type, Category: def.Category,
 			Aspect: def.Aspect, CardSet: def.CardSet, Cost: def.Cost,
-			Unique: def.Unique, Traits: def.Traits, Resources: def.Resources,
-			Quantity: def.Quantity,
+			Unique: def.Unique, Traits: def.Traits, Text: def.Text, Resources: def.Resources,
+			Quantity:    def.Quantity,
 			Implemented: engine.Implemented(def.Code),
 		})
 	}
@@ -46,13 +47,13 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleHeroes(w http.ResponseWriter, r *http.Request) {
 	type heroOut struct {
-		Base       string `json:"base"`
-		HeroCode   string `json:"heroCode"`
+		Base         string `json:"base"`
+		HeroCode     string `json:"heroCode"`
 		AlterEgoCode string `json:"alterEgoCode"`
-		Name       string `json:"name"`
+		Name         string `json:"name"`
 		AlterEgoName string `json:"alterEgoName"`
-		PackCode   string `json:"packCode"`
-		Implemented bool  `json:"implemented"`
+		PackCode     string `json:"packCode"`
+		Implemented  bool   `json:"implemented"`
 	}
 	seen := map[string]bool{}
 	var out []heroOut
@@ -68,7 +69,7 @@ func (s *Server) handleHeroes(w http.ResponseWriter, r *http.Request) {
 		h := heroOut{
 			Base: base, HeroCode: def.Code,
 			AlterEgoCode: base + "b",
-			Name: def.Name, PackCode: def.PackCode,
+			Name:         def.Name, PackCode: def.PackCode,
 			Implemented: engine.Implemented(def.Code),
 		}
 		if back, ok := engine.DB.Lookup(base + "b"); ok {

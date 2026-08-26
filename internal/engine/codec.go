@@ -37,7 +37,7 @@ func init() {
 		MinionDefeated{}, MainSchemeMaxed{}, SchemeDefeated{},
 		ReplaceMainScheme{}, FlipMainScheme{}, GameOver{}, AskQuestion{},
 		WindowAfterEnemyAttacked{}, WindowAfterThwarted{}, RunAbility{},
-		ApplyVillainScheme{}, ResourcePayStub{}, RevealNemesisSet{}, SpawnDrone{},
+		ApplyVillainScheme{}, ResourcePayStub{}, RevealNemesisSet{}, SpawnDrone{}, ChooseDiscardFromHand{},
 		TakeDeckCard{}, FlipVillainPersona{}, MillPlayerDeck{}, DealEncounterToPlayer{}, EngageMinion{}, DiscardEncounterCard{}, AddInfamyMsg{}, BoostEnemyAttack{}, BoostActivation{},
 		ObligationResolve{}, DiscardControlled{}, AddAccelerationToken{}, RevealNextEncounter{},
 		PlayDefenseEvent{}, AddEntityCounter{}, ReturnControlled{},

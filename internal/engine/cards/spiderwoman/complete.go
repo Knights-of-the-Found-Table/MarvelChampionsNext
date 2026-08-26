@@ -72,56 +72,58 @@ func registerSW() {
 		},
 	})
 
-	// Hex Bolt: mill 3, resolve per boost count.
+	// Hex Bolt: mill 3, resolve ONE tier from the SUMMED boost icons.
 	engine.RegisterBehavior("15004", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			p := g.Player(e.EOwner())
 			if p == nil {
 				return nil
 			}
-			var msgs []engine.Message
+			total := 0
 			for i := 0; i < 3; i++ {
 				c, ok := g.DrawEncounter()
 				if !ok {
 					break
 				}
+				total += boostOf(c)
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
-				switch b := boostOf(c); {
-				case b == 0:
-					msgs = append(msgs, cardutil.ChooseEnemy(engine.Tf("c.hexBolt0BoostDeal2DamageToWhichEnemy"),
-						func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(
-						g, &engine.EventCard{Code: "15004", Owner: p.ID})...)
-				case b == 1:
-					msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-						engine.Tf("c.hexBolt1BoostRemove2ThreatFromWhichScheme"), schemePicks(g, 2, p.ID)...)})
-				case b == 2:
-					msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
-				default:
-					var picks []engine.Choice
-					for _, q := range g.Players {
+			}
+			g.TLogf("c.hexBoltMilled", total)
+			switch {
+			case total == 0:
+				return cardutil.ChooseEnemy(engine.Tf("c.hexBolt0BoostDeal2DamageToWhichEnemy"),
+					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(
+					g, &engine.EventCard{Code: "15004", Owner: p.ID})
+			case total == 1:
+				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
+					engine.Tf("c.hexBolt1BoostRemove2ThreatFromWhichScheme"), schemePicks(g, 2, p.ID)...)}}
+			case total == 2:
+				return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
+			default:
+				var picks []engine.Choice
+				for _, q := range g.Players {
+					picks = append(picks,
+						engine.Choice{Label: engine.S("Tough — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							Msgs(engine.ToughEntity{Target: q.ID}),
+						engine.Choice{Label: engine.S("Stun — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							Msgs(engine.StunEntity{Target: q.ID}))
+				}
+				for _, id := range cardutil.SortedEnemyIDs(g) {
+					enemy := g.Entity(id)
+					if enemy != nil {
 						picks = append(picks,
-							engine.Choice{Label: engine.S("Tough — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
-								Msgs(engine.ToughEntity{Target: q.ID}),
-							engine.Choice{Label: engine.S("Stun — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
-								Msgs(engine.StunEntity{Target: q.ID}))
-					}
-					for _, id := range cardutil.SortedEnemyIDs(g) {
-						enemy := g.Entity(id)
-						if enemy != nil {
-							picks = append(picks,
-								engine.Choice{Label: engine.Tf("c.stun3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
-									Msgs(engine.StunEntity{Target: id}),
-								engine.Choice{Label: engine.Tf("c.confuse3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
-									Msgs(engine.ConfuseEntity{Target: id}))
-						}
-					}
-					if len(picks) > 0 {
-						msgs = append(msgs, engine.AskQuestion{Player: p.ID,
-							Question: engine.Ask(engine.Tf("c.hexBolt3BoostPlaceAStatusOnWhichCharacter"), picks...)})
+							engine.Choice{Label: engine.Tf("c.stun3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+								Msgs(engine.StunEntity{Target: id}),
+							engine.Choice{Label: engine.Tf("c.confuse3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+								Msgs(engine.ConfuseEntity{Target: id}))
 					}
 				}
+				if len(picks) > 0 {
+					return []engine.Message{engine.AskQuestion{Player: p.ID,
+						Question: engine.Ask(engine.Tf("c.hexBolt3BoostPlaceAStatusOnWhichCharacter"), picks...)}}
+				}
+				return nil
 			}
-			return msgs
 		},
 	})
 
@@ -306,24 +308,19 @@ func registerSW() {
 		engine.RegisterBehavior("15018", b)
 	}
 
-	// Spiritual Meditation: draw 2, discard 1.
+	// Spiritual Meditation: draw 2, discard 1. The discard ask is a
+	// ChooseDiscardFromHand message, so the two drawn cards are in the
+	// selectable hand and the labels render per-locale (m.discardCard).
 	engine.RegisterBehavior("15019", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			p := g.Player(e.EOwner())
 			if p == nil {
 				return nil
 			}
-			msgs := []engine.Message{engine.DrawCards{Player: p.ID, N: 2}}
-			var picks []engine.Choice
-			for _, c := range p.Hand {
-				picks = append(picks, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
-					Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
+			return []engine.Message{
+				engine.DrawCards{Player: p.ID, N: 2},
+				engine.ChooseDiscardFromHand{Player: p.ID, N: 1, Prompt: engine.Tf("c.discardWhichCard")},
 			}
-			if len(picks) > 0 {
-				msgs = append(msgs, engine.AskQuestion{Player: p.ID,
-					Question: engine.Ask(engine.Tf("c.discardWhichCard"), picks...)})
-			}
-			return msgs
 		},
 	})
 

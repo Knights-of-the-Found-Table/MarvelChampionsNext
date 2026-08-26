@@ -457,6 +457,30 @@ a.button {
   justify-content: flex-end;
 }
 
+/* 按住 Ctrl 时的卡牌文本叠加：与卡图并排的窄栏，展示名称（含 code）、
+   类型/阵营/费用、特性与规则文本。 */
+.card-zoom .card-zoom-text {
+  width: min(320px, 34vw);
+  max-height: 72vh;
+  overflow-y: auto;
+  margin: 0 14px;
+  padding: 12px 14px;
+  background: rgba(10, 18, 26, 0.94);
+  border: 1px solid #d6a556;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  color: #e8dcc8;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  pointer-events: none;
+}
+
+.card-zoom .card-zoom-text p {
+  margin: 8px 0 0;
+  white-space: pre-line;
+}
+
 .preview-anchor {
   position: fixed;
   left: 50%;

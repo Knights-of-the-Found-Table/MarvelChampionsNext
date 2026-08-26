@@ -462,7 +462,7 @@ func registerPackCards() {
 			if len(p.Hand) > 0 {
 				var subs []engine.Choice
 				for _, c := range p.Hand {
-					subs = append(subs, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					subs = append(subs, engine.Choice{Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 							engine.ObligationResolve{Player: p.ID, Card: card}))
 				}

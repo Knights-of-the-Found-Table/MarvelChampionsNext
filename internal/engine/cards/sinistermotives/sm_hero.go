@@ -243,7 +243,7 @@ func registerSMHeroCards() {
 			ids = append(ids, p.Allies...)
 			for _, id := range ids {
 				var def = g.Entity(id).EDef()
-				if def != nil && def.HasTrait("shield") {
+				if def != nil && def.HasTrait("S.H.I.E.L.D.") {
 					opts = append(opts, engine.Choice{
 						Label: engine.S(def.Name), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: id}))
@@ -297,7 +297,7 @@ func registerSMHeroCards() {
 				return nil
 			}
 			for _, id := range p.Supports {
-				if s := g.Supports[id]; s != nil && s.Exhausted && s.EDef().HasTrait("shield") {
+				if s := g.Supports[id]; s != nil && s.Exhausted && s.EDef().HasTrait("S.H.I.E.L.D.") {
 					return []engine.Message{engine.ReadyEntity{ID: id}}
 				}
 			}
@@ -378,7 +378,7 @@ func registerSMHeroCards() {
 			if s == nil || s.Exhausted {
 				return nil
 			}
-			if def := pc.Card.Def(); def == nil || !def.HasTrait("shield") {
+			if def := pc.Card.Def(); def == nil || !def.HasTrait("S.H.I.E.L.D.") {
 				return nil
 			}
 			return cardutil.ChooseEnemy(engine.Tf("c.skyDestroyerDeal2Damage"),

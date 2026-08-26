@@ -43,6 +43,10 @@ type CardDef struct {
 	Unique bool `json:"unique"`
 
 	Traits []string `json:"traits,omitempty"`
+	// ETraits is the English trait list captured at load; zh overlays
+	// replace Traits (display) but never ETraits, so game logic matching
+	// printed traits (S.H.I.E.L.D. reactions) is locale-proof.
+	ETraits []string `json:"etraits,omitempty"`
 	// Keywords are the structured form of printed keywords/rules riders
 	// (Guard, Retaliate 2, Hinder 3, ...). 游戏逻辑严禁解析 Text 做判断
 	// （regex/子串匹配印刷文本一律禁止，参见 engine/i18n.go 的 i18n 规约）：
@@ -52,6 +56,13 @@ type CardDef struct {
 
 	// Resources lists printed resource icons: energy, physical, mental, wild.
 	Resources []string `json:"resources,omitempty"`
+	// DoubleForAspect / DoubleForTrait carry the parsed doubling condition
+	// of resource cards ("The Power of X"): the card generates one extra
+	// resource when spent paying for a card of that aspect ("Basic (gray)")
+	// or carrying that trait ("AERIAL"). Parsed once at load from the
+	// English print text — never from the (translatable) card name.
+	DoubleForAspect string `json:"doubleForAspect,omitempty"`
+	DoubleForTrait  string `json:"doubleForTrait,omitempty"`
 
 	// BoostEntersPlay marks the "Boost: put this card into play" rider:
 	// revealed as a boost card, it enters play instead of adding boost
@@ -224,6 +235,26 @@ func romanToInt(s string) (int, bool) {
 	return total, total > 0
 }
 
+// powerDoubleTraitRE / powerDoubleAspectRE capture the target condition of
+// "Double the number of resources this card generates ... paying for ..."
+// resource cards: a printed [[TRAIT]] or a named aspect. Other doubling
+// wordings (Self Confidence's damage condition) intentionally do not match.
+var (
+	powerDoubleTraitRE  = regexp.MustCompile(`Double the number of resources this card generates (?:when|while) paying for an? \[\[([^\]]+)\]\] card`)
+	powerDoubleAspectRE = regexp.MustCompile(`Double the number of resources this card generates (?:when|while) paying for an? ([A-Za-z]+)`)
+)
+
+func parseResourceDouble(text string) (aspect, trait string) {
+	clean := tagRE.ReplaceAllString(text, "")
+	if m := powerDoubleTraitRE.FindStringSubmatch(clean); m != nil {
+		return "", strings.ToLower(m[1])
+	}
+	if m := powerDoubleAspectRE.FindStringSubmatch(clean); m != nil {
+		return strings.ToLower(m[1]), ""
+	}
+	return "", ""
+}
+
 // parseKeywords extracts leading printed keywords ("Guard.", "Retaliate 2.",
 // ...) from the card text after stripping formatting tags.
 func parseKeywords(text string) []Keyword {
@@ -263,12 +294,17 @@ func parseKeywords(text string) []Keyword {
 	return kws
 }
 
+// traitSepRE matches marvelcdb trait separators: a period followed by
+// whitespace, or a trailing period. "S.H.I.E.L.D. Vehicle" keeps the
+// abbreviation whole — its inner periods are not followed by spaces.
+var traitSepRE = regexp.MustCompile(`\.\s+|\.$`)
+
 func parseTraits(s string) []string {
 	if s == "" {
 		return nil
 	}
 	var out []string
-	for _, part := range strings.Split(s, ".") {
+	for _, part := range traitSepRE.Split(s, -1) {
 		part = strings.ToLower(strings.TrimSpace(part))
 		if part != "" {
 			out = append(out, part)
@@ -325,6 +361,8 @@ func normalize(def *CardDef, raw rawCard) {
 	def.BackImageSrc = raw.BackImageSrc
 
 	def.Traits = parseTraits(raw.Traits)
+	def.ETraits = def.Traits
+	def.DoubleForAspect, def.DoubleForTrait = parseResourceDouble(raw.Text)
 	def.Keywords = parseKeywords(raw.Text)
 
 	// Riders the game logic keys on, parsed once at load. Hinder is
@@ -387,15 +425,27 @@ func sideSuffix(code string) string {
 
 func hasSideSuffix(code string) bool { return sideSuffix(code) != "" }
 
-// Trait reports whether the card carries the given (case-insensitive) trait.
+// HasTrait reports whether the card carries the given (case-insensitive)
+// trait. Matching prefers the English ETraits (zh overlays rewrite Traits),
+// and tolerates the trailing period of printed abbreviations: both
+// "S.H.I.E.L.D." and "s.h.i.e.l.d" denote the same trait.
 func (c *CardDef) HasTrait(trait string) bool {
-	t := strings.ToLower(trait)
+	t := normTrait(trait)
+	for _, x := range c.ETraits {
+		if normTrait(x) == t {
+			return true
+		}
+	}
 	for _, x := range c.Traits {
-		if x == t {
+		if normTrait(x) == t {
 			return true
 		}
 	}
 	return false
+}
+
+func normTrait(s string) string {
+	return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(s)), ".")
 }
 
 // HasKeyword reports whether the card has the named printed keyword.

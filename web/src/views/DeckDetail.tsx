@@ -106,15 +106,13 @@ export default function DeckDetail() {
     return { total, byType, byAspect, costBuckets, byResource }
   }, [entries])
 
-  if (error) return <section><h2>{t('deck.title')}</h2><p className="error">{error}</p></section>
-  if (!deck) return <section><p className="muted">{t('deck.loading')}</p></section>
-
-  const hero = catalog[deck.investigatorCode]
-  const heroName = hero ? lname(zh, hero.code, hero.name) : deck.investigatorCode
+  // 所有 hooks 必须在下面的 error/loading 早退 return 之前调用：牌组是
+  // 异步加载的，deck=null 的首帧与加载完成的第二帧 hook 数量必须一致，
+  // 否则 React 报 "Rendered more hooks than during the previous render"。
   const heroZoomRef = useRef<HTMLDivElement | null>(null)
-  const heroZoom = useCardZoom(deck.investigatorCode, heroZoomRef)
+  const heroZoom = useCardZoom(deck?.investigatorCode ?? '', heroZoomRef)
   const previewRef = useRef<HTMLDivElement | null>(null)
-  const previewZoom = useCardZoom(previewCode ?? deck.investigatorCode, previewRef)
+  const previewZoom = useCardZoom(previewCode ?? deck?.investigatorCode ?? '', previewRef)
   useOutsideClose(previewCode !== null, () => setPreviewCode(null))
   useEffect(() => {
     if (previewCode && coarsePointer) previewZoom.show()
@@ -122,6 +120,12 @@ export default function DeckDetail() {
     // previewZoom identity changes with code; only react to the requested code.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewCode, coarsePointer])
+
+  if (error) return <section><h2>{t('deck.title')}</h2><p className="error">{error}</p></section>
+  if (!deck) return <section><p className="muted">{t('deck.loading')}</p></section>
+
+  const hero = catalog[deck.investigatorCode]
+  const heroName = hero ? lname(zh, hero.code, hero.name) : deck.investigatorCode
   const maxCost = Math.max(1, ...stats.costBuckets)
   const grouped = new Map<string, DeckEntry[]>()
   for (const e of entries) {

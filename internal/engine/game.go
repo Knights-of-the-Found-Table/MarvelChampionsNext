@@ -916,46 +916,23 @@ func iconCount(def *data.CardDef) int {
 	return len(def.Resources)
 }
 
-// powerOfBonus returns the extra icon a "The Power of <Aspect>" resource
-// card contributes when paying for a card of that aspect (data-driven:
-// parsed from the printed English name, EName — zh overlays replace Name,
-// so matching Name here would silently disable the doubling for Chinese
-// games). "The Power in All of Us" (13024) doubles for Basic (gray) cards,
-// "The Power of the Mind" (40028) for PSIONIC cards, "The Power of Flight"
-// (42022) for AERIAL cards.
+// powerOfBonus returns the extra icon a doubling resource card ("The Power
+// of X") contributes when spent on the given payment target. The condition
+// comes from structured fields parsed once at data load
+// (DoubleForAspect/DoubleForTrait) — never from the card name, which zh
+// overlays translate (matching Name would silently disable the doubling in
+// Chinese games).
 func powerOfBonus(paying, target *data.CardDef) int {
-	name := paying.EName
-	if name == "" {
-		name = paying.Name // test fixtures without EName
-	}
-	isPowerCard := strings.HasPrefix(name, "The Power of ") || name == "The Power in All of Us"
-	if target == nil || !isPowerCard {
+	if target == nil {
 		return 0
 	}
-	switch name {
-	case "The Power of the Mind":
-		if target.HasTrait("Psionic") {
-			return 1
-		}
-		return 0
-	case "The Power of Leadership":
-		if target.Aspect == "leadership" {
-			return 1
-		}
-		return 0
-	case "The Power of Flight":
-		if target.HasTrait("Aerial") {
-			return 1
-		}
-		return 0
-	case "The Power in All of Us":
-		if target.Aspect == "basic" {
+	if paying.DoubleForAspect != "" {
+		if target.Aspect == paying.DoubleForAspect {
 			return 1
 		}
 		return 0
 	}
-	aspect := strings.ToLower(strings.TrimPrefix(name, "The Power of "))
-	if target.Aspect == aspect {
+	if paying.DoubleForTrait != "" && target.HasTrait(paying.DoubleForTrait) {
 		return 1
 	}
 	return 0
@@ -1114,7 +1091,8 @@ func (g *Game) MarshalJSON() ([]byte, error) {
 		*alias
 		Queue   []msgEnvelope    `json:"queue,omitempty"`
 		Pending *PendingQuestion `json:"pending,omitempty"`
-	}{alias: (*alias)(g), Pending: g.pending}
+		NextID  int              `json:"nextId,omitempty"`
+	}{alias: (*alias)(g), Pending: g.pending, NextID: g.nextID}
 	var err error
 	out.Queue, err = marshalMessages(g.queue)
 	if err != nil {
@@ -1130,6 +1108,7 @@ func (g *Game) UnmarshalJSON(b []byte) error {
 		*alias
 		Queue   []msgEnvelope    `json:"queue"`
 		Pending *PendingQuestion `json:"pending"`
+		NextID  int              `json:"nextId"`
 	}{alias: (*alias)(g)}
 	if err := jsonUnmarshal(b, &in); err != nil {
 		return err
@@ -1140,9 +1119,89 @@ func (g *Game) UnmarshalJSON(b []byte) error {
 	}
 	g.queue = queue
 	g.pending = in.Pending
+	g.nextID = in.NextID
+	g.healNextID()
 	g.scenario = nil
 	g.migrateMainSchemeCodes()
 	return nil
+}
+
+// healNextID raises the entity-id counter above every id currently in the
+// game. Saves written before nextId was persisted restart the counter at 0,
+// so every later spawn collided with setup-time entities: maps keyed by
+// entity id silently overwrote existing upgrades/minions with new cards
+// ("all my Magic Shields turned into The Sorcerer Supreme"). Walking the
+// live state repairs those saves; ids only ever grow, so fresh games with
+// the counter intact are unaffected.
+func (g *Game) healNextID() {
+	max := 0
+	see := func(id string) {
+		if i := strings.LastIndexByte(id, '-'); i >= 0 {
+			if n, err := strconv.Atoi(id[i+1:]); err == nil && n > max {
+				max = n
+			}
+		}
+	}
+	seeCard := func(c Card) { see(c.ID) }
+	for _, p := range g.Players {
+		see(p.ID.String())
+		for _, c := range p.Hand {
+			seeCard(c)
+		}
+		for _, c := range p.Deck {
+			seeCard(c)
+		}
+		for _, c := range p.Discard {
+			seeCard(c)
+		}
+		for _, c := range p.SenseDeck {
+			seeCard(c)
+		}
+		for _, c := range p.EncounterDown {
+			seeCard(c)
+		}
+	}
+	for _, list := range []CardList{g.EncounterDeck, g.EncounterDiscard, g.Collection, g.SetAside, g.VictoryDisplay} {
+		for _, c := range list {
+			seeCard(c)
+		}
+	}
+	if g.MainScheme != nil {
+		see(g.MainScheme.ID.String())
+	}
+	for id := range g.Villains {
+		see(id.String())
+	}
+	for id := range g.Minions {
+		see(id.String())
+		if m := g.Minions[id]; m != nil && m.Source != nil {
+			seeCard(*m.Source)
+		}
+	}
+	for id := range g.Allies {
+		see(id.String())
+	}
+	for id := range g.Supports {
+		see(id.String())
+	}
+	for id := range g.Upgrades {
+		see(id.String())
+	}
+	for id := range g.Attachments {
+		see(id.String())
+	}
+	for id := range g.Treacheries {
+		see(id.String())
+	}
+	for id := range g.SideSchemes {
+		see(id.String())
+	}
+	for id := range g.Environments {
+		see(id.String())
+	}
+	if max >= g.nextID {
+		g.nextID = max + 1
+	}
 }
 
 // migrateMainSchemeCodes re-derives the main scheme's stage codes from the

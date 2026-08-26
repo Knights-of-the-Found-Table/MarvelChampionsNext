@@ -270,6 +270,16 @@ type (
 	// facedown Drone minion engaged with them.
 	SpawnDrone struct{ Player PlayerID }
 
+	// ChooseDiscardFromHand asks a player to choose N cards from their
+	// CURRENT hand to discard. Choices are built when the message is
+	// processed, so cards drawn by earlier queued messages (Spiritual
+	// Meditation's draw 2) are selectable.
+	ChooseDiscardFromHand struct {
+		Player PlayerID
+		N      int
+		Prompt Msg
+	}
+
 	// TakeDeckCard moves a specific card from a player's deck to their
 	// hand. FromTop > 0 discards the other top-N cards instead of the
 	// whole-deck shuffle that callers usually push separately.
@@ -807,6 +817,7 @@ func (WindowAfterThwarted) msg()      {}
 func (RunAbility) msg()               {}
 func (RevealNemesisSet) msg()         {}
 func (SpawnDrone) msg()               {}
+func (ChooseDiscardFromHand) msg()    {}
 func (TakeDeckCard) msg()             {}
 func (FlipVillainPersona) msg()       {}
 func (MillPlayerDeck) msg()           {}

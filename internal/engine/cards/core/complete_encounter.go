@@ -460,7 +460,20 @@ func registerRemainingEncounterCards() {
 		},
 	})
 
-	// Ultron Drones environment: drone stats already covered by spawn.
+	// Ultron main scheme stage 1B "When Revealed": each player's top deck
+	// card enters play facedown as a Drone minion.
+	engine.RegisterBehavior("01137b", &engine.Behavior{
+		MainSchemeRevealed: func(g *engine.Game, s *engine.MainScheme) []engine.Message {
+			var msgs []engine.Message
+			for _, p := range g.Players {
+				msgs = append(msgs, engine.SpawnDrone{Player: p.ID})
+			}
+			return msgs
+		},
+	})
+
+	// Ultron Drones environment: drone stats already covered by spawn;
+	// defeated drones route to their owner's discard (MinionDefeated).
 	engine.RegisterBehavior("01140", &engine.Behavior{})
 
 	// Program Transmitter: +1 threat to each side scheme after Ultron
@@ -495,8 +508,25 @@ func registerRemainingEncounterCards() {
 		},
 	})
 
-	// Upgraded Drones: bonus handled by the engine's droneBonus.
+	// Upgraded Drones: attaches to the Ultron Drones environment (bonus
+	// handled by the engine's droneBonus).
 	engine.RegisterBehavior("01142", &engine.Behavior{
+		OnAttach: func(g *engine.Game, t *engine.Attachment, target engine.EntityID) []engine.Message {
+			for _, id := range cardutil.SortedIDs(g.Environments) {
+				if env := g.Environments[id]; env != nil {
+					t.Target = id
+					g.TLogf("c.attachesToEnvironment", t)
+					return nil
+				}
+			}
+			// Environment not in play yet: fall back to the villain so the
+			// card still has a visible host.
+			for id := range g.Villains {
+				t.Target = id
+				break
+			}
+			return nil
+		},
 		Abilities: removalAbility("Spend [energy] [mental] [physical] → discard Upgraded Drones", "energy:1 mental:1 physical:1", 3),
 	})
 

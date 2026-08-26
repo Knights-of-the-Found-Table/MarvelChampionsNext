@@ -105,7 +105,9 @@ func TestMessageArgConsistency(t *testing.T) {
 func TestResourcePayment(t *testing.T) {
 	leadership := &data.CardDef{Code: "leadership-target", Name: "Leadership Card", Type: "event", Aspect: "leadership"}
 	justice := &data.CardDef{Code: "justice-target", Name: "Justice Card", Type: "event", Aspect: "justice"}
-	power := &data.CardDef{Code: "62017", Name: "The Power of Leadership", Type: "resource", Resources: []string{"wild"}}
+	// Doubling conditions are structured data parsed at load; hand-built
+	// fixtures set them directly.
+	power := &data.CardDef{Code: "62017", Name: "The Power of Leadership", Type: "resource", Resources: []string{"wild"}, DoubleForAspect: "leadership"}
 	if got := iconCount(power) + powerOfBonus(power, leadership); got != 2 {
 		t.Fatalf("The Power of Leadership should pay 2 for Leadership, got %d", got)
 	}
@@ -117,12 +119,13 @@ func TestResourcePayment(t *testing.T) {
 	}
 }
 
-// TestPowerDoublingUnderZhOverlay: the zh overlay replaces Name with the
-// Chinese translation; doubling must still key off the immutable English
-// EName (regression: Mockingbird cost 3 could not be paid with 凝聚力量).
+// TestPowerDoublingUnderZhOverlay: the zh overlay replaces Name/Text with
+// Chinese translations; doubling keys off DoubleForAspect/DoubleForTrait
+// parsed once from the English print text, so localization cannot disable
+// it (regression: Mockingbird cost 3 could not be paid with 凝聚力量).
 func TestPowerDoublingUnderZhOverlay(t *testing.T) {
 	basicAlly := &data.CardDef{Code: "01083", Name: "仿声鸟", EName: "Mockingbird", Type: "ally", Aspect: "basic"}
-	powerAll := &data.CardDef{Code: "13024", Name: "凝聚力量", EName: "The Power in All of Us", Type: "resource", Resources: []string{"wild"}}
+	powerAll := &data.CardDef{Code: "13024", Name: "凝聚力量", EName: "The Power in All of Us", Type: "resource", Resources: []string{"wild"}, DoubleForAspect: "basic"}
 	if got := iconCount(powerAll) + powerOfBonus(powerAll, basicAlly); got != 2 {
 		t.Fatalf("The Power in All of Us should pay 2 for a basic card under zh overlay, got %d", got)
 	}
@@ -130,10 +133,41 @@ func TestPowerDoublingUnderZhOverlay(t *testing.T) {
 	if got := iconCount(powerAll) + powerOfBonus(powerAll, aspectCard); got != 1 {
 		t.Fatalf("The Power in All of Us should pay 1 for a Justice card, got %d", got)
 	}
-	zhLeadership := &data.CardDef{Code: "62017", Name: "领袖之力", EName: "The Power of Leadership", Type: "resource", Resources: []string{"wild"}}
+	zhLeadership := &data.CardDef{Code: "62017", Name: "领袖之力", EName: "The Power of Leadership", Type: "resource", Resources: []string{"wild"}, DoubleForAspect: "leadership"}
 	leadershipTarget := &data.CardDef{Code: "y", Name: "领袖事件", EName: "Leadership Event", Type: "event", Aspect: "leadership"}
 	if got := iconCount(zhLeadership) + powerOfBonus(zhLeadership, leadershipTarget); got != 2 {
 		t.Fatalf("The Power of Leadership should pay 2 for Leadership under zh overlay, got %d", got)
+	}
+}
+
+// TestResourceDoubleParsing: every printed doubling resource card parses to
+// its structured condition at data load (aspect cards, the Basic (gray)
+// card, and the [[AERIAL]]/[[PSIONIC]] trait variants); Self Confidence's
+// damage-based wording must NOT parse as a payment-target doubling.
+func TestResourceDoubleParsing(t *testing.T) {
+	cases := []struct {
+		code          string
+		aspect, trait string
+	}{
+		{"01079", "protection", ""},
+		{"01055", "aggression", ""},
+		{"01062", "justice", ""},
+		{"01072", "leadership", ""},
+		{"13024", "basic", ""},
+		{"46023", "basic", ""},
+		{"42022", "", "aerial"},
+		{"40028", "", "psionic"},
+		{"41021", "", "psionic"},
+		{"44025", "", ""}, // Self Confidence: identity-damage condition, not a target doubling
+	}
+	for _, c := range cases {
+		def, ok := DB.Lookup(c.code)
+		if !ok {
+			t.Fatalf("%s not in DB", c.code)
+		}
+		if def.DoubleForAspect != c.aspect || def.DoubleForTrait != c.trait {
+			t.Errorf("%s: doubleFor=%q/%q, want %q/%q", c.code, def.DoubleForAspect, def.DoubleForTrait, c.aspect, c.trait)
+		}
 	}
 }
 

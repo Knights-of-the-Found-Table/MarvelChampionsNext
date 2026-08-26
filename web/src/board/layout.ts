@@ -137,7 +137,9 @@ function schemeCard(s: SchemeView, x: number, y: number, main: boolean): PlacedC
 
 function minionCard(m: MinionView, x: number, y: number, playerIndex: number): PlacedCard {
   return {
-    id: m.id, code: m.code, kind: 'minion', x, y, playerIndex,
+    // 面向下无人机（奥创）：显示牌主玩家牌背，不带卡图。
+    id: m.id, code: m.faceDown ? '' : m.code, kind: 'minion', x, y, playerIndex,
+    faceDown: m.faceDown,
     title: m.name, hp: m.hp, maxHp: m.maxHp, attack: m.attack, scheme: m.scheme,
     stunned: m.stunned, confused: m.confused, tough: m.tough, guard: m.guard, z: 2,
   }
@@ -266,13 +268,18 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   const slotDx = (exhausted: boolean | undefined, scale: number): number =>
     exhausted ? ((CARD_H - CARD_W) / 2) * scale : 0
 
-  // 场地行：一名玩家的盟友 + 升级 + 支援，以 cx 居中（横置卡占宽位）
+  // 场地行：一名玩家的盟友 + 升级 + 支援，以 cx 居中（横置卡占宽位）。
+  // 已附属到非玩家宿主（06031 监视 → 主线密谋）的升级不在此行，
+  // 由文件末尾的附属摆放逻辑叠放到宿主旁。
   function fieldRow(p: PlayerView, pi: number, y: number, scale: number, cx: number): void {
     const gap = 18 * scale
     const items: PlacedCard[] = []
     // 场地行内盟友/升级/支援同尺寸、同基线对齐
     for (const a of p.allies ?? []) items.push({ ...allyCard(a, 0, y, pi), scale })
-    for (const u of p.upgrades ?? []) items.push({ ...entityCard('upgrade', u, 0, y, pi), scale })
+    for (const u of p.upgrades ?? []) {
+      if (u.attachTo) continue
+      items.push({ ...entityCard('upgrade', u, 0, y, pi), scale })
+    }
     for (const s of p.supports ?? []) items.push({ ...entityCard('support', s, 0, y, pi), scale })
     if (items.length === 0) return
     const widths = items.map((it) => slotW(it.exhausted, it.scale ?? 1))
@@ -326,6 +333,7 @@ export function layoutBoard(view: GameView): PlacedCard[] {
       fieldItems.push({ c, w: slotW(c.exhausted, scale) })
     }
     for (const u of p.upgrades ?? []) {
+      if (u.attachTo) continue
       const c = { ...entityCard('upgrade', u, 0, y, pi), scale }
       fieldItems.push({ c, w: slotW(c.exhausted, scale) })
     }
@@ -407,6 +415,33 @@ export function layoutBoard(view: GameView): PlacedCard[] {
   }
   placeAttached(view.attachments, 'attachment')
   placeAttached(view.treacheries, 'treachery')
+
+  // 附属到非玩家宿主的玩家升级（06031 监视 → 主线密谋）：小尺寸叠放在
+  // 宿主卡旁；找不到宿主则放到右上角无宿主区。
+  let homelessUp = 0
+  for (const p of players) {
+    const ownerIdx = players.indexOf(p)
+    for (const u of p.upgrades ?? []) {
+      if (!u.attachTo) continue
+      const card = { ...entityCard('upgrade', u, 0, 0, ownerIdx) }
+      const host = byId.get(u.attachTo)
+      if (host) {
+        const anchorX = host.x + (host.w ?? CARD_W) * 0.55
+        const stack = cards.filter((c) => c.kind === 'upgrade' && Math.abs(c.x - anchorX) < 8 && c.y > host.y - 30 && c.y < host.y + (host.h ?? CARD_H)).length
+        card.x = anchorX
+        card.y = host.y + 8 + stack * 22
+        card.z = (host.z ?? 2) + 1 + stack
+        card.scale = 0.6
+      } else {
+        card.x = 1580
+        card.y = 60 + homelessUp * 120
+        card.z = 2
+        card.scale = 0.8
+        homelessUp++
+      }
+      cards.push(card)
+    }
+  }
 
   // 手牌扇形（仅查看者本人）
   cards.push(...handCards)

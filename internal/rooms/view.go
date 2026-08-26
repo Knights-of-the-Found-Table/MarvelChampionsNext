@@ -86,6 +86,8 @@ type MinionView struct {
 	Tough    bool   `json:"tough,omitempty"`
 	// EngagedWith is the player the minion is engaged with (board layout).
 	EngagedWith string `json:"engagedWith,omitempty"`
+	// FaceDown marks a facedown Drone (Ultron): render the player card back.
+	FaceDown bool `json:"faceDown,omitempty"`
 }
 
 type AllyView struct {
@@ -149,6 +151,10 @@ type EntityLite struct {
 	Name      string `json:"name"`
 	Exhausted bool   `json:"exhausted"`
 	Counters  int    `json:"counters,omitempty"`
+	// AttachTo names the non-player host this upgrade is attached to
+	// (Under Surveillance → main scheme); the board renders it beside the
+	// host instead of in the owner's upgrade row.
+	AttachTo string `json:"attachTo,omitempty"`
 }
 
 // AttachmentView is a card attached to (or in the case of persistent
@@ -210,7 +216,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 			HP: max(0, m.HP()), MaxHP: m.MaxHP,
 			Attack: m.AttackVal, Scheme: m.SchemeVal,
 			Guard: m.Guard, Stunned: m.Stunned, Confused: m.Confused, Tough: m.Tough,
-			EngagedWith: string(m.EngagedWith),
+			EngagedWith: string(m.EngagedWith), FaceDown: m.IsDrone,
 		})
 	}
 	for _, a := range sortedByNum(g.Attachments) {
@@ -269,7 +275,7 @@ func BuildView(id int64, name string, g *engine.Game, viewerUserID string, owner
 		}
 		for _, id := range p.Upgrades {
 			if u := g.Upgrades[id]; u != nil {
-				pv.Upgrades = append(pv.Upgrades, EntityLite{ID: string(u.ID), Code: u.Code, Name: u.EDef().Name, Exhausted: u.Exhausted, Counters: u.Counters})
+				pv.Upgrades = append(pv.Upgrades, EntityLite{ID: string(u.ID), Code: u.Code, Name: u.EDef().Name, Exhausted: u.Exhausted, Counters: u.Counters, AttachTo: string(u.AttachTo)})
 			}
 		}
 		v.Players = append(v.Players, pv)

@@ -688,6 +688,21 @@ func (g *Game) handle(msg Message) {
 				}
 				g.Delete(a)
 			}
+			// A facedown Drone (Ultron Drones 01140) is a player card: it
+			// returns to its owner's discard pile, not the encounter pile.
+			if mn.IsDrone && mn.Source != nil {
+				src := *mn.Source
+				owner := src.Owner
+				if owner == "" {
+					owner = mn.EngagedWith
+					src.Owner = owner
+				}
+				if p := g.Player(owner); p != nil {
+					p.Discard = append(p.Discard, src)
+					g.Delete(m.MinionID)
+					return
+				}
+			}
 			if strings.Contains(mn.EDef().Text, "Victory") {
 				g.VictoryDisplay = append(g.VictoryDisplay, Card{ID: g.nextCardID(), Code: mn.Code})
 			} else {
@@ -868,6 +883,9 @@ func (g *Game) handle(msg Message) {
 
 	case SpawnDrone:
 		g.handleSpawnDrone(m.Player)
+
+	case ChooseDiscardFromHand:
+		g.handleChooseDiscardFromHand(m)
 
 	case ObligationResolve:
 		if p := g.Player(m.Player); p != nil {
@@ -1626,8 +1644,43 @@ func (g *Game) handleSpawnDrone(pid PlayerID) {
 	}
 	card := p.Deck[0]
 	p.Deck = p.Deck[1:]
-	g.spawnDroneMinion(card)
+	if card.Owner == "" {
+		card.Owner = pid
+	}
+	mn := g.spawnDroneMinion(card)
+	mn.EngagedWith = pid
 	g.tlogMajorf("log.droneEnters", p.Name)
+}
+
+// handleChooseDiscardFromHand asks for N discards from the hand as it is
+// RIGHT NOW — the question is built at processing time, so cards drawn by
+// messages queued ahead of this one are selectable (Spiritual Meditation).
+func (g *Game) handleChooseDiscardFromHand(m ChooseDiscardFromHand) {
+	p := g.Player(m.Player)
+	if p == nil || len(p.Hand) == 0 {
+		return
+	}
+	n := m.N
+	if n <= 0 {
+		n = 1
+	}
+	if n > len(p.Hand) {
+		n = len(p.Hand)
+	}
+	prompt := m.Prompt
+	if prompt.Key == "" && prompt.Text == "" {
+		prompt = Tf("c.discardWhichCard")
+	}
+	var picks []Choice
+	for _, c := range p.Hand {
+		picks = append(picks, Choice{
+			Label: Tf("m.discardCard", c), Kind: ChoiceCard, CardCode: c.Code, SourceID: EntityID(c.ID),
+		}.Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
+	}
+	q := AskN(prompt, 0, picks...)
+	q.Validate = fmt.Sprintf("discardCost:%d", n)
+	q.Context = map[string]any{"player": p.ID.String()}
+	g.Push(AskQuestion{Player: p.ID, Question: q})
 }
 
 func (g *Game) discardControlled(pid PlayerID, id EntityID) {
@@ -2369,13 +2422,15 @@ func (g *Game) handlePlayCard(m PlayCard) {
 	delete(g.EventDamageBonus, p.ID)
 	delete(g.EventThreatBonus, p.ID)
 	leadershipBoost := map[PlayerID]bool{}
-	// Pay resources: discard chosen cards.
+	// Pay resources: discard chosen cards. Every paid card is journaled so
+	// the log shows what a play cost, not just that it happened.
 	for _, id := range m.Paid.CardIDs {
 		rc, ok := p.Hand.Remove(id)
 		if !ok {
 			continue
 		}
 		p.Discard = append(p.Discard, rc)
+		g.tlogf("log.paysWith", p.Name, rc)
 		// Mutant Genesis resource riders: Aggressive Energy (+1 damage for
 		// Attack events) and Defensive Energy (draw 1 for Defense events).
 		switch data.BaseCode(rc.Code) {
@@ -2906,11 +2961,15 @@ func (g *Game) advanceVillainStage(id EntityID) {
 	if v == nil {
 		return
 	}
+	// A scenario hook owns the whole defeat flow: these scenarios predate
+	// data-driven stage chaining and handle every defeat themselves (the
+	// Sinister Six sets members aside mid-progression, Kang time-jumps to a
+	// scheme stage). The hook fires on each defeat, before any stage chain.
+	if scen := g.Scenario(); scen.OnVillainDefeated != nil {
+		g.Push(scen.OnVillainDefeated(g, v)...)
+		return
+	}
 	if v.Stage >= len(v.stageCodes) {
-		if scen := g.Scenario(); scen.OnVillainDefeated != nil {
-			g.Push(scen.OnVillainDefeated(g, v)...)
-			return
-		}
 		g.Push(GameOver{Won: true, Reason: Tf("reason.villainDefeated")})
 		return
 	}
@@ -3053,8 +3112,9 @@ func (g *Game) handleSchemeDefeated(id EntityID) {
 		scen := g.Scenario()
 		if scen.OnMainSchemeDefeated != nil {
 			g.Push(scen.OnMainSchemeDefeated(g, g.MainScheme)...)
-		} else {
-			g.tlogMajorf("log.mainSchemeDefeated", g.MainScheme)
 		}
+		// Default: a cleared main scheme is not "defeated" — the threat
+		// removal is already journaled (log.losesThreatMax). Only scenarios
+		// with a printed clear-to-win condition hook the event.
 	}
 }

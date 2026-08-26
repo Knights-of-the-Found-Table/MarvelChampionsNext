@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { allCards, type CardInfo } from './api'
 import { useLang, type Lang } from './i18n'
 
 interface Manifest {
@@ -103,7 +104,17 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
   const lang = useLang()
   const [visible, setVisible] = useState(false)
   const [side, setSide] = useState<'left' | 'right'>('right')
+  // 按住 Ctrl 时，预览图上叠加卡牌文本（含 code）；模块级共享按键状态。
+  const [withText, setWithText] = useState(false)
   const timer = useRef<number | null>(null)
+
+  useEffect(() => {
+    const bump = () => setWithText(ctrlHeld)
+    ctrlListeners.add(bump)
+    return () => {
+      ctrlListeners.delete(bump)
+    }
+  }, [])
 
   function position() {
     const rect = anchorRef.current?.getBoundingClientRect()
@@ -166,12 +177,78 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
               }
             }}
           />
+          {withText && <CardTextOverlay code={code} />}
         </div>,
         document.body
       )
     : null
 
   return { onEnter, show, hide, overlay }
+}
+
+// ---- Ctrl 按住：卡牌文本叠加 ------------------------------------------------
+
+let ctrlHeld = false
+const ctrlListeners = new Set<() => void>()
+if (typeof window !== 'undefined') {
+  const setCtrl = (down: boolean) => {
+    if (ctrlHeld !== down) {
+      ctrlHeld = down
+      for (const listener of ctrlListeners) listener()
+    }
+  }
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Control') setCtrl(true)
+  })
+  window.addEventListener('keyup', (e) => {
+    if (e.key === 'Control') setCtrl(false)
+  })
+  window.addEventListener('blur', () => setCtrl(false))
+}
+
+// 叠加面板：卡名（含 code）、类型/阵营/费用、特性、规则文本。目录
+// allCards() 会话级缓存，首次按住 Ctrl 悬浮时拉取一次。
+function CardTextOverlay({ code }: { code: string }) {
+  const [info, setInfo] = useState<CardInfo | null>(null)
+  const [missing, setMissing] = useState(false)
+  useEffect(() => {
+    let alive = true
+    allCards()
+      .then((list) => {
+        if (!alive) return
+        const hit = list.find((c) => c.code === code) ?? null
+        if (hit) setInfo(hit)
+        else setMissing(true)
+      })
+      .catch(() => alive && setMissing(true))
+    return () => {
+      alive = false
+    }
+  }, [code])
+  if (missing) {
+    return (
+      <div className="card-zoom-text" data-empty="true">
+        <strong>{code}</strong>
+      </div>
+    )
+  }
+  if (!info) return null
+  const stripTags = (s: string) => s.replace(/<[^>]*>/g, '')
+  return (
+    <div className="card-zoom-text">
+      <strong>
+        {info.name}
+        <span className="muted"> · {info.code}</span>
+      </strong>
+      <div className="muted">
+        {info.type}
+        {info.aspect ? ` · ${info.aspect}` : ''}
+        {info.cost != null ? ` · ${info.cost}` : ''}
+        {info.traits?.length ? ` · ${info.traits.join(' ')}` : ''}
+      </div>
+      {info.text ? <p>{stripTags(info.text)}</p> : null}
+    </div>
+  )
 }
 
 // `zoom={false}` lets a parent row own the preview: it calls useCardZoom

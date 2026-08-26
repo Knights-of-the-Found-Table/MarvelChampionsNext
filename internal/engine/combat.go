@@ -523,6 +523,37 @@ func (g *Game) damage(id EntityID, n int, source EntityID, unpreventable bool) {
 			g.Push(ToughDiscarded{Target: id})
 			return
 		}
+		if !unpreventable {
+			// Damage-prevention upgrades protect friendly characters,
+			// not only the identity (Magic Shield 15008: "when a FRIENDLY
+			// CHARACTER would take any amount of damage") — this covers
+			// consequential damage from attacking/thwarting too.
+			prevented := 0
+			if owner := g.Player(e.Owner); owner != nil {
+				for _, uid := range owner.Upgrades {
+					u := g.Upgrades[uid]
+					if u == nil {
+						continue
+					}
+					hook := behavior(u.Code).DamagePrevention
+					if hook == nil {
+						continue
+					}
+					pv, _ := hook(g, u, owner, n-prevented)
+					prevented += pv
+					if prevented >= n {
+						break
+					}
+				}
+			}
+			if prevented > 0 {
+				n -= prevented
+				g.tlogf("log.preventsDamage", e, prevented)
+				if n <= 0 {
+					return
+				}
+			}
+		}
 		if src, ok := g.eventBonusFor(n, source, "damage"); ok {
 			n = src
 		}

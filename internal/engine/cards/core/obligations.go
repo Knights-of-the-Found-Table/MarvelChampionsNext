@@ -19,7 +19,7 @@ func registerCoreObligations() {
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.EDef().HasTrait("black panther") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code,
+						Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}

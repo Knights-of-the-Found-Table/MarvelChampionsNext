@@ -142,6 +142,7 @@ export interface MinionView {
   confused?: boolean
   tough?: boolean
   engagedWith?: string
+  faceDown?: boolean
 }
 
 export interface AllyView {
@@ -165,6 +166,7 @@ export interface EntityLite {
   name: string
   exhausted: boolean
   counters?: number
+  attachTo?: string
 }
 
 // Card attached to (or associated with) a host entity.
@@ -275,6 +277,7 @@ export interface CardInfo {
   unique: boolean
   traits?: string[]
   resources?: string[]
+  text?: string
 }
 
 let cardsPromise: Promise<CardInfo[]> | null = null
