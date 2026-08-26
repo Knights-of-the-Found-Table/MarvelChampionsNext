@@ -30,6 +30,15 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 		Resources   []string `json:"resources,omitempty"`
 		Quantity    int      `json:"quantity,omitempty"`
 		Implemented bool     `json:"implemented"`
+
+		// Printed hero/ally stats for the deck-detail hero panel; nil when
+		// the card has no printed value of that kind.
+		HP       *int `json:"hp,omitempty"`
+		Attack   *int `json:"attack,omitempty"`
+		Thwart   *int `json:"thwart,omitempty"`
+		Defense  *int `json:"defense,omitempty"`
+		Recover  *int `json:"recover,omitempty"`
+		HandSize *int `json:"handSize,omitempty"`
 	}
 	out := make([]cardOut, 0, len(all))
 	for _, def := range all {
@@ -40,6 +49,8 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 			Unique: def.Unique, Traits: def.Traits, Text: def.Text, Resources: def.Resources,
 			Quantity:    def.Quantity,
 			Implemented: engine.Implemented(def.Code),
+			HP:          def.HP, Attack: def.Attack, Thwart: def.Thwart,
+			Defense: def.Defense, Recover: def.Recover, HandSize: def.HandSize,
 		})
 	}
 	writeJSON(w, http.StatusOK, out)

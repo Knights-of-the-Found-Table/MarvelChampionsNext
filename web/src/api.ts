@@ -278,6 +278,13 @@ export interface CardInfo {
   traits?: string[]
   resources?: string[]
   text?: string
+  // Printed hero/ally stats (deck-detail hero panel); absent when unprinted.
+  hp?: number
+  attack?: number
+  thwart?: number
+  defense?: number
+  recover?: number
+  handSize?: number
 }
 
 let cardsPromise: Promise<CardInfo[]> | null = null

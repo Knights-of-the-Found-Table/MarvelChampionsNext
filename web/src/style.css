@@ -253,14 +253,14 @@ a.button {
   width: 360px;
 }
 
+/* ---- deck detail（ArkhamDB 式布局） ---- */
+
 .deck-list {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
   margin-top: 1rem;
 }
-
-/* ---- deck detail ---- */
 
 .clickable {
   cursor: pointer;
@@ -270,17 +270,192 @@ a.button {
   border-color: var(--accent-2);
 }
 
-.deck-hero {
-  align-items: flex-start;
+.deck-layout {
+  display: grid;
+  grid-template-columns: 400px minmax(0, 1fr);
   gap: 1.2rem;
+  align-items: start;
+}
+
+.deck-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.deck-back {
+  margin: 0;
+}
+
+/* 英雄面板：阵营色带头部 + 立绘/信息双栏 + 底部统计格。 */
+.deck-hero {
+  padding: 0;
+  overflow: hidden;
+}
+
+.dhp-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.dhp-header strong {
+  font-size: 1.15rem;
+}
+
+.dhp-header.an-hero {
+  background: linear-gradient(90deg, #46586e, #2e3b4b);
+}
+
+.dhp-header.an-aggression {
+  background: linear-gradient(90deg, #a03030, #6e2020);
+}
+
+.dhp-header.an-justice {
+  background: linear-gradient(90deg, #2c7a4b, #1d5433);
+}
+
+.dhp-header.an-leadership {
+  background: linear-gradient(90deg, #a97e2f, #6e5220);
+}
+
+.dhp-header.an-protection {
+  background: linear-gradient(90deg, #6a49a8, #452e70);
+}
+
+.dhp-header.an-basic {
+  background: linear-gradient(90deg, #4a5666, #303947);
+}
+
+.dhp-body {
+  display: flex;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  align-items: flex-start;
+}
+
+.dhp-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.dhp-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dhp-stats {
+  gap: 0.5rem;
+}
+
+.dhp-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-2);
+  font-weight: 700;
+}
+
+.dhp-glyph {
+  font-size: 0.8rem;
+}
+
+.dhp-text {
+  white-space: pre-line;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  border-left: 3px solid var(--border);
+  padding-left: 0.6rem;
+}
+
+.dhp-pack {
+  font-size: 0.85rem;
+}
+
+.dhp-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+}
+
+.dhp-foot-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.dhp-foot-cell + .dhp-foot-cell {
+  border-left: 1px solid var(--border);
+}
+
+/* 右侧清单：类型分组双栏流式排布。 */
+.deck-main {
+  min-width: 0;
+}
+
+.deck-chips {
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.deck-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: 0.85rem;
+}
+
+.deck-cols {
+  columns: 2;
+  column-gap: 1.6rem;
+}
+
+.deck-group {
+  break-inside: auto;
+  margin-bottom: 1.4rem;
+}
+
+.deck-group h3 {
+  margin: 0 0 0.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  break-after: avoid;
 }
 
 .deck-row {
+  display: flex;
   align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+  break-inside: avoid;
+}
+
+.deck-row:hover {
+  background: var(--panel-2);
 }
 
 .deck-count {
-  min-width: 2.2rem;
+  min-width: 1.8rem;
   flex-shrink: 0;
   text-align: right;
   font-weight: 700;
@@ -292,33 +467,113 @@ a.button {
   flex-shrink: 0;
 }
 
-.stat-row {
-  gap: 1rem;
+.deck-thumb img {
+  border-radius: 4px;
 }
 
-.cost-curve {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 72px;
-  max-width: 240px;
+/* 清单行内的缩略图压到图1的小尺寸（CardImage 默认 xs=60 宽）。 */
+.deck-row .deck-thumb img {
+  width: 42px;
 }
 
-.cost-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.cost-pill {
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
-  height: 100%;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
-.cost-bar {
-  width: 100%;
-  min-height: 2px;
-  border-radius: 3px 3px 0 0;
-  background: var(--accent-2);
+.cost-pill.empty {
+  visibility: hidden;
+}
+
+.deck-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.deck-name .uniq {
+  opacity: 0.9;
+}
+
+.deck-pips {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+/* 阵营配色：名称 / 费用徽章 / 圆点共用。 */
+.an-aggression {
+  color: #ef6b60;
+}
+
+.an-justice {
+  color: #55b87a;
+}
+
+.an-leadership {
+  color: #d9a04a;
+}
+
+.an-protection {
+  color: #a985e8;
+}
+
+.an-basic {
+  color: #96a3b4;
+}
+
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+span.dot.an-aggression {
+  background: #ef6b60;
+}
+
+span.dot.an-justice {
+  background: #55b87a;
+}
+
+span.dot.an-leadership {
+  background: #d9a04a;
+}
+
+span.dot.an-protection {
+  background: #a985e8;
+}
+
+span.dot.an-basic {
+  background: #96a3b4;
+}
+
+span.dot.an-hero {
+  background: #7d8ea3;
+}
+
+@media (max-width: 1100px) {
+  .deck-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-side {
+    position: static;
+  }
+
+  .deck-cols {
+    columns: 1;
+  }
 }
 
 .games-table {
