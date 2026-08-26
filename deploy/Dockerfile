@@ -1,30 +1,26 @@
 # syntax=docker/dockerfile:1
 
-# --- Build Go binaries (server + fetchimages with embedded card data) ---
+# --- Build the Go server (card data embedded, images NOT fetched) ---
 FROM golang:1.26-alpine AS gobuild
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -trimpath -o /out/server ./cmd/server \
- && CGO_ENABLED=0 go build -trimpath -o /out/fetchimages ./cmd/fetchimages
+RUN CGO_ENABLED=0 go build -trimpath -o /out/server ./cmd/server
 
-# --- Download card images from marvelcdb (content-hash manifest) ---
-# MC_PACKS limits the fetch to specific pack codes (comma separated).
-FROM alpine:3.20 AS images
-COPY --from=gobuild /out/fetchimages /usr/local/bin/fetchimages
-RUN mkdir -p /cards && fetchimages -out /cards
-
-# --- Build the frontend with images in place ---
+# --- Build the frontend ---
 FROM node:24-alpine AS webbuild
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci --no-fund --no-audit
 COPY web/ .
-COPY --from=images /cards public/img/cards
 RUN npm run build
 
 # --- Final image: single binary + static assets ---
+# Card images are NOT downloaded at build time. At container runtime the
+# server fetches them on demand through its source chain into MC_CACHE_DIR
+# (/data/cache — persisted on the volume below); setting MC_PREWARM_IMAGES=1
+# in the environment instead prewarms every card in the background at boot.
 FROM alpine:3.20
 RUN adduser -D -u 10001 marvel && mkdir -p /data /app && chown -R marvel /data /app
 USER marvel

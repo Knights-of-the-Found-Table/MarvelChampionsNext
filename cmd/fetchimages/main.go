@@ -1,8 +1,11 @@
 // Command fetchimages downloads card images into the cache directory and
 // writes a manifest of content hashes. It fetches through the same source
 // chain as the server (IMAGE_MIRROR when configured, marvelcdb.com
-// otherwise); images are never committed to the repository. This tool runs
-// at docker build time and optionally during local development.
+// otherwise); images are never committed to the repository. The server
+// itself never needs this tool — it fetches on demand at runtime, or
+// prewarms in the background under MC_PREWARM_IMAGES=1. fetchimages is an
+// optional convenience for seeding a cache ahead of time (e.g. local
+// development).
 //
 // The manifest powers permanent client-side caching: image URLs carry
 // ?v=<sha256-prefix> and the server marks them immutable.
