@@ -540,24 +540,31 @@
 }
 
 /* 血量徽章：右下角红球 */
+/* 血量/威胁代币：SVG 实体代币（GameCard 的 StatToken），容器只负责定位。
+   hp 显示剩余生命值；low/high 状态用红色辉光脉冲提示。 */
 .hp-badge {
   position: absolute;
   right: -12px;
   bottom: 20px;
+  display: inline-block;
+  z-index: 5;
+}
+
+.hp-badge .stat-token {
   width: 36px;
   height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ae790e, #df0c21 70%);
-  border: 3px solid rgba(40, 4, 6, 0.9);
-  color: #fff;
-  font-size: 16px;
+  display: block;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
+}
+
+.stat-token-num {
+  fill: #fff;
+  stroke: #1a1013;
+  stroke-width: 3px;
+  paint-order: stroke;
   font-weight: 900;
   font-style: italic;
-  text-shadow: 0 1px 2px #000;
-  z-index: 5;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+  font-family: inherit;
 }
 
 .hp-badge.low {
@@ -567,42 +574,52 @@
 @keyframes hp-low-pulse {
   0%,
   100% {
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), 0 0 0 0 rgba(255, 40, 40, 0.6);
+    filter: drop-shadow(0 0 0 rgba(255, 40, 40, 0));
   }
   50% {
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), 0 0 0 9px rgba(255, 40, 40, 0);
+    filter: drop-shadow(0 0 7px rgba(255, 64, 40, 0.95));
   }
 }
 
-/* 威胁条：卡底部黑条 */
+/* 威胁代币：三角牌 + /上限 小签 */
 .threat-bar {
   position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 5px;
-  padding: 2px 0;
-  text-align: center;
-  background: linear-gradient(rgba(10, 10, 10, 0.92), rgba(0, 0, 0, 0.92));
-  border-radius: 3px;
-  color: #e9e275;
-  font-size: 14px;
-  font-weight: 900;
-  text-shadow: 0 1px 2px #000;
+  left: auto;
+  right: -15px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
   z-index: 4;
 }
 
-.threat-bar.high {
-  color: #ff6b5e;
+.threat-bar .stat-token {
+  width: 40px;
+  height: 40px;
+  display: block;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
+}
+
+.threat-max {
+  padding: 0 4px;
+  border-radius: 5px;
+  background: rgba(10, 9, 12, 0.88);
+  color: #ffd97a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.threat-bar.high .stat-token {
   animation: threat-high-pulse 0.9s ease-in-out infinite;
 }
 
 @keyframes threat-high-pulse {
   0%,
   100% {
-    background: rgba(10, 10, 10, 0.92);
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
   }
   50% {
-    background: rgba(120, 16, 10, 0.94);
+    filter: drop-shadow(0 0 8px rgba(255, 90, 60, 0.95));
   }
 }
 
@@ -1974,22 +1991,11 @@ body.fx-off *::after {
 .hp-badge {
   right: -17px;
   bottom: 14px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  background: radial-gradient(circle at 34% 28%, #68d98b, #177344 68%, #0b3924);
-  border: 2px solid #b9dcad;
-  box-shadow: 0 0 0 3px #10251b, 0 4px 10px rgba(0, 0, 0, 0.62), 0 0 12px rgba(71, 215, 126, 0.24);
-  font-style: normal;
-  font-size: 16px;
 }
 
-.badge-icon {
-  font-size: 10px;
-  opacity: 0.82;
+.hp-badge .stat-token {
+  width: 40px;
+  height: 40px;
 }
 
 .gcard-stats {
@@ -2023,44 +2029,28 @@ body.fx-off *::after {
 .stat-sch { background: radial-gradient(circle at 35% 28%, #b682dc, #63358a 68%, #301746); }
 
 .threat-bar {
-  left: auto;
   right: -15px;
   bottom: 10px;
-  min-width: 54px;
-  height: 42px;
-  padding: 0 9px 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  border-radius: 22px;
-  color: #fff;
-  background: radial-gradient(circle at 35% 25%, #b776d8, #613285 62%, #2c113f);
-  border: 2px solid #d8b3ee;
-  box-shadow: 0 0 0 3px #1d1028, 0 5px 12px rgba(0, 0, 0, 0.64);
-  font-size: 18px;
 }
 
-.threat-bar small { font-size: 11px; opacity: 0.72; }
-.threat-bar::after {
-  content: "";
-  position: absolute;
-  left: 8px;
-  bottom: 5px;
-  width: calc(var(--threat-progress) - 16px);
-  max-width: calc(100% - 16px);
-  height: 3px;
-  border-radius: 2px;
-  background: #efc7ff;
-  box-shadow: 0 0 5px rgba(229, 175, 255, 0.7);
+.threat-bar .stat-token {
+  width: 44px;
+  height: 44px;
+}
+
+.threat-max {
+  border: 1px solid rgba(216, 179, 238, 0.55);
+  color: #f2e3ff;
 }
 
 .gcard.k-scheme.is-main-scheme .threat-bar {
   right: 12px;
   bottom: 11px;
-  min-width: 84px;
-  height: 48px;
-  font-size: 24px;
+}
+
+.gcard.k-scheme.is-main-scheme .threat-bar .stat-token {
+  width: 52px;
+  height: 52px;
 }
 
 .gcard.k-scheme .gcard-schemetags {

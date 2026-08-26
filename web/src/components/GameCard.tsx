@@ -2,13 +2,95 @@
 // 外层节点只做位移（transition 自动补间移动动画），内层处理横置旋转与
 // hover 缩放。标志物（状态芯片、血量/威胁徽章、计数器等）以绝对定位
 // 覆盖在卡面上，数值同时写入 data-* 供 diff 动画层定位飘字。
-import { useEffect, useRef, useState, type ReactNode, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode, type PointerEvent as ReactPointerEvent } from 'react'
 import { cardUrl, fallbackDataUrl, useCardZoom } from '../cards'
 import { lname, useLang, useT, useZhMap } from '../i18n'
 import type { CardFx } from '../board/fx'
 import type { PlacedCard } from '../board/layout'
 
 const PLAYER_COLORS = ['#4a90d9', '#d94a4a', '#d9a04a', '#3fa66a']
+
+// 实体代币风格的数值徽章（参照桌游伤害/威胁代币）：黑边框 + 炽橙底纹 +
+// 白色斜体描边数字。hp 展示剩余生命值，threat 展示当前威胁。
+// 渐变/网点图案的 id 必须每实例唯一（同屏几十个代币共享 defs 命名空间）。
+function StatToken({ kind, value }: { kind: 'hp' | 'threat'; value: number }) {
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
+  const gid = `tg-${uid}`
+  // 两位数缩小字号，避免撑出黑边。
+  const numSize = value >= 10 ? 13 : 16
+  if (kind === 'hp') {
+    return (
+      <svg className="stat-token" viewBox="0 0 40 40" aria-hidden="true">
+        <defs>
+          <radialGradient id={gid} cx="50%" cy="40%" r="68%">
+            <stop offset="0%" stopColor="#ffce4d" />
+            <stop offset="45%" stopColor="#ff8c1f" />
+            <stop offset="80%" stopColor="#e63a1c" />
+            <stop offset="100%" stopColor="#7e1007" />
+          </radialGradient>
+          <pattern id={`${gid}-d`} width="3.6" height="3.6" patternUnits="userSpaceOnUse">
+            <circle cx="1.8" cy="1.8" r="0.85" fill="rgba(64,7,2,0.42)" />
+          </pattern>
+        </defs>
+        <circle cx="20" cy="20" r="18.6" fill="#171114" />
+        <circle cx="20" cy="20" r="14.6" fill={`url(#${gid})`} />
+        <circle cx="20" cy="20" r="14.6" fill={`url(#${gid}-d)`} />
+        <circle cx="20" cy="20" r="14.6" fill="none" stroke="rgba(255,199,96,0.8)" strokeWidth="1.1" />
+        <text
+          className="stat-token-num"
+          x="20"
+          y="21"
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={numSize}
+        >
+          {value}
+        </text>
+      </svg>
+    )
+  }
+  return (
+    <svg className="stat-token" viewBox="0 0 40 40" aria-hidden="true">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffbe3d" />
+          <stop offset="55%" stopColor="#f59012" />
+          <stop offset="100%" stopColor="#d96a08" />
+        </linearGradient>
+      </defs>
+      <polygon
+        points="20,3 38,36.5 2,36.5"
+        fill="#171114"
+        stroke="#171114"
+        strokeWidth="5"
+        strokeLinejoin="round"
+      />
+      <polygon
+        points="20,8.5 33.2,33 6.8,33"
+        fill={`url(#${gid})`}
+        stroke="#171114"
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+      {/* 裂纹：桌面威胁代币的碎裂底纹 */}
+      <g stroke="#6b3305" strokeWidth="1.1" fill="none" strokeLinecap="round" opacity="0.75">
+        <path d="M20 12.5 L17.6 19 L21 24.5" />
+        <path d="M17.6 19 L13.8 20.6" />
+        <path d="M26.8 25 L23.4 22.4 L25 28.5" />
+      </g>
+      <text
+        className="stat-token-num"
+        x="20"
+        y="22.5"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={numSize}
+      >
+        {value}
+      </text>
+    </svg>
+  )
+}
 
 interface Props {
   card: PlacedCard
@@ -116,7 +198,6 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
           '--z': card.z ?? 2,
           '--pc': color,
           '--hp-progress': card.maxHp ? `${Math.max(0, Math.min(1, (card.hp ?? 0) / card.maxHp)) * 360}deg` : '0deg',
-          '--threat-progress': card.maxThreat ? `${Math.max(0, Math.min(1, (card.threat ?? 0) / card.maxThreat)) * 100}%` : '0%',
           ...(fx?.lunge
             ? {
                 '--lx': `${fx.lunge.dx}px`,
@@ -187,20 +268,18 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
           )}
         </div>
 
-        {/* 血量徽章 */}
+        {/* 血量代币（剩余生命值） */}
         {card.hp !== undefined && card.maxHp ? (
           <TaggedNumber className={`hp-badge ${card.hp <= card.maxHp / 3 ? 'low' : ''}`} label={t('stat.hp')}>
-            <span className="badge-icon">✚</span>
-            <span>{card.hp}</span>
+            <StatToken kind="hp" value={card.hp} />
           </TaggedNumber>
         ) : null}
 
-        {/* 威胁条 */}
+        {/* 威胁代币 */}
         {card.threat !== undefined && (
           <TaggedNumber className={`threat-bar ${card.maxThreat && card.threat >= card.maxThreat - 2 ? 'high' : ''}`} label={t('stat.threat')}>
-            <span className="badge-icon">◆</span>
-            <strong>{card.threat}</strong>
-            {card.maxThreat ? <small>/{card.maxThreat}</small> : null}
+            <StatToken kind="threat" value={card.threat} />
+            {card.maxThreat ? <span className="threat-max">/{card.maxThreat}</span> : null}
           </TaggedNumber>
         )}
 
