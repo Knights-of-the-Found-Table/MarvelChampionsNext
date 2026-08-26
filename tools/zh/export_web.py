@@ -38,10 +38,15 @@ def main() -> int:
             if fields.get("traits"):
                 rich["traits"] = fields["traits"]
             full[code] = rich
+    def write_lf(path: Path, obj) -> None:
+        # 固定 LF 行尾：gitattributes 要求 *.json eol=lf
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=1)
+
     NAMES.parent.mkdir(parents=True, exist_ok=True)
-    NAMES.write_text(json.dumps(names, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_lf(NAMES, names)
     FULL.parent.mkdir(parents=True, exist_ok=True)
-    FULL.write_text(json.dumps(full, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_lf(FULL, full)
     print(f"done: {len(names)} names -> {NAMES}")
     print(f"done: {len(full)} full cards -> {FULL}")
     return 0
