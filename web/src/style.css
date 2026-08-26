@@ -457,8 +457,8 @@ a.button {
   justify-content: flex-end;
 }
 
-/* 按住 Ctrl 时的卡牌文本叠加：直接铺在放大卡图上（frame 随图收缩，
-   文本层绝对定位盖住卡面），深色半透明底 + 可滚动正文。 */
+/* 按住 Ctrl 时的卡牌文本叠加：一层暗色蒙版整面盖住放大卡图（无边框、
+   无投影，圆角跟随卡图），文本直接落在蒙版上，可滚动。 */
 .card-zoom-frame {
   position: relative;
   display: flex;
@@ -468,13 +468,11 @@ a.button {
 
 .card-zoom .card-zoom-text {
   position: absolute;
-  inset: 4% 6%;
+  inset: 0;
   overflow-y: auto;
-  padding: clamp(10px, 1.6vh, 16px) clamp(12px, 1.4vw, 18px);
-  background: rgba(8, 15, 23, 0.88);
-  border: 1px solid rgba(214, 165, 86, 0.85);
-  border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  padding: clamp(12px, 2vh, 20px) clamp(12px, 1.6vw, 20px);
+  background: rgba(8, 15, 23, 0.86);
+  border-radius: 10px;
   color: #e8dcc8;
   font-size: 13px;
   line-height: 1.5;
