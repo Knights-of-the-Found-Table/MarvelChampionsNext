@@ -1023,7 +1023,7 @@ var cardMessages = map[string]map[Lang]string{
 	"c.heldHostageAttachesTo":                                        {LangEn: "Held Hostage attaches to %s", LangZh: "扣押人质附加到 %s"},
 	"c.helicarrierNextCardCosts1Less":                                {LangEn: "Helicarrier — next card costs 1 less", LangZh: "空天母舰——下一张牌费用 -1"},
 	"c.heroicInterventionSpend3ResourcesRemove5ThreatAndGainTough":   {LangEn: "Heroic Intervention — spend 3 resources → remove 5 threat and gain tough", LangZh: "英勇干预——消耗 3 点资源 → 移除 5 点威胁并获得坚韧"},
-	"c.hexBoltMilled":                                                {LangEn: "Hex Bolt: milled 3 encounter cards, %d boost icons total", LangZh: "咒术飞弹：弃掉 3 张遭遇牌，增效图标共 %d 个"},
+	"c.hexBoltMilled":                                                {LangEn: "Hex Bolt discards %s from the encounter deck (boost %d)", LangZh: "咒术飞弹：弃置遭遇牌 %s（增效图标 %d 个）"},
 	"c.hexBolt0BoostDeal2DamageToWhichEnemy":                         {LangEn: "Hex Bolt (0 boost): deal 2 damage to which enemy?", LangZh: "咒术飞弹（0 增效）：对哪个敌人造成 2 点伤害？"},
 	"c.hexBolt1BoostRemove2ThreatFromWhichScheme":                    {LangEn: "Hex Bolt (1 boost): remove 2 threat from which scheme?", LangZh: "咒术飞弹（1 增效）：从哪个密谋上移除 2 点威胁？"},
 	"c.hexBolt3BoostPlaceAStatusOnWhichCharacter":                    {LangEn: "Hex Bolt (3+ boost): place a status on which character?", LangZh: "咒术飞弹（3+ 增效）：在哪个角色身上放置状态？"},

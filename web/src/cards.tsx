@@ -7,8 +7,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { allCards, type CardInfo } from './api'
+import { allCards, zhCardDetails, type CardInfo, type ZhCardDetail } from './api'
 import { useLang, type Lang } from './i18n'
+import { en as enStrings, zh as zhStrings, type MsgKey } from './i18n/strings'
 
 interface Manifest {
   [code: string]: string
@@ -166,18 +167,20 @@ export function useCardZoom(code: string, anchorRef: React.RefObject<HTMLElement
   const overlay = visible
     ? createPortal(
         <div className={`card-zoom card-zoom-${side} ${coarsePointer ? 'card-zoom-touch' : ''}`} aria-hidden="true">
-          <img
-            src={cardUrl(code, lang)}
-            alt=""
-            onError={(e) => {
-              const img = e.currentTarget
-              if (!img.dataset.fallback) {
-                img.dataset.fallback = '1'
-                img.src = fallbackDataUrl(code)
-              }
-            }}
-          />
-          {withText && <CardTextOverlay code={code} />}
+          <div className="card-zoom-frame">
+            <img
+              src={cardUrl(code, lang)}
+              alt=""
+              onError={(e) => {
+                const img = e.currentTarget
+                if (!img.dataset.fallback) {
+                  img.dataset.fallback = '1'
+                  img.src = fallbackDataUrl(code)
+                }
+              }}
+            />
+            {withText && <CardTextOverlay code={code} />}
+          </div>
         </div>,
         document.body
       )
@@ -206,10 +209,14 @@ if (typeof window !== 'undefined') {
   window.addEventListener('blur', () => setCtrl(false))
 }
 
-// 叠加面板：卡名（含 code）、类型/阵营/费用、特性、规则文本。目录
-// allCards() 会话级缓存，首次按住 Ctrl 悬浮时拉取一次。
+// 叠加面板：直接铺在放大卡图上。zh 模式优先用 zh-cards-full.json 的
+// 中文卡名/正文/特性（按需拉取、会话级缓存），en 用 /marvel/cards 目录；
+// 类型/阵营经 strings 字典本地化，缺失键回退原文。目录 allCards() 同样
+// 会话级缓存，首次按住 Ctrl 悬浮时拉取一次。
 function CardTextOverlay({ code }: { code: string }) {
+  const lang = useLang()
   const [info, setInfo] = useState<CardInfo | null>(null)
+  const [zh, setZh] = useState<ZhCardDetail | null>(null)
   const [missing, setMissing] = useState(false)
   useEffect(() => {
     let alive = true
@@ -218,35 +225,49 @@ function CardTextOverlay({ code }: { code: string }) {
         if (!alive) return
         const hit = list.find((c) => c.code === code) ?? null
         if (hit) setInfo(hit)
-        else setMissing(true)
+        else if (lang !== 'zh') setMissing(true)
       })
-      .catch(() => alive && setMissing(true))
+      .catch(() => {
+        if (alive && lang !== 'zh') setMissing(true)
+      })
+    if (lang === 'zh') {
+      zhCardDetails()
+        .then((m) => {
+          if (alive) setZh(m[code] ?? null)
+        })
+        .catch(() => {})
+    }
     return () => {
       alive = false
     }
-  }, [code])
-  if (missing) {
-    return (
+  }, [code, lang])
+  const stripTags = (s: string) => s.replace(/<[^>]*>/g, '')
+  if (!info && !zh) {
+    return missing ? (
       <div className="card-zoom-text" data-empty="true">
         <strong>{code}</strong>
       </div>
-    )
+    ) : null
   }
-  if (!info) return null
-  const stripTags = (s: string) => s.replace(/<[^>]*>/g, '')
+  const dict = lang === 'zh' ? zhStrings : enStrings
+  const typeLabel = info ? dict[(`type.${info.type}`) as MsgKey] ?? info.type : ''
+  const aspectLabel = info?.aspect ? dict[(`aspect.${info.aspect}`) as MsgKey] ?? info.aspect : ''
+  const name = zh?.name ?? info?.name ?? code
+  const traits = zh?.traits ?? (info?.traits?.length ? info.traits.join(' ') : '')
+  const text = zh?.text ?? info?.text ?? ''
   return (
     <div className="card-zoom-text">
       <strong>
-        {info.name}
-        <span className="muted"> · {info.code}</span>
+        {name}
+        <span className="muted"> · {code}</span>
       </strong>
       <div className="muted">
-        {info.type}
-        {info.aspect ? ` · ${info.aspect}` : ''}
-        {info.cost != null ? ` · ${info.cost}` : ''}
-        {info.traits?.length ? ` · ${info.traits.join(' ')}` : ''}
+        {[typeLabel, aspectLabel, info?.cost != null ? String(info.cost) : '']
+          .filter(Boolean)
+          .join(' · ')}
+        {traits ? ` · ${traits}` : ''}
       </div>
-      {info.text ? <p>{stripTags(info.text)}</p> : null}
+      {text ? <p>{stripTags(text)}</p> : null}
     </div>
   )
 }

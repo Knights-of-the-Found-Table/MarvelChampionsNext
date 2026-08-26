@@ -288,6 +288,33 @@ export function allCards(): Promise<CardInfo[]> {
   return cardsPromise
 }
 
+// Simplified-Chinese card faces (name/text/traits by code) for the Ctrl
+// hover text overlay. Served as a static asset (~1MB) and fetched lazily on
+// first use; en mode never loads it.
+export interface ZhCardDetail {
+  name: string
+  subname?: string
+  text?: string
+  traits?: string
+}
+
+let zhDetailsPromise: Promise<Record<string, ZhCardDetail>> | null = null
+
+export function zhCardDetails(): Promise<Record<string, ZhCardDetail>> {
+  if (!zhDetailsPromise) {
+    zhDetailsPromise = fetch('/zh-cards-full.json')
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status))
+        return r.json() as Promise<Record<string, ZhCardDetail>>
+      })
+      .catch((e) => {
+        zhDetailsPromise = null
+        throw e
+      })
+  }
+  return zhDetailsPromise
+}
+
 export interface ScenarioInfo {
   id: string
   name: string

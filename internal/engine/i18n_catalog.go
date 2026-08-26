@@ -115,6 +115,7 @@ var messages = map[string]map[Lang]string{
 	"log.revealsNemesis":               {LangEn: "%s reveals their nemesis set!", LangZh: "%s 揭示了其宿敌牌组！"},
 	"log.round":                        {LangEn: "── Round %d ──", LangZh: "── 第 %d 轮 ──"},
 	"log.scenario":                     {LangEn: "Scenario: %s", LangZh: "剧本:%s"},
+	"log.scenarioVS":                   {LangEn: "Scenario: %s — %s", LangZh: "剧本:%s——%s"},
 	"log.schemesAgainst":               {LangEn: "%s schemes against %s", LangZh: "%s 对 %s 密谋"},
 	"log.shuffledIntoEncounter":        {LangEn: "%s is shuffled into the encounter deck", LangZh: "%s 被洗入遭遇牌库"},
 	"log.shufflesDeck":                 {LangEn: "%s shuffles their deck", LangZh: "%s 洗了自己的牌库"},

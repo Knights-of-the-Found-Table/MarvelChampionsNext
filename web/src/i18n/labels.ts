@@ -20,7 +20,7 @@ const catalogListeners = new Set<() => void>()
 export function loadCatalog(lang: Lang): Promise<Catalog | null> {
   if (catalogs[lang]) return Promise.resolve(catalogs[lang])
   if (!catalogPromises[lang]) {
-    catalogPromises[lang] = get<Catalog>(`/api/v1/locales/${lang}`)
+    catalogPromises[lang] = get<Catalog>(`/locales/${lang}`)
       .then((c) => {
         catalogPromises[lang] = null
         if (c) {

@@ -1,11 +1,11 @@
-# 给前端导出简中卡牌名称：tools/zh/out/*.json -> web/src/i18n/zh-cards.json
+# 给前端导出简中卡牌数据：tools/zh/out/*.json -> 两个前端文件
 #
-# 服务端默认按 MC_LANG=zh 输出中文文案（internal/engine/zhtext.go +
-# MC_ZH_DIR 覆盖层）；这份映射作为 MC_LANG=en 时的前端兜底，把服务端
-# 英文卡名覆盖为译文。完整译文文件里还有 text/flavor/背面字段，但网页
-# 以卡图渲染、从不显示卡牌正文，所以这里只裁剪出界面用到的字段：
+#   web/src/i18n/zh-cards.json   { "<code>": { "name", "subname"? } }
+#     卡名映射（小体积），静态打进 JS 包，供对局记录/提示里的卡名本地化。
 #
-#   web/src/i18n/zh-cards.json = { "<code>": { "name": "...", "subname": "..." } }
+#   web/public/zh-cards-full.json  { "<code>": { "name", "subname"?, "text"?, "traits"? } }
+#     完整卡面数据（约 1MB），按需运行时拉取（Ctrl 悬浮信息层首次显示时），
+#     不进 JS 包。网页其余场景以卡图渲染，不需要正文。
 #
 # Usage:
 #   python tools/zh/export_web.py
@@ -18,21 +18,32 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "tools" / "zh" / "out"
-TARGET = ROOT / "web" / "src" / "i18n" / "zh-cards.json"
+NAMES = ROOT / "web" / "src" / "i18n" / "zh-cards.json"
+FULL = ROOT / "web" / "public" / "zh-cards-full.json"
 
 
 def main() -> int:
-    cards = {}
+    names = {}
+    full = {}
     for pack_file in sorted(OUT_DIR.glob("*.json")):
         # out 文件带 UTF-8 BOM（merge_chunks.py 写入时加了 utf-8-sig）。
         for code, fields in json.loads(pack_file.read_text(encoding="utf-8-sig")).items():
             entry = {"name": fields["name"]}
             if fields.get("subname"):
                 entry["subname"] = fields["subname"]
-            cards[code] = entry
-    TARGET.parent.mkdir(parents=True, exist_ok=True)
-    TARGET.write_text(json.dumps(cards, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"done: {len(cards)} cards -> {TARGET}")
+            names[code] = entry
+            rich = dict(entry)
+            if fields.get("text"):
+                rich["text"] = fields["text"]
+            if fields.get("traits"):
+                rich["traits"] = fields["traits"]
+            full[code] = rich
+    NAMES.parent.mkdir(parents=True, exist_ok=True)
+    NAMES.write_text(json.dumps(names, ensure_ascii=False, indent=1), encoding="utf-8")
+    FULL.parent.mkdir(parents=True, exist_ok=True)
+    FULL.write_text(json.dumps(full, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"done: {len(names)} names -> {NAMES}")
+    print(f"done: {len(full)} full cards -> {FULL}")
     return 0
 
 

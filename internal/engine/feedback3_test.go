@@ -130,9 +130,10 @@ func TestUpgradedDronesAttachToEnvironment(t *testing.T) {
 	}
 }
 
-// TestHexBoltSumsBoostIcons: 15004 resolves ONE tier from the summed boost
-// icons of the three milled cards (0 → damage question, 2 → draw 1).
-func TestHexBoltSumsBoostIcons(t *testing.T) {
+// TestHexBoltResolvesEachMilledCard: 15004 evaluates EACH of the three milled
+// encounter cards independently by its own printed boost icons — 0 → 2 damage
+// to an enemy, 1 → 2 threat from a scheme, 2 → draw 1 card.
+func TestHexBoltResolvesEachMilledCard(t *testing.T) {
 	b := engine.LookupBehavior("15004")
 	if b == nil || b.OnPlay == nil {
 		t.Fatal("15004 behavior missing")
@@ -146,35 +147,51 @@ func TestHexBoltSumsBoostIcons(t *testing.T) {
 		return out
 	}
 
-	// 0+0+0 = 0 → choose-enemy damage question.
+	// 0+0+0 → three independent choose-enemy damage questions.
 	g := newRulesGame(t, 7)
 	p := g.Players[0]
 	villain := &engine.Villain{ID: g.NextEntityID("villain"), Code: "01094", MaxHP: 14}
 	g.Villains[villain.ID] = villain
 	g.EncounterDeck = mk("01104", "01105", "01104")
 	msgs := b.OnPlay(g, &engine.EventCard{Code: "15004", Owner: p.ID})
-	if !hasAskQuestion(msgs) {
-		t.Fatalf("total 0 should ask for an enemy target, got %v", msgs)
+	if n := countAskQuestion(msgs); n != 3 {
+		t.Fatalf("three 0-boost cards should ask 3 enemy questions, got %d: %v", n, msgs)
 	}
 
-	// 1+1+0 = 2 → draw 1, no question.
+	// 2+1+0 → draw 1 (for the boost-2 card), a scheme question (boost 1)
+	// and an enemy question (boost 0), in mill order.
 	g2 := newRulesGame(t, 7)
 	p2 := g2.Players[0]
-	g2.EncounterDeck = mk("01101", "01106", "01104")
+	villain2 := &engine.Villain{ID: g2.NextEntityID("villain"), Code: "01094", MaxHP: 14}
+	g2.Villains[villain2.ID] = villain2
+	g2.EncounterDeck = mk("01099", "01101", "01104")
 	msgs2 := b.OnPlay(g2, &engine.EventCard{Code: "15004", Owner: p2.ID})
-	for _, m := range msgs2 {
-		if d, ok := m.(engine.DrawCards); ok && d.N == 1 && d.Player == p2.ID {
-			return
+	drawIdx, askIdx := -1, -1
+	for i, m := range msgs2 {
+		if d, ok := m.(engine.DrawCards); ok && d.N == 1 && d.Player == p2.ID && drawIdx == -1 {
+			drawIdx = i
+		}
+		if _, ok := m.(engine.AskQuestion); ok && askIdx == -1 {
+			askIdx = i
 		}
 	}
-	t.Fatalf("total 2 should draw 1 card, got %v", msgs2)
+	if drawIdx != 0 {
+		t.Fatalf("boost-2 card (milled first) should draw 1 first, got %v", msgs2)
+	}
+	if countAskQuestion(msgs2) != 2 {
+		t.Fatalf("boost-1 and boost-0 cards should ask 2 questions, got %v", msgs2)
+	}
+	if askIdx != 1 {
+		t.Fatalf("boost-1 scheme question should come after the draw, got %v", msgs2)
+	}
 }
 
-func hasAskQuestion(msgs []engine.Message) bool {
+func countAskQuestion(msgs []engine.Message) int {
+	n := 0
 	for _, m := range msgs {
 		if _, ok := m.(engine.AskQuestion); ok {
-			return true
+			n++
 		}
 	}
-	return false
+	return n
 }

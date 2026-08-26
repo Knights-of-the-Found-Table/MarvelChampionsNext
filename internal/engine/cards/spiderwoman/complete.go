@@ -72,58 +72,27 @@ func registerSW() {
 		},
 	})
 
-	// Hex Bolt: mill 3, resolve ONE tier from the SUMMED boost icons.
+	// Hex Bolt: mill 3 encounter cards; EACH card resolves independently
+	// by its own printed boost icons (0 → 2 damage, 1 → 2 threat, 2 → draw 1,
+	// 3+ → status card).
 	engine.RegisterBehavior("15004", &engine.Behavior{
 		OnPlay: func(g *engine.Game, e engine.Entity) []engine.Message {
 			p := g.Player(e.EOwner())
 			if p == nil {
 				return nil
 			}
-			total := 0
+			ev := &engine.EventCard{Code: "15004", Owner: p.ID}
+			var msgs []engine.Message
 			for i := 0; i < 3; i++ {
 				c, ok := g.DrawEncounter()
 				if !ok {
 					break
 				}
-				total += boostOf(c)
 				g.EncounterDiscard = append(g.EncounterDiscard, c)
+				g.TLogf("c.hexBoltMilled", c, boostOf(c))
+				msgs = append(msgs, hexBoltTier(g, ev, p, boostOf(c))...)
 			}
-			g.TLogf("c.hexBoltMilled", total)
-			switch {
-			case total == 0:
-				return cardutil.ChooseEnemy(engine.Tf("c.hexBolt0BoostDeal2DamageToWhichEnemy"),
-					func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(
-					g, &engine.EventCard{Code: "15004", Owner: p.ID})
-			case total == 1:
-				return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-					engine.Tf("c.hexBolt1BoostRemove2ThreatFromWhichScheme"), schemePicks(g, 2, p.ID)...)}}
-			case total == 2:
-				return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
-			default:
-				var picks []engine.Choice
-				for _, q := range g.Players {
-					picks = append(picks,
-						engine.Choice{Label: engine.S("Tough — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
-							Msgs(engine.ToughEntity{Target: q.ID}),
-						engine.Choice{Label: engine.S("Stun — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
-							Msgs(engine.StunEntity{Target: q.ID}))
-				}
-				for _, id := range cardutil.SortedEnemyIDs(g) {
-					enemy := g.Entity(id)
-					if enemy != nil {
-						picks = append(picks,
-							engine.Choice{Label: engine.Tf("c.stun3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
-								Msgs(engine.StunEntity{Target: id}),
-							engine.Choice{Label: engine.Tf("c.confuse3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
-								Msgs(engine.ConfuseEntity{Target: id}))
-					}
-				}
-				if len(picks) > 0 {
-					return []engine.Message{engine.AskQuestion{Player: p.ID,
-						Question: engine.Ask(engine.Tf("c.hexBolt3BoostPlaceAStatusOnWhichCharacter"), picks...)}}
-				}
-				return nil
-			}
+			return msgs
 		},
 	})
 
@@ -495,6 +464,46 @@ func registerNemesis() {
 }
 
 // ---- helpers ----
+
+// hexBoltTier resolves one milled encounter card by its boost icon count:
+// 0 → 2 damage to an enemy, 1 → 2 threat off a scheme, 2 → draw 1,
+// 3+ → status card on a character.
+func hexBoltTier(g *engine.Game, ev *engine.EventCard, p *engine.Player, boost int) []engine.Message {
+	switch {
+	case boost == 0:
+		return cardutil.ChooseEnemy(engine.Tf("c.hexBolt0BoostDeal2DamageToWhichEnemy"),
+			func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return 2, nil })(g, ev)
+	case boost == 1:
+		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
+			engine.Tf("c.hexBolt1BoostRemove2ThreatFromWhichScheme"), schemePicks(g, 2, p.ID)...)}}
+	case boost == 2:
+		return []engine.Message{engine.DrawCards{Player: p.ID, N: 1}}
+	default:
+		var picks []engine.Choice
+		for _, q := range g.Players {
+			picks = append(picks,
+				engine.Choice{Label: engine.S("Tough — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					Msgs(engine.ToughEntity{Target: q.ID}),
+				engine.Choice{Label: engine.S("Stun — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					Msgs(engine.StunEntity{Target: q.ID}))
+		}
+		for _, id := range cardutil.SortedEnemyIDs(g) {
+			enemy := g.Entity(id)
+			if enemy != nil {
+				picks = append(picks,
+					engine.Choice{Label: engine.Tf("c.stun3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+						Msgs(engine.StunEntity{Target: id}),
+					engine.Choice{Label: engine.Tf("c.confuse3", cardutil.EnemyLabel(enemy)), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+						Msgs(engine.ConfuseEntity{Target: id}))
+			}
+		}
+		if len(picks) == 0 {
+			return nil
+		}
+		return []engine.Message{engine.AskQuestion{Player: p.ID,
+			Question: engine.Ask(engine.Tf("c.hexBolt3BoostPlaceAStatusOnWhichCharacter"), picks...)}}
+	}
+}
 
 func schemePicks(g *engine.Game, n int, pid engine.PlayerID) []engine.Choice {
 	return cardutil.SchemeChoices(g, func(s engine.EntityID) []engine.Message {

@@ -1769,7 +1769,24 @@ func (g *Game) handleStartGame() {
 	if scen.Setup != nil {
 		g.Push(scen.Setup(g)...)
 	}
-	g.tlogMajorf("log.scenario", scen.Name)
+	// "Scenario: Villain — Scheme" logs the two card names as structured
+	// card args so zh clients resolve them; scenarios whose display name
+	// doesn't compose that way keep the plain-string form. Display names
+	// drop the scheme card's trailing "!".
+	if len(scen.VillainBases) > 0 {
+		if v, ok := schemeDef(DB, scen.VillainBases[0]); ok {
+			if s, ok2 := schemeDef(DB, scen.ID); ok2 &&
+				(v.Name+" — "+strings.TrimSuffix(s.Name, "!") == scen.Name || v.Name+" — "+s.Name == scen.Name) {
+				g.tlogMajorf("log.scenarioVS", v, s)
+			} else {
+				g.tlogMajorf("log.scenario", scen.Name)
+			}
+		} else {
+			g.tlogMajorf("log.scenario", scen.Name)
+		}
+	} else {
+		g.tlogMajorf("log.scenario", scen.Name)
+	}
 	// Opening hands (official setup step 14), then mulligans (step 15),
 	// then player setup abilities (step 16), then the first round.
 	for _, p := range g.Players {
