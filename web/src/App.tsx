@@ -1,10 +1,9 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { setToken } from './api'
+import { Outlet, NavLink } from 'react-router-dom'
 import { useLang, useSetLang, useT } from './i18n'
 import ReportBugButton from './components/ReportBugButton'
+import UserMenu from './components/UserMenu'
 
 export default function App() {
-  const navigate = useNavigate()
   const t = useT()
   const lang = useLang()
   const setLang = useSetLang()
@@ -25,15 +24,7 @@ export default function App() {
             <option value="en">EN</option>
             <option value="zh">中文</option>
           </select>
-          <button
-            className="linklike"
-            onClick={() => {
-              setToken(null)
-              navigate('/login')
-            }}
-          >
-            {t('nav.logout')}
-          </button>
+          <UserMenu />
         </nav>
       </header>
       <main>

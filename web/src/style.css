@@ -58,7 +58,7 @@ body {
   border-radius: 4px;
 }
 
-.topbar a.active {
+.topbar a:hover {
   background: var(--panel-2);
 }
 
@@ -139,14 +139,14 @@ button.linklike {
   text-decoration: underline;
 }
 
-/* 顶栏报告 Bug：GitHub 图标按钮。 */
+/* 顶栏报告 Bug：GitHub 图标 + 文字。 */
 button.bug-report-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.35rem;
   min-height: 30px;
-  width: 32px;
-  padding: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.95rem;
   color: var(--text, #dfe7ef);
   background: none;
   border: none;
@@ -156,6 +156,48 @@ button.bug-report-btn {
 button.bug-report-btn:hover {
   color: #fff;
   background: rgba(120, 140, 160, 0.18);
+}
+
+/* 顶栏右上角用户菜单：用户名按钮 + 下拉（退出登录）。 */
+.user-menu {
+  position: relative;
+}
+
+.user-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.user-menu-caret {
+  font-size: 0.7em;
+  opacity: 0.7;
+  transition: transform 120ms;
+}
+
+.user-menu-btn[aria-expanded='true'] .user-menu-caret {
+  transform: rotate(180deg);
+}
+
+.user-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  min-width: 9rem;
+  padding: 0.3rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.user-menu-panel button {
+  text-align: left;
+  background: none;
+  border: none;
 }
 
 a.button {

@@ -2608,7 +2608,7 @@
 	"nav.games": {"en":"Games","zh":"对局"},
 	"nav.logout": {"en":"Log out","zh":"退出登录"},
 	"nav.new": {"en":"New Game","zh":"新建对局"},
-	"nav.reportBug": {"en":"Report Bug","zh":"报告 Bug"},
+	"nav.reportBug": {"en":"Report Bug","zh":"反馈 bug"},
 	"nav.reportBugHint": {"en":"Open a pre-filled GitHub issue","zh":"打开预填好的 GitHub Issue"},
 	"newgame.create": {"en":"Create game","zh":"创建对局"},
 	"newgame.creating": {"en":"Creating…","zh":"创建中…"},
