@@ -189,22 +189,24 @@ export default function DeckDetail() {
     ...[...grouped.keys()].filter((t) => !TYPE_ORDER.includes(t)).sort(),
   ]
 
-  // 印刷属性条：化解-攻击-防御-恢复-手牌-生命。恢复是第二身份的动作，
-  // 与英雄面的战斗属性并列展示。
-  const heroStats: Array<[string, string, number | undefined]> = [
-    ['thwart', t('stat.thwart'), hero?.thwart],
-    ['attack', t('stat.attack'), hero?.attack],
-    ['defense', t('stat.defense'), hero?.defense],
-    ['recover', t('stat.recover'), hero?.recover],
-    ['hand', t('stat.handSize'), hero?.handSize],
-    ['hp', t('stat.hp'), hero?.hp],
-  ]
-
   // 化身面：英雄注册码恒为 {base}a，目录里存在 {base}b 才渲染第二面
   // （少数扩展包数据缺 linked 身份面时优雅降级为单面）。
   const aeMatch = /^(\d{5})a$/.exec(heroCode)
   const aeCode = aeMatch ? `${aeMatch[1]}b` : ''
   const ae = aeCode ? catalog[aeCode] : undefined
+
+  // 印刷属性条：化解-攻击-防御-恢复-手牌-生命。恢复等第二身份属性印在
+  // 化身面上，英雄面没印的维度回退化身面的印刷值。
+  const statOf = (k: 'hp' | 'attack' | 'thwart' | 'defense' | 'recover' | 'handSize') =>
+    hero?.[k] ?? ae?.[k]
+  const heroStats: Array<[string, string, number | undefined]> = [
+    ['thwart', t('stat.thwart'), statOf('thwart')],
+    ['attack', t('stat.attack'), statOf('attack')],
+    ['defense', t('stat.defense'), statOf('defense')],
+    ['recover', t('stat.recover'), statOf('recover')],
+    ['hand', t('stat.handSize'), statOf('handSize')],
+    ['hp', t('stat.hp'), statOf('hp')],
+  ]
 
   // 头部副标题是第二身份名：取化身面（b 面）的名称，猩红女巫 →
   // 旺达·马克西莫夫；无化身面时退回英雄卡的化名（subname），与主标题

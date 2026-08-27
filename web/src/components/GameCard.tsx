@@ -10,6 +10,20 @@ import type { PlacedCard } from '../board/layout'
 
 const PLAYER_COLORS = ['#4a90d9', '#d94a4a', '#d9a04a', '#3fa66a']
 
+// 伤害代币图形（不含数字）：对局的血量徽章与牌组详情的生命值图标共用这
+// 份黑边 + 炽橙渐变 + 网点定义。渐变/网点 id 必须每实例唯一（同屏多枚
+// 代币共享 defs 命名空间）。
+export function DamageTokenArt({ gid }: { gid: string }) {
+  return (
+    <>
+      <circle cx="20" cy="20" r="18.6" fill="#171114" />
+      <circle cx="20" cy="20" r="14.6" fill={`url(#${gid})`} />
+      <circle cx="20" cy="20" r="14.6" fill={`url(#${gid}-d)`} />
+      <circle cx="20" cy="20" r="14.6" fill="none" stroke="rgba(255,199,96,0.8)" strokeWidth="1.1" />
+    </>
+  )
+}
+
 // 实体代币风格的数值徽章（参照桌游伤害/威胁代币）：黑边框 + 炽橙底纹 +
 // 白色斜体描边数字。hp 展示剩余生命值，threat 展示当前威胁。
 // 渐变/网点图案的 id 必须每实例唯一（同屏几十个代币共享 defs 命名空间）。
@@ -32,10 +46,7 @@ function StatToken({ kind, value }: { kind: 'hp' | 'threat'; value: number }) {
             <circle cx="1.8" cy="1.8" r="0.85" fill="rgba(64,7,2,0.42)" />
           </pattern>
         </defs>
-        <circle cx="20" cy="20" r="18.6" fill="#171114" />
-        <circle cx="20" cy="20" r="14.6" fill={`url(#${gid})`} />
-        <circle cx="20" cy="20" r="14.6" fill={`url(#${gid}-d)`} />
-        <circle cx="20" cy="20" r="14.6" fill="none" stroke="rgba(255,199,96,0.8)" strokeWidth="1.1" />
+        <DamageTokenArt gid={gid} />
         <text
           className="stat-token-num"
           x="20"

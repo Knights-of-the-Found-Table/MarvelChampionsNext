@@ -1,13 +1,17 @@
 // 印刷属性小图标：按实体卡牌的图记语言手绘的内联 SVG——化解/攻击/防御/
-// 恢复共用同一个漫画式爆炸形，仅颜色不同（THW 蓝 / ATK 红 / DEF 绿 /
-// REC 金）；手牌是扇形展开的三张玩家卡背（玩家卡背印象色 #00548F）；生
-// 命复用伤害代币的黑灰泼溅形并加红点示意。纯展示组件：数字由调用方放在
-// 图标旁边，图形按 14–16px 的实际显示尺寸简化，不做印刷版的内芯纹理。
+// 恢复共用卡面上那种多尖角的漫画爆炸形，仅颜色不同（THW 蓝 / ATK 红 /
+// DEF 绿 / REC 金）；手牌是扇形展开的三张玩家卡背（玩家卡背印象色
+// #00548F）；生命直接复用对局的伤害代币图形（DamageTokenArt）。纯展示
+// 组件：数字由调用方放在图标旁边。
+import { useId } from 'react'
+import { DamageTokenArt } from './GameCard'
+
 const WHITE = '#fff'
 
-// 12 尖角的漫画爆炸形，轻微不规则（生成脚本一次性算出）。
-export const BURST =
-  'M20.0 1.7 L23.2 7.9 L28.2 5.7 L27.6 12.4 L35.8 10.9 L32.1 16.8 L36.5 20.0 L30.3 22.8 L35.8 29.1 L28.8 28.8 L28.2 34.3 L22.8 30.3 L20.0 38.3 L16.8 32.1 L11.8 34.3 L12.4 27.6 L4.2 29.2 L7.9 23.2 L3.5 20.0 L9.7 17.2 L4.2 10.8 L11.2 11.2 L11.7 5.7 L17.2 9.7 Z'
+// 14 尖角的漫画爆炸形，尖长身短、轻微不规则并整体斜置（生成脚本一次性
+// 算出）；miter 连接保住尖角不被白描边磨圆。
+const BURST =
+  'M39.7 17.2 L31.3 21.0 L37.6 25.6 L28.5 25.0 L34.5 33.7 L26.3 29.4 L26.6 37.3 L21.4 29.8 L18.3 39.8 L16.6 30.8 L10.6 35.9 L13.2 27.2 L3.4 31.0 L9.4 24.0 L1.7 22.6 L10.1 19.2 L1.0 13.9 L10.3 14.3 L6.6 7.3 L14.5 11.8 L12.9 1.4 L18.4 8.8 L21.6 1.6 L23.0 10.6 L30.1 2.9 L27.8 11.8 L35.4 9.7 L29.3 16.5 Z'
 
 const STAT_COLORS: Record<string, string | undefined> = {
   thwart: '#0e76bc',
@@ -18,7 +22,7 @@ const STAT_COLORS: Record<string, string | undefined> = {
 
 export const PLAYER_CARD_BLUE = '#00548F'
 
-function StatShapes({ stat }: { stat: string }) {
+function StatShapes({ stat, gid }: { stat: string; gid: string }) {
   switch (stat) {
     case 'thwart':
     case 'attack':
@@ -29,8 +33,8 @@ function StatShapes({ stat }: { stat: string }) {
           d={BURST}
           fill={STAT_COLORS[stat]}
           stroke={WHITE}
-          strokeWidth={4.6}
-          strokeLinejoin="round"
+          strokeWidth={3.8}
+          strokeLinejoin="miter"
           paintOrder="stroke"
         />
       )
@@ -72,21 +76,8 @@ function StatShapes({ stat }: { stat: string }) {
       )
     }
     case 'hp': {
-      // 伤害代币：黑灰不规则泼溅 + 右下红色血点。
-      return (
-        <>
-          <path
-            d='M20.0 0.8 L25.0 9.5 L29.5 8.6 L29.9 17.2 L38.6 17.8 L30.7 25.7 L31.9 30.7 L24.0 29.8 L19.1 39.0 L16.4 31.4 L8.1 29.4 L10.9 25.1 L0.8 18.1 L8.7 16.1 L8.5 8.3 L16.3 9.9 Z'
-            fill="#49505c"
-            stroke={WHITE}
-            strokeWidth={4}
-            strokeLinejoin="round"
-            paintOrder="stroke"
-            transform="translate(20 19.6) scale(0.92) translate(-20 -19.6)"
-          />
-          <circle cx={30.8} cy={31.4} r={4} fill="#ff5f4d" stroke={WHITE} strokeWidth={2.6} paintOrder="stroke" />
-        </>
-      )
+      // 复用对局的伤害代币：黑边圆牌 + 炽橙渐变 + 网点。
+      return <DamageTokenArt gid={gid} />
     }
     default:
       return null
@@ -94,9 +85,22 @@ function StatShapes({ stat }: { stat: string }) {
 }
 
 export function StatIcon({ stat, size = 14 }: { stat: string; size?: number }) {
+  // 渐变/网点 id 每实例唯一：同屏多枚图标共享 defs 命名空间。
+  const gid = `st-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   return (
     <svg className="res-icon" width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <StatShapes stat={stat} />
+      <defs>
+        <radialGradient id={gid} cx="50%" cy="40%" r="68%">
+          <stop offset="0%" stopColor="#ffce4d" />
+          <stop offset="45%" stopColor="#ff8c1f" />
+          <stop offset="80%" stopColor="#e63a1c" />
+          <stop offset="100%" stopColor="#7e1007" />
+        </radialGradient>
+        <pattern id={`${gid}-d`} width="3.6" height="3.6" patternUnits="userSpaceOnUse">
+          <circle cx="1.8" cy="1.8" r="0.85" fill="rgba(64,7,2,0.42)" />
+        </pattern>
+      </defs>
+      <StatShapes stat={stat} gid={gid} />
     </svg>
   )
 }
