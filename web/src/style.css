@@ -289,7 +289,7 @@ a.button {
   margin: 0;
 }
 
-/* 英雄面板：阵营色带头部 + 立绘/信息双栏 + 底部统计格。 */
+/* 英雄面板：阵营色带头部 + 属性条 + 双面身份卡/牌组详情双栏 + 印刷文本。 */
 .deck-hero {
   padding: 0;
   overflow: hidden;
@@ -297,14 +297,20 @@ a.button {
 
 .dhp-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.9rem;
+  row-gap: 0.1rem;
   padding: 0.7rem 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 }
 
 .dhp-header strong {
   font-size: 1.15rem;
+}
+
+.dhp-header span {
+  opacity: 0.92;
 }
 
 .dhp-header.an-hero {
@@ -331,30 +337,10 @@ a.button {
   background: linear-gradient(90deg, #4a5666, #303947);
 }
 
-.dhp-body {
-  display: flex;
-  gap: 0.9rem;
-  padding: 0.9rem;
-  align-items: flex-start;
-}
-
-.dhp-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  min-width: 0;
-}
-
-.dhp-label {
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.dhp-stats {
-  gap: 0.5rem;
+/* 头部正下方的印刷属性条：满宽一行（放不下时换行）。 */
+.dhp-stats-strip {
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
 }
 
 .dhp-stat {
@@ -372,6 +358,74 @@ a.button {
   font-size: 0.8rem;
 }
 
+.dhp-body {
+  display: flex;
+  gap: 1rem;
+  padding: 0.9rem;
+  align-items: stretch;
+}
+
+/* 身份双面卡：英雄面在上、化身面在下，等宽竖排。 */
+.dhp-faces {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: 132px;
+  flex-shrink: 0;
+}
+
+.dhp-face {
+  border-radius: 8px;
+  line-height: 0;
+  transition: box-shadow 0.15s ease;
+}
+
+.dhp-face:hover {
+  box-shadow: 0 0 0 2px var(--accent-2);
+}
+
+.dhp-face img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* 牌组详情清单：卡组大小 / 扩充需求 / 派系分布。 */
+.dhp-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.dhp-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dhp-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dhp-detail-key {
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.dhp-packnames {
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.dhp-aspects .deck-chip {
+  background: var(--panel-2);
+}
+
 .dhp-text {
   white-space: pre-line;
   font-size: 0.88rem;
@@ -384,22 +438,12 @@ a.button {
   font-size: 0.85rem;
 }
 
-.dhp-foot {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--border);
-}
-
-.dhp-foot-cell {
+/* 面板底部：印刷能力文本 + 出处行。 */
+.dhp-lower {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.6rem 0.9rem;
-  font-size: 0.9rem;
-}
-
-.dhp-foot-cell + .dhp-foot-cell {
-  border-left: 1px solid var(--border);
+  gap: 0.5rem;
+  padding: 0 1rem 0.9rem;
 }
 
 /* 右侧清单：类型分组双栏流式排布。 */
@@ -585,6 +629,22 @@ span.dot.an-hero {
 
   .deck-cols {
     columns: 1;
+  }
+}
+
+/* 窄屏：双面身份卡并排、详情清单移到下方。 */
+@media (max-width: 520px) {
+  .dhp-body {
+    flex-direction: column;
+  }
+
+  .dhp-faces {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .dhp-face {
+    flex: 1;
   }
 }
 

@@ -1,5 +1,5 @@
-// 牌组详情：ArkhamDB 式布局。左侧英雄面板（宽幅色带头部 + 立绘 + 印刷
-// 属性/能力文本 + 牌组统计），右侧牌组清单按类型分组双栏排布，每行
+// 牌组详情：ArkhamDB 式布局。左侧身份面板（色带头部 + 英雄/化身双面卡 +
+// 牌组详情清单 + 印刷能力文本），右侧牌组清单按类型分组双栏排布，每行
 // 「数量 × 缩略图 费用徽章 名称 资源图标」，名称按阵营着色。
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -85,6 +85,25 @@ function DeckCardRow({ info, count, onPreview }: DeckEntry & { onPreview: (code:
   )
 }
 
+// 身份面板里的单面身份卡：hover 放大、点击进预览（触屏）。两面的放大
+// 各自独立，互不牵连。
+function IdentityFace({ code, onClick }: { code: string; onClick: () => void }) {
+  const faceRef = useRef<HTMLDivElement | null>(null)
+  const zoom = useCardZoom(code, faceRef)
+  return (
+    <div
+      className="dhp-face clickable"
+      ref={faceRef}
+      onMouseEnter={zoom.onEnter}
+      onMouseLeave={zoom.hide}
+      onClick={onClick}
+    >
+      <CardImage code={code} size="md" zoom={false} />
+      {zoom.overlay}
+    </div>
+  )
+}
+
 export default function DeckDetail() {
   const { id } = useParams<{ id: string }>()
   const t = useT()
@@ -139,8 +158,6 @@ export default function DeckDetail() {
       catalog[deck.investigatorCode.replace(/a$/, '')]?.code ??
       deck.investigatorCode
     : ''
-  const heroZoomRef = useRef<HTMLDivElement | null>(null)
-  const heroZoom = useCardZoom(heroCode, heroZoomRef)
   const previewRef = useRef<HTMLDivElement | null>(null)
   const previewZoom = useCardZoom(previewCode ?? heroCode, previewRef)
   useOutsideClose(previewCode !== null, () => setPreviewCode(null))
@@ -157,8 +174,6 @@ export default function DeckDetail() {
   const hero = catalog[heroCode] ?? catalog[`${heroCode}a`]
   const heroName = hero ? lname(zh, hero.code, hero.name) : deck.investigatorCode
   const heroSub = hero ? lsubname(zh, hero.code, hero.subname ?? '') : ''
-  // 扩充需求含英雄本身的扩充。
-  const packCount = stats.packs.size + (hero && !stats.packs.has(hero.packCode) ? 1 : 0)
 
   const grouped = new Map<string, DeckEntry[]>()
   for (const e of entries) {
@@ -189,14 +204,25 @@ export default function DeckDetail() {
     ['✋', t('stat.handSize'), hero?.handSize],
   ]
 
+  // 化身面：英雄注册码恒为 {base}a，目录里存在 {base}b 才渲染第二面
+  // （少数扩展包数据缺 linked 身份面时优雅降级为单面）。
+  const aeMatch = /^(\d{5})a$/.exec(heroCode)
+  const aeCode = aeMatch ? `${aeMatch[1]}b` : ''
+  const ae = aeCode ? catalog[aeCode] : undefined
+
+  // 扩充需求含英雄本身的扩充；展开成名称清单供详情区展示。
+  const allPacks = new Set(stats.packs)
+  if (hero) allPacks.add(hero.packCode)
+  const packNames = new Map<string, string>()
+  for (const e of entries) packNames.set(e.info.packCode, e.info.packName ?? e.info.packCode)
+  if (hero) packNames.set(hero.packCode, hero.packName ?? hero.packCode)
+  const packCount = allPacks.size
+
   return (
     <div className="deck-layout">
       <aside className="deck-side">
         <div
           className="deck-hero card"
-          ref={heroZoomRef}
-          onMouseEnter={heroZoom.onEnter}
-          onMouseLeave={heroZoom.hide}
           onClick={() => setPreviewCode(heroCode)}
         >
           <div className={`dhp-header ${aspectClass(hero?.aspect)}`}>
@@ -206,19 +232,49 @@ export default function DeckDetail() {
             </strong>
             {heroSub && <span>{heroSub}</span>}
           </div>
+          <div className="row wrap dhp-stats-strip">
+            {heroStats
+              .filter(([, , v]) => v != null)
+              .map(([glyph, label, v]) => (
+                <span key={label} className="dhp-stat" title={label}>
+                  <span className="dhp-glyph">{glyph}</span>
+                  {v}
+                </span>
+              ))}
+          </div>
           <div className="dhp-body">
-            <div className="dhp-info">
-              <div className="dhp-label">{hero ? t(`type.${hero.type}`) : ''}</div>
-              <div className="row wrap dhp-stats">
-                {heroStats
-                  .filter(([, , v]) => v != null)
-                  .map(([glyph, label, v]) => (
-                    <span key={label} className="dhp-stat" title={label}>
-                      <span className="dhp-glyph">{glyph}</span>
-                      {v}
+            <div className="dhp-faces">
+              <IdentityFace code={heroCode} onClick={() => setPreviewCode(heroCode)} />
+              {ae && <IdentityFace code={aeCode} onClick={() => setPreviewCode(aeCode)} />}
+            </div>
+            <div className="dhp-details">
+              <div className="dhp-label">{t('deck.details')}</div>
+              <div className="dhp-detail">
+                <span className="dhp-detail-key">{t('deck.size')}</span>
+                <strong>{t('deck.heroStats', stats.total, entries.length)}</strong>
+              </div>
+              <div className="dhp-detail">
+                <span className="dhp-detail-key">{t('deck.packs')}</span>
+                <strong>{packCount}</strong>
+              </div>
+              <div className="muted dhp-packnames" title={[...packNames.values()].join(' · ')}>
+                {[...packNames.values()].join(' · ')}
+              </div>
+              <div className="dhp-detail">
+                <span className="dhp-detail-key">{t('deck.aspects')}</span>
+                <div className="row wrap dhp-aspects">
+                  {ASPECT_ORDER.filter((a) => stats.byAspect.has(a)).map((a) => (
+                    <span key={a} className="deck-chip">
+                      <span className={`dot ${aspectClass(a)}`} />
+                      {t(`aspect.${a}`)} ({stats.byAspect.get(a)})
                     </span>
                   ))}
+                </div>
               </div>
+            </div>
+          </div>
+          {(hero?.text || hero) && (
+            <div className="dhp-lower">
               {hero?.text && (
                 <div className="dhp-text">
                   <ResText text={hero.text.replace(/<[^>]*>/g, '')} />
@@ -230,18 +286,7 @@ export default function DeckDetail() {
                 </div>
               )}
             </div>
-            <CardImage code={heroCode} size="lg" zoom={false} />
-          </div>
-          <div className="dhp-foot">
-            <div className="dhp-foot-cell">
-              <span className="muted">{t('deck.size')}</span>
-              <strong>{t('deck.heroStats', stats.total, entries.length)}</strong>
-            </div>
-            <div className="dhp-foot-cell">
-              <span className="muted">{t('deck.packs')}</span>
-              <strong>{packCount}</strong>
-            </div>
-          </div>
+          )}
         </div>
         <p className="muted deck-back">
           <Link to="/decks">{t('deck.back')}</Link>
@@ -275,7 +320,6 @@ export default function DeckDetail() {
           ))}
         </div>
       </div>
-      {heroZoom.overlay}
       {previewCode && coarsePointer && <div ref={previewRef} className="preview-anchor" />}
       {previewCode && coarsePointer && previewZoom.overlay}
     </div>
