@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { get, post, del, Deck } from '../api'
+import { describeDeckIssues } from '../deckIssues'
 import { CardImage } from '../cards'
-import { useT } from '../i18n'
+import { useT, useZhMap } from '../i18n'
 
 export default function Decks() {
   const navigate = useNavigate()
   const t = useT()
+  const zh = useZhMap()
   const [decks, setDecks] = useState<Deck[]>([])
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
@@ -103,6 +105,14 @@ export default function Decks() {
             <CardImage code={d.investigatorCode} size="sm" />
             <div style={{ flex: 1 }}>
               <strong>{d.name}</strong>
+              {d.valid === false && (
+                <span
+                  className="deck-invalid-badge"
+                  title={describeDeckIssues(t, zh, d.issues ?? []).join('\n')}
+                >
+                  ⚠ {t('decks.invalid')}
+                </span>
+              )}
               <div className="muted">
                 {t('decks.cardStats', Object.keys(d.slots).length, Object.values(d.slots).reduce((a, b) => a + b, 0))}
               </div>

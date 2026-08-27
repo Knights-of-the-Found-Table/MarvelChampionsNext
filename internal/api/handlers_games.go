@@ -29,6 +29,20 @@ func deckHero(deck *store.Deck) (string, error) {
 	return heroBase, nil
 }
 
+// checkDeckPlayable refuses to seat a rulebook-illegal deck: illegal decks
+// import fine (for viewing / future editing) but never start games. The
+// structured issues ride along in the body so the UI can explain why.
+func checkDeckPlayable(w http.ResponseWriter, deck *store.Deck) bool {
+	if issues := engine.ValidateDeck(deck.InvestigatorCode, deck.Slots); len(issues) > 0 {
+		writeJSON(w, http.StatusBadRequest, map[string]any{
+			"error":      "deck is not legal for play",
+			"deckIssues": issues,
+		})
+		return false
+	}
+	return true
+}
+
 func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
 	var uid int64
 	if _, err := fmt.Sscanf(userID(r), "%d", &uid); err != nil {
@@ -105,6 +119,9 @@ func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if !checkDeckPlayable(w, deck) {
+		return
+	}
 	specs := []engine.PlayerSpec{{
 		Name: playerName, UserID: fmt.Sprint(uid), HeroBase: heroBase, Deck: deck.Slots,
 	}}
@@ -162,6 +179,9 @@ type lobbyDeck struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	HeroCode string `json:"heroCode"`
+	// 组牌校验结果：非法牌组已在入座时被拒，这里供大厅界面给仍持有
+	// 引用的旧行打警告标。
+	Valid bool `json:"valid"`
 }
 
 func (s *Server) lobbyDeckView(deckID int64) *lobbyDeck {
@@ -169,7 +189,10 @@ func (s *Server) lobbyDeckView(deckID int64) *lobbyDeck {
 	if err != nil {
 		return nil
 	}
-	return &lobbyDeck{ID: d.Token, Name: d.Name, HeroCode: d.InvestigatorCode}
+	return &lobbyDeck{
+		ID: d.Token, Name: d.Name, HeroCode: d.InvestigatorCode,
+		Valid: len(engine.ValidateDeck(d.InvestigatorCode, d.Slots)) == 0,
+	}
 }
 
 func (s *Server) lobbyPayload(g *store.GameRow) (map[string]any, error) {
@@ -297,6 +320,9 @@ func (s *Server) handleJoinGame(w http.ResponseWriter, r *http.Request) {
 	heroBase, err := deckHero(deck)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if !checkDeckPlayable(w, deck) {
 		return
 	}
 	slot := 0
@@ -446,6 +472,9 @@ func (s *Server) handleStart(w http.ResponseWriter, r *http.Request) {
 		}
 		if _, err := deckHero(deck); err != nil {
 			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if !checkDeckPlayable(w, deck) {
 			return
 		}
 		name := ""

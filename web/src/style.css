@@ -231,6 +231,7 @@ a.button {
 
 .error {
   color: var(--danger);
+  white-space: pre-line;
 }
 
 .victory {
@@ -260,6 +261,40 @@ a.button {
   flex-direction: column;
   gap: 0.6rem;
   margin-top: 1rem;
+}
+
+/* 组牌校验：不合规徽标 + 牌组详情的问题面板。不合规牌组可以保留，
+   但不能用于开局。 */
+.deck-invalid-badge {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  color: var(--danger);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.deck-issues {
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--danger);
+  border-radius: 0.6rem;
+  background: rgba(220, 60, 60, 0.08);
+}
+
+.deck-issues strong {
+  color: var(--danger);
+}
+
+.deck-issues ul {
+  margin: 0.5rem 0 0.25rem;
+  padding-left: 1.2rem;
+}
+
+.deck-issues li {
+  margin: 0.15rem 0;
+  font-size: 0.85rem;
 }
 
 .clickable {
@@ -560,6 +595,10 @@ a.button {
   color: #96a3b4;
 }
 
+.an-pool {
+  color: #e86bb0;
+}
+
 .dot {
   width: 0.7rem;
   height: 0.7rem;
@@ -586,6 +625,10 @@ span.dot.an-protection {
 
 span.dot.an-basic {
   background: #96a3b4;
+}
+
+span.dot.an-pool {
+  background: #e86bb0;
 }
 
 span.dot.an-hero {

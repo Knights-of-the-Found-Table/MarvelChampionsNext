@@ -4,7 +4,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { get, post, type Deck, type LobbyView } from '../api'
-import { useT } from '../i18n'
+import { errorText } from '../deckIssues'
+import { useT, useZhMap } from '../i18n'
 import Game from './Game'
 
 export default function GamePage() {
@@ -60,6 +61,7 @@ function Lobby({
   onStarted: () => void
 }) {
   const t = useT()
+  const zh = useZhMap()
   const [me, setMe] = useState<{ id: number; username: string } | null>(null)
   const [decks, setDecks] = useState<Deck[]>([])
   const [deckChoice, setDeckChoice] = useState('')
@@ -87,7 +89,7 @@ function Lobby({
       await fn()
       onRefresh()
     } catch (err) {
-      setError(String((err as Error).message || err))
+      setError(errorText(t, zh, err))
     } finally {
       setBusy(false)
     }
@@ -108,8 +110,9 @@ function Lobby({
       <select value={deckChoice} onChange={(e) => setDeckChoice(e.target.value)}>
         {decks.length === 0 && <option value="">{t('newgame.importFirst')}</option>}
         {decks.map((d) => (
-          <option key={d.id} value={d.id}>
+          <option key={d.id} value={d.id} disabled={d.valid === false}>
             {d.name}
+            {d.valid === false ? ` ⚠ ${t('decks.invalid')}` : ''}
           </option>
         ))}
       </select>
@@ -144,7 +147,18 @@ function Lobby({
                 {p.username || `#${p.slot}`}
                 {p.host && <span className="tag-host">{t('lobby.host')}</span>}
               </span>
-              <span className="muted">{p.deck ? p.deck.name : t('lobby.needDeckFirst')}</span>
+              <span className="muted">
+                {p.deck ? (
+                  <>
+                    {p.deck.name}
+                    {p.deck.valid === false && (
+                      <span className="deck-invalid-badge">⚠ {t('decks.invalid')}</span>
+                    )}
+                  </>
+                ) : (
+                  t('lobby.needDeckFirst')
+                )}
+              </span>
               {isHost && !p.host && (
                 <button disabled={busy} onClick={() => void run(() => post(`/marvel/games/${lobby.id}/kick`, { slot: p.slot }))}>
                   {t('lobby.remove')}

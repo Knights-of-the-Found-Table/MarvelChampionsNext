@@ -13,6 +13,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/rooms"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
 
@@ -20,6 +21,39 @@ import (
 )
 
 const testSecret = "test-secret"
+
+// legalSpideyDeck builds a rulebook-legal Spider-Man deck: the exact hero
+// set at printed counts plus core justice/basic filler up to the 40-card
+// minimum, so game flows run against decks that pass ValidateDeck.
+func legalSpideyDeck() map[string]int {
+	slots := map[string]int{
+		"01002": 1, "01003": 2, "01004": 2, "01005": 3, "01006": 1,
+		"01007": 2, "01008": 2, "01009": 2, // Spider-Man hero set
+	}
+	total := 15
+	for _, d := range engine.DB.All() {
+		if total >= 40 {
+			break
+		}
+		if d.PackCode != "core" || d.Unique || d.Quantity <= 0 {
+			continue
+		}
+		if d.Aspect != "justice" && d.Aspect != "basic" {
+			continue
+		}
+		switch d.Type {
+		case "hero", "alter_ego", "obligation":
+			continue
+		}
+		n := 3
+		if total+n > 40 {
+			n = 40 - total
+		}
+		slots[d.Code] = n
+		total += n
+	}
+	return slots
+}
 
 func newTestServer(t *testing.T) (*httptest.Server, *store.Store) {
 	t.Helper()
@@ -215,11 +249,7 @@ func TestFullGameFlow(t *testing.T) {
 	deck := importDeckRequest{
 		Name:             "Spidey Aggression",
 		InvestigatorCode: "01001a",
-		Slots: map[string]int{
-			"01002": 1, "01003": 2, "01004": 2, "01005": 2, "01006": 1,
-			"01007": 2, "01008": 2,
-			"01088": 3, "01089": 3, "01090": 3, "01054": 2, "01055": 1,
-		},
+		Slots:            legalSpideyDeck(),
 	}
 	resp, body = doJSON(t, "POST", base+"/api/v1/marvel/decks", token, deck)
 	if resp.StatusCode != http.StatusCreated {
@@ -354,7 +384,7 @@ func TestHandRedaction(t *testing.T) {
 	deck := importDeckRequest{
 		Name:             "Deck",
 		InvestigatorCode: "01001a",
-		Slots:            map[string]int{"01088": 3, "01089": 3, "01090": 3, "01005": 2, "01006": 1, "01002": 1},
+		Slots:            legalSpideyDeck(),
 	}
 	_, bd := doJSON(t, "POST", base+"/api/v1/marvel/decks", t1, deck)
 	deckID := bd["id"].(string)
@@ -408,7 +438,7 @@ func TestOpaqueIdentifiers(t *testing.T) {
 	_, bd := doJSON(t, "POST", base+"/api/v1/marvel/decks", token, importDeckRequest{
 		Name:             "Deck",
 		InvestigatorCode: "01001a",
-		Slots:            map[string]int{"01088": 3, "01089": 3, "01090": 3, "01005": 2, "01006": 1, "01002": 1},
+		Slots:            legalSpideyDeck(),
 	})
 	deckID := bd["id"].(string)
 	if !tokenRE.MatchString(deckID) {
@@ -489,7 +519,6 @@ func TestLobbyFlow(t *testing.T) {
 	ts, _ := newTestServer(t)
 	base := ts.URL
 
-	const testSlots = `{"01088":3,"01089":3,"01090":3,"01005":2,"01006":1,"01002":1}`
 	var tokens [4]string // auth tokens, index 0 = host
 	var decks [4]string  // each user's own deck token
 	for i := 0; i < 4; i++ {
@@ -498,11 +527,10 @@ func TestLobbyFlow(t *testing.T) {
 		_, bd := doJSON(t, "POST", base+"/api/v1/marvel/decks", tokens[i], importDeckRequest{
 			Name:             fmt.Sprintf("Deck %d", i),
 			InvestigatorCode: "01001a",
-			Slots:            map[string]int{"01088": 3, "01089": 3, "01090": 3, "01005": 2, "01006": 1, "01002": 1},
+			Slots:            legalSpideyDeck(),
 		})
 		decks[i] = bd["id"].(string)
 	}
-	_ = testSlots
 
 	// host creates a 3-player lobby: scenario only, no decks
 	resp, body := doJSON(t, "POST", base+"/api/v1/marvel/games", tokens[0], createGameRequest{

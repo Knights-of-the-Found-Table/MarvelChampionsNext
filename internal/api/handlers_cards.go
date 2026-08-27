@@ -105,6 +105,19 @@ func (s *Server) handleScenarios(w http.ResponseWriter, r *http.Request) {
 
 // ---------------------------------------------------------------- decks
 
+// deckOut 在存储的牌组上附加组牌规则校验结果（engine.ValidateDeck）：
+// 不合规的牌组照常返回，由前端标记为不可用，服务端只在开局/入座时拒绝。
+type deckOut struct {
+	store.Deck
+	Valid  bool               `json:"valid"`
+	Issues []engine.DeckIssue `json:"issues,omitempty"`
+}
+
+func deckWithValidation(deck *store.Deck) deckOut {
+	issues := engine.ValidateDeck(deck.InvestigatorCode, deck.Slots)
+	return deckOut{Deck: *deck, Valid: len(issues) == 0, Issues: issues}
+}
+
 type importDeckRequest struct {
 	// URL of a marvelcdb decklist to import.
 	URL string `json:"url"`
@@ -215,7 +228,7 @@ func (s *Server) handleGetDeck(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusNotFound, "deck not found")
 		return
 	}
-	writeJSON(w, http.StatusOK, deck)
+	writeJSON(w, http.StatusOK, deckWithValidation(deck))
 }
 
 func (s *Server) handleListDecks(w http.ResponseWriter, r *http.Request) {
@@ -229,10 +242,14 @@ func (s *Server) handleListDecks(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "store failed")
 		return
 	}
-	if decks == nil {
-		decks = []store.Deck{}
+	out := make([]deckOut, 0, len(decks))
+	for i := range decks {
+		out = append(out, deckWithValidation(&decks[i]))
 	}
-	writeJSON(w, http.StatusOK, decks)
+	if len(out) == 0 {
+		out = []deckOut{}
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (s *Server) handleDeleteDeck(w http.ResponseWriter, r *http.Request) {

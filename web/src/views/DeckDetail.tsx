@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { get, allCards, CardInfo, Deck } from '../api'
+import { describeDeckIssues } from '../deckIssues'
 import { CardImage, useCardZoom } from '../cards'
 import { lname, lsubname, useT, useZhMap } from '../i18n'
 import { ResourceIcon } from '../components/ResourceIcon'
@@ -26,7 +27,7 @@ const coarsePointer =
   typeof window.matchMedia === 'function' && window.matchMedia('(hover: none) and (pointer: coarse)').matches
 
 const TYPE_ORDER = ['ally', 'event', 'support', 'upgrade', 'resource', 'player_side_scheme']
-const ASPECT_ORDER = ['hero', 'aggression', 'justice', 'leadership', 'protection', 'basic']
+const ASPECT_ORDER = ['hero', 'aggression', 'justice', 'leadership', 'protection', 'pool', 'basic']
 
 interface DeckEntry {
   info: CardInfo
@@ -280,6 +281,17 @@ export default function DeckDetail() {
 
       <div className="deck-main">
         <h2>{deck.name}</h2>
+        {deck.valid === false && deck.issues && deck.issues.length > 0 && (
+          <div className="deck-issues" role="alert">
+            <strong>⚠ {t('deck.issueTitle')}</strong>
+            <ul>
+              {describeDeckIssues(t, zh, deck.issues).map((s, i) => (
+                <li key={i}>{s}</li>
+              ))}
+            </ul>
+            <p className="muted">{t('deck.issuesHint')}</p>
+          </div>
+        )}
         <div className="deck-cols">
           {typeKeys.map((key) => (
             <div key={key} className="deck-group">

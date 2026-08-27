@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { get, post, Deck, ScenarioInfo } from '../api'
-import { useT } from '../i18n'
+import { errorText } from '../deckIssues'
+import { useT, useZhMap } from '../i18n'
+
+// 默认选中的牌组：优先合法牌组，全部不合法时退回第一个。
+function defaultDeck(decks: Deck[]): string | null {
+  return (decks.find((d) => d.valid !== false) ?? decks[0])?.id ?? null
+}
 
 export default function NewGame() {
   const navigate = useNavigate()
   const t = useT()
+  const zh = useZhMap()
   const [decks, setDecks] = useState<Deck[]>([])
   const [scenarios, setScenarios] = useState<ScenarioInfo[]>([])
   const [playerCount, setPlayerCount] = useState(1)
@@ -19,7 +26,7 @@ export default function NewGame() {
   useEffect(() => {
     get<Deck[]>('/marvel/decks').then((d) => {
       setDecks(d)
-      if (d.length > 0) setDeckIds((ids) => ids.map((x, i) => (i === 0 && x === null ? d[0].id : x)))
+      if (d.length > 0) setDeckIds((ids) => ids.map((x, i) => (i === 0 && x === null ? defaultDeck(d) : x)))
     })
     get<ScenarioInfo[]>('/marvel/scenarios').then((s) => {
       setScenarios(s)
@@ -42,7 +49,7 @@ export default function NewGame() {
       })
       navigate(`/games/${view.id}`)
     } catch (err) {
-      setError(String((err as Error).message))
+      setError(errorText(t, zh, err))
     } finally {
       setBusy(false)
     }
@@ -60,7 +67,7 @@ export default function NewGame() {
             onChange={(e) => {
               const n = Number(e.target.value)
               setPlayerCount(n)
-              setDeckIds((ids) => ids.map((x, i) => (i < n && x === null && decks.length > 0 ? decks[0].id : x)))
+              setDeckIds((ids) => ids.map((x, i) => (i < n && x === null && decks.length > 0 ? defaultDeck(decks) : x)))
             }}
           >
             {[1, 2, 3, 4].map((n) => (
@@ -73,19 +80,20 @@ export default function NewGame() {
         {playerCount === 1 ? (
           <label>
             {t('newgame.playerDeck', 1)}
-            <select
-              value={deckIds[0] ?? ''}
-              onChange={(e) =>
-                setDeckIds((ids) => ids.map((x, j) => (j === 0 ? e.target.value : x)))
-              }
-            >
-              {decks.length === 0 && <option value="">{t('newgame.importFirst')}</option>}
-              {decks.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+          <select
+            value={deckIds[0] ?? ''}
+            onChange={(e) =>
+              setDeckIds((ids) => ids.map((x, j) => (j === 0 ? e.target.value : x)))
+            }
+          >
+            {decks.length === 0 && <option value="">{t('newgame.importFirst')}</option>}
+            {decks.map((d) => (
+              <option key={d.id} value={d.id} disabled={d.valid === false}>
+                {d.name}
+                {d.valid === false ? ` ⚠ ${t('decks.invalid')}` : ''}
+              </option>
+            ))}
+          </select>
           </label>
         ) : (
           <p className="muted">{t('newgame.lobbyHint')}</p>
@@ -111,7 +119,17 @@ export default function NewGame() {
           {t('newgame.gameName')}
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('newgame.gameNamePlaceholder')} />
         </label>
-        <button type="submit" disabled={busy || deckIds.slice(0, playerCount).some((x) => x === null) || !scenarioId}>
+        <button
+          type="submit"
+          disabled={
+            busy ||
+            deckIds.slice(0, playerCount).some((x) => x === null) ||
+            !scenarioId ||
+            deckIds
+              .slice(0, playerCount)
+              .some((x) => decks.find((d) => d.id === x)?.valid === false)
+          }
+        >
           {busy ? t('newgame.creating') : t('newgame.create')}
         </button>
       </form>

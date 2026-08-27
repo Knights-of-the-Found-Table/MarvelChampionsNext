@@ -5,6 +5,7 @@ package data
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -69,6 +70,20 @@ type CardDef struct {
 	// icons (parsed at load, never re-matched on Text).
 	BoostEntersPlay bool `json:"boostEntersPlay,omitempty"`
 
+	// ---- 身份卡上的组牌骑手，加载期从印刷文本解析一次成结构化字段，
+	// 牌组校验等逻辑只读字段，绝不再匹配 Text（参见上方 Keywords 的规约）。
+	// AspectMode 放宽单派系规则："" = 正常（至多一个派系）；
+	// "two_equal"（蜘蛛女）= 恰好两个派系且数量相等；
+	// "four_equal"（魔士亚当）= 四个派系数目全部相等。
+	AspectMode string `json:"aspectMode,omitempty"`
+	// AspectException 允许在所选派系之外加入符合条件的卡（独眼龙
+	// X-Men 盟友、末世 Cable 玩家副计谋、卡魔拉 attack/thwart 事件、
+	// 希尔 S.H.I.E.L.D. 支援、奇迹人带能量图标的事件）。
+	AspectException *AspectException `json:"aspectException,omitempty"`
+	// UniqueAll 把非英雄套装卡的复制上限降为 1（魔士亚当「除亚当
+	// 沃洛克之外的任何卡至多 1 张」）。
+	UniqueAll bool `json:"uniqueAll,omitempty"`
+
 	Text      string `json:"text,omitempty"`
 	Quantity  int    `json:"quantity,omitempty"`
 	DeckLimit int    `json:"deckLimit,omitempty"`
@@ -118,6 +133,55 @@ func (k Keyword) String() string {
 		return fmt.Sprintf("%s %d", k.Name, k.Value)
 	}
 	return k.Name
+}
+
+// AspectException 是身份卡上「所选派系之外也可加入……」骑手的结构化
+// 形式。匹配走印刷英文特征（ETraits —— zh 覆盖层不影响匹配）。Total/
+// Titles 为 0 表示该维度不设上限。
+type AspectException struct {
+	// Trait 要求卡牌带有该特征（"x-men"、"s.h.i.e.l.d."）。
+	Trait string `json:"trait,omitempty"`
+	// CardType 要求卡牌类型（"ally"、"event"、"support"、"player_side_scheme"）。
+	CardType string `json:"cardType,omitempty"`
+	// EventTraits（卡魔拉）要求事件带有至少一个所列印刷特征（"attack"、"thwart"）。
+	EventTraits []string `json:"eventTraits,omitempty"`
+	// EnergyEvents（奇迹人）要求印有 [energy] 资源图标。
+	EnergyEvents bool `json:"energyEvents,omitempty"`
+	// Total 限制总张数（卡魔拉：6）；Titles 限制不同牌名数（希尔：3）。
+	Total  int `json:"total,omitempty"`
+	Titles int `json:"titles,omitempty"`
+}
+
+// Matches reports whether the card qualifies for this exception rider.
+func (x *AspectException) Matches(d *CardDef) bool {
+	if x == nil {
+		return false
+	}
+	if x.CardType != "" && d.Type != x.CardType {
+		return false
+	}
+	if x.Trait != "" && !d.HasTrait(x.Trait) {
+		return false
+	}
+	if len(x.EventTraits) > 0 {
+		if d.Type != "event" {
+			return false
+		}
+		hit := false
+		for _, tr := range x.EventTraits {
+			if d.HasTrait(tr) {
+				hit = true
+				break
+			}
+		}
+		if !hit {
+			return false
+		}
+	}
+	if x.EnergyEvents && (d.Type != "event" || !slices.Contains(d.Resources, "energy")) {
+		return false
+	}
+	return true
 }
 
 var playerTypes = map[string]bool{
@@ -195,7 +259,50 @@ var (
 	romanRE     = regexp.MustCompile(`^(?i)([IVX]+)(?:([A-Z])|\d)?$`)
 	plainNumRE  = regexp.MustCompile(`^(\d+)(?:([A-Z])|\d)?$`)
 	letterRE    = regexp.MustCompile(`^([A-Z])(\d)?$`)
+
+	// 身份卡组牌骑手的印刷英文原文匹配。骑手措辞随印刷固定不变，每条
+	// 骑手对应一个结构化字段；匹配前先剥离标签（[[TRAIT]] 引用不带尖括
+	// 号，剥离后原样保留）。
+	deckTwoAspectsRE    = regexp.MustCompile(`(?i)choose two aspects instead of one during deck-building`)
+	deckFourAspectsRE   = regexp.MustCompile(`(?i)equal number of cards from all 4 aspects`)
+	deckWarlockUniqueRE = regexp.MustCompile(`(?i)cannot include more than 1 copy of any non-adam warlock card`)
+	deckXMenAlliesRE    = regexp.MustCompile(`(?i)include \[\[x-men\]\] allies from any aspect`)
+	deckSideSchemesRE   = regexp.MustCompile(`(?i)include player side schemes from any aspect`)
+	deckEnergyEventsRE  = regexp.MustCompile(`(?i)include events with a printed \[energy\] resource icon from any aspect`)
+	deckGamoraEventsRE  = regexp.MustCompile(`(?i)include up to 6 \[\[attack\]\] and/or \[\[thwart\]\] events`)
+	deckShieldSupportRE = regexp.MustCompile(`(?i)copies of 3 \[\[s\.h\.i\.e\.l\.d\.\]\] supports`)
 )
+
+// parseDeckRiders extracts identity-card deckbuilding riders into the
+// structured fields on the (alter-ego) card def, once at load. Runtime
+// logic never re-matches Text.
+func parseDeckRiders(def *CardDef, text string) {
+	if text == "" {
+		return
+	}
+	clean := tagRE.ReplaceAllString(text, "")
+	switch {
+	case deckTwoAspectsRE.MatchString(clean):
+		def.AspectMode = "two_equal"
+	case deckFourAspectsRE.MatchString(clean):
+		def.AspectMode = "four_equal"
+	}
+	if deckWarlockUniqueRE.MatchString(clean) {
+		def.UniqueAll = true
+	}
+	switch {
+	case deckXMenAlliesRE.MatchString(clean):
+		def.AspectException = &AspectException{Trait: "x-men", CardType: "ally"}
+	case deckSideSchemesRE.MatchString(clean):
+		def.AspectException = &AspectException{CardType: "player_side_scheme"}
+	case deckEnergyEventsRE.MatchString(clean):
+		def.AspectException = &AspectException{CardType: "event", EnergyEvents: true}
+	case deckGamoraEventsRE.MatchString(clean):
+		def.AspectException = &AspectException{CardType: "event", EventTraits: []string{"attack", "thwart"}, Total: 6}
+	case deckShieldSupportRE.MatchString(clean):
+		def.AspectException = &AspectException{Trait: "s.h.i.e.l.d.", CardType: "support", Titles: 3}
+	}
+}
 
 // parseStage converts marvelcdb stage markers ("1", "I", "2A", "B1") into a
 // numeric stage plus the original label. num is nil when the marker cannot be
@@ -376,6 +483,7 @@ func normalize(def *CardDef, raw rawCard) {
 	// "Boost:</b> Put this card into play" — tags stripped before matching
 	// (the literal text carries a bold tag between "Boost:" and "Put").
 	def.BoostEntersPlay = boostSelfRE.MatchString(tagRE.ReplaceAllString(raw.Text, ""))
+	parseDeckRiders(def, raw.Text)
 
 	// Preserve printed resource multiplicity. Basic resource cards such as
 	// Energy/Genius/Strength carry two copies of the same icon; collapsing the
@@ -406,6 +514,10 @@ func normalize(def *CardDef, raw rawCard) {
 		def.Aspect = raw.FactionCode
 	} else if raw.FactionCode == "basic" {
 		def.Aspect = "basic"
+	} else if raw.FactionCode == "pool" {
+		// Deadpool 的「池」派系：只在他的牌组里合法（由牌组校验器判
+		// 定），对引擎规则而言不是派系。
+		def.Aspect = "pool"
 	}
 
 	if raw.DoubleSided || raw.LinkedToCode != "" || hasSideSuffix(raw.Code) {

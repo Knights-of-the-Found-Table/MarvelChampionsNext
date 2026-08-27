@@ -14,6 +14,8 @@ export function setToken(t: string | null) {
 
 export class ApiError extends Error {
   status: number
+  // 结构化的牌组校验问题（开局/入座被拒时服务端带回），无则缺省。
+  deckIssues?: DeckIssue[]
   constructor(status: number, message: string) {
     super(message)
     this.status = status
@@ -31,9 +33,11 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   })
   if (!resp.ok) {
     let msg = resp.statusText
+    let deckIssues: DeckIssue[] | undefined
     try {
       const data = await resp.json()
       if (data.error) msg = data.error
+      if (Array.isArray(data.deckIssues)) deckIssues = data.deckIssues
     } catch {
       /* ignore */
     }
@@ -44,7 +48,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       setToken(null)
       window.location.assign('/login')
     }
-    throw new ApiError(resp.status, msg)
+    const err = new ApiError(resp.status, msg)
+    err.deckIssues = deckIssues
+    throw err
   }
   if (resp.status === 204) return undefined as T
   return (await resp.json()) as T
@@ -257,11 +263,25 @@ export interface GameView {
   encounterDiscardTop?: CardRef
 }
 
+// 一条组牌规则违反（engine.ValidateDeck）：key 对应 deck.issue.* 文案键，
+// card/title 指向违规卡，n/m 携带数量参数。
+export interface DeckIssue {
+  key: string
+  card?: string
+  title?: string
+  aspect?: string
+  n?: number
+  m?: number
+}
+
 export interface Deck {
   id: string
   name: string
   investigatorCode: string
   slots: Record<string, number>
+  // 组牌规则校验结果：不合规牌组仍可导入/查看，只是不能用于开局。
+  valid?: boolean
+  issues?: DeckIssue[]
 }
 
 export interface CardInfo {
@@ -341,6 +361,7 @@ export interface LobbyDeck {
   id: string
   name: string
   heroCode: string
+  valid?: boolean
 }
 
 export interface LobbyPlayer {
