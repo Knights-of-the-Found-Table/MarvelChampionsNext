@@ -33,10 +33,19 @@ CURATED_FIXES = {
     "11005": "康（猩红百夫长）",  # 缺右括号；11038 同名完整
     "21165b": "洛基王万岁",     # 粘连「122」；21165a 同卡 A 面正确
     "32088b": "李千欢",         # 表内误作「李干欢」；35003 同角色作「李千欢」
+    "29014": "9霄云",           # 「9霄云」的 9 是名字本体（人工确认），不是粘连数字
     # 以下 3 条：表内同基码 a/b 面本应同名却漂移，按 a 面（主面）对齐
     "45085b": "天启四骑士来袭",  # 表内作「…来袭！」多感叹号
     "45183b": "米哈伊尔·拉斯普廷",  # 表内误作「拉斯普京」（姓氏译字漂移）
     "32125b": "兄弟会强袭！",    # 表内丢句尾感叹号
+}
+
+# zh 镜像与本库的 code 面位差异：镜像按卡图正/背面命名（{base}a/b），
+# 本库一侧可能无面位后缀或按 marvelcdb 的人/变身共码。key=对照表 code，
+# value=本库 code。目标 code 不在库内时仍按缺失跳过。
+MIRROR_CODE_REMAP = {
+    "26002a": "26002",    # 无形（Intangible）：本库登记为无面位母码 26002
+    "31002a": "31001b",   # 潘妮·帕克：镜像把变身面单列为 31002，本库与英雄共码 31001b
 }
 
 
@@ -56,13 +65,23 @@ def main() -> int:
     src = sys.argv[1]
     raw = load_json(src)
 
+    # ---- 镜像面位改写（先于清洗，改写值覆盖同 code 的直引条目）----
+    remapped = []
+    for mcode, rcode in MIRROR_CODE_REMAP.items():
+        if mcode in raw:
+            remapped.append((mcode, rcode))
+            raw[rcode] = raw[mcode]
+            del raw[mcode]
+
     # ---- 清洗 + 人工修正 ----
     ocr, suspects, curated_applied = {}, [], []
     for code, text in raw.items():
         c = text.replace("✦", "").replace("!", "！").strip()
         if code in CURATED_FIXES:
+            # 人工确证值无条件采信，不再过 OCR 噪声检查（如「9霄云」的数字开头）。
             curated_applied.append((code, c, CURATED_FIXES[code]))
-            c = CURATED_FIXES[code]
+            ocr[code] = CURATED_FIXES[code]
+            continue
         if not c:
             suspects.append((code, text, "空串"))
             continue
@@ -173,6 +192,10 @@ def main() -> int:
         w("## 人工确证的修正\n\n| code | 原 | 修后 |\n|---|---|---|\n")
         for code, before, after in curated_applied:
             w(f"| {code} | {before} | {after} |\n")
+        if remapped:
+            w("\n## 镜像面位 code 改写\n\n| 对照表 code | 本库 code |\n|---|---|\n")
+            for src, dst in remapped:
+                w(f"| {src} | {dst} |\n")
         w("\n## 同名卡副本统一\n\n| code | 英文名 | 表内值 | 统一为 | 相似度 | 多数派 |\n|---|---|---|---|---|---|\n")
         for c, en, old, new, sim, n in unified:
             w(f"| {c} | {en} | {old} | {new} | {sim} | {n} |\n")

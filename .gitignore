@@ -37,3 +37,4 @@ cache/
 /.zcode
 # Generated zh mirror audit report (tools/zh/audit_mirror.py)
 tools/zh/zh_mirror_audit.txt
+__pycache__/
