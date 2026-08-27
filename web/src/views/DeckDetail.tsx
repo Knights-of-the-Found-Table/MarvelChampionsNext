@@ -1,12 +1,12 @@
-// 牌组详情：ArkhamDB 式布局。左侧身份面板（色带头部 + 英雄/化身双面卡 +
-// 牌组详情清单 + 印刷能力文本），右侧牌组清单按类型分组双栏排布，每行
-// 「数量 × 缩略图 费用徽章 名称 资源图标」，名称按阵营着色。
+// 牌组详情：ArkhamDB 式布局。左侧身份面板（色带头部 + 印刷属性条 +
+// 英雄/化身双面卡 + 牌组详情清单），右侧牌组清单按类型分组双栏排布，
+// 每行「数量 × 缩略图 费用徽章 名称 资源图标」，名称按阵营着色。
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { get, allCards, CardInfo, Deck } from '../api'
 import { CardImage, useCardZoom } from '../cards'
 import { lname, lsubname, useT, useZhMap } from '../i18n'
-import { ResText, ResourceIcon } from '../components/ResourceIcon'
+import { ResourceIcon } from '../components/ResourceIcon'
 
 function useOutsideClose(active: boolean, close: () => void) {
   useEffect(() => {
@@ -35,13 +35,6 @@ interface DeckEntry {
 // an-* 阵营配色类：名称/费用徽章/色带头部共用。hero 专属卡回落为中性色。
 function aspectClass(a?: string): string {
   return `an-${a || 'hero'}`
-}
-
-// 卡牌编号：取 code 数字段的后三位（01001a → 1），packName #N 展示用。
-function cardNumber(code: string): string {
-  const digits = code.replace(/\D/g, '')
-  if (digits.length > 2) return String(Number(digits.slice(2)))
-  return digits
 }
 
 function DeckCardRow({ info, count, onPreview }: DeckEntry & { onPreview: (code: string) => void }) {
@@ -210,12 +203,9 @@ export default function DeckDetail() {
   const aeCode = aeMatch ? `${aeMatch[1]}b` : ''
   const ae = aeCode ? catalog[aeCode] : undefined
 
-  // 扩充需求含英雄本身的扩充；展开成名称清单供详情区展示。
+  // 扩充需求含英雄本身的扩充。
   const allPacks = new Set(stats.packs)
   if (hero) allPacks.add(hero.packCode)
-  const packNames = new Map<string, string>()
-  for (const e of entries) packNames.set(e.info.packCode, e.info.packName ?? e.info.packCode)
-  if (hero) packNames.set(hero.packCode, hero.packName ?? hero.packCode)
   const packCount = allPacks.size
 
   return (
@@ -257,12 +247,9 @@ export default function DeckDetail() {
                 <span className="dhp-detail-key">{t('deck.packs')}</span>
                 <strong>{packCount}</strong>
               </div>
-              <div className="muted dhp-packnames" title={[...packNames.values()].join(' · ')}>
-                {[...packNames.values()].join(' · ')}
-              </div>
               <div className="dhp-detail">
                 <span className="dhp-detail-key">{t('deck.aspects')}</span>
-                <div className="row wrap dhp-aspects">
+                <div className="dhp-aspects">
                   {ASPECT_ORDER.filter((a) => stats.byAspect.has(a)).map((a) => (
                     <span key={a} className="deck-chip">
                       <span className={`dot ${aspectClass(a)}`} />
@@ -273,20 +260,6 @@ export default function DeckDetail() {
               </div>
             </div>
           </div>
-          {(hero?.text || hero) && (
-            <div className="dhp-lower">
-              {hero?.text && (
-                <div className="dhp-text">
-                  <ResText text={hero.text.replace(/<[^>]*>/g, '')} />
-                </div>
-              )}
-              {hero && (
-                <div className="dhp-pack muted">
-                  {hero.packName ?? hero.packCode} #{cardNumber(hero.code)}
-                </div>
-              )}
-            </div>
-          )}
         </div>
         <p className="muted deck-back">
           <Link to="/decks">{t('deck.back')}</Link>
@@ -295,18 +268,6 @@ export default function DeckDetail() {
 
       <div className="deck-main">
         <h2>{deck.name}</h2>
-        <div className="row wrap deck-chips">
-          {ASPECT_ORDER.filter((a) => stats.byAspect.has(a)).map((a) => (
-            <span key={a} className="deck-chip">
-              <span className={`dot ${aspectClass(a)}`} />
-              {t(`aspect.${a}`)} ({stats.byAspect.get(a)})
-            </span>
-          ))}
-          <span className="deck-chip">{t('deck.heroStats', stats.total, entries.length)}</span>
-          <span className="deck-chip">
-            {t('deck.packs')} {packCount}
-          </span>
-        </div>
         <div className="deck-cols">
           {typeKeys.map((key) => (
             <div key={key} className="deck-group">

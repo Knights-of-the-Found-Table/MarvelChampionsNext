@@ -417,43 +417,21 @@ a.button {
   letter-spacing: 0.05em;
 }
 
-.dhp-packnames {
-  font-size: 0.78rem;
-  line-height: 1.45;
+/* 派系分布：单列纵排的阵营芯片。 */
+.dhp-aspects {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
 }
 
 .dhp-aspects .deck-chip {
   background: var(--panel-2);
 }
 
-.dhp-text {
-  white-space: pre-line;
-  font-size: 0.88rem;
-  line-height: 1.45;
-  border-left: 3px solid var(--border);
-  padding-left: 0.6rem;
-}
-
-.dhp-pack {
-  font-size: 0.85rem;
-}
-
-/* 面板底部：印刷能力文本 + 出处行。 */
-.dhp-lower {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 1rem 0.9rem;
-}
-
 /* 右侧清单：类型分组双栏流式排布。 */
 .deck-main {
   min-width: 0;
-}
-
-.deck-chips {
-  gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .deck-chip {
