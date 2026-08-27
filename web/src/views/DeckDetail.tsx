@@ -203,6 +203,13 @@ export default function DeckDetail() {
   const aeCode = aeMatch ? `${aeMatch[1]}b` : ''
   const ae = aeCode ? catalog[aeCode] : undefined
 
+  // 头部副标题是第二身份名：取化身面（b 面）的名称，猩红女巫 →
+  // 旺达·马克西莫夫；无化身面时退回英雄卡的化名（subname），与主标题
+  // 同名（如幻视）或缺席时不显示。
+  let identSub = ae ? lname(zh, ae.code, ae.name) : ''
+  if (!identSub) identSub = heroSub || ''
+  if (identSub === heroName) identSub = ''
+
   // 扩充需求含英雄本身的扩充。
   const allPacks = new Set(stats.packs)
   if (hero) allPacks.add(hero.packCode)
@@ -220,7 +227,7 @@ export default function DeckDetail() {
               {hero?.unique ? '★ ' : ''}
               {heroName}
             </strong>
-            {heroSub && <span>{heroSub}</span>}
+            {identSub && <span>{identSub}</span>}
           </div>
           <div className="row wrap dhp-stats-strip">
             {heroStats
