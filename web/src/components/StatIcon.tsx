@@ -1,85 +1,90 @@
-// 印刷属性小图标：与 ResourceIcon 同一套贴纸语言（彩色主体 + 白外描边 +
-// 硬投影），但统一用钢蓝单色——这些是数值语义不是资源语义，避免与四色
-// 资源代币混淆。六种：化解（英雄面具）/ 攻击（长剑）/ 防御（盾徽）/
-// 恢复（急救十字）/ 手牌（扇形三张）/ 生命（心形）。纯展示组件。
-const STAT_COLOR = '#93a4bb'
-const STAT_DARK = '#55647a'
+// 印刷属性小图标：按实体卡牌的图记语言手绘的内联 SVG——化解/攻击/防御/
+// 恢复共用同一个漫画式爆炸形，仅颜色不同（THW 蓝 / ATK 红 / DEF 绿 /
+// REC 金）；手牌是扇形展开的三张玩家卡背（玩家卡背印象色 #00548F）；生
+// 命复用伤害代币的黑灰泼溅形并加红点示意。纯展示组件：数字由调用方放在
+// 图标旁边，图形按 14–16px 的实际显示尺寸简化，不做印刷版的内芯纹理。
+const WHITE = '#fff'
+
+// 12 尖角的漫画爆炸形，轻微不规则（生成脚本一次性算出）。
+export const BURST =
+  'M20.0 1.7 L23.2 7.9 L28.2 5.7 L27.6 12.4 L35.8 10.9 L32.1 16.8 L36.5 20.0 L30.3 22.8 L35.8 29.1 L28.8 28.8 L28.2 34.3 L22.8 30.3 L20.0 38.3 L16.8 32.1 L11.8 34.3 L12.4 27.6 L4.2 29.2 L7.9 23.2 L3.5 20.0 L9.7 17.2 L4.2 10.8 L11.2 11.2 L11.7 5.7 L17.2 9.7 Z'
+
+const STAT_COLORS: Record<string, string | undefined> = {
+  thwart: '#0e76bc',
+  attack: '#d22b28',
+  defense: '#1ea44e',
+  recover: '#eeae27',
+}
+
+export const PLAYER_CARD_BLUE = '#00548F'
 
 function StatShapes({ stat }: { stat: string }) {
   switch (stat) {
-    case 'thwart': {
-      // 半脸英雄面具：外轮廓带两侧系带缺口，深色双目孔
-      return (
-        <>
-          <path d="M4.5 13.5q15.5-7.5 31 0l-.9 7.2q-.9 9.3-7.5 9.8l-4.4-3h-4.4l-4.4 3q-6.6-.5-7.5-9.8Z" />
-          <g fill={STAT_DARK} stroke="none">
-            <ellipse cx={13.7} cy={20.4} rx={3.6} ry={2.3} transform="rotate(-8 13.7 20.4)" />
-            <ellipse cx={26.3} cy={20.4} rx={3.6} ry={2.3} transform="rotate(8 26.3 20.4)" />
-          </g>
-        </>
-      )
-    }
-    case 'attack': {
-      // 竖直长剑转 45°：剑身 + 护手 + 握柄 + 圆剑首，深色剑脊线
-      return (
-        <g transform="rotate(45 20 20)">
-          <path d="M20 3.2 23.6 8v15.2L20 26.2l-3.6-3V8Z" />
-          <rect x={10.6} y={24.6} width={18.8} height={3.6} rx={1.7} />
-          <path d="M18.5 28.2h3v4.8h-3Z" />
-          <circle cx={20} cy={35.2} r={2.4} />
-          <path d="M21.9 8.4v12" stroke={STAT_DARK} strokeWidth={1.7} strokeLinecap="round" fill="none" />
-        </g>
-      )
-    }
-    case 'defense': {
-      // 盾徽：主体 + 深色内圈勾边
-      return (
-        <>
-          <path d="M20 3.2 33.8 8.4v9q0 12.8-13.8 19.4Q6.2 30.2 6.2 17.4v-9Z" />
-          <path
-            d="M20 8.5 29.7 12.2v5.2q0 9.1-9.7 14.6-9.7-5.5-9.7-14.6v-5.2Z"
-            fill="none"
-            stroke={STAT_DARK}
-            strokeWidth={2.1}
-          />
-        </>
-      )
-    }
+    case 'thwart':
+    case 'attack':
+    case 'defense':
     case 'recover': {
-      // 急救十字：白色十字压在圆面上
       return (
-        <>
-          <circle cx={20} cy={20} r={15.6} />
-          <path
-            d="M16.4 9.6h7.2v6.8h6.8v7.2h-6.8v6.8h-7.2v-6.8H9.6v-7.2h6.8Z"
-            fill="#fff"
-            stroke="none"
-          />
-        </>
+        <path
+          d={BURST}
+          fill={STAT_COLORS[stat]}
+          stroke={WHITE}
+          strokeWidth={4.6}
+          strokeLinejoin="round"
+          paintOrder="stroke"
+        />
       )
     }
     case 'hand': {
-      // 手牌：左右两张斜靠的暗色底卡衬托中间前卡（绘制顺序即层叠顺序）
+      // 玩家卡背扇面：左右两张斜靠、中间前卡压下；细浅框是卡背印花示意。
+      const card = ({ x, y, rot }: { x: number; y: number; rot: number }) => (
+        <g key={`${x}.${y}`} transform={`translate(${x} ${y}) rotate(${rot})`}>
+          <rect
+            x={-6.2}
+            y={-8.8}
+            width={12.4}
+            height={17.6}
+            rx={2}
+            fill={PLAYER_CARD_BLUE}
+            stroke={WHITE}
+            strokeWidth={3.6}
+            strokeLinejoin="round"
+            paintOrder="stroke"
+          />
+          <rect
+            x={-4.7}
+            y={-7.2}
+            width={9.4}
+            height={14.4}
+            rx={1}
+            fill="none"
+            stroke="#4d88bf"
+            strokeWidth={1.3}
+          />
+        </g>
+      )
       return (
         <>
-          <rect x={13.4} y={7} width={13.2} height={18.6} rx={2.3} transform="rotate(-20 20 16.3)" fill={STAT_DARK} />
-          <rect x={13.4} y={7} width={13.2} height={18.6} rx={2.3} transform="rotate(20 20 16.3)" fill={STAT_DARK} />
-          <rect x={13.4} y={10.4} width={13.2} height={18.6} rx={2.3} />
+          {card({ x: 11, y: 13.5, rot: -30 })}
+          {card({ x: 29, y: 13.5, rot: 30 })}
+          {card({ x: 20, y: 22, rot: 0 })}
         </>
       )
     }
     case 'hp': {
-      // 心形：左上一道深色高光弧
+      // 伤害代币：黑灰不规则泼溅 + 右下红色血点。
       return (
         <>
-          <path d="M20 34.8C9 27.4 5.2 20.9 5.2 15A7.7 7.7 0 0 1 20 11.2 7.7 7.7 0 0 1 34.8 15c0 5.9-3.8 12.4-14.8 19.8Z" />
           <path
-            d="M11.8 15.6q2.7-4.3 6.5-4.2"
-            stroke={STAT_DARK}
-            strokeWidth={1.9}
-            strokeLinecap="round"
-            fill="none"
+            d='M20.0 0.8 L25.0 9.5 L29.5 8.6 L29.9 17.2 L38.6 17.8 L30.7 25.7 L31.9 30.7 L24.0 29.8 L19.1 39.0 L16.4 31.4 L8.1 29.4 L10.9 25.1 L0.8 18.1 L8.7 16.1 L8.5 8.3 L16.3 9.9 Z'
+            fill="#49505c"
+            stroke={WHITE}
+            strokeWidth={4}
+            strokeLinejoin="round"
+            paintOrder="stroke"
+            transform="translate(20 19.6) scale(0.92) translate(-20 -19.6)"
           />
+          <circle cx={30.8} cy={31.4} r={4} fill="#ff5f4d" stroke={WHITE} strokeWidth={2.6} paintOrder="stroke" />
         </>
       )
     }
@@ -91,16 +96,7 @@ function StatShapes({ stat }: { stat: string }) {
 export function StatIcon({ stat, size = 14 }: { stat: string; size?: number }) {
   return (
     <svg className="res-icon" width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <g
-        fill={STAT_COLOR}
-        stroke="#fff"
-        strokeWidth={5.2}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        paintOrder="stroke"
-      >
-        <StatShapes stat={stat} />
-      </g>
+      <StatShapes stat={stat} />
     </svg>
   )
 }

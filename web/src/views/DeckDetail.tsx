@@ -237,7 +237,7 @@ export default function DeckDetail() {
               .filter(([, , v]) => v != null)
               .map(([stat, label, v]) => (
                 <span key={label} className="dhp-stat" title={label}>
-                  <StatIcon stat={stat} size={14} />
+                  <StatIcon stat={stat} size={16} />
                   {v}
                 </span>
               ))}
