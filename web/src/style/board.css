@@ -592,15 +592,12 @@
   }
 }
 
-/* 威胁代币：三角牌 + /上限 小签 */
+/* 威胁代币：三角牌，当前值/要求值直接印在三角上 */
 .threat-bar {
   position: absolute;
   left: auto;
   right: -15px;
   bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 3px;
   z-index: 4;
 }
 
@@ -609,15 +606,6 @@
   height: 40px;
   display: block;
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
-}
-
-.threat-max {
-  padding: 0 4px;
-  border-radius: 5px;
-  background: rgba(10, 9, 12, 0.88);
-  color: #ffd97a;
-  font-size: 11px;
-  font-weight: 700;
 }
 
 .threat-bar.high .stat-token {
@@ -2050,11 +2038,6 @@ body.fx-off *::after {
 .threat-bar .stat-token {
   width: 44px;
   height: 44px;
-}
-
-.threat-max {
-  border: 1px solid rgba(216, 179, 238, 0.55);
-  color: #f2e3ff;
 }
 
 .gcard.k-scheme.is-main-scheme .threat-bar {

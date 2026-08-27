@@ -25,13 +25,21 @@ export function DamageTokenArt({ gid }: { gid: string }) {
 }
 
 // 实体代币风格的数值徽章（参照桌游伤害/威胁代币）：黑边框 + 炽橙底纹 +
-// 白色斜体描边数字。hp 展示剩余生命值，threat 展示当前威胁。
-// 渐变/网点图案的 id 必须每实例唯一（同屏几十个代币共享 defs 命名空间）。
-function StatToken({ kind, value }: { kind: 'hp' | 'threat'; value: number }) {
+// 白色斜体描边数字。hp 展示剩余生命值；threat 把「当前值/要求值」整体印
+// 在三角形里（要求值缺席时只印当前值）——串越长字号越小、重心越贴近
+// 三角形的宽底。渐变/网点图案的 id 必须每实例唯一（同屏几十个代币共享
+// defs 命名空间）。
+function StatToken({ kind, value, max }: { kind: 'hp' | 'threat'; value: number; max?: number }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
   const gid = `tg-${uid}`
-  // 两位数缩小字号，避免撑出黑边。
-  const numSize = value >= 10 ? 13 : 16
+  const label = max ? `${value}/${max}` : `${value}`
+  // 两位数缩小字号，避免撑出黑边；带要求值的三角内文再按串长收缩。
+  let numSize = value >= 10 ? 13 : 16
+  let numY = kind === 'hp' ? 21 : 22.5
+  if (kind === 'threat' && max) {
+    numSize = label.length <= 3 ? 13 : label.length === 4 ? 10 : 8.2
+    numY = label.length <= 3 ? 28 : 28.6
+  }
   if (kind === 'hp') {
     return (
       <svg className="stat-token" viewBox="0 0 40 40" aria-hidden="true">
@@ -50,7 +58,7 @@ function StatToken({ kind, value }: { kind: 'hp' | 'threat'; value: number }) {
         <text
           className="stat-token-num"
           x="20"
-          y="21"
+          y={numY}
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={numSize}
@@ -92,12 +100,13 @@ function StatToken({ kind, value }: { kind: 'hp' | 'threat'; value: number }) {
       <text
         className="stat-token-num"
         x="20"
-        y="22.5"
+        y={numY}
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={numSize}
+        style={max && label.length > 3 ? { strokeWidth: 2.2 } : undefined}
       >
-        {value}
+        {label}
       </text>
     </svg>
   )
@@ -286,11 +295,10 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
           </TaggedNumber>
         ) : null}
 
-        {/* 威胁代币 */}
+        {/* 威胁代币：当前值/要求值整体印在三角形上 */}
         {card.threat !== undefined && (
           <TaggedNumber className={`threat-bar ${card.maxThreat && card.threat >= card.maxThreat - 2 ? 'high' : ''}`} label={t('stat.threat')}>
-            <StatToken kind="threat" value={card.threat} />
-            {card.maxThreat ? <span className="threat-max">/{card.maxThreat}</span> : null}
+            <StatToken kind="threat" value={card.threat} max={card.maxThreat} />
           </TaggedNumber>
         )}
 
