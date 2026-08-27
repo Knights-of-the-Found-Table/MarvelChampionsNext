@@ -284,6 +284,17 @@ export interface Deck {
   issues?: DeckIssue[]
 }
 
+// 身份卡上「所选派系之外也可加入……」骑手的结构化形式（服务端
+// data.AspectException 的镜像）；匹配只读这些字段，绝不解析卡面文本。
+export interface AspectException {
+  trait?: string
+  cardType?: string
+  eventTraits?: string[]
+  energyEvents?: boolean
+  total?: number
+  titles?: number
+}
+
 export interface CardInfo {
   code: string
   name: string
@@ -293,11 +304,14 @@ export interface CardInfo {
   type: string
   category: string
   aspect?: string
+  cardSet?: string
   cost?: number | null
   unique: boolean
   traits?: string[]
   resources?: string[]
   text?: string
+  quantity?: number
+  implemented?: boolean
   // Printed hero/ally stats (deck-detail hero panel); absent when unprinted.
   hp?: number
   attack?: number
@@ -305,6 +319,22 @@ export interface CardInfo {
   defense?: number
   recover?: number
   handSize?: number
+  // 组牌骑手（印在化身面上）：组牌器据此驱动派系选择器、例外卡放行与
+  // 复制上限，与 engine.ValidateDeck 同源。
+  aspectMode?: string
+  aspectException?: AspectException
+  uniqueAll?: boolean
+}
+
+// GET /marvel/heroes 的一行：一个可选英雄身份。
+export interface HeroInfo {
+  base: string
+  heroCode: string
+  alterEgoCode: string
+  name: string
+  alterEgoName?: string
+  packCode: string
+  implemented: boolean
 }
 
 let cardsPromise: Promise<CardInfo[]> | null = null

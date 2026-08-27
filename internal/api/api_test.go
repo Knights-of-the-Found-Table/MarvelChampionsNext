@@ -643,3 +643,105 @@ func TestLobbyFlow(t *testing.T) {
 		t.Fatalf("spectator view: %d %v", resp.StatusCode, body["question"])
 	}
 }
+
+// TestValidateDeckEndpoint pins the deck builder's live-validation endpoint:
+// same engine.ValidateDeck rules as the stored-deck projection, structured
+// issues in, no persistence.
+func TestValidateDeckEndpoint(t *testing.T) {
+	ts, _ := newTestServer(t)
+	base := ts.URL
+
+	_, b := doJSON(t, "POST", base+"/api/v1/register", "", credentials{Username: "validator", Password: "secret123"})
+	token := b["token"].(string)
+
+	// a rulebook-legal deck validates clean
+	resp, body := doJSON(t, "POST", base+"/api/v1/marvel/decks/validate", token, map[string]any{
+		"investigatorCode": "01001a",
+		"slots":            legalSpideyDeck(),
+	})
+	if resp.StatusCode != http.StatusOK || body["valid"] != true {
+		t.Fatalf("legal deck should validate: %d %v", resp.StatusCode, body)
+	}
+	if issues, ok := body["issues"].([]any); !ok || len(issues) != 0 {
+		t.Fatalf("legal deck should have no issues: %v", body["issues"])
+	}
+
+	// a stub deck reports the structured issues the UI renders
+	resp, body = doJSON(t, "POST", base+"/api/v1/marvel/decks/validate", token, map[string]any{
+		"investigatorCode": "01001a",
+		"slots":            map[string]int{"01088": 3},
+	})
+	if resp.StatusCode != http.StatusOK || body["valid"] != false {
+		t.Fatalf("stub deck should not validate: %d %v", resp.StatusCode, body)
+	}
+	issues, _ := body["issues"].([]any)
+	if len(issues) == 0 {
+		t.Fatal("stub deck should carry issues")
+	}
+	found := map[string]bool{}
+	for _, raw := range issues {
+		is := raw.(map[string]any)
+		found[is["key"].(string)] = true
+	}
+	if !found["setMissing"] || !found["tooSmall"] {
+		t.Fatalf("expected setMissing+tooSmall issues: %v", issues)
+	}
+
+	// an unknown identity is reported, not a 500
+	resp, body = doJSON(t, "POST", base+"/api/v1/marvel/decks/validate", token, map[string]any{
+		"investigatorCode": "99999a",
+		"slots":            legalSpideyDeck(),
+	})
+	if resp.StatusCode != http.StatusOK || body["valid"] != false {
+		t.Fatalf("unknown identity: %d %v", resp.StatusCode, body)
+	}
+
+	// the endpoint requires auth like the other deck endpoints
+	resp, _ = doJSON(t, "POST", base+"/api/v1/marvel/decks/validate", "", map[string]any{})
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated validate should 401: %d", resp.StatusCode)
+	}
+}
+
+// TestCardsCatalogRiderFields pins the structured deckbuilding-rider fields
+// the builder UI consumes from /marvel/cards (Spider-Woman's alter-ego side,
+// Gamora's exception with its cap, plain Spider-Man carries none).
+func TestCardsCatalogRiderFields(t *testing.T) {
+	ts, _ := newTestServer(t)
+
+	resp, err := http.Get(ts.URL + "/api/v1/marvel/cards")
+	if err != nil {
+		t.Fatalf("cards: %v", err)
+	}
+	var cards []map[string]any
+	_ = json.NewDecoder(resp.Body).Decode(&cards)
+	resp.Body.Close()
+
+	byCode := map[string]map[string]any{}
+	for _, c := range cards {
+		byCode[c["code"].(string)] = c
+	}
+
+	sw := byCode["04031b"]
+	if sw == nil || sw["aspectMode"] != "two_equal" {
+		t.Fatalf("spider-woman alter ego aspectMode: %v", sw["aspectMode"])
+	}
+	gamora := byCode["18001b"]
+	if gamora == nil {
+		t.Fatal("gamora alter ego missing from catalog")
+	}
+	ex, ok := gamora["aspectException"].(map[string]any)
+	if !ok || ex["cardType"] != "event" || ex["total"].(float64) != 6 {
+		t.Fatalf("gamora aspectException: %v", gamora["aspectException"])
+	}
+	spidey := byCode["01001b"]
+	if spidey == nil {
+		t.Fatal("spider-man alter ego missing from catalog")
+	}
+	if _, has := spidey["aspectMode"]; has {
+		t.Fatal("plain alter ego should omit aspectMode")
+	}
+	if _, has := spidey["aspectException"]; has {
+		t.Fatal("plain alter ego should omit aspectException")
+	}
+}

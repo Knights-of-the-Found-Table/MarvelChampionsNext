@@ -86,6 +86,9 @@ export default function Decks() {
         <button type="button" disabled={busy} onClick={() => fileRef.current?.click()}>
           {t('decks.importFile')}
         </button>
+        <button type="button" className="primary" onClick={() => navigate('/decks/new')}>
+          {t('decks.create')}
+        </button>
         <input
           ref={fileRef}
           type="file"

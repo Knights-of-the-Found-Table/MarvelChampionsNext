@@ -6,6 +6,8 @@ import App from './App'
 import Login from './views/Login'
 import Decks from './views/Decks'
 import DeckDetail from './views/DeckDetail'
+import HeroPicker from './views/HeroPicker'
+import DeckBuilder from './views/DeckBuilder'
 import NewGame from './views/NewGame'
 import Games from './views/Games'
 import GamePage from './views/GamePage'
@@ -29,6 +31,8 @@ const router = createBrowserRouter([
       { index: true, element: <RequireAuth><Games /></RequireAuth> },
       { path: 'login', element: <Login /> },
       { path: 'decks', element: <RequireAuth><Decks /></RequireAuth> },
+      { path: 'decks/new', element: <RequireAuth><HeroPicker /></RequireAuth> },
+      { path: 'decks/new/build', element: <RequireAuth><DeckBuilder /></RequireAuth> },
       { path: 'decks/:id', element: <RequireAuth><DeckDetail /></RequireAuth> },
       { path: 'new', element: <RequireAuth><NewGame /></RequireAuth> },
       { path: 'games/:id', element: <RequireAuth><GamePage /></RequireAuth> },

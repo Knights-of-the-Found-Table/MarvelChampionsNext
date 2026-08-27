@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
+	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/store"
 )
 
@@ -39,6 +40,12 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 		Defense  *int `json:"defense,omitempty"`
 		Recover  *int `json:"recover,omitempty"`
 		HandSize *int `json:"handSize,omitempty"`
+
+		// 组牌骑手的结构化字段（印在化身面上），组牌器据此驱动派系选择
+		// 器、例外卡放行与复制上限——与 engine.ValidateDeck 同源。
+		AspectMode      string                `json:"aspectMode,omitempty"`
+		AspectException *data.AspectException `json:"aspectException,omitempty"`
+		UniqueAll       bool                  `json:"uniqueAll,omitempty"`
 	}
 	out := make([]cardOut, 0, len(all))
 	for _, def := range all {
@@ -51,6 +58,9 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 			Implemented: engine.Implemented(def.Code),
 			HP:          def.HP, Attack: def.Attack, Thwart: def.Thwart,
 			Defense: def.Defense, Recover: def.Recover, HandSize: def.HandSize,
+			AspectMode:      def.AspectMode,
+			AspectException: def.AspectException,
+			UniqueAll:       def.UniqueAll,
 		})
 	}
 	writeJSON(w, http.StatusOK, out)
@@ -268,4 +278,20 @@ func (s *Server) handleDeleteDeck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleValidateDeck 是组牌器的实时校验端点：与导入共用 engine.ValidateDeck
+// 这一份规则实现，前端不必在客户端复刻规则逻辑。校验是建议性的——返回
+// 问题清单，不阻止保存。
+func (s *Server) handleValidateDeck(w http.ResponseWriter, r *http.Request) {
+	var req importDeckRequest
+	if err := jsonDecode(r, &req); err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+	issues := engine.ValidateDeck(req.InvestigatorCode, req.Slots)
+	if issues == nil {
+		issues = []engine.DeckIssue{}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"valid": len(issues) == 0, "issues": issues})
 }

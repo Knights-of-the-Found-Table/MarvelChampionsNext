@@ -45,6 +45,7 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("GET /api/v1/marvel/decks", s.auth(s.handleListDecks))
 	mux.HandleFunc("GET /api/v1/marvel/decks/{id}", s.auth(s.handleGetDeck))
 	mux.HandleFunc("POST /api/v1/marvel/decks", s.auth(s.handleImportDeck))
+	mux.HandleFunc("POST /api/v1/marvel/decks/validate", s.auth(s.handleValidateDeck))
 	mux.HandleFunc("DELETE /api/v1/marvel/decks/{id}", s.auth(s.handleDeleteDeck))
 
 	mux.HandleFunc("GET /api/v1/marvel/games", s.auth(s.handleListGames))
