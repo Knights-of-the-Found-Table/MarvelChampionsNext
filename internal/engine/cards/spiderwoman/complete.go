@@ -60,7 +60,7 @@ func registerSW() {
 					continue
 				}
 				cost := *def.Cost
-				picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (free)"), Kind: engine.ChoicePlay, CardCode: def.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("c.nameFree", def), Kind: engine.ChoicePlay, CardCode: def.Code}.
 					Msgs(engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}},
 						engine.MillEncounter{N: cost}))
 			}
@@ -142,7 +142,7 @@ func registerSW() {
 					}
 					var picks []engine.Choice
 					for _, c := range p.Deck[:3] {
-						picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.TopDeckPick{Player: p.ID, CardID: c.ID}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID,
@@ -482,9 +482,9 @@ func hexBoltTier(g *engine.Game, ev *engine.EventCard, p *engine.Player, boost i
 		var picks []engine.Choice
 		for _, q := range g.Players {
 			picks = append(picks,
-				engine.Choice{Label: engine.S("Tough — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+				engine.Choice{Label: engine.Tf("c.toughDash", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 					Msgs(engine.ToughEntity{Target: q.ID}),
-				engine.Choice{Label: engine.S("Stun — " + q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+				engine.Choice{Label: engine.Tf("c.stunDash", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 					Msgs(engine.StunEntity{Target: q.ID}))
 		}
 		for _, id := range cardutil.SortedEnemyIDs(g) {

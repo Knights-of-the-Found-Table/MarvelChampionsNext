@@ -119,7 +119,7 @@ func registerSignatures() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "event" && hasEnergy(c) && len(p.SenseDeck) < 3 {
 					card := c
-					ch = append(ch, engine.Choice{Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: card.ID}))
+					ch = append(ch, engine.Choice{Label: engine.Tf("c.tuckName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: card.ID}))
 				}
 			}
 			ch = append(ch, engine.Choice{ID: "draw", Label: engine.Tf("c.draw1Card"), Kind: engine.ChoiceLabel}.Msgs(engine.DrawCards{Player: p.ID, N: 1}))
@@ -138,11 +138,11 @@ func registerSignatures() {
 		var ch []engine.Choice
 		for _, c := range p.Discard {
 			if (c.Def().Type == "event" || c.Def().Type == "resource") && hasEnergy(c) && len(p.SenseDeck) < 3 {
-				ch = append(ch, engine.Choice{Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
+				ch = append(ch, engine.Choice{Label: engine.Tf("c.tuckName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 			}
 		}
 		for _, c := range p.SenseDeck {
-			ch = append(ch, engine.Choice{Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.SideDeckToHand{Player: p.ID, CardID: c.ID}))
+			ch = append(ch, engine.Choice{Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.SideDeckToHand{Player: p.ID, CardID: c.ID}))
 		}
 		if len(ch) == 0 {
 			return nil

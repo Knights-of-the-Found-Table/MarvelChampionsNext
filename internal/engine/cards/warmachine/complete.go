@@ -51,10 +51,10 @@ func registerWarMachine() {
 				if def.Type == "upgrade" && def.HasTrait("tech") && !seen[c.Code] {
 					seen[c.Code] = true
 					if _, inDeck := p.Deck.Find(c.ID); inDeck {
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameDeck", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 					} else {
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameDiscard", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 				}
@@ -252,7 +252,7 @@ func registerWarMachine() {
 			for _, c := range p.Discard {
 				def := c.Def()
 				if def.Type == "event" && def.Aspect == "leadership" {
-					picks = append(picks, engine.Choice{Label: engine.S("Attach " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.attachName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.SupportStoreCard{ID: e.EID(), Card: c}))
 				}
 			}
@@ -357,7 +357,7 @@ func registerWarMachine() {
 					for _, q := range g.Players {
 						for _, id := range q.Allies {
 							if a := g.Allies[id]; a != nil && a.Exhausted {
-								picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+								picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 									Msgs(engine.AddEntityCounter{ID: self, N: -1}, engine.ReadyEntity{ID: a.ID}))
 							}
 						}
@@ -389,7 +389,7 @@ func registerWarMachine() {
 				}
 				for _, t := range hero.Traits {
 					if def.HasTrait(t) {
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}}))
 						break
 					}
@@ -423,7 +423,7 @@ func registerWarMachine() {
 				if cost > 0 {
 					msgs = append(msgs, engine.ThwartScheme{Scheme: mainSchemeID(g), N: cost, Source: p.ID})
 				}
-				picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceCard, CardCode: a.Code}.
 					Msgs(msgs...))
 			}
 			if len(picks) == 0 {
@@ -453,7 +453,7 @@ func registerWarMachine() {
 						func(g *engine.Game, tgt engine.Entity) (int, []engine.Message) { return cost, nil })(
 						g, &engine.EventCard{Code: "23019", Owner: p.ID})...)
 				}
-				picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceCard, CardCode: a.Code}.
 					Msgs(msgs...))
 			}
 			if len(picks) == 0 {
@@ -493,7 +493,7 @@ func registerWarMachine() {
 			for _, c := range p.Deck {
 				def := c.Def()
 				if def.Type == "upgrade" && def.HasTrait("tech") {
-					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.UpgradeEnterPlay{Player: p.ID, Card: c},
 							engine.ShufflePlayerDeck{Player: p.ID}))
 				}
@@ -558,7 +558,7 @@ func registerWarMachine() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "justice" {
-							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -592,7 +592,7 @@ func registerWarMachine() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, ATK: 1}))
 				}
 			}
@@ -633,7 +633,7 @@ func registerNemesis() {
 			var picks []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}

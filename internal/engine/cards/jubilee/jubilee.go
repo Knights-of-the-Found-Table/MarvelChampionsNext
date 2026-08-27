@@ -113,13 +113,13 @@ func registerJubileeSignatures() {
 			var choices []engine.Choice
 			for _, c := range p.Deck {
 				if c.Def().HasTrait("item") {
-					choices = append(choices, engine.Choice{Label: engine.S("Put " + c.Def().Name + " into play"), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.Tf("c.putIntoPlay", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}}))
 				}
 			}
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("item") {
-					choices = append(choices, engine.Choice{Label: engine.S("Put " + c.Def().Name + " into play"), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.Tf("c.putIntoPlay", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}, engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}}))
 				}
 			}

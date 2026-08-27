@@ -198,7 +198,7 @@ func registerAoaCampaign() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, ATK: 1, THW: 1, MaxHP: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{

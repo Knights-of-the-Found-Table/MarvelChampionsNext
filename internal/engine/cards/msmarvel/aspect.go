@@ -81,7 +81,7 @@ func registerNova() {
 							continue
 						}
 						out = append(out, engine.Choice{
-							Label: engine.S("Spend " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.spendName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 							engine.DamageEntity{Target: atk, Damage: 2, Source: p.ID},

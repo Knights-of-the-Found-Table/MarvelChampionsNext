@@ -836,7 +836,7 @@ func registerRemainingEncounterCards() {
 			picks = append(picks, engine.Choice{Label: engine.Tf("c.takeDamage1PerUpgrade", n), Kind: engine.ChoiceLabel}.
 				Msgs(engine.DamageEntity{Target: p.ID, Damage: n, Source: t.ID}))
 			for _, id := range p.Upgrades {
-				picks = append(picks, engine.Choice{Label: engine.S("Discard " + g.Upgrades[id].EDef().Name), Kind: engine.ChoiceCard, CardCode: g.Upgrades[id].Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", g.Upgrades[id]), Kind: engine.ChoiceCard, CardCode: g.Upgrades[id].Code}.
 					Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.electricWhipAttack"), picks...)}}

@@ -125,7 +125,7 @@ func registerDominoCards() {
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					choices = append(choices, engine.Choice{
-						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+						Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 2 * mental, Source: p.ID}))
 				}
 				msgs = append(msgs, engine.AskQuestion{Player: p.ID, Question: engine.Ask(
@@ -153,7 +153,7 @@ func registerDominoCards() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+							Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 2 * wild, Source: p.ID}))
 					}
 					wildChoices = append(wildChoices, engine.Choice{ID: "w-thw", Label: engine.Tf("c.wildIconsRemoveThreat", 2*wild), Kind: engine.ChoiceLabel}.
@@ -418,7 +418,7 @@ func registerDominoCards() {
 			return []engine.Message{engine.AskQuestion{
 				Player: p.ID,
 				Question: engine.Ask(engine.Tf("c.memoriesOfArmageddonExhaustYourIdentityInAlterEgoFormToDisca"),
-					engine.Choice{ID: "discard", Label: engine.S("Exhaust " + p.AlterEgoDef().Name + " → discard"), Kind: engine.ChoiceLabel}.
+					engine.Choice{ID: "discard", Label: engine.Tf("c.exhaustAEDiscard", p.AlterEgoDef()), Kind: engine.ChoiceLabel}.
 						Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}),
 					engine.Choice{ID: "keep", Label: engine.Tf("c.keepItInPlay"), Kind: engine.ChoicePass}),
 			}}

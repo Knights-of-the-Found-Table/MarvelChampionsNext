@@ -118,7 +118,7 @@ func registerSignatures() {
 				discardTucked(p, i)
 				n = 9
 			}
-			choices = append(choices, engine.Choice{Label: engine.S(enemy.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
+			choices = append(choices, engine.Choice{Label: engine.Tf("m.cardName", enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode()}.
 				Msgs(engine.DamageEntity{Target: id, Damage: n, Source: p.ID}))
 		}
 		if len(choices) == 0 {
@@ -150,7 +150,7 @@ func registerSignatures() {
 		n := min(2, len(g.EncounterDeck))
 		var choices []engine.Choice
 		for _, c := range g.EncounterDeck[:n] {
-			choices = append(choices, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+			choices = append(choices, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 				Msgs(engine.DiscardEncounterCard{Card: c}))
 		}
 		if len(choices) == 0 {
@@ -169,7 +169,7 @@ func registerSignatures() {
 				var choices []engine.Choice
 				if len(g.EncounterDeck) > 0 {
 					c := g.EncounterDeck[0]
-					choices = append(choices, engine.Choice{ID: "tuck", Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{ID: "tuck", Label: engine.Tf("c.tuckName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.DiscardEncounterCard{Card: c}))
 				}
 				choices = append(choices, engine.Choice{ID: "heal", Label: engine.Tf("c.healForTuckedCards"), Kind: engine.ChoiceLabel}.

@@ -105,7 +105,7 @@ func registerNebula() {
 				}
 				var msgs []engine.Message
 				msgs = append(msgs, sp(g, u)...)
-				picks = append(picks, engine.Choice{Label: engine.S(u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 					Msgs(msgs...))
 			}
 			if len(picks) == 0 {
@@ -158,7 +158,7 @@ func registerNebula() {
 			for _, c := range p.Discard {
 				def := c.Def()
 				if def.Type == "upgrade" && def.HasTrait("technique") {
-					shufflePicks = append(shufflePicks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					shufflePicks = append(shufflePicks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -201,7 +201,7 @@ func registerNebula() {
 				}
 				var msgs []engine.Message
 				msgs = append(msgs, sp(g, u)...)
-				picks = append(picks, engine.Choice{Label: engine.S(u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 					Msgs(msgs...))
 			}
 			if len(picks) == 0 {
@@ -361,7 +361,7 @@ func registerNebula() {
 				var subs []engine.Choice
 				for _, id := range p.Upgrades {
 					if u := g.Upgrades[id]; u != nil && u.EDef().HasTrait("technique") {
-						subs = append(subs, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+						subs = append(subs, engine.Choice{Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 							Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 					}
 				}
@@ -390,7 +390,7 @@ func registerNebula() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil && a.EDef().HasTrait("guardian") {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, ATK: 2}))
 				}
 			}
@@ -440,7 +440,7 @@ func registerNebula() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "protection" {
-							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -463,12 +463,12 @@ func registerNebula() {
 				return nil
 			}
 			var picks []engine.Choice
-			picks = append(picks, engine.Choice{Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID}.
+			picks = append(picks, engine.Choice{Label: engine.Tf("c.nameIdentity", p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID}.
 				Msgs(engine.AttachUpgrade{ID: e.EID(), Target: p.ID, MaxHP: 1, GrantTrait: "guardian"}))
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, MaxHP: 1, GrantTrait: "guardian"}))
 				}
 			}
@@ -530,7 +530,7 @@ func registerNemesis() {
 			var picks []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -579,7 +579,7 @@ func registerNemesis() {
 					var picks []engine.Choice
 					for _, id := range p.Upgrades {
 						if u := g.Upgrades[id]; u != nil {
-							picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 								Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 						}
 					}

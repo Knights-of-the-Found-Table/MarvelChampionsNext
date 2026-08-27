@@ -160,9 +160,9 @@ type Behavior struct {
 
 // ResourceAbility describes an exhaust-to-generate-resources ability.
 type ResourceAbility struct {
-	Icon         string // generated icon: energy | physical | mental | wild
-	HeroOnly     bool   // "Hero Resource": hero form required
-	EventOnly    bool   // only usable when paying for an event
+	Icon      string // generated icon: energy | physical | mental | wild
+	HeroOnly  bool   // "Hero Resource": hero form required
+	EventOnly bool   // only usable when paying for an event
 	// UsesCounters consumes one counter from the source per use.
 	UsesCounters bool
 	// NoExhaust skips the source exhaustion (identity counter resources,

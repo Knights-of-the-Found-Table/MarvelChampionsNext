@@ -156,7 +156,7 @@ func senseAttach(enemies, schemes bool) func(g *engine.Game, e engine.Entity) []
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
@@ -241,7 +241,7 @@ func registerNemesis() {
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil && s.EDef().HasTrait("persona") {
 					discard = append(discard, engine.Choice{
-						Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code,
+						Label: engine.Tf("m.discardCard", s), Kind: engine.ChoiceCard, CardCode: s.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -321,14 +321,14 @@ func registerNemesis() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					rfg = append(rfg, engine.Choice{
-						Label: engine.S("Remove " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code,
+						Label: engine.Tf("c.removeName", a), Kind: engine.ChoiceCard, CardCode: a.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			for _, id := range p.Supports {
 				if sp := g.Supports[id]; sp != nil && sp.EDef().HasTrait("persona") {
 					rfg = append(rfg, engine.Choice{
-						Label: engine.S("Remove " + sp.EDef().Name), Kind: engine.ChoiceCard, CardCode: sp.Code,
+						Label: engine.Tf("c.removeName", sp), Kind: engine.ChoiceCard, CardCode: sp.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}

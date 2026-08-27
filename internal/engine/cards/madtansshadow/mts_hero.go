@@ -76,7 +76,7 @@ func registerMTSHeroCards() {
 				c := p.Deck[i]
 				if c.Def().Type == "event" {
 					picks = append(picks, engine.Choice{
-						Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}

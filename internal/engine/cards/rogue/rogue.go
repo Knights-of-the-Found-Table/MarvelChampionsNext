@@ -337,7 +337,7 @@ func registerGoinRogue() {
 					msgs = append(msgs, engine.DrawCards{Player: pid, N: 1})
 				}
 				ch := engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(msgs...)
 				if kind == "villain" {
 					confuse := cardutil.EnemyChoices(g, 0, pid, func(t engine.EntityID) []engine.Message {
@@ -496,7 +496,7 @@ func registerSuperpowerAdaptation() {
 				}
 				seen[c.Code] = true
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Take " + def.Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.takeName", def), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.RecycleFromDiscard{Player: pid, From: owner.ID, CardID: c.ID}))
 			}
 			if len(choices) == 0 {

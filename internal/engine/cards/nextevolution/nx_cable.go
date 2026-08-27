@@ -62,7 +62,7 @@ func registerCableCards() {
 			for i := 0; i < x && i < len(g.EncounterDeck); i++ {
 				c := g.EncounterDeck[i]
 				choices = append(choices, engine.Choice{
-					ID: fmt.Sprintf("drop-%d", i), Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceLabel,
+					ID: fmt.Sprintf("drop-%d", i), Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.EncounterTakeCard{CardID: c.ID}))
 			}
 			choices = append(choices, cardutil.Skip())
@@ -172,7 +172,7 @@ func registerCableCards() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+							Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: p.ID}))
 					}
 					return []engine.Message{

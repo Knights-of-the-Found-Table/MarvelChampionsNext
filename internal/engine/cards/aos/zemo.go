@@ -1,8 +1,6 @@
 package aos
 
 import (
-	"strconv"
-
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/cardutil"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/data"
@@ -192,7 +190,7 @@ func registerZemo() {
 						n = c
 					}
 					discard = append(discard, engine.Choice{
-						Label: engine.S("Discard " + a.EDef().Name + " — remove " + strconv.Itoa(n) + " secrets"), Kind: engine.ChoiceTarget, SourceID: aid,
+						Label: engine.Tf("c.discardRemoveSecrets", a, n), Kind: engine.ChoiceTarget, SourceID: aid,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: aid}))
 				}
 			}
@@ -203,7 +201,7 @@ func registerZemo() {
 						n = c
 					}
 					discard = append(discard, engine.Choice{
-						Label: engine.S("Discard " + s.EDef().Name + " — remove " + strconv.Itoa(n) + " secrets"), Kind: engine.ChoiceTarget, SourceID: sid,
+						Label: engine.Tf("c.discardRemoveSecrets", s, n), Kind: engine.ChoiceTarget, SourceID: sid,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: sid}))
 				}
 			}

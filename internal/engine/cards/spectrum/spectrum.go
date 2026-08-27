@@ -75,7 +75,7 @@ func formChoices(g *engine.Game, p *engine.Player, prompt string, includeCurrent
 		if !includeCurrent && code == current {
 			continue
 		}
-		choices = append(choices, engine.Choice{Label: engine.S(engine.DB.MustLookup(code).Name), Kind: engine.ChoiceCard, CardCode: code}.
+		choices = append(choices, engine.Choice{Label: engine.Tf("m.cardName", engine.DB.MustLookup(code)), Kind: engine.ChoiceCard, CardCode: code}.
 			Msgs(engine.AddEntityCounter{ID: p.ID, N: formSignal(code)}))
 	}
 	if len(choices) == 0 {

@@ -91,7 +91,7 @@ func registerVenom() {
 				def := c.Def()
 				if def.Type == "upgrade" && def.HasTrait("weapon") && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 							engine.ShufflePlayerDeck{Player: p.ID}))
 				}
@@ -180,13 +180,13 @@ func registerVenom() {
 							}
 						}
 						if len(msgs) > 0 {
-							opts = append(opts, engine.Choice{Label: engine.S("Splash 1 — " + q.Name + "'s minions"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							opts = append(opts, engine.Choice{Label: engine.Tf("c.splashMinions", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(msgs...))
 						}
 					}
 					for _, sid := range g.Schemes() {
 						s := g.Entity(sid)
-						opts = append(opts, engine.Choice{Label: engine.S("2 threat — " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
+						opts = append(opts, engine.Choice{Label: engine.Tf("c.twoThreatName", s), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
 							Msgs(engine.ThwartScheme{Scheme: sid, N: 2, Source: p.ID}))
 					}
 					if len(opts) == 0 {
@@ -418,7 +418,7 @@ func registerVenom() {
 			var weapons []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.EDef().HasTrait("weapon") && !u.Exhausted {
-					weapons = append(weapons, engine.Choice{Label: engine.S("Exhaust " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+					weapons = append(weapons, engine.Choice{Label: engine.Tf("c.exhaustName", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.ExhaustEntity{ID: id}))
 				}
 			}
@@ -472,7 +472,7 @@ func registerVenom() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && a.Damage > 0 && a.EDef().HasTrait("guardian") {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ToughEntity{Target: a.ID}))
 					}
 				}
@@ -500,7 +500,7 @@ func registerVenom() {
 					var picks []engine.Choice
 					for _, q := range g.Players {
 						if q.Damage > 0 {
-							picks = append(picks, engine.Choice{Label: engine.S(q.Name + " (alter-ego)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("c.nameAlterEgo", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(engine.HealEntity{Target: q.ID, N: 1}))
 						}
 					}

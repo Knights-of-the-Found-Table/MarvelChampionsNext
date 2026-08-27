@@ -79,7 +79,7 @@ func registerSignatures() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 			}
@@ -129,7 +129,7 @@ func registerSignatures() {
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					choices = append(choices, engine.Choice{
-						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+						Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: s.ECode(),
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 2, Source: pid}))
 				}
@@ -205,7 +205,7 @@ func registerSignatures() {
 							msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.shuffleInName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {

@@ -176,7 +176,7 @@ func registerNova() {
 				def := c.Def()
 				if def.Type == "event" && def.Aspect == "aggression" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}

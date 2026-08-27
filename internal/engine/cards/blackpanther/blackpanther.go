@@ -82,7 +82,7 @@ func specialQuestion(g *engine.Game, p *engine.Player) *engine.Question {
 	var choices []engine.Choice
 	for _, u := range ups {
 		choices = append(choices, engine.Choice{
-			Label: engine.S(u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
+			Label: engine.Tf("m.cardName", u), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
 		}.Msgs(specialExecute(g, u.ID)...))
 	}
 	if len(choices) == 0 {
@@ -150,7 +150,7 @@ func registerBlackPanther() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Play " + def.Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.playCard", def), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.UpgradeEnterPlay{Player: pl.ID, Card: c},
 							engine.ShufflePlayerDeck{Player: pl.ID},
@@ -271,7 +271,7 @@ func registerOnTheProwl() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				ch := engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid})
 				if special != nil {
@@ -395,7 +395,7 @@ func registerQueenRamonda() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S(q.Name + " (heal " + itoa(rec) + ")"), Kind: engine.ChoiceTarget, SourceID: q.ID,
+							Label: engine.Tf("c.nameHealN", q.Name, rec), Kind: engine.ChoiceTarget, SourceID: q.ID,
 						}.Msgs(engine.HealEntity{Target: q.ID, N: rec}))
 					}
 					if len(choices) == 0 {
@@ -447,7 +447,7 @@ func registerAjaAdanna() {
 						}
 						seen[c.Code] = true
 						choices = append(choices, engine.Choice{
-							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.ShuffleIntoDeck{Player: pl.ID, CardID: c.ID}))
 					}
 					if len(choices) == 0 {
@@ -482,7 +482,7 @@ func registerKimoyoBeads() {
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					enemy := g.Entity(id)
 					discardChoices = append(discardChoices, engine.Choice{
-						Label: engine.S("Discard → confuse " + enemy.EDef().Name), Kind: engine.ChoiceTarget,
+						Label: engine.Tf("c.discardConfuse", enemy), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: enemy.ECode(),
 					}.Msgs(
 						engine.DiscardControlled{Player: u.Owner, ID: u.ID},

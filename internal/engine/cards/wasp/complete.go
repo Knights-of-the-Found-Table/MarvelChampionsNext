@@ -352,7 +352,7 @@ func registerWasp() {
 			var avengers []engine.Choice
 			for _, q := range g.Players {
 				if !q.Exhausted && g.EntityHasTrait(q.ID, "avenger") {
-					avengers = append(avengers, engine.Choice{Label: engine.S("Exhaust " + q.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					avengers = append(avengers, engine.Choice{Label: engine.Tf("c.exhaustIdentity", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 						Msgs(engine.ExhaustEntity{ID: q.ID}))
 				}
 			}
@@ -360,7 +360,7 @@ func registerWasp() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && !a.Exhausted && a.EDef().HasTrait("avenger") {
-						avengers = append(avengers, engine.Choice{Label: engine.S("Exhaust " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
+						avengers = append(avengers, engine.Choice{Label: engine.Tf("c.exhaustName", a), Kind: engine.ChoiceCard, CardCode: a.Code}.
 							Msgs(engine.ExhaustEntity{ID: id}))
 					}
 				}

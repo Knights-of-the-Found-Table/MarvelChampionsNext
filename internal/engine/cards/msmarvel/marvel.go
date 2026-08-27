@@ -39,7 +39,7 @@ func registerMsMarvel() {
 				Player: p.ID,
 				Question: engine.Ask(engine.Tf("c.morphogeneticsExhaustMsMarvelToReturnToYourHand", def.Name),
 					engine.Choice{
-						ID: "return", Label: engine.S("Exhaust Ms. Marvel — return " + def.Name + " to hand"),
+						ID: "return", Label: engine.Tf("c.msMarvelExhaustReturn", def),
 						Kind: engine.ChoiceLabel,
 					}.Msgs(
 						engine.ExhaustEntity{ID: p.ID},
@@ -216,7 +216,7 @@ func registerObligation() {
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil && isPersonaSupport(s) {
 					supportChoices = append(supportChoices, engine.Choice{
-						Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code,
+						Label: engine.Tf("m.discardCard", s), Kind: engine.ChoiceCard, CardCode: s.Code,
 					}.Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}

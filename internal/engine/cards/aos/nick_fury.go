@@ -272,7 +272,7 @@ func registerNickSignatures() {
 					}
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Remove 2 threat from " + s.EDef().Name + " and use the suit rider"),
+					Label: engine.Tf("c.removeThreatSuit", s),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(base...))
 			}

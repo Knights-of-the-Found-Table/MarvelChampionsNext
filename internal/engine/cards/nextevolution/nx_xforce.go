@@ -212,13 +212,13 @@ func registerXForceCards() {
 					for _, id := range g.Schemes() {
 						sc := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							ID: "thw-" + id.String(), Label: engine.S("Remove 1 threat from " + sc.EDef().Name), Kind: engine.ChoiceTarget,
+							ID: "thw-" + id.String(), Label: engine.Tf("c.removeThreatFrom", 1, sc), Kind: engine.ChoiceTarget,
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID}))
 					}
 					for _, id := range cardutil.SortedEnemyIDs(g) {
 						enemy := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							ID: "dmg-" + id.String(), Label: engine.S("Deal 1 damage to " + enemy.EDef().Name), Kind: engine.ChoiceTarget,
+							ID: "dmg-" + id.String(), Label: engine.Tf("c.deal1DamageTo", enemy), Kind: engine.ChoiceTarget,
 						}.Msgs(engine.DamageEntity{Target: id, Damage: 1, Source: p.ID}))
 					}
 					for _, id := range p.Allies {
@@ -420,7 +420,7 @@ func registerXForceCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, ATK: 1}))
 			}
@@ -567,7 +567,7 @@ func registerXForceCards() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
@@ -599,7 +599,7 @@ func registerXForceCards() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.DiscardControlled{Player: u.Owner, ID: u.ID},
 					engine.ThwartScheme{Scheme: id, N: m.N, Source: p.ID}))
@@ -628,7 +628,7 @@ func registerXForceCards() {
 				return nil
 			}
 			return []engine.Ability{{
-				Label: engine.S("Atlas Bear — peek and fetch " + top.Def().Name), Type: engine.AbilityAction,
+				Label: engine.Tf("c.atlasBearFetch", top), Type: engine.AbilityAction,
 				Exhaust: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]

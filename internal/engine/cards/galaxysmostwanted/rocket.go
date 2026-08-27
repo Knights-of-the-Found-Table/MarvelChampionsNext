@@ -105,7 +105,7 @@ func registerRocketCards() {
 					for _, dc := range p.Discard {
 						if dc.Def().Type == "upgrade" && dc.Def().HasTrait("tech") {
 							picks = append(picks, engine.Choice{
-								Label: engine.S(dc.Def().Name), Kind: engine.ChoiceCard, CardCode: dc.Code,
+								Label: engine.Tf("m.cardName", dc), Kind: engine.ChoiceCard, CardCode: dc.Code,
 							}.Msgs(engine.DiscardToBottom{Player: p.ID, CardID: dc.ID}))
 						}
 					}
@@ -135,7 +135,7 @@ func registerRocketCards() {
 			for _, id := range p.Upgrades {
 				if o := g.Upgrades[id]; o != nil && o.ID != u.ID && o.EDef().HasTrait("tech") {
 					targets = append(targets, engine.Choice{
-						Label: engine.S(o.EDef().Name), Kind: engine.ChoiceTarget, SourceID: o.ID,
+						Label: engine.Tf("m.cardName", o), Kind: engine.ChoiceTarget, SourceID: o.ID,
 					}.Msgs(engine.AddEntityCounter{ID: o.ID, N: 1}))
 				}
 			}
@@ -213,7 +213,7 @@ func registerRocketCards() {
 							}
 						}
 						picks = append(picks, engine.Choice{
-							Label: engine.S(p.Name + "'s engagement"), Kind: engine.ChoiceLabel,
+							Label: engine.Tf("c.playerEngagement", p.Name), Kind: engine.ChoiceLabel,
 						}.Msgs(msgs...))
 					}
 					return []engine.Message{engine.AskQuestion{Player: owner.ID,
@@ -300,7 +300,7 @@ func registerRocketBasics() {
 						switch u.Code[:5] {
 						case "16034", "16036", "16037", "16038":
 							picks = append(picks, engine.Choice{
-								Label: engine.S("2 charges + ready " + u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+								Label: engine.Tf("c.twoChargesReady", u), Kind: engine.ChoiceTarget, SourceID: id,
 							}.Msgs(engine.AddEntityCounter{ID: id, N: 2}, engine.ReadyEntity{ID: id}))
 						}
 					}

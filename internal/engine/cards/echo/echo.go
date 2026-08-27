@@ -67,7 +67,7 @@ func registerSignatures() {
 			var choices []engine.Choice
 			for _, c := range p.SenseDeck {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.SideDeckToHand{Player: pid, CardID: c.ID}))
 			}
 			choices = append(choices, cardutil.Skip())
@@ -92,7 +92,7 @@ func registerSignatures() {
 						continue
 					}
 					choices = append(choices, engine.Choice{
-						Label: engine.S(def.Name + " (" + pl.Name + ")"), Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.Tf("c.nameParen", def, pl.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.RecycleFromDiscard{Player: pid, From: pl.ID, CardID: c.ID}))
 				}
 			}
@@ -168,7 +168,7 @@ func registerSignatures() {
 							msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.shuffleInName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
@@ -258,7 +258,7 @@ func registerSignatures() {
 					var choices []engine.Choice
 					for _, c := range p.SenseDeck {
 						choices = append(choices, engine.Choice{
-							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.SideDeckToHand{Player: p.ID, CardID: c.ID}))
 					}
 					if len(choices) == 0 {

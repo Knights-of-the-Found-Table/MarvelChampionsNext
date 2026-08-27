@@ -218,7 +218,7 @@ func registerThievesGuild() {
 					msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S(sc.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: sc.ECode(),
+					Label: engine.Tf("m.cardName", sc), Kind: engine.ChoiceTarget, SourceID: id, CardCode: sc.ECode(),
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
@@ -369,7 +369,7 @@ func registerCreoleCharmer() {
 					}
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {

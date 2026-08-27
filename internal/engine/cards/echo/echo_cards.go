@@ -67,7 +67,7 @@ func registerGetTheirAttention() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: p.ID}))
 			}
@@ -113,7 +113,7 @@ func registerSeeNoEvil() {
 		for _, id := range g.Schemes() {
 			s := g.Entity(id)
 			schemes = append(schemes, engine.Choice{
-				Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+				Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 		}

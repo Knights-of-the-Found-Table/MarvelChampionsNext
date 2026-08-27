@@ -73,7 +73,7 @@ func registerSheHulk() {
 			for _, id := range cardutil.SortedEnemyIDs(g) {
 				enemy := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(enemy.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", enemy), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: enemy.ECode(),
 				}.Msgs(engine.DamageEntity{Target: id, Damage: 2, Source: p.ID}))
 			}

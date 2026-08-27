@@ -283,7 +283,7 @@ func registerLogansCabin() {
 					for _, c := range p.Discard {
 						if c.Def().CardSet == "wolverine" {
 							opts = append(opts, engine.Choice{
-								Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.shuffleInName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ExhaustEntity{ID: self},
 								engine.ShuffleIntoDeck{Player: s.Owner, CardID: c.ID},

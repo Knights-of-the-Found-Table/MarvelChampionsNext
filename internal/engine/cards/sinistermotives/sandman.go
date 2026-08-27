@@ -108,7 +108,7 @@ func registerSandman() {
 						if a := g.Allies[id]; a != nil && !a.Exhausted {
 							n := max(1, a.AttackVal)
 							picks = append(picks, engine.Choice{
-								Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+								Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id,
 							}.Msgs(engine.ExhaustEntity{ID: id}, engine.AddEntityCounter{ID: self, N: -n}))
 						}
 					}

@@ -50,7 +50,7 @@ func registerMagnetoExtras() {
 				for _, id := range cardutil.SortedEnemyIDs(g) {
 					msgs = append(msgs, engine.DamageEntity{Target: id, Damage: 1, Source: p.ID})
 				}
-				choices = append(choices, engine.Choice{ID: "energy", Label: engine.S("Spend " + energy.Def().Name + " — 1 damage to each enemy"), Kind: engine.ChoiceLabel}.Msgs(msgs...))
+				choices = append(choices, engine.Choice{ID: "energy", Label: engine.Tf("c.spendEnergyStrike", energy), Kind: engine.ChoiceLabel}.Msgs(msgs...))
 			}
 			if mental != nil {
 				var msgs []engine.Message
@@ -58,7 +58,7 @@ func registerMagnetoExtras() {
 				for _, id := range g.Schemes() {
 					msgs = append(msgs, engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID})
 				}
-				choices = append(choices, engine.Choice{ID: "mental", Label: engine.S("Spend " + mental.Def().Name + " — 1 threat from each scheme"), Kind: engine.ChoiceLabel}.Msgs(msgs...))
+				choices = append(choices, engine.Choice{ID: "mental", Label: engine.Tf("c.spendSchemeThreat", mental), Kind: engine.ChoiceLabel}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
 				return nil
@@ -116,7 +116,7 @@ func registerMagnetoExtras() {
 				if d.Type == "ally" && (d.HasTrait("X-Force") || d.HasTrait("X-Men")) {
 					card := c
 					return []engine.Ability{{
-						Label: engine.S("Won't Stay Down — return " + card.Def().Name), Type: engine.AbilityAction,
+						Label: engine.Tf("c.wontStayDownReturn", card), Type: engine.AbilityAction,
 						AlterEgoOnly: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
@@ -177,7 +177,7 @@ func registerMagnetoExtras() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AllyDestroyed{AllyID: id},
 					engine.HealEntity{Target: p.ID, N: a.MaxHP},
 					engine.ToughEntity{Target: p.ID}))
@@ -202,7 +202,7 @@ func registerMagnetoExtras() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AllyDestroyed{AllyID: id}, engine.ReadyEntity{ID: p.ID}))
 			}
 			return []engine.Message{engine.AskQuestion{

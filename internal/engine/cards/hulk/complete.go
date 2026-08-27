@@ -45,7 +45,7 @@ func registerRemaining() {
 			for _, sid := range g.Schemes() {
 				s := g.Entity(sid)
 				picks = append(picks, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: sid, N: 1, Source: e.EOwner()}))
 			}
 			if len(picks) == 0 {
@@ -203,7 +203,7 @@ func registerRemaining() {
 					for _, sid := range g.Schemes() {
 						s := g.Entity(sid)
 						picks = append(picks, engine.Choice{
-							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
+							Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: sid, N: 1, Source: e.EOwner()},
 							engine.AddEntityCounter{ID: self, N: 1}))
 					}
@@ -244,7 +244,7 @@ func registerRemaining() {
 						continue
 					}
 					picks = append(picks, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
 					}.Msgs(engine.HealEntity{Target: a.ID, N: 1}, engine.ReadyEntity{ID: a.ID}))
 				}
 			}

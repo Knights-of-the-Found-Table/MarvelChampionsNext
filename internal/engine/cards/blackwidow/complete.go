@@ -79,7 +79,7 @@ func registerBlackWidow() {
 							continue
 						}
 						seen[c.Code] = true
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 					if len(picks) == 0 {
@@ -340,7 +340,7 @@ func registerBlackWidow() {
 			var picks []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}

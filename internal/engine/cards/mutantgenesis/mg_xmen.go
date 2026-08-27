@@ -39,13 +39,13 @@ func registerXMenShared() {
 			var choices []engine.Choice
 			if xMenControlled(g, p) {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Tough on " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.Tf("c.toughOn", p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.ToughEntity{Target: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Tough on " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.Tf("c.toughOn", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -107,7 +107,7 @@ func registerXMenShared() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Defend with " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.defendWith", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.AllyEntersPlayFree{Player: p.ID, Card: c}))
 			}
 			if len(choices) == 0 {
@@ -136,7 +136,7 @@ func registerXMenShared() {
 			var choices []engine.Choice
 			if v := activeOrFirstVillain(g); v != nil {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Confuse " + v.EDef().Name), Kind: engine.ChoiceTarget, SourceID: v.ID,
+					Label: engine.Tf("c.confuseName", v), Kind: engine.ChoiceTarget, SourceID: v.ID,
 				}.Msgs(engine.ConfuseEntity{Target: v.ID}))
 			}
 			for _, id := range cardutil.SortedIDs(g.Minions) {
@@ -149,7 +149,7 @@ func registerXMenShared() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.readyName", a), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -532,7 +532,7 @@ func registerTraining(code string, atk, hp int) {
 					continue // max 1 Training upgrade per ally
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+					Label: engine.Tf("c.attachToName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, ATK: atk, MaxHP: hp}))
 			}
 			if len(choices) == 0 {

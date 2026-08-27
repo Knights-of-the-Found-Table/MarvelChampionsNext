@@ -395,7 +395,7 @@ func registerShared() {
 		for _, id := range p.Upgrades {
 			u := g.Upgrades[id]
 			if u != nil {
-				picks = append(picks, engine.Choice{Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceCard, CardCode: u.Code}.
 					Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 			}
 		}

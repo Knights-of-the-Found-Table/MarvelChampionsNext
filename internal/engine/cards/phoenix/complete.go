@@ -321,7 +321,7 @@ func registerRemainingPhoenix() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Move 2 threat to " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.move2ThreatTo", s), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.ThwartScheme{Scheme: m.Scheme, N: 2, Source: a.Owner},
 					engine.SchemeThreat{Scheme: id, N: 2, Source: a.Owner}))
 			}
@@ -493,7 +493,7 @@ func registerRemainingPhoenix() {
 				if a := g.Allies[id]; a != nil {
 					aid := id
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
+						Label: engine.Tf("c.readyName", a), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
 					}.Msgs(engine.ReadyEntity{ID: aid}, engine.AllyStatBonus{Ally: aid, THW: 2, ATK: 2}))
 				}
 			}
@@ -544,7 +544,7 @@ func attachTrainingPHX(bonus func() (thw, atk, hp int)) func(g *engine.Game, e e
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+				Label: engine.Tf("c.attachToName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 			}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, THW: thw, ATK: atk, MaxHP: hp}))
 		}
 		if len(choices) == 0 {

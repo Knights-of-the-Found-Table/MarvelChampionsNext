@@ -60,7 +60,7 @@ func registerNightcrawler() {
 								continue
 							}
 							choices = append(choices, engine.Choice{
-								Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 								engine.ReturnDiscardCard{Player: p.ID, CardID: target},

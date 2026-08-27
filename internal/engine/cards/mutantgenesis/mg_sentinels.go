@@ -175,7 +175,7 @@ func registerWideawake() {
 					return nil
 				}
 				return []engine.Ability{{
-					Label: engine.S("Discard " + t.EDef().Name + " — spend " + icons), Type: engine.AbilityAction,
+					Label: engine.Tf("c.discardSpend", t, icons), Type: engine.AbilityAction,
 					Cost: 3, CostIcons: icons,
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}

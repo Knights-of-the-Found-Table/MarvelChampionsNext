@@ -26,7 +26,7 @@ func registerMarket() {
 					removal = append([]engine.Message{engine.ThwartScheme{Scheme: g.MainScheme.ID, N: 3, Source: e.EID()}}, removal...)
 				}
 				picks = append(picks, engine.Choice{
-					ID: typ, Label: engine.S("Name: " + typ), Kind: engine.ChoiceLabel,
+					ID: typ, Label: engine.Tf("c.nameType", typ), Kind: engine.ChoiceLabel,
 				}.Msgs(removal...))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
@@ -348,7 +348,7 @@ func registerMarket() {
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Exhausted {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -377,7 +377,7 @@ func registerMarket() {
 				Msgs(engine.ToughEntity{Target: p.ID}))
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -410,7 +410,7 @@ func registerMarket() {
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Damage > 0 {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.HealEntity{Target: id, N: 1}))
 				}
 			}
@@ -466,7 +466,7 @@ func registerMarket() {
 					}
 					var picks []engine.Choice
 					for _, c := range p.Hand {
-						picks = append(picks, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 					}
 					if len(picks) == 0 {
@@ -544,7 +544,7 @@ func registerMarket() {
 			for _, tp := range g.Players {
 				var subs []engine.Choice
 				for _, c := range tp.Discard {
-					subs = append(subs, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					subs = append(subs, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: tp.ID, CardID: c.ID}))
 				}
 				if len(subs) == 0 {
@@ -577,7 +577,7 @@ func registerMarket() {
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Exhausted {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id}.
 						Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}

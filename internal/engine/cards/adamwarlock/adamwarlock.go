@@ -43,7 +43,7 @@ func battleMageEffect(g *engine.Game, p *engine.Player, aspect string) []engine.
 		for _, pl := range g.Players {
 			for _, id := range pl.Allies {
 				if a := g.Allies[id]; a != nil && a.Damage > 0 {
-					choices = append(choices, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
+					choices = append(choices, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
 						Msgs(engine.HealEntity{Target: id, N: 1}, engine.AddEntityCounter{ID: p.ID, N: battleMageSignal}))
 				}
 			}
@@ -217,7 +217,7 @@ func registerSignatures() {
 			if c.ID == "" || c.Code == "21040" {
 				continue
 			}
-			choices = append(choices, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+			choices = append(choices, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 				Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 		}
 		if len(choices) == 0 {

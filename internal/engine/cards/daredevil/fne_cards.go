@@ -199,7 +199,7 @@ func registerKnowYourEnemy() {
 		for _, id := range g.Schemes() {
 			s := g.Entity(id)
 			choices = append(choices, engine.Choice{
-				Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+				Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(engine.ThwartScheme{Scheme: id, N: 1, Source: pid}))
 		}
@@ -251,7 +251,7 @@ func registerChanceEncounter() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}

@@ -83,7 +83,7 @@ func breakTheFourthWall(g *engine.Game, self engine.EntityID) []engine.Message {
 			continue
 		}
 		finds = append(finds, engine.Choice{
-			Label: engine.S("Add " + d.Name + " to your hand"), Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.Tf("c.addToHand", d), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.Msgs(
 			engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 			engine.ShufflePlayerDeck{Player: p.ID},
@@ -97,7 +97,7 @@ func breakTheFourthWall(g *engine.Game, self engine.EntityID) []engine.Message {
 	var choices []engine.Choice
 	for _, c := range p.Hand {
 		choices = append(choices, engine.Choice{
-			Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.Msgs(
 			engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 		).WithThen(search))

@@ -116,7 +116,7 @@ func appendConstantTraining(base string) {
 				for _, c := range pl.Deck {
 					if c.Def().HasTrait("tactic") {
 						picks = append(picks, engine.Choice{
-							Label:    engine.S("Take " + c.Def().Name),
+							Label:    engine.Tf("c.takeName", c),
 							Kind:     engine.ChoiceCard,
 							CardCode: c.Code,
 						}.Msgs(
@@ -206,7 +206,7 @@ func registerPhoenixAlly() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "cyclops" {
 					picks = append(picks, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -390,7 +390,7 @@ func registerTacticalBrilliance() {
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("tactic") {
 					tacticChoices = append(tacticChoices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: pid, CardID: c.ID}))
 				}
 			}

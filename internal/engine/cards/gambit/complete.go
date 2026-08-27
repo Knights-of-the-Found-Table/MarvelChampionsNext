@@ -147,7 +147,7 @@ func registerRemainingGambit() {
 			for _, id := range cardutil.SortedIDs(g.Villains) {
 				if v := g.Villains[id]; v != nil {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Confuse " + v.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.confuseName", v), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ConfuseEntity{Target: id}))
 					break
 				}
@@ -163,7 +163,7 @@ func registerRemainingGambit() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.readyName", a), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ReadyEntity{ID: id}))
 					break
 				}

@@ -59,7 +59,7 @@ func registerFalcon() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: treacheries, Source: pid}))
 			}
@@ -220,7 +220,7 @@ func registerStrengthInNumbers() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && !a.Exhausted {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Exhaust " + a.EDef().Name), Kind: engine.ChoiceTarget,
+						Label: engine.Tf("c.exhaustName", a), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: a.Code,
 					}.Msgs(
 						engine.ExhaustEntity{ID: id},
@@ -273,7 +273,7 @@ func registerQuinjet() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+					Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 				}.Msgs(
 					engine.AllyEntersPlayFree{Player: p.ID, Card: c},
 					engine.DiscardControlled{Player: p.ID, ID: e.EID()},
@@ -351,12 +351,12 @@ func registerHonoraryAvenger() {
 			}
 			var choices []engine.Choice
 			choices = append(choices, engine.Choice{
-				Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID,
+				Label: engine.Tf("c.nameIdentity", p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
 			}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: p.ID, MaxHP: 1, GrantTrait: "avenger"}))
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id, MaxHP: 1, GrantTrait: "avenger"}))
 				}
 			}
@@ -391,7 +391,7 @@ func registerEnraged() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id, ATK: 2}))
 				}
 			}
@@ -413,7 +413,7 @@ func registerFollowed() {
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
 				s := g.SideSchemes[id]
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
 			if len(choices) == 0 {

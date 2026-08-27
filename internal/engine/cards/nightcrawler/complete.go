@@ -215,7 +215,7 @@ func registerNightcrawlerExtras() {
 				mn := g.Minions[id]
 				if mn != nil && !mn.EDef().HasTrait("Elite") {
 					targets = append(targets, engine.Choice{
-						ID: "mn-" + id.String(), Label: engine.S(mn.EDef().Name), Kind: engine.ChoiceTarget,
+						ID: "mn-" + id.String(), Label: engine.Tf("m.cardName", mn), Kind: engine.ChoiceTarget,
 					}.Msgs(engine.MinionDefeated{MinionID: id}))
 				}
 			}

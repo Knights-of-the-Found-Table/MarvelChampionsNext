@@ -50,7 +50,7 @@ func supportCounterChoices(g *engine.Game, p *engine.Player, prompt string, n in
 	var choices []engine.Choice
 	for _, s := range shieldSupports(g, p) {
 		choices = append(choices, engine.Choice{
-			Label: engine.S(s.EDef().Name),
+			Label: engine.Tf("m.cardName", s),
 			Kind:  engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 		}.Msgs(engine.AddEntityCounter{ID: s.ID, N: n}))
 	}

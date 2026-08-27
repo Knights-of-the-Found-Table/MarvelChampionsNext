@@ -122,10 +122,10 @@ func registerVision() {
 							seen[c.Code] = true
 							inDeck := func() bool { _, ok := p.Deck.Find(c.ID); return ok }()
 							if inDeck {
-								picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+								picks = append(picks, engine.Choice{Label: engine.Tf("c.nameDeck", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 									Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 							} else {
-								picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+								picks = append(picks, engine.Choice{Label: engine.Tf("c.nameDiscard", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 									Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 							}
 						}
@@ -177,7 +177,7 @@ func registerVision() {
 				def := c.Def()
 				if def.Type == "event" && def.Code[:2] == "26" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: u.ID},
 							engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
@@ -272,7 +272,7 @@ func registerVision() {
 			for _, c := range p.Discard {
 				def := c.Def()
 				if def.Type == "event" && def.HasTrait("defense") {
-					picks = append(picks, engine.Choice{Label: engine.S("Attach " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.attachName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.SupportStoreCard{ID: e.EID(), Card: c}))
 				}
 			}
@@ -372,7 +372,7 @@ func registerVision() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && a.EDef().HasTrait("android") {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ReadyEntity{ID: a.ID}, engine.HealEntity{Target: a.ID, N: 1}))
 					}
 				}
@@ -426,7 +426,7 @@ func registerVision() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "aggression" {
-							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -451,7 +451,7 @@ func registerVision() {
 			var picks []engine.Choice
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
 				s := g.SideSchemes[id]
-				picks = append(picks, engine.Choice{Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code}.
 					Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID,
@@ -474,10 +474,10 @@ func registerVision() {
 				if def.Type == "ally" && !seen[c.Code] {
 					seen[c.Code] = true
 					if _, ok := p.Deck.Find(c.ID); ok {
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameDeck", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 					} else {
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameDiscard", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 				}
@@ -505,7 +505,7 @@ func registerVision() {
 					def := c.Def()
 					if def.Type == "ally" && (def.HasTrait("avenger") || def.HasTrait("guardian")) && !seen[c.Code] {
 						seen[c.Code] = true
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.PlayCard{Player: e.EOwner(), Card: c, Paid: engine.CostPaid{}}))
 					}
 				}
@@ -529,7 +529,7 @@ func registerVision() {
 			for _, c := range p.Hand {
 				def := c.Def()
 				if def.Cost != nil && *def.Cost > 0 {
-					picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (-3)"), Kind: engine.ChoicePlay, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.nameMinus", def, 3), Kind: engine.ChoicePlay, CardCode: def.Code}.
 						Msgs(engine.ExhaustEntity{ID: p.ID},
 							engine.CostDiscountApply{Player: p.ID, Amount: 3}))
 				}

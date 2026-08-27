@@ -95,7 +95,7 @@ func registerMiles() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "spider_man_morales" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -254,7 +254,7 @@ func registerMilesSignatures() {
 						var choices []engine.Choice
 						for _, c := range p.Hand {
 							choices = append(choices, engine.Choice{
-								Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 						}
 						msgs = append(msgs, engine.AskQuestion{

@@ -109,7 +109,7 @@ func registerCrimeSet() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Move " + s.EDef().Name + "'s threat to the main scheme"), Kind: engine.ChoiceTarget, SourceID: id,
+					Label: engine.Tf("c.moveThreatToMain", s), Kind: engine.ChoiceTarget, SourceID: id,
 				}.Msgs(engine.SchemeThreat{Scheme: g.MainScheme.ID, N: s.Threat, Source: t.ID},
 					engine.ThwartScheme{Scheme: id, N: s.Threat, Source: t.ID}))
 			}
@@ -178,7 +178,7 @@ func registerFantasySet() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "ally" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Put " + c.Def().Name + " into play"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.putIntoPlay", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.AllyEntersPlayFree{Player: p.ID, Card: c}))
 					break
 				}
@@ -480,7 +480,7 @@ func registerSitcomSet() {
 			if !p.IsHero() && len(p.Hand) > 0 {
 				c := p.Hand[0]
 				choices = append(choices, engine.Choice{
-					ID: "discard", Label: engine.S("Discard " + c.Def().Name + " (an upgrade) → discard this obligation"), Kind: engine.ChoiceLabel,
+					ID: "discard", Label: engine.Tf("c.discardUpgradeObl", c), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 			}
 			return []engine.Message{engine.AskQuestion{
@@ -500,7 +500,7 @@ func registerSitcomSet() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "ally" {
 					choices = append(choices, engine.Choice{
-						ID: "shuffle", Label: engine.S("Shuffle " + c.Def().Name + " into your deck → discard this obligation"), Kind: engine.ChoiceLabel,
+						ID: "shuffle", Label: engine.Tf("c.shuffleInObl", c), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}, engine.ObligationResolve{Player: p.ID, Card: card, Remove: true}))
 					break
 				}

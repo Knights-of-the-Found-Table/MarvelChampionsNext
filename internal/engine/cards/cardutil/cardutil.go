@@ -41,7 +41,7 @@ func EnemyLabel(e engine.Entity) engine.Msg {
 	case *engine.Minion:
 		return engine.Tf("m.hp", t, t.HP(), t.MaxHP)
 	}
-	return engine.S(e.EDef().Name)
+	return engine.Tf("m.cardName", e)
 }
 
 // EnemyChoices lists all enemies as damage targets.
@@ -76,7 +76,7 @@ func SchemeChoices(g *engine.Game, mk func(scheme engine.EntityID) []engine.Mess
 	for _, id := range g.Schemes() {
 		s := g.Entity(id)
 		out = append(out, engine.Choice{
-			Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+			Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 			SourceID: id, CardCode: s.ECode(),
 		}.Msgs(mk(id)...))
 	}
@@ -121,7 +121,7 @@ func ChooseScheme(prompt engine.Msg, amount func(g *engine.Game, e engine.Entity
 		for _, id := range schemes {
 			s := g.Entity(id)
 			choices = append(choices, engine.Choice{
-				Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+				Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(engine.ThwartScheme{Scheme: id, N: amount(g, e), Source: pid}))
 		}

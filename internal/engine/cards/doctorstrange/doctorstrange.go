@@ -133,7 +133,7 @@ func registerInvocations() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 4, Source: pid}))
 			}
@@ -159,7 +159,7 @@ func registerInvocations() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -221,7 +221,7 @@ func registerSignatures() {
 					if len(p.SenseDeck) > 0 {
 						top := p.SenseDeck[0]
 						choices = append(choices, engine.Choice{
-							ID: "discard", Label: engine.S("Discard " + top.Def().Name + " from the Invocation deck"), Kind: engine.ChoiceLabel,
+							ID: "discard", Label: engine.Tf("c.discardFromInvocation", top), Kind: engine.ChoiceLabel,
 						}.Msgs(engine.SideDeckDiscardTop{Player: p.ID}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.wongChoose"), choices...)}}
@@ -246,7 +246,7 @@ func registerSignatures() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: pid}))
 			}
@@ -326,7 +326,7 @@ func registerSignatures() {
 				def := c.Def()
 				if def.CardSet == "doctor_strange" && def.Code != "09006" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Take " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.Tf("c.takeName", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.TakeDeckCard{Player: pid, CardID: c.ID}, engine.ShufflePlayerDeck{Player: pid}))
 				}
 			}
@@ -335,7 +335,7 @@ func registerSignatures() {
 				if def.CardSet == "doctor_strange" && def.Code != "09006" {
 					msgs := []engine.Message{engine.ShuffleIntoDeck{Player: pid, CardID: c.ID}}
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Shuffle in " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.Tf("c.shuffleInName", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(msgs...))
 				}
 			}
@@ -387,7 +387,7 @@ func registerSignatures() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.shuffleInName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID},
 							engine.DrawCards{Player: p.ID, N: 1},
@@ -466,7 +466,7 @@ func registerSignatures() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.TakeDeckCard{Player: pid, CardID: c.ID}, engine.ShufflePlayerDeck{Player: pid}))
 			}
 			if len(choices) == 0 {

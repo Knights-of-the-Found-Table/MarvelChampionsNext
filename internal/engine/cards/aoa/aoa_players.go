@@ -87,7 +87,7 @@ func registerAoaPlayerCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 1}))
 			}
@@ -121,7 +121,7 @@ func registerAoaPlayerCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 2}))
 			}
@@ -410,7 +410,7 @@ func registerAoaPlayerCards() {
 			var choices []engine.Choice
 			if g.EntityHasTrait(p.ID, "X-Men") {
 				choices = append(choices, engine.Choice{
-					ID: "hero", Label: engine.S(p.HeroDef().Name), Kind: engine.ChoiceTarget,
+					ID: "hero", Label: engine.Tf("m.cardName", p), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.HealEntity{Target: p.ID, N: 2}))
 			}
 			for _, id := range p.Allies {
@@ -419,7 +419,7 @@ func registerAoaPlayerCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.HealEntity{Target: id, N: 2}))
 			}
 			if len(choices) == 0 {
@@ -484,7 +484,7 @@ func registerAoaPlayerCards() {
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					thw = append(thw, engine.Choice{
-						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+						Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 						SourceID: id, CardCode: s.ECode(),
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: p.ID}))
 				}
@@ -512,7 +512,7 @@ func registerAoaPlayerCards() {
 			for i, c := range p.Hand {
 				card := c
 				discard = append(discard, engine.Choice{
-					ID: fmt.Sprintf("d-%d", i), Label: engine.S(card.Def().Name), Kind: engine.ChoiceCard, CardCode: card.Code,
+					ID: fmt.Sprintf("d-%d", i), Label: engine.Tf("m.cardName", card), Kind: engine.ChoiceCard, CardCode: card.Code,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{card}}))
 			}
 			return []engine.Message{

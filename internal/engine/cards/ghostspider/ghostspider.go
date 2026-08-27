@@ -167,14 +167,14 @@ func registerGWSignatures() {
 				for _, c := range p.Hand {
 					if c.Def().Type == "event" {
 						choices = append(choices, engine.Choice{
-							Label: engine.S(c.Def().Name + " (hand)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.nameHand", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.SupportStoreCard{ID: george.ID, Card: c}))
 					}
 				}
 				for _, c := range p.Discard {
 					if c.Def().Type == "event" {
 						choices = append(choices, engine.Choice{
-							Label: engine.S(c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.nameDiscard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.ReturnDiscardCard{Player: pid, CardID: c.ID},
 							engine.SupportStoreCard{ID: george.ID, Card: c},
@@ -307,7 +307,7 @@ func registerGWSignatures() {
 									continue
 								}
 								choices = append(choices, engine.Choice{
-									Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+									Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 								}.Msgs(engine.SupportStoreCard{ID: s.ID, Card: c}))
 							}
 							if len(choices) == 0 {

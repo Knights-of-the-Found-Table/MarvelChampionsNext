@@ -135,7 +135,7 @@ func registerSabretooth() {
 					return nil
 				}
 				return []engine.Ability{{
-					Label: engine.S("Discard " + t.EDef().Name + " — spend [energy][mental][physical]"), Type: engine.AbilityAction,
+					Label: engine.Tf("c.discardSpend", t, "[energy][mental][physical]"), Type: engine.AbilityAction,
 					Cost: 3, CostIcons: "energy:1 mental:1 physical:1",
 					Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 						return []engine.Message{engine.DiscardAttachmentMsg{ID: self}}

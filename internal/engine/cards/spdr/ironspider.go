@@ -113,7 +113,7 @@ func registerIronSpiderPlayers() {
 					engine.Choice{Label: engine.S("+DEF"), Kind: engine.ChoiceLabel}.Msgs(engine.ApplyStatBonus{Target: p.ID, DEF: x}),
 				)
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Discard " + u.EDef().Name + " (+" + fmt.Sprint(x) + ")"), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("c.discardBonus", u, x), Kind: engine.ChoiceTarget,
 					SourceID: u.ID, CardCode: u.Code,
 				}.Msgs(engine.DiscardControlled{Player: p.ID, ID: u.ID}, engine.ReadyEntity{ID: p.ID}).WithThen(stats))
 			}
@@ -302,7 +302,7 @@ func registerIronSpiderPlayers() {
 					msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Ready " + u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+					Label: engine.Tf("c.readyName", u), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
@@ -367,13 +367,13 @@ func registerIronSpiderPlayers() {
 			var choices []engine.Choice
 			if !clarityAttachedTo(g, p.ID) {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.Tf("c.attachToName", p), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && !clarityAttachedTo(g, id) {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.Tf("c.attachToName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 				}
 			}
@@ -443,7 +443,7 @@ func registerIronSpiderEncounter() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.attachName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.AttachHandCard{Player: p.ID, CardID: c.ID, Enemy: e.EID()}))
 			}
 			if len(choices) == 0 {

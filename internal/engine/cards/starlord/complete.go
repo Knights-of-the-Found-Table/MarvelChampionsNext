@@ -314,7 +314,7 @@ func registerStarLord() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil && a.EDef().HasTrait("guardian") {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, ATK: 1}))
 				}
 			}
@@ -344,12 +344,12 @@ func registerStarLord() {
 					var picks []engine.Choice
 					for _, id := range p.Allies {
 						if a := g.Allies[id]; a != nil && a.Exhausted && a.EDef().HasTrait("guardian") {
-							picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 								Msgs(engine.ReadyEntity{ID: a.ID}))
 						}
 					}
 					if p.Exhausted && g.EntityHasTrait(p.ID, "guardian") {
-						picks = append(picks, engine.Choice{Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameIdentity", p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID}.
 							Msgs(engine.ReadyEntity{ID: p.ID}))
 					}
 					if len(picks) == 0 {

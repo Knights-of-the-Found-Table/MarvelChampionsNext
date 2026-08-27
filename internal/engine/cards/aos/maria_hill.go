@@ -51,7 +51,7 @@ func registerMariaHill() {
 									continue
 								}
 								choices = append(choices, engine.Choice{
-									Label: engine.S(fmt.Sprintf("%s → %s", from.EDef().Name, to.EDef().Name)),
+									Label: engine.Tf("c.supportMove", from, to),
 									Kind:  engine.ChoiceTarget, SourceID: to.ID, CardCode: to.Code,
 								}.Msgs(
 									engine.AddEntityCounter{ID: from.ID, N: -1},
@@ -79,7 +79,7 @@ func registerMariaHill() {
 							def := c.Def()
 							if def.Type == "support" && hasShieldTrait(def) {
 								choices = append(choices, engine.Choice{
-									Label: engine.S("Add " + def.Name + " to your hand"),
+									Label: engine.Tf("c.addToHand", def),
 									Kind:  engine.ChoiceCard, CardCode: c.Code,
 								}.Msgs(
 									engine.TakeDeckCard{Player: pl.ID, CardID: c.ID},
@@ -242,7 +242,7 @@ func registerMariaSignatures() {
 					}
 					for _, pl := range g.Players {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Heal 3 damage from " + pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
+							Label: engine.Tf("c.healDamageFrom", 3, pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 						}.Msgs(engine.AddEntityCounter{ID: self, N: -1}, engine.HealEntity{Target: pl.ID, N: 3}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: s.Owner,

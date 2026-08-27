@@ -68,7 +68,7 @@ func registerDomino() {
 					var choices []engine.Choice
 					for _, c := range p.Hand {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Swap out " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.swapOut", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.SwapHandWithDeckTop{Player: p.ID, CardID: c.ID}))
 					}
 					return []engine.Message{engine.AskQuestion{

@@ -143,13 +143,13 @@ func registerSMHeroCards() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && !a.Exhausted && g.EntityHasTrait(id, "web-warrior") {
 					exhausts = append(exhausts, engine.Choice{
-						Label: engine.S("Exhaust " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.exhaustName", a), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: id}))
 				}
 			}
 			if p.Exhausted == false {
 				exhausts = append(exhausts, engine.Choice{
-					ID: "self", Label: engine.S("Exhaust " + p.Name + " (Web-Warrior)"), Kind: engine.ChoiceLabel,
+					ID: "self", Label: engine.Tf("c.exhaustWebWarrior", p.Name), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ExhaustEntity{ID: p.ID}))
 			}
 			if len(exhausts) == 0 {
@@ -245,7 +245,7 @@ func registerSMHeroCards() {
 				var def = g.Entity(id).EDef()
 				if def != nil && def.HasTrait("S.H.I.E.L.D.") {
 					opts = append(opts, engine.Choice{
-						Label: engine.S(def.Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: id}))
 				}
 			}
@@ -327,7 +327,7 @@ func registerSMHeroCards() {
 				if def.Type == "event" && !seen[def.Code] {
 					seen[def.Code] = true
 					picks = append(picks, engine.Choice{
-						Label: engine.S(def.Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: def.Code,
+						Label: engine.Tf("c.nameDeck", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}

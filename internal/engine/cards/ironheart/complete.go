@@ -144,7 +144,7 @@ func registerIronheart() {
 				def := c.Def()
 				if def.Code[:2] == "29" && def.Type != "obligation" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: engine.S("Search — " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.searchName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -309,12 +309,12 @@ func registerIronheart() {
 					var picks []engine.Choice
 					for _, id := range p.Allies {
 						if q := g.Allies[id]; q != nil && q.Exhausted && id != self && q.EDef().HasTrait("champion") {
-							picks = append(picks, engine.Choice{Label: engine.S(q.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: q.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", q), Kind: engine.ChoiceTarget, SourceID: id, CardCode: q.Code}.
 								Msgs(engine.ReadyEntity{ID: id}))
 						}
 					}
 					if p.Exhausted && g.EntityHasTrait(p.ID, "champion") {
-						picks = append(picks, engine.Choice{Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameIdentity", p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID}.
 							Msgs(engine.ReadyEntity{ID: p.ID}))
 					}
 					if len(picks) == 0 {
@@ -338,13 +338,13 @@ func registerIronheart() {
 			for _, q := range g.Players {
 				for _, id := range q.Allies {
 					if a := g.Allies[id]; a != nil && a.EDef().HasTrait("champion") {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
 							Msgs(engine.AllyStatBonus{Ally: id, THW: 1, ATK: 1}))
 					}
 				}
 			}
 			if g.EntityHasTrait(p.ID, "champion") {
-				picks = append(picks, engine.Choice{Label: engine.S(p.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: p.ID}.
+				picks = append(picks, engine.Choice{Label: engine.Tf("c.nameIdentity", p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID}.
 					Msgs(engine.ApplyStatBonus{Target: p.ID, THW: 1, ATK: 1, DEF: 1}))
 			}
 			if len(picks) == 0 {
@@ -419,7 +419,7 @@ func registerIronheart() {
 								engine.ApplyStatBonus{Target: q.ID, THW: 1, ATK: 1}))
 						for _, id := range q.Allies {
 							if a := g.Allies[id]; a != nil {
-								picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
+								picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code}.
 									Msgs(engine.AddEntityCounter{ID: self, N: -1},
 										engine.AllyStatBonus{Ally: id, THW: 1, ATK: 1}))
 							}
@@ -456,7 +456,7 @@ func registerIronheart() {
 			var picks []engine.Choice
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil && s.Exhausted && s.EDef().HasTrait("s.h.i.e.l.d.") {
-					picks = append(picks, engine.Choice{Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code}.
 						Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}

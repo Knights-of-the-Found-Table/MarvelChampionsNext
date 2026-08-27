@@ -22,14 +22,14 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 	// Change form (once per turn, own turn only; the character keeps its
 	// ready/exhausted state per the official rules).
 	if ownTurn && !p.FormChanged {
-		var target string
+		var targetDef *data.CardDef
 		if p.IsHero() {
-			target = p.AlterEgoDef().Name
+			targetDef = p.AlterEgoDef()
 		} else {
-			target = p.HeroDef().Name
+			targetDef = p.HeroDef()
 		}
 		choices = append(choices, Choice{
-			ID: "form", Label: Tf("m.changeTo", target), Kind: ChoiceForm,
+			ID: "form", Label: Tf("m.changeTo", targetDef), Kind: ChoiceForm,
 			CardCode: otherSideCode(p), SourceID: p.ID,
 		}.Msgs(ChangeForm{Player: p.ID}))
 	}
@@ -50,7 +50,7 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		}
 		cost := g.costFor(p, def)
 		choice := Choice{
-			Label:    Tf("m.cost", def.Name, cost),
+			Label:    Tf("m.cost", def, cost),
 			Kind:     ChoicePlay,
 			CardCode: def.Code,
 			SourceID: EntityID(c.ID),
@@ -71,7 +71,7 @@ func (g *Game) turnMenu(p *Player, ownTurn bool) *Question {
 		}
 		cost := g.costFor(p, def)
 		choice := Choice{
-			Label:    Tf("m.fromDiscardCost", def.Name, cost),
+			Label:    Tf("m.fromDiscardCost", def, cost),
 			Kind:     ChoicePlay,
 			CardCode: def.Code,
 		}
@@ -367,12 +367,16 @@ func (g *Game) resourcePayChoices(p *Player, self *Card, targetDef *data.CardDef
 			continue
 		}
 		def := c.Def()
-		label := def.Name
+		// 标签结构化：卡名经 {k:"card"} 参数由前端按语言解析，资源标记
+		// （[energy energy] 等）保持印刷记号形态，由前端 ResText 画图标。
+		var label Msg
 		if len(def.Resources) > 0 {
-			label += " [" + resourceLabels(def) + "]"
+			label = Tf("m.payWith", def, resourceLabels(def))
+		} else {
+			label = Tf("m.cardName", def)
 		}
 		out = append(out, Choice{
-			Label: S(label), Kind: ChoiceResource, CardCode: def.Code, SourceID: EntityID(c.ID),
+			Label: label, Kind: ChoiceResource, CardCode: def.Code, SourceID: EntityID(c.ID),
 			Icons: def.Resources,
 		}.Msgs(ResourcePayStub{Card: c}))
 	}
@@ -764,7 +768,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 	if heroDefendOK {
 		choices = append(choices, Choice{
 			ID:    "hero-defend",
-			Label: Tf("m.exhaustDefend", p.HeroDef().Name, p.DefenseStat(g)),
+			Label: Tf("m.exhaustDefend", p.HeroDef(), p.DefenseStat(g)),
 			Kind:  ChoiceBasicPower, SourceID: p.ID, CardCode: p.HeroCode,
 		}.Msgs(Defends{Defender: p.ID, Against: attackerID}))
 	}
@@ -794,7 +798,7 @@ func (g *Game) defenseOptions(attackerID EntityID, p *Player) []Choice {
 			continue
 		}
 		choice := Choice{
-			ID: "defense-event-" + c.ID, Label: Tf("m.playCard", def.Name),
+			ID: "defense-event-" + c.ID, Label: Tf("m.playCard", def),
 			Kind: ChoicePlay, CardCode: def.Code,
 		}
 		if cost := deref(def.Cost, 0); cost > 0 {

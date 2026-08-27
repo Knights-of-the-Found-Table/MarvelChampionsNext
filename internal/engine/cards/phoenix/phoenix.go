@@ -476,7 +476,7 @@ func registerPsychicRapport() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "cyclops" {
 					discardOpts = append(discardOpts, engine.Choice{
-						Label: engine.S("Return " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.returnName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: pid, CardID: c.ID}))
 				}
 			}

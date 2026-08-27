@@ -212,7 +212,7 @@ func registerRemainingPlayerCards() {
 					for _, c := range p.Hand {
 						def := c.Def()
 						picks = append(picks, engine.Choice{
-							Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+							Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 						}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 							engine.DrawCards{Player: p.ID, N: n}))
 					}
@@ -323,7 +323,7 @@ func registerRemainingPlayerCards() {
 			var choices []engine.Choice
 			for _, c := range p.Hand {
 				choices = append(choices, engine.Choice{
-					Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 			}
 			q := engine.AskN(engine.Tf("c.legalPracticeChooseAndDiscardUpTo5"), 0, choices...)
@@ -493,7 +493,7 @@ func registerRemainingPlayerCards() {
 							def := c.Def()
 							if def.Type == "upgrade" && def.HasTrait("tech") {
 								picks = append(picks, engine.Choice{
-									Label: engine.S(q.Name + " — " + def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+									Label: engine.Tf("c.playerCardPair", q.Name, def), Kind: engine.ChoiceCard, CardCode: def.Code,
 								}.Msgs(engine.RecycleFromDiscard{Player: g.Entity(self).EOwner(), From: q.ID, CardID: c.ID}))
 								break // topmost only
 							}
@@ -640,7 +640,7 @@ func registerRemainingPlayerCards() {
 				seen[c.Code] = true
 				def := c.Def()
 				picks = append(picks, engine.Choice{
-					Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+					Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 				}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 			}
 			if len(picks) == 0 {
@@ -943,7 +943,7 @@ func registerRemainingPlayerCards() {
 						continue
 					}
 					picks = append(picks, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
 					}.Msgs(engine.ReadyEntity{ID: a.ID}))
 				}
 			}
@@ -1027,7 +1027,7 @@ func registerRemainingPlayerCards() {
 					continue
 				}
 				picks = append(picks, engine.Choice{
-					Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
+					Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, ATK: 1, THW: 1}))
 			}
 			if len(picks) == 0 {
@@ -1086,13 +1086,13 @@ func registerRemainingPlayerCards() {
 					var picks []engine.Choice
 					for _, q := range g.Players {
 						if q.Damage > 0 {
-							picks = append(picks, engine.Choice{Label: engine.S(q.Name + " (hero)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("c.nameHero", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 								Msgs(engine.AddEntityCounter{ID: self, N: -1}, engine.HealEntity{Target: q.ID, N: 2}))
 						}
 						for _, id := range q.Allies {
 							a := g.Allies[id]
 							if a != nil && a.Damage > 0 {
-								picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+								picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 									Msgs(engine.AddEntityCounter{ID: self, N: -1}, engine.HealEntity{Target: a.ID, N: 2}))
 							}
 						}
@@ -1410,7 +1410,7 @@ func deckSearchQuestion(g *engine.Game, pid engine.PlayerID, typ, prompt string)
 		}
 		seen[c.Code] = true
 		picks = append(picks, engine.Choice{
-			Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code,
+			Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code,
 		}.Msgs(engine.TakeDeckCard{Player: pid, CardID: c.ID},
 			engine.ShufflePlayerDeck{Player: pid}))
 	}

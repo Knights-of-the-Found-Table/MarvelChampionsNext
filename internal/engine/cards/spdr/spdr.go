@@ -73,7 +73,7 @@ func registerSPDRSignatures() {
 			for _, c := range p.Deck {
 				if c.Def().HasTrait("interface") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(c.Def().Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.nameDeck", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: p.ID},
@@ -83,7 +83,7 @@ func registerSPDRSignatures() {
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("interface") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.nameDiscard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -222,7 +222,7 @@ func registerSPDRSignatures() {
 								continue
 							}
 							choices = append(choices, engine.Choice{
-								Label: engine.S(u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+								Label: engine.Tf("m.cardName", u), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 							}.Msgs(
 								engine.ExhaustEntity{ID: u.ID},
 								engine.DrawCards{Player: p.ID, N: 1},
@@ -254,7 +254,7 @@ func registerSPDRSignatures() {
 									continue
 								}
 								ups = append(ups, engine.Choice{
-									Label: engine.S(u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+									Label: engine.Tf("m.cardName", u), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 								}.Msgs(
 									engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 									engine.ReadyEntity{ID: u.ID},
@@ -262,7 +262,7 @@ func registerSPDRSignatures() {
 							}
 							if len(ups) > 0 {
 								choices = append(choices, engine.Choice{
-									Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+									Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 								}.WithThen(engine.Ask(engine.Tf("c.readyWhichInterfaceUpgrade"), ups...)))
 							}
 						}
@@ -379,7 +379,7 @@ func registerSPDRObligation() {
 			var discardChoices []engine.Choice
 			for _, u := range interfaceUpgrades(g, p) {
 				discardChoices = append(discardChoices, engine.Choice{
-					Label: engine.S(u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
+					Label: engine.Tf("m.cardName", u), Kind: engine.ChoiceTarget, SourceID: u.ID, CardCode: u.Code,
 				}.Msgs(
 					engine.DiscardControlled{Player: p.ID, ID: u.ID},
 					engine.ObligationResolve{Player: p.ID, Card: card},

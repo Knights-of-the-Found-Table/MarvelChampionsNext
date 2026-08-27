@@ -152,7 +152,7 @@ func registerRemainingThor() {
 			var picks []engine.Choice
 			for _, c := range top {
 				picks = append(picks, engine.Choice{
-					Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardEncounterCard{Card: c}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: e.EOwner(),

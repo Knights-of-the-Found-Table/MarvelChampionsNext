@@ -41,7 +41,7 @@ func TestSuperhumanAgilityOncePerAspectPerRound(t *testing.T) {
 		t.Fatal("Spider-Woman should expose a React hook")
 	}
 	aggr := engine.Card{Code: "04043", Owner: p.ID} // Press the Advantage (aggression)
-	just := engine.Card{Code: "04047", Owner: p.ID}  // Skilled Investigator (justice)
+	just := engine.Card{Code: "04047", Owner: p.ID} // Skilled Investigator (justice)
 
 	msgs := b.React(g, p, engine.PlayCard{Player: p.ID, Card: aggr})
 	if len(msgs) != 1 {

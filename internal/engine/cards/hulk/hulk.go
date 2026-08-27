@@ -57,7 +57,7 @@ func registerHulk() {
 					var choices []engine.Choice
 					for _, c := range pl.Hand {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Draw 1, discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.draw1Discard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DrawCards{Player: pl.ID, N: 1},
 							engine.DiscardCards{Player: pl.ID, Cards: engine.CardList{c}},
@@ -123,7 +123,7 @@ func registerSubOrbitalLeap() {
 			if g.MainScheme != nil {
 				id := g.MainScheme.ID
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Remove 3 threat from " + g.MainScheme.EDef().Name), Kind: engine.ChoiceLabel,
+					Label: engine.Tf("c.removeThreatFrom", 3, g.MainScheme), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 			}
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
@@ -133,7 +133,7 @@ func registerSubOrbitalLeap() {
 				}
 				id := id
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Remove 3 threat from " + ss.EDef().Name), Kind: engine.ChoiceLabel,
+					Label: engine.Tf("c.removeThreatFrom", 3, ss), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: 3, Source: pid}))
 			}
 			if len(choices) == 0 {

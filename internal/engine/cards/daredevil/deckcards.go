@@ -51,7 +51,7 @@ func registerContingencyPlanning() {
 								continue
 							}
 							choices = append(choices, engine.Choice{
-								Label: engine.S("Tuck " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.tuckName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(engine.SupportStoreCard{ID: s.ID, Card: c}))
 						}
 						if len(choices) == 0 {
@@ -131,7 +131,7 @@ func registerInHarmsWay() {
 				for _, sid := range g.Schemes() {
 					s := g.Entity(sid)
 					inner = append(inner, engine.Choice{
-						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+						Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 						SourceID: sid, CardCode: s.ECode(),
 					}.Msgs(
 						engine.DamageEntity{Target: id, Damage: x, Source: pid},

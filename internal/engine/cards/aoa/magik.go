@@ -60,7 +60,7 @@ func registerMagik() {
 				if c.Def().HasTrait("spell") {
 					// No discard-to-deck-top message exists. ShuffleIntoDeck
 					// preserves the zone change but randomizes its final position.
-					choices = append(choices, engine.Choice{Label: engine.S("Return " + c.Def().Name + " to your deck"), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.Tf("c.returnToDeck", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -88,7 +88,7 @@ func registerMagikSignatures() {
 				p := g.Player(s.Owner)
 				var choices []engine.Choice
 				for _, c := range p.Hand {
-					choices = append(choices, engine.Choice{Label: engine.S("Put " + c.Def().Name + " on top"), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					choices = append(choices, engine.Choice{Label: engine.Tf("c.putOnTop", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.SwapHandWithDeckTop{Player: p.ID, CardID: c.ID}))
 				}
 				if len(choices) == 0 || len(p.Deck) == 0 {
@@ -126,7 +126,7 @@ func registerMagikSignatures() {
 		n := min(3, len(p.Deck))
 		var choices []engine.Choice
 		for _, c := range p.Deck[:n] {
-			choices = append(choices, engine.Choice{Label: engine.S("Draw " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+			choices = append(choices, engine.Choice{Label: engine.Tf("c.drawName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 				Msgs(engine.TopDeckPick{Player: p.ID, CardID: c.ID}))
 		}
 		// TopDeckPick draws one and bottoms the others. This approximates
@@ -139,7 +139,7 @@ func registerMagikSignatures() {
 		var choices []engine.Choice
 		for _, c := range p.Discard {
 			if c.Code != "45037" && c.Def().CardSet == "magik" {
-				choices = append(choices, engine.Choice{Label: engine.S("Return " + c.Def().Name + " to your deck"), Kind: engine.ChoiceCard, CardCode: c.Code}.
+				choices = append(choices, engine.Choice{Label: engine.Tf("c.returnToDeck", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 					Msgs(engine.ReadyEntity{ID: p.ID}, engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 			}
 		}

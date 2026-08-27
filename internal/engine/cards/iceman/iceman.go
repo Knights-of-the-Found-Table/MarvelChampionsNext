@@ -243,7 +243,7 @@ func registerIcemanSignatures() {
 				msgs = append(msgs, engine.AddEntityCounter{ID: id, N: 0})
 			}
 			msgs = append([]engine.Message{engine.DamageEntity{Target: id, Damage: damage, Source: p.ID}}, msgs...)
-			choices = append(choices, engine.Choice{Label: engine.S(target.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: target.ECode()}.Msgs(msgs...))
+			choices = append(choices, engine.Choice{Label: engine.Tf("m.cardName", target), Kind: engine.ChoiceTarget, SourceID: id, CardCode: target.ECode()}.Msgs(msgs...))
 		}
 		if len(choices) == 0 {
 			return nil

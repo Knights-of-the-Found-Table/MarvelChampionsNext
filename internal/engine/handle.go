@@ -1814,7 +1814,7 @@ func (g *Game) askMulligan(pid PlayerID) {
 	for _, c := range p.Hand {
 		def := c.Def()
 		pick.Choices = append(pick.Choices, Choice{
-			Label: S(def.Name), Kind: ChoiceCard, CardCode: def.Code,
+			Label: Tf("m.cardName", def), Kind: ChoiceCard, CardCode: def.Code,
 		}.Msgs(MulliganCard{Player: p.ID, CardID: c.ID}))
 	}
 	q := Ask(Tf("q.mulligan"),
@@ -1837,7 +1837,7 @@ func (g *Game) askDiscardToHandSize(pid PlayerID) {
 		for _, c := range p.Hand {
 			def := c.Def()
 			pick.Choices = append(pick.Choices, Choice{
-				Label: S(def.Name), Kind: ChoiceCard, CardCode: def.Code,
+				Label: Tf("m.cardName", def), Kind: ChoiceCard, CardCode: def.Code,
 			}.Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
 		}
 		q := Ask(Tf("q.discardBeforeDraw"),
@@ -1851,7 +1851,7 @@ func (g *Game) askDiscardToHandSize(pid PlayerID) {
 	for _, c := range p.Hand {
 		def := c.Def()
 		q.Choices = append(q.Choices, Choice{
-			Label: S(def.Name), Kind: ChoiceCard, CardCode: def.Code,
+			Label: Tf("m.cardName", def), Kind: ChoiceCard, CardCode: def.Code,
 		}.Msgs(DiscardCards{Player: p.ID, Cards: CardList{c}}))
 	}
 	q.N = over
@@ -2090,7 +2090,7 @@ func (g *Game) handleVillainActivates(m VillainActivates) {
 				continue
 			}
 			g.Push(AskQuestion{Player: p.ID, Question: Ask(
-				Tf("q.tempusPrompt", def.Name),
+				Tf("q.tempusPrompt", def),
 				Choice{ID: "tempus-cancel", Label: Tf("m.discardTempus"), Kind: ChoiceAbility, SourceID: a.ID, CardCode: a.Code}.
 					Msgs(AllyDestroyed{AllyID: a.ID}, DealEncounterToPlayer{Player: p.ID}),
 				Choice{ID: "tempus-pass", Label: Tf("m.letSchemeResolve"), Kind: ChoicePass}.
@@ -2155,7 +2155,7 @@ func (g *Game) handleMinionActivates(m MinionActivates) {
 			for _, uid := range p.Upgrades {
 				if u := g.Upgrades[uid]; u != nil && u.Code == "50050" {
 					g.Push(AskQuestion{Player: p.ID, Question: Ask(
-						Tf("q.informantPrompt", p.Name, def.Name),
+						Tf("q.informantPrompt", p.Name, def),
 						Choice{ID: "informant-use", Label: Tf("m.discardInformant"), Kind: ChoicePlay, CardCode: u.Code}.
 							Msgs(DiscardControlled{Player: p.ID, ID: u.ID},
 								ThwartScheme{Scheme: g.MainScheme.ID, N: g.schemeValueOf(mn.ID), Source: u.ID}),

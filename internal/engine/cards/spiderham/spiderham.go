@@ -67,7 +67,7 @@ func registerHamSignatures() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "spider_ham" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -115,7 +115,7 @@ func registerHamSignatures() {
 			for _, id := range cardutil.SortedIDs(g.SideSchemes) {
 				s := g.SideSchemes[id]
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Remove 5 threat from " + s.EDef().Name), Kind: engine.ChoiceTarget,
+					Label: engine.Tf("c.removeThreatFrom", 5, s), Kind: engine.ChoiceTarget,
 					SourceID: id, CardCode: s.Code,
 				}.Msgs(pay, engine.ThwartScheme{Scheme: id, N: 5, Source: p.ID}))
 			}

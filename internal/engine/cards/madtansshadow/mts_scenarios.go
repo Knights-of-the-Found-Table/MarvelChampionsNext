@@ -170,10 +170,10 @@ func registerEbonyMaw() {
 			for _, p := range g.Players {
 				opts = append(opts,
 					engine.Choice{
-						ID: "dmg" + string(p.ID), Label: engine.S(p.Name + " takes 2 damage"), Kind: engine.ChoiceLabel,
+						ID: "dmg" + string(p.ID), Label: engine.Tf("c.playerTakes2", p.Name), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.DamageEntity{Target: p.ID, Damage: 2, Source: e.EID()}),
 					engine.Choice{
-						ID: "thr" + string(p.ID), Label: engine.S("Place 2 threat here (" + p.Name + ")"), Kind: engine.ChoiceLabel,
+						ID: "thr" + string(p.ID), Label: engine.Tf("c.place2ThreatPlayer", p.Name), Kind: engine.ChoiceLabel,
 					}.Msgs(engine.SchemeThreat{Scheme: e.EID(), N: 2, Source: e.EID()}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: cardutil.FirstPlayerID(g),

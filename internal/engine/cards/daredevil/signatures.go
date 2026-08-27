@@ -59,7 +59,7 @@ func chooseSenseFree(g *engine.Game, p *engine.Player, prompt string) []engine.M
 	var choices []engine.Choice
 	for _, c := range p.SenseDeck {
 		choices = append(choices, engine.Choice{
-			Label: engine.S("Play " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.Tf("m.playCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.Msgs(engine.SenseEnterPlay{Player: p.ID, Card: c}))
 	}
 	choices = append(choices, cardutil.Skip())
@@ -164,7 +164,7 @@ func registerFocusTheSenses() {
 			var choices []engine.Choice
 			for _, c := range p.SenseDeck {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Play " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("m.playCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.SenseEnterPlay{Player: p.ID, Card: c}))
 			}
 			out := recall
@@ -195,7 +195,7 @@ func registerFoggyNelson() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+							Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 							SourceID: id, CardCode: s.ECode(),
 						}.Msgs(engine.ThwartScheme{Scheme: id, N: 2, Source: pid}))
 					}
@@ -246,7 +246,7 @@ func registerKarenPage() {
 							msgs = append(msgs, engine.DrawCards{Player: p.ID, N: 1})
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
@@ -426,7 +426,7 @@ func registerManWithoutFear() {
 					var choices []engine.Choice
 					for _, c := range p.SenseDeck {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Play " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.playCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DamageEntity{Target: p.ID, Damage: 1, Source: p.ID},
 							engine.SenseEnterPlay{Player: p.ID, Card: c},

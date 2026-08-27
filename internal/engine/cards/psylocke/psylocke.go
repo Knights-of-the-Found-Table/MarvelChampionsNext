@@ -89,7 +89,7 @@ func registerPsylocke() {
 			var choices []engine.Choice
 			for _, u := range ups {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Flip " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
+					Label: engine.Tf("c.flipName", u), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID,
 				}.Msgs(flipSignal(u)))
 			}
 			return []engine.Message{engine.AskQuestion{
@@ -252,7 +252,7 @@ func registerMentalDetection() {
 					msgs = append(msgs, engine.DrawCards{Player: pid, N: draw})
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(msgs...))
 			}
 			if len(choices) == 0 {
@@ -355,13 +355,13 @@ func registerTrainingRegimen() {
 							engine.ShufflePlayerDeck{Player: p.ID},
 						}
 						ch := engine.Choice{
-							Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(take...)
 						if p.IsHero() && len(p.Hand) > 0 {
 							var discards []engine.Choice
 							for _, h := range p.Hand {
 								discards = append(discards, engine.Choice{
-									Label: engine.S("Discard " + h.Def().Name), Kind: engine.ChoiceCard, CardCode: h.Code,
+									Label: engine.Tf("m.discardCard", h), Kind: engine.ChoiceCard, CardCode: h.Code,
 								}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{h}}))
 							}
 							ch = ch.WithThen(engine.Ask(engine.Tf("c.trainingRegimenDiscard1CardFromYourHand"), discards...))
@@ -615,7 +615,7 @@ func registerObligation() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Discard " + c.Def().Name + " → remove Body Swapped from the game"),
+					Label: engine.Tf("c.discardBodySwap", c),
 					Kind:  engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(
 					engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},

@@ -101,7 +101,7 @@ func registerHawkeye() {
 					for _, c := range pl.Deck {
 						if c.Code == bowCode {
 							choices = append(choices, engine.Choice{
-								Label: engine.S("Take " + c.Def().Name + " from deck"), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.takeFromDeck", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.TakeDeckCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -111,7 +111,7 @@ func registerHawkeye() {
 					for _, c := range pl.Discard {
 						if c.Code == bowCode {
 							choices = append(choices, engine.Choice{
-								Label: engine.S("Take " + c.Def().Name + " from discard"), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.takeFromDiscard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ReturnDiscardCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -206,7 +206,7 @@ func registerQuiver() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(engine.TakeDeckCard{Player: pl.ID, CardID: c.ID}))
 					}
 					if len(choices) == 0 {
@@ -250,7 +250,7 @@ func registerMockingbird() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Spend " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.spendName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: pl.ID, Cards: engine.CardList{c}},
 							engine.ReturnControlled{Player: pl.ID, ID: self},
@@ -502,7 +502,7 @@ func registerKateBishop() {
 							continue
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Discard " + c.Def().Name + " (X=" + itoa(x) + ")"), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("c.discardXCost", c, x), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: pl.ID, Cards: engine.CardList{c}},
 						).WithThen(engine.Ask(engine.S("Hawkeye — deal "+itoa(x)+" damage to which enemy?"), sub...)))

@@ -57,7 +57,7 @@ func registerQuicksilver() {
 			}
 			for _, sid := range g.Schemes() {
 				s := g.Entity(sid)
-				options = append(options, engine.Choice{Label: engine.S("Remove 2 — " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
+				options = append(options, engine.Choice{Label: engine.Tf("c.remove2Name", s), Kind: engine.ChoiceTarget, SourceID: sid, CardCode: s.ECode()}.
 					Msgs(engine.ThwartScheme{Scheme: sid, N: 2, Source: p.ID}))
 			}
 			if len(options) == 0 {
@@ -112,7 +112,7 @@ func registerQuicksilver() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Code[:2] == "14" && def.Type != "obligation" {
-							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -342,7 +342,7 @@ func registerQuicksilver() {
 				}
 				for _, id := range q.Allies {
 					if a := g.Allies[id]; a != nil && a.Damage > 0 {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.HealEntity{Target: a.ID, N: 1}))
 					}
 				}

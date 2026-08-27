@@ -418,7 +418,7 @@ func registerSignatures() {
 			var choices []engine.Choice
 			for _, id := range p.Upgrades {
 				if u := g.Upgrades[id]; u != nil && u.Exhausted && u.EDef().CardSet == "hercules" {
-					choices = append(choices, engine.Choice{Label: engine.S("Ready " + u.EDef().Name), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID}.Msgs(engine.ReadyEntity{ID: u.ID}))
+					choices = append(choices, engine.Choice{Label: engine.Tf("c.readyName", u), Kind: engine.ChoiceCard, CardCode: u.Code, SourceID: u.ID}.Msgs(engine.ReadyEntity{ID: u.ID}))
 				}
 			}
 			if len(choices) > 0 {
@@ -580,7 +580,7 @@ func registerNemesis() {
 		for _, c := range owner.Hand {
 			for _, r := range c.Def().Resources {
 				if r == "physical" || r == "wild" {
-					choices = append(choices, engine.Choice{Label: engine.S("Spend " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.DiscardCards{Player: owner.ID, Cards: engine.CardList{c}}))
+					choices = append(choices, engine.Choice{Label: engine.Tf("c.spendName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.DiscardCards{Player: owner.ID, Cards: engine.CardList{c}}))
 					break
 				}
 			}

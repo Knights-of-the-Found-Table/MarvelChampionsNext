@@ -35,7 +35,7 @@ func attachToMinion(code string) func(g *engine.Game, e engine.Entity) []engine.
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: engine.S("Attach to " + mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: mn.ID, CardCode: mn.Code,
+				Label: engine.Tf("c.attachToName", mn), Kind: engine.ChoiceTarget, SourceID: mn.ID, CardCode: mn.Code,
 			}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: mn.ID}))
 		}
 		if len(choices) == 0 {
@@ -76,7 +76,7 @@ func attachToXMenAlly(bonus func() (thw, atk, hp int)) func(g *engine.Game, e en
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+				Label: engine.Tf("c.attachToName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 			}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, THW: thw, ATK: atk, MaxHP: hp}))
 		}
 		if len(choices) == 0 {
@@ -101,7 +101,7 @@ func registerRemainingCyclops() {
 			for _, c := range p.Deck {
 				if c.Def().Type == "resource" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeFromDeck", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}))
 					break
 				}
@@ -109,7 +109,7 @@ func registerRemainingCyclops() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "resource" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeFromDiscard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					break
 				}
@@ -220,13 +220,13 @@ func registerRemainingCyclops() {
 			}
 			if g.EntityHasTrait(p.ID, "x-men") {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Ready " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.Tf("c.readyName", p), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.ExhaustEntity{ID: s.ID}, engine.ReadyEntity{ID: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if x := g.Allies[id]; x != nil && x.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Ready " + x.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.readyName", x), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: s.ID}, engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -310,7 +310,7 @@ func registerRemainingCyclops() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+					Label: engine.Tf("c.readyName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.ReadyEntity{ID: id}, engine.HealEntity{Target: id, N: 1}))
 			}
 			if len(choices) == 0 {
@@ -337,7 +337,7 @@ func registerRemainingCyclops() {
 			for _, c := range p.Discard {
 				if c.Def().CardSet == "cyclops" {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Return " + c.Def().Name + " to hand"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.returnToHand", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -390,7 +390,7 @@ func registerRemainingCyclops() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Pin down " + mn.EDef().Name + " (−2 ATK)"), Kind: engine.ChoiceTarget, SourceID: mn.ID,
+					Label: engine.Tf("c.pinDown", mn), Kind: engine.ChoiceTarget, SourceID: mn.ID,
 				}.Msgs(
 					engine.AttachUpgrade{ID: u.ID, Target: mn.ID},
 					engine.BoostEnemyAttack{Enemy: mn.ID, N: -2},
@@ -429,7 +429,7 @@ func registerRemainingCyclops() {
 			}
 			if !hasHonorary(p.ID) {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.Tf("c.attachToName", p), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: p.ID, MaxHP: 1, GrantTrait: "x-men"}))
 			}
 			for _, id := range p.Allies {
@@ -438,7 +438,7 @@ func registerRemainingCyclops() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+					Label: engine.Tf("c.attachToName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, MaxHP: 1, GrantTrait: "x-men"}))
 			}
 			if len(choices) == 0 {

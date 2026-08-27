@@ -113,7 +113,7 @@ func registerValkyrie() {
 					for i := 0; i < 5 && i < len(p.Deck); i++ {
 						c := p.Deck[i]
 						if c.Def().Code[:2] == "25" && c.Def().Type != "obligation" {
-							picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 								Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 									engine.ShufflePlayerDeck{Player: p.ID}))
 						}
@@ -220,7 +220,7 @@ func registerValkyrie() {
 				def := c.Def()
 				if def.Code[:2] == "25" && def.Type != "obligation" && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 						Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -368,7 +368,7 @@ func registerValkyrie() {
 					for _, c := range p.Deck {
 						def := c.Def()
 						if def.Type == "ally" && def.HasTrait("asgard") {
-							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID},
 									engine.PlayCard{Player: p.ID, Card: c, Paid: engine.CostPaid{}},
 									engine.ShufflePlayerDeck{Player: p.ID}))
@@ -440,7 +440,7 @@ func registerValkyrie() {
 					for _, c := range p.Discard {
 						def := c.Def()
 						if def.Type == "event" && def.Aspect == "leadership" {
-							picks = append(picks, engine.Choice{Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: def.Code}.
+							picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: def.Code}.
 								Msgs(engine.ShuffleIntoDeck{Player: p.ID, CardID: c.ID}))
 						}
 					}
@@ -478,12 +478,12 @@ func registerValkyrie() {
 				for _, id := range q.Allies {
 					a := g.Allies[id]
 					if a != nil && a.Exhausted && (a.EDef().HasTrait("avenger") || a.EDef().HasTrait("guardian")) {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ReadyEntity{ID: a.ID}))
 					}
 				}
 				if q.Exhausted && (g.EntityHasTrait(q.ID, "avenger") || g.EntityHasTrait(q.ID, "guardian")) {
-					picks = append(picks, engine.Choice{Label: engine.S(q.Name + " (identity)"), Kind: engine.ChoiceTarget, SourceID: q.ID}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("c.nameIdentity", q.Name), Kind: engine.ChoiceTarget, SourceID: q.ID}.
 						Msgs(engine.ReadyEntity{ID: q.ID}))
 				}
 			}

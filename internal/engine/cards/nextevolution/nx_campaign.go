@@ -333,7 +333,7 @@ func overburdenChoice(g *engine.Game, p *engine.Player) []engine.Message {
 	}
 	if found {
 		choices = append(choices, engine.Choice{
-			ID: "disc", Label: engine.S("Discard " + resource.Def().Name), Kind: engine.ChoiceLabel,
+			ID: "disc", Label: engine.Tf("m.discardCard", resource), Kind: engine.ChoiceLabel,
 		}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{resource}}))
 	}
 	return []engine.Message{engine.AskQuestion{

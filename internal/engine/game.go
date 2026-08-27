@@ -654,7 +654,7 @@ func (g *Game) validateSelection(q *Question, choices []*Choice) ([]Message, err
 		for _, id := range g.Schemes() {
 			s := g.Entity(id)
 			picks = append(picks, Choice{
-				Label: S(s.EDef().Name), Kind: ChoiceTarget,
+				Label: Tf("m.cardName", s), Kind: ChoiceTarget,
 				SourceID: id, CardCode: s.ECode(),
 			}.Msgs(ThwartScheme{Scheme: id, N: n, Source: pid}))
 		}

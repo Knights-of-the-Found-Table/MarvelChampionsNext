@@ -379,7 +379,7 @@ func registerPackCards() {
 				}
 				for _, id := range q.Allies {
 					if a := g.Allies[id]; a != nil && a.Damage > 0 {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.HealEntity{Target: a.ID, N: 2}))
 					}
 				}
@@ -437,7 +437,7 @@ func registerPackCards() {
 							continue
 						}
 						seen[c.Code] = true
-						picks = append(picks, engine.Choice{Label: engine.S(def.Name + " (" + match + ")"), Kind: engine.ChoiceCard, CardCode: def.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("c.nameParen", def, match), Kind: engine.ChoiceCard, CardCode: def.Code}.
 							Msgs(engine.CostDiscountApply{Player: p.ID, Amount: 1}))
 					}
 					if len(picks) == 0 {
@@ -512,7 +512,7 @@ func registerPackCards() {
 					Msgs(engine.ToughEntity{Target: q.ID}))
 				for _, id := range q.Allies {
 					if a := g.Allies[id]; a != nil {
-						picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+						picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 							Msgs(engine.ToughEntity{Target: a.ID}))
 					}
 				}
@@ -684,7 +684,7 @@ func attachPickMsg(g *engine.Game, e engine.Entity, name string, hp int) engine.
 		if name == "Power Gloves" && !hasTrait(a, "avenger") {
 			continue
 		}
-		picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+		picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 			Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, MaxHP: hp}))
 	}
 	if len(picks) == 0 {

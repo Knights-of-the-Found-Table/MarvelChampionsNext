@@ -104,7 +104,7 @@ func registerTRORSAspect() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
 					picks = append(picks, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ToughEntity{Target: id}))
 				}
 			}
@@ -162,7 +162,7 @@ func registerTRORSAspect() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Exhausted && g.EntityHasTrait(id, "avenger") {
 					picks = append(picks, engine.Choice{
-						Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ReadyEntity{ID: id}))
 				}
 			}
@@ -243,7 +243,7 @@ func registerTRORSAspect() {
 			for _, id := range sortedSchemeIDs(g) {
 				if s := g.SideSchemes[id]; s != nil && s.Threat > 0 {
 					picks = append(picks, engine.Choice{
-						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 3 * len(g.Players), Source: e.EID()}))
 				}
 			}

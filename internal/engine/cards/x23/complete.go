@@ -128,7 +128,7 @@ func registerX23Extras() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.theDirectApproachAttachTo"), choices...)}}

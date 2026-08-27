@@ -88,7 +88,7 @@ func registerWoLANDPlayers() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Remove " + fmt.Sprint(n) + " threat from " + s.EDef().Name),
+					Label: engine.Tf("c.removeThreatFrom", n, s),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: n, Source: p.ID}))
 			}
@@ -196,7 +196,7 @@ func registerWoLANDPlayers() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Reveal " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.revealName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(
 					engine.EncounterTakeCard{CardID: c.ID},
 					engine.RevealEncounterCard{Player: pid, Card: c},
@@ -240,7 +240,7 @@ func registerWoLANDPlayers() {
 				attach := id
 				upgrade := u
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
+					Label: engine.Tf("c.attachToName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
 				}.Msgs(engine.AttachUpgrade{ID: upgrade.ID, Target: attach}))
 			}
 			if len(choices) == 0 {
@@ -297,7 +297,7 @@ func registerWoLANDPlayers() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
+					Label: engine.Tf("c.attachToName", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			if len(choices) == 0 {
@@ -334,7 +334,7 @@ func registerWoLANDPlayers() {
 				}
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Remove " + fmt.Sprint(amount) + " threat from " + s.EDef().Name),
+					Label: engine.Tf("c.removeThreatFrom", amount, s),
 					Kind:  engine.ChoiceTarget, SourceID: id, CardCode: s.ECode(),
 				}.Msgs(engine.ThwartScheme{Scheme: id, N: amount, Source: u.Owner}))
 			}
@@ -452,7 +452,7 @@ func registerWoLANDPlayers() {
 			var choices []engine.Choice
 			for _, tp := range g.Players {
 				choices = append(choices, engine.Choice{
-					Label: engine.S(tp.Name + " draws 1"), Kind: engine.ChoiceLabel,
+					Label: engine.Tf("c.playerDraws1", tp.Name), Kind: engine.ChoiceLabel,
 				}.Msgs(engine.DrawCards{Player: tp.ID, N: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{
@@ -484,7 +484,7 @@ func registerWoLANDPlayers() {
 			if hasSpiderTitle(p.HeroDef().Name) || hasSpiderTitle(p.AlterEgoDef().Name) {
 				if !warriorAttachedTo(g, p.ID) {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Attach to " + p.HeroDef().Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
+						Label: engine.Tf("c.attachToName", p.HeroDef()), Kind: engine.ChoiceTarget, SourceID: p.ID,
 					}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: p.ID, GrantTrait: "web-warrior"}))
 				}
 			}
@@ -494,7 +494,7 @@ func registerWoLANDPlayers() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Attach to " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+					Label: engine.Tf("c.attachToName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id, GrantTrait: "web-warrior"}))
 			}
 			if len(choices) == 0 {
@@ -671,7 +671,7 @@ func registerInheritors() {
 				for _, id := range p.Allies {
 					if a := g.Allies[id]; a != nil {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Stun " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+							Label: engine.Tf("c.stunName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 						}.Msgs(engine.StunEntity{Target: id}))
 					}
 				}
@@ -711,14 +711,14 @@ func registerInheritors() {
 				for _, id := range cardutil.SortedIDs(g.Supports) {
 					if s := g.Supports[id]; s != nil && s.Owner == pid {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
+							Label: engine.Tf("m.discardCard", s), Kind: engine.ChoiceTarget, SourceID: id, CardCode: s.Code,
 						}.Msgs(engine.DiscardControlled{Player: pid, ID: id}))
 					}
 				}
 				for _, id := range cardutil.SortedIDs(g.Upgrades) {
 					if u := g.Upgrades[id]; u != nil && u.Owner == pid {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Discard " + u.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: u.Code,
+							Label: engine.Tf("m.discardCard", u), Kind: engine.ChoiceTarget, SourceID: id, CardCode: u.Code,
 						}.Msgs(engine.DiscardControlled{Player: pid, ID: id}))
 					}
 				}

@@ -78,7 +78,7 @@ func registerX23() {
 					for _, c := range pl.Discard {
 						if c.Code == "43003" || c.Code == "43007" {
 							choices = append(choices, engine.Choice{
-								Label: engine.S("Shuffle in " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.shuffleInName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ShuffleIntoDeck{Player: pl.ID, CardID: c.ID},
 								engine.DrawCards{Player: pl.ID, N: 1},
@@ -209,7 +209,7 @@ func registerRegenerativeLongevity() {
 			hb := honeyBadger(g, p)
 			var choices []engine.Choice
 			choices = append(choices, engine.Choice{
-				ID: "self-4", Label: engine.S("Heal 4 from " + p.Name), Kind: engine.ChoiceLabel,
+				ID: "self-4", Label: engine.Tf("c.healNFrom", 4, p.Name), Kind: engine.ChoiceLabel,
 			}.Msgs(engine.HealEntity{Target: pid, N: 4}))
 			if hb != nil {
 				choices = append(choices,
@@ -336,7 +336,7 @@ func registerSisterhood() {
 								engine.ShufflePlayerDeck{Player: pl.ID})
 						}
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(fetch...))
 					}
 					if len(choices) == 0 {

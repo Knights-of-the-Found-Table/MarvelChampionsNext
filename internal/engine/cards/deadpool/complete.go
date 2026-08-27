@@ -166,7 +166,7 @@ func registerCorpsCards() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					ID: "ally-" + id.String(), Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "ally-" + id.String(), Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.ReadyEntity{ID: id}, engine.AllyStatBonus{Ally: id, ATK: 1}))
 			}
 			return []engine.Message{engine.AskQuestion{
@@ -549,7 +549,7 @@ func registerCorpsNeutrals() {
 				for _, id := range g.Schemes() {
 					s := g.Entity(id)
 					thw = append(thw, engine.Choice{
-						Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ThwartScheme{Scheme: id, N: 1, Source: p.ID}))
 				}
 				choices = append(choices, engine.Choice{ID: "thw", Label: engine.Tf("c.remove1Threat"), Kind: engine.ChoiceLabel}.
@@ -623,7 +623,7 @@ func registerCorpsNeutrals() {
 				if c.Def().Type == "ally" && c.Def().HasTrait("Deadpool Corps") {
 					card := c
 					return []engine.Ability{{
-						Label: engine.S("Deadpool Corps Ship — deploy " + card.Def().Name), Type: engine.AbilityAction,
+						Label: engine.Tf("c.dpCorpsShipDeploy", card), Type: engine.AbilityAction,
 						Exhaust: true,
 						Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 							s := g.Supports[self]
@@ -719,7 +719,7 @@ func registerCorpsNeutrals() {
 			for _, id := range g.Schemes() {
 				s := g.Entity(id)
 				choices = append(choices, engine.Choice{
-					ID: "sch-" + id.String(), Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget,
+					ID: "sch-" + id.String(), Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget,
 				}.Msgs(engine.AttachUpgrade{ID: u.ID, Target: id}))
 			}
 			return []engine.Message{engine.AskQuestion{

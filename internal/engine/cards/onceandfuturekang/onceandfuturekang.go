@@ -326,13 +326,13 @@ func registerMinions() {
 			var picks []engine.Choice
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", a), Kind: engine.ChoiceCard, CardCode: a.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", s), Kind: engine.ChoiceCard, CardCode: s.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
@@ -539,13 +539,13 @@ func registerTreacheries() {
 			var picks []engine.Choice
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + a.EDef().Name), Kind: engine.ChoiceCard, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", a), Kind: engine.ChoiceCard, CardCode: a.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			for _, id := range p.Supports {
 				if s := g.Supports[id]; s != nil {
-					picks = append(picks, engine.Choice{Label: engine.S("Discard " + s.EDef().Name), Kind: engine.ChoiceCard, CardCode: s.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.discardCard", s), Kind: engine.ChoiceCard, CardCode: s.Code}.
 						Msgs(engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}

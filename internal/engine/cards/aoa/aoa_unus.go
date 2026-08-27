@@ -284,7 +284,7 @@ func registerDystopianNightmare() {
 			for i, c := range p.Hand {
 				hc := c
 				choices = append(choices, engine.Choice{
-					ID: "d-" + hc.ID, Label: engine.S("Discard " + hc.Def().Name), Kind: engine.ChoiceCard,
+					ID: "d-" + hc.ID, Label: engine.Tf("m.discardCard", hc), Kind: engine.ChoiceCard,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{hc}},
 					engine.ObligationResolve{Player: p.ID, Card: card}))
 				_ = i

@@ -81,7 +81,7 @@ func weatherChoices(g *engine.Game, p *engine.Player, prompt string) []engine.Me
 		}
 		def := engine.DB.MustLookup(code)
 		choices = append(choices, engine.Choice{
-			Label: engine.S(def.Name), Kind: engine.ChoiceCard, CardCode: code,
+			Label: engine.Tf("m.cardName", def), Kind: engine.ChoiceCard, CardCode: code,
 		}.Msgs(engine.AddEntityCounter{ID: p.ID, N: weatherSignal(code)}))
 	}
 	if len(choices) == 0 {
@@ -182,7 +182,7 @@ func weatherSpecial(g *engine.Game, p *engine.Player) []engine.Message {
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: engine.S(mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code,
+				Label: engine.Tf("m.cardName", mn), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code,
 			}.Msgs(engine.AddEntityCounter{ID: id, N: blankMinionSignal}))
 		}
 		if len(choices) > 0 {
@@ -489,7 +489,7 @@ func registerStormNemesis() {
 		for _, id := range targets {
 			enemy := g.Entity(id)
 			choices = append(choices, engine.Choice{
-				Label: engine.S(enemy.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
+				Label: engine.Tf("m.cardName", enemy), Kind: engine.ChoiceTarget, SourceID: id, CardCode: enemy.ECode(),
 			}.Msgs(
 				engine.DamageEntity{Target: p.ID, Damage: maxATK, Source: id},
 				engine.DamageEntity{Target: id, Damage: p.AttackStat(g), Source: p.ID},

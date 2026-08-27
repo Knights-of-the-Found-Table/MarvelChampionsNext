@@ -119,7 +119,7 @@ func registerSilkComplete() {
 			}
 			top, _ := g.PeekEncounterTop()
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				engine.S("Madame Web — top of the encounter deck: "+top.Def().Name),
+				engine.Tf("c.madameWebTopDeck", top),
 				engine.Choice{Label: engine.Tf("c.discardIt"), Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
 				engine.Choice{Label: engine.Tf("c.leaveIt"), Kind: engine.ChoicePass},
 			)}}

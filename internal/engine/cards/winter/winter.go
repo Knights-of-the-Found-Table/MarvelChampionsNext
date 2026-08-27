@@ -59,7 +59,7 @@ func registerSignatures() {
 		var ch []engine.Choice
 		for _, c := range p.Discard {
 			if c.Def().Type == "event" && c.Def().HasTrait("attack") {
-				ch = append(ch, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
+				ch = append(ch, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 			}
 		}
 		if len(ch) == 0 {
@@ -105,7 +105,7 @@ func registerSignatures() {
 			var ch []engine.Choice
 			for _, c := range g.EncounterDeck {
 				if c.Def().Type == "minion" {
-					ch = append(ch, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.RevealEncounterCard{Player: p.ID, Card: c}, engine.DrawCards{Player: p.ID, N: 1}, engine.ShufflePlayerDeck{Player: p.ID}))
+					ch = append(ch, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(engine.RevealEncounterCard{Player: p.ID, Card: c}, engine.DrawCards{Player: p.ID, N: 1}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
 			if len(ch) == 0 {
@@ -172,7 +172,7 @@ func registerObligation() {
 					cost = n
 				}
 			}
-			choices = append(choices, engine.Choice{ID: "discard", Label: engine.S("Discard " + best.Def().Name + " and take damage"), Kind: engine.ChoiceCard, CardCode: best.Code}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{best}}, engine.DamageEntity{Target: p.ID, Damage: cost, Source: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
+			choices = append(choices, engine.Choice{ID: "discard", Label: engine.Tf("c.discardTakeDamage", best), Kind: engine.ChoiceCard, CardCode: best.Code}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{best}}, engine.DamageEntity{Target: p.ID, Damage: cost, Source: p.ID}, engine.ObligationResolve{Player: p.ID, Card: card}))
 		}
 		return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.redRoomProgrammingChoose"), choices...)}}
 	}})

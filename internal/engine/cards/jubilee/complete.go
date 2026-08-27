@@ -52,7 +52,7 @@ func registerJubileeExtras() {
 					for _, id := range g.Schemes() {
 						s := g.Entity(id)
 						choices = append(choices, engine.Choice{
-							Label: engine.S(s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+							Label: engine.Tf("m.cardName", s), Kind: engine.ChoiceTarget, SourceID: id,
 						}.Msgs(engine.ExhaustEntity{ID: p.ID}, engine.ThwartScheme{Scheme: id, N: 2, Source: p.ID}))
 					}
 					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.disguiseRemove2ThreatFrom"), choices...)}}

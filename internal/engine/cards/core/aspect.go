@@ -54,7 +54,7 @@ func registerAspectCards() {
 			for _, id := range p.Allies {
 				if a := g.Allies[id]; a != nil && a.Damage > 0 {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Heal " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
+						Label: engine.Tf("c.healName", a), Kind: engine.ChoiceTarget, SourceID: id, CardCode: a.Code,
 					}.Msgs(engine.HealEntity{Target: id, N: 2}))
 				}
 			}

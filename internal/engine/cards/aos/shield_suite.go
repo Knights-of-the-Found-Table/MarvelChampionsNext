@@ -20,7 +20,7 @@ func registerShieldSuite() {
 			for _, s := range shieldSupports(g, p) {
 				if s.Exhausted {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Ready " + s.EDef().Name), Kind: engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
+						Label: engine.Tf("c.readyName", s), Kind: engine.ChoiceTarget, SourceID: s.ID, CardCode: s.Code,
 					}.Msgs(engine.ReadyEntity{ID: s.ID}))
 				}
 			}
@@ -71,7 +71,7 @@ func registerShieldSuite() {
 					for _, aid := range p.Allies {
 						if a := g.Allies[aid]; a != nil && a.Exhausted {
 							choices = append(choices, engine.Choice{
-								Label: engine.S("Ready " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
+								Label: engine.Tf("c.readyName", a), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
 							}.Msgs(engine.ReadyEntity{ID: aid}))
 						}
 					}
@@ -157,12 +157,12 @@ func registerShieldSuite() {
 							continue
 						}
 						friendly = append(friendly, engine.Choice{
-							Label: engine.S("Tough: " + pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
+							Label: engine.Tf("c.toughColen", pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID,
 						}.Msgs(engine.ToughEntity{Target: pl.ID}))
 						for _, aid := range pl.Allies {
 							if a := g.Allies[aid]; a != nil {
 								friendly = append(friendly, engine.Choice{
-									Label: engine.S("Tough: " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
+									Label: engine.Tf("c.toughColen", a), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code,
 								}.Msgs(engine.ToughEntity{Target: aid}))
 							}
 						}
@@ -211,7 +211,7 @@ func registerShieldSuite() {
 			var choices []engine.Choice
 			for _, c := range p.Hand {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Discard " + c.Def().Name + " (cover for Grant Ward)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("c.discardCoverWard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.ConsumeHandCard{Player: p.ID, CardID: c.ID}))
 			}
 			choices = append(choices, engine.Choice{
@@ -245,7 +245,7 @@ func registerShieldSuite() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				engine.S("Melinda May — top of the encounter deck: "+top.Def().Name),
+				engine.Tf("c.melindaMayTopDeck", top),
 				engine.Choice{Label: engine.Tf("c.discardIt"), Kind: engine.ChoicePass}.Msgs(engine.DiscardEncounterCard{Card: top}),
 				engine.Choice{Label: engine.Tf("c.leaveIt"), Kind: engine.ChoicePass},
 			)}}
@@ -292,7 +292,7 @@ func circeDeploy(g *engine.Game, self engine.EntityID) []engine.Message {
 				continue
 			}
 			choices = append(choices, engine.Choice{
-				Label: engine.S(p.Name + " deploys " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+				Label: engine.Tf("c.playerDeploys", p.Name, c), Kind: engine.ChoiceCard, CardCode: c.Code,
 			}.Msgs(engine.AllyEntersPlayFree{Player: p.ID, Card: c}))
 		}
 	}
@@ -367,7 +367,7 @@ func registerFurySuite() {
 			var choices []engine.Choice
 			for _, c := range top {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardEncounterCard{Card: c}))
 			}
 			choices = append(choices, engine.Choice{Label: engine.Tf("c.discardNone"), Kind: engine.ChoicePass})
@@ -395,7 +395,7 @@ func registerFurySuite() {
 				return nil
 			}
 			return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(
-				engine.S("Intelligence — top of the encounter deck: "+top.Def().Name),
+				engine.Tf("c.intelligenceTopDeck", top),
 				engine.Choice{Label: engine.Tf("c.discardIntelligenceAndTheTopCard"), Kind: engine.ChoicePass}.Msgs(
 					engine.DiscardControlled{Player: p.ID, ID: u.ID},
 					engine.DiscardEncounterCard{Card: top}),
@@ -454,17 +454,17 @@ func registerFurySuite() {
 					continue
 				}
 				if hasShieldTrait(pl.EDef()) {
-					tough = append(tough, engine.Choice{Label: engine.S("Tough: " + pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID}.Msgs(engine.ToughEntity{Target: pl.ID}))
+					tough = append(tough, engine.Choice{Label: engine.Tf("c.toughColen", pl.Name), Kind: engine.ChoiceTarget, SourceID: pl.ID}.Msgs(engine.ToughEntity{Target: pl.ID}))
 				}
 				for _, aid := range pl.Allies {
 					if a := g.Allies[aid]; a != nil && hasShieldTrait(a.EDef()) {
-						tough = append(tough, engine.Choice{Label: engine.S("Tough: " + a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code}.Msgs(engine.ToughEntity{Target: aid}))
+						tough = append(tough, engine.Choice{Label: engine.Tf("c.toughColen", a), Kind: engine.ChoiceTarget, SourceID: aid, CardCode: a.Code}.Msgs(engine.ToughEntity{Target: aid}))
 					}
 				}
 			}
 			var scheme []engine.Choice
 			for _, sid := range g.Schemes() {
-				scheme = append(scheme, engine.Choice{Label: engine.S("Remove 3 threat from " + g.Entity(sid).EDef().Name), Kind: engine.ChoiceTarget, SourceID: sid}.Msgs(engine.ThwartScheme{Scheme: sid, N: 3, Source: e.EID()}))
+				scheme = append(scheme, engine.Choice{Label: engine.Tf("c.removeThreatFrom", 3, g.Entity(sid)), Kind: engine.ChoiceTarget, SourceID: sid}.Msgs(engine.ThwartScheme{Scheme: sid, N: 3, Source: e.EID()}))
 			}
 			var choices []engine.Choice
 			choices = append(choices, engine.Choice{Label: engine.Tf("c.draw2Cards"), Kind: engine.ChoicePass}.Msgs(engine.DrawCards{Player: p.ID, N: 2}))

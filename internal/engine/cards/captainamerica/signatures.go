@@ -172,7 +172,7 @@ func shieldTossCardStep(g *engine.Game, p *engine.Player, shield engine.EntityID
 			continue
 		}
 		choices = append(choices, engine.Choice{
-			Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+			Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 		}.WithThen(shieldTossEnemyStep(g, p, shield, append(cards, c), enemies)))
 	}
 	// A discard is mandatory per enemy; if the hand ran dry the chain

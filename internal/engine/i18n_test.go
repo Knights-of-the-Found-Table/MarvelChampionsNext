@@ -31,6 +31,13 @@ func parseVerbs(f string) ([]int, []string, bool) {
 	return idx, typ, explicit
 }
 
+// passthroughFormats：en/zh 格式串刻意相同的键。内容全部由参数承载
+// （如 m.cardName 的卡名引用由前端按语言解析），格式串本身无可翻译
+// 之处；不进白名单会被下方"zh==en"检查误伤。
+var passthroughFormats = map[string]bool{
+	"m.cardName": true,
+}
+
 // TestMessageCatalogComplete 要求每个键都有非空 en/zh 两条,且译文确实
 // 与原文不同（防止复制原文当译文）。
 func TestMessageCatalogComplete(t *testing.T) {
@@ -43,7 +50,7 @@ func TestMessageCatalogComplete(t *testing.T) {
 			t.Errorf("%s: missing en or zh entry", key)
 			continue
 		}
-		if en == zh {
+		if en == zh && !passthroughFormats[key] {
 			t.Errorf("%s: zh identical to en", key)
 		}
 	}

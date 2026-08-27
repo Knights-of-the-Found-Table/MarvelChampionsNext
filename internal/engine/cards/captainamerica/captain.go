@@ -70,7 +70,7 @@ func registerCaptainAmerica() {
 					var choices []engine.Choice
 					for _, c := range p.Hand {
 						choices = append(choices, engine.Choice{
-							Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+							Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 						}.Msgs(
 							engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}},
 							engine.ReadyEntity{ID: self},
@@ -192,7 +192,7 @@ func registerCapObligation() {
 			var choices []engine.Choice
 			for _, c := range p.Hand {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+					Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 				}.Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 			}
 			var penalty []engine.Message

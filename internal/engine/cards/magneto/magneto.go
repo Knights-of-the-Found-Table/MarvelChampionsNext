@@ -161,7 +161,7 @@ func registerMagnetoSignatures() {
 				if mn == nil || mn.EDef().HasTrait("elite") {
 					continue
 				}
-				choices = append(choices, engine.Choice{Label: engine.S("Wrap " + mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
+				choices = append(choices, engine.Choice{Label: engine.Tf("c.wrap", mn), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
 					Msgs(engine.AttachUpgrade{ID: e.EID(), Target: id}))
 			}
 			if len(choices) == 0 {
@@ -200,7 +200,7 @@ func registerMagnetoSignatures() {
 			case *engine.MainScheme:
 				remaining = s.Threat
 			}
-			choice := engine.Choice{Label: engine.S("Remove 3 threat from " + scheme.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: scheme.ECode()}.Msgs(msgs...)
+			choice := engine.Choice{Label: engine.Tf("c.removeThreatFrom", 3, scheme), Kind: engine.ChoiceTarget, SourceID: id, CardCode: scheme.ECode()}.Msgs(msgs...)
 			if remaining <= 3 {
 				var attachments []engine.Choice
 				for aid, a := range g.Attachments {
@@ -209,7 +209,7 @@ func registerMagnetoSignatures() {
 					}
 					text := strings.ToLower(a.EDef().Text)
 					if strings.Contains(text, "hero action") || strings.Contains(text, "hero response") {
-						attachments = append(attachments, engine.Choice{Label: engine.S("Discard " + a.EDef().Name), Kind: engine.ChoiceCard, SourceID: aid, CardCode: a.Code}.
+						attachments = append(attachments, engine.Choice{Label: engine.Tf("m.discardCard", a), Kind: engine.ChoiceCard, SourceID: aid, CardCode: a.Code}.
 							Msgs(engine.DiscardAttachmentMsg{ID: aid}))
 					}
 				}
@@ -259,7 +259,7 @@ func registerMagnetoSignatures() {
 				return []engine.Message{engine.DamageEntity{Target: id, Damage: mn.HP(), Source: p.ID}, engine.DamageEntity{Target: target, Damage: 5, Source: p.ID}, engine.StunEntity{Target: target}}
 			})
 			if len(targets) > 0 {
-				wrapped = append(wrapped, engine.Choice{Label: engine.S("Discard " + mn.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
+				wrapped = append(wrapped, engine.Choice{Label: engine.Tf("m.discardCard", mn), Kind: engine.ChoiceTarget, SourceID: id, CardCode: mn.Code}.
 					WithThen(engine.Ask(engine.Tf("c.magneticMissileChooseTheTarget"), targets...)))
 			}
 		}

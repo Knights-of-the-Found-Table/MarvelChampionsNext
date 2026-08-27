@@ -70,7 +70,7 @@ func registerGamora() {
 				k := eventKind(c.Code)
 				if (k == "attack" || k == "thwart") && !seen[c.Code] {
 					seen[c.Code] = true
-					picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -228,7 +228,7 @@ func registerGamora() {
 			for i := 0; i < n && i < len(p.Deck); i++ {
 				c := p.Deck[i]
 				if eventKind(c.Code) == "attack" {
-					picks = append(picks, engine.Choice{Label: engine.S(c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 						Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}, engine.ShufflePlayerDeck{Player: p.ID}))
 				}
 			}
@@ -318,7 +318,7 @@ func registerGamora() {
 				var subs []engine.Choice
 				for _, c := range p.Hand {
 					if eventKind(c.Code) != "" {
-						subs = append(subs, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+						subs = append(subs, engine.Choice{Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.DiscardCards{Player: p.ID, Cards: engine.CardList{c}}))
 					}
 				}
@@ -358,7 +358,7 @@ func registerGamora() {
 			for _, id := range p.Allies {
 				a := g.Allies[id]
 				if a != nil && a.EDef().HasTrait("guardian") {
-					picks = append(picks, engine.Choice{Label: engine.S(a.EDef().Name), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
+					picks = append(picks, engine.Choice{Label: engine.Tf("m.cardName", a), Kind: engine.ChoiceTarget, SourceID: a.ID, CardCode: a.Code}.
 						Msgs(engine.AttachUpgrade{ID: e.EID(), Target: a.ID, MaxHP: 1, THW: 1}))
 				}
 			}
@@ -458,7 +458,7 @@ func registerNemesis() {
 					var subs []engine.Choice
 					for _, c := range hand {
 						if eventKind(c.Code) == "attack" {
-							subs = append(subs, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+							subs = append(subs, engine.Choice{Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 								Msgs(engine.DiscardCards{Player: pid, Cards: engine.CardList{c}}))
 						}
 					}

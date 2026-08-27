@@ -58,7 +58,7 @@ func registerRemainingWolv() {
 					continue
 				}
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Discard " + t.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id, CardCode: t.Code,
+					Label: engine.Tf("m.discardCard", t), Kind: engine.ChoiceTarget, SourceID: id, CardCode: t.Code,
 				}.Msgs(engine.DiscardAttachmentMsg{ID: id}))
 			}
 			if len(choices) == 0 {

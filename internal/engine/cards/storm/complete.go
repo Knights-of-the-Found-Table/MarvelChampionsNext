@@ -77,7 +77,7 @@ func registerRemainingStorm() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "ally" && c.Def().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Return " + c.Def().Name + " to hand"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.returnToHand", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 				}
 			}
@@ -176,7 +176,7 @@ func registerRemainingStorm() {
 			for _, c := range p.Deck {
 				if c.Def().Type == "support" && (c.Def().HasTrait("x-men") || c.Def().HasTrait("x-force")) {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name + " (deck)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeFromDeck", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.TakeDeckCard{Player: p.ID, CardID: c.ID}))
 					break
 				}
@@ -184,7 +184,7 @@ func registerRemainingStorm() {
 			for _, c := range p.Discard {
 				if c.Def().Type == "support" && (c.Def().HasTrait("x-men") || c.Def().HasTrait("x-force")) {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name + " (discard)"), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeFromDiscard", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					break
 				}
@@ -256,13 +256,13 @@ func registerRemainingStorm() {
 			var choices []engine.Choice
 			if g.EntityHasTrait(p.ID, "x-men") {
 				choices = append(choices, engine.Choice{
-					Label: engine.S("Ready " + p.Name), Kind: engine.ChoiceTarget, SourceID: p.ID,
+					Label: engine.Tf("c.readyName", p), Kind: engine.ChoiceTarget, SourceID: p.ID,
 				}.Msgs(engine.ExhaustEntity{ID: s.ID}, engine.ReadyEntity{ID: p.ID}))
 			}
 			for _, id := range p.Allies {
 				if x := g.Allies[id]; x != nil && x.EDef().HasTrait("x-men") {
 					choices = append(choices, engine.Choice{
-						Label: engine.S("Ready " + x.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id,
+						Label: engine.Tf("c.readyName", x), Kind: engine.ChoiceTarget, SourceID: id,
 					}.Msgs(engine.ExhaustEntity{ID: s.ID}, engine.ReadyEntity{ID: id}))
 				}
 			}

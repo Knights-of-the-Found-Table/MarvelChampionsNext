@@ -82,7 +82,7 @@ func registerThor() {
 					for _, c := range pl.Deck {
 						if c.Code == "06009" {
 							deckChoices = append(deckChoices, engine.Choice{
-								Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.TakeDeckCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -92,7 +92,7 @@ func registerThor() {
 					for _, c := range pl.Discard {
 						if c.Code == "06009" {
 							discardChoices = append(discardChoices, engine.Choice{
-								Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+								Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 							}.Msgs(
 								engine.ReturnDiscardCard{Player: pl.ID, CardID: c.ID},
 								engine.ShufflePlayerDeck{Player: pl.ID},
@@ -185,7 +185,7 @@ func registerForAsgard() {
 			for _, c := range p.Deck {
 				if c.Def().HasTrait("asgard") {
 					deckChoices = append(deckChoices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.TakeDeckCard{Player: pid, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: pid},
@@ -195,7 +195,7 @@ func registerForAsgard() {
 			for _, c := range p.Discard {
 				if c.Def().HasTrait("asgard") {
 					discardChoices = append(discardChoices, engine.Choice{
-						Label: engine.S("Take " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code,
+						Label: engine.Tf("c.takeName", c), Kind: engine.ChoiceCard, CardCode: c.Code,
 					}.Msgs(
 						engine.ShuffleIntoDeck{Player: pid, CardID: c.ID},
 						engine.ShufflePlayerDeck{Player: pid},

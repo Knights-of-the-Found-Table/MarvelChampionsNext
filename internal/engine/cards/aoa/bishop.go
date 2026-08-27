@@ -90,7 +90,7 @@ func registerBishop() {
 				var choices []engine.Choice
 				for _, c := range p.Discard {
 					if c.Def().HasTrait("temporal") {
-						choices = append(choices, engine.Choice{Label: engine.S("Return " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.
+						choices = append(choices, engine.Choice{Label: engine.Tf("c.returnName", c), Kind: engine.ChoiceCard, CardCode: c.Code}.
 							Msgs(engine.ReturnDiscardCard{Player: p.ID, CardID: c.ID}))
 					}
 				}
@@ -109,7 +109,7 @@ func registerBishopSignatures() {
 	registerBishopAlly := func(code, icon string) {
 		engine.RegisterBehavior(code, &engine.Behavior{Abilities: func(g *engine.Game, e engine.Entity) []engine.Ability {
 			return []engine.Ability{{
-				Label: engine.S("Discard a resource card → ready " + e.EDef().Name),
+				Label: engine.Tf("c.discardReadyResource", e),
 				Type:  engine.AbilityAction, OncePerTurn: true,
 				Execute: func(g *engine.Game, self engine.EntityID) []engine.Message {
 					a := g.Allies[self]
@@ -126,12 +126,12 @@ func registerBishopSignatures() {
 								break
 							}
 						}
-						choices = append(choices, engine.Choice{Label: engine.S("Discard " + c.Def().Name), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(msgs...))
+						choices = append(choices, engine.Choice{Label: engine.Tf("m.discardCard", c), Kind: engine.ChoiceCard, CardCode: c.Code}.Msgs(msgs...))
 					}
 					if len(choices) == 0 {
 						return nil
 					}
-					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.S("Ready "+a.EDef().Name), choices...)}}
+					return []engine.Message{engine.AskQuestion{Player: p.ID, Question: engine.Ask(engine.Tf("c.readyName", a), choices...)}}
 				},
 			}}
 		}})

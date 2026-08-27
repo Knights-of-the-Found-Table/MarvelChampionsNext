@@ -193,7 +193,7 @@ func registerSignatures() {
 					if n < 0 {
 						n = 0
 					}
-					cs = append(cs, engine.Choice{Label: engine.S(m.EDef().Name), Kind: engine.ChoiceTarget, SourceID: id}.Msgs(engine.ExhaustEntity{ID: u.ID}, engine.AddEntityCounter{ID: a.ID, N: -n}, engine.DiscardControlled{Player: p.ID, ID: id}))
+					cs = append(cs, engine.Choice{Label: engine.Tf("m.cardName", m), Kind: engine.ChoiceTarget, SourceID: id}.Msgs(engine.ExhaustEntity{ID: u.ID}, engine.AddEntityCounter{ID: a.ID, N: -n}, engine.DiscardControlled{Player: p.ID, ID: id}))
 				}
 			}
 			if len(cs) == 0 {
