@@ -7,6 +7,7 @@ import { get, allCards, CardInfo, Deck } from '../api'
 import { CardImage, useCardZoom } from '../cards'
 import { lname, lsubname, useT, useZhMap } from '../i18n'
 import { ResourceIcon } from '../components/ResourceIcon'
+import { StatIcon } from '../components/StatIcon'
 
 function useOutsideClose(active: boolean, close: () => void) {
   useEffect(() => {
@@ -188,13 +189,15 @@ export default function DeckDetail() {
     ...[...grouped.keys()].filter((t) => !TYPE_ORDER.includes(t)).sort(),
   ]
 
+  // 印刷属性条：化解-攻击-防御-恢复-手牌-生命。恢复是第二身份的动作，
+  // 与英雄面的战斗属性并列展示。
   const heroStats: Array<[string, string, number | undefined]> = [
-    ['❤️', t('stat.hp'), hero?.hp],
-    ['⚔️', t('stat.attack'), hero?.attack],
-    ['💬', t('stat.thwart'), hero?.thwart],
-    ['🛡️', t('stat.defense'), hero?.defense],
-    ['🔄', t('stat.recover'), hero?.recover],
-    ['✋', t('stat.handSize'), hero?.handSize],
+    ['thwart', t('stat.thwart'), hero?.thwart],
+    ['attack', t('stat.attack'), hero?.attack],
+    ['defense', t('stat.defense'), hero?.defense],
+    ['recover', t('stat.recover'), hero?.recover],
+    ['hand', t('stat.handSize'), hero?.handSize],
+    ['hp', t('stat.hp'), hero?.hp],
   ]
 
   // 化身面：英雄注册码恒为 {base}a，目录里存在 {base}b 才渲染第二面
@@ -232,9 +235,9 @@ export default function DeckDetail() {
           <div className="row wrap dhp-stats-strip">
             {heroStats
               .filter(([, , v]) => v != null)
-              .map(([glyph, label, v]) => (
+              .map(([stat, label, v]) => (
                 <span key={label} className="dhp-stat" title={label}>
-                  <span className="dhp-glyph">{glyph}</span>
+                  <StatIcon stat={stat} size={14} />
                   {v}
                 </span>
               ))}
