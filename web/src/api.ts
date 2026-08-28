@@ -422,3 +422,110 @@ export interface LobbyView {
   players: LobbyPlayer[]
   openSlots: number
 }
+
+// -------------------------------------------------------------- campaigns
+
+export interface CampaignPlayerLog {
+  slot: number
+  userId?: number
+  name: string
+  heroBase: string
+  deck: Record<string, number>
+  hp?: number
+  units?: number
+  market?: string[]
+  healNext?: boolean
+  tech?: string
+  condition?: string
+  improved?: boolean
+  allies?: string[]
+  engagedEnemy?: boolean
+}
+
+export interface CampaignState {
+  box: string
+  difficulty: string
+  index: number
+  status: string
+  players: CampaignPlayerLog[]
+  experimental?: string[]
+  delayCounters?: number
+  removedAllies?: string[]
+  collection?: string[]
+  artifacts?: string[]
+  headhunter?: boolean[]
+  powerStone?: number
+  evasion?: number
+  pendingChoices?: Record<string, string>
+  lastResult?: 'won' | 'lost' | ''
+}
+
+export interface CampaignSeat {
+  slot: number
+  userId?: string
+  username: string
+  hero: string
+  deckName: string
+}
+
+export interface CampaignChapter {
+  id: string
+  name: string
+}
+
+export interface CampaignGameRef {
+  id: string
+  name: string
+  scenarioId: string
+  status: string
+}
+
+export interface MarketCard {
+  code: string
+  name: string
+  cost: number
+}
+
+export interface CampaignDetail {
+  id: string
+  box: string
+  name: string
+  desc?: string
+  difficulty: string
+  status: string
+  index: number
+  playerCount: number
+  host: boolean
+  yourSlot: number
+  state: CampaignState
+  seats: CampaignSeat[]
+  chapters: CampaignChapter[]
+  games: CampaignGameRef[]
+  market: MarketCard[]
+  /** EN display names for every campaign card code in the log. */
+  names: Record<string, string>
+  /** Choice pools by pending-choice kind. */
+  pools: { tech: string[]; condition: string[] }
+}
+
+export interface CampaignSummary {
+  id: string
+  box: string
+  name: string
+  status: string
+  index: number
+  playerCount: number
+  updatedAt: string
+}
+
+export const listCampaigns = () => get<CampaignSummary[]>('/marvel/campaigns')
+export const getCampaign = (id: string) => get<CampaignDetail>(`/marvel/campaigns/${id}`)
+export const createCampaign = (body: { box: string; difficulty: string; playerCount: number; deckId?: string }) =>
+  post<CampaignDetail>('/marvel/campaigns', body)
+export const joinCampaign = (id: string, deckId: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/join`, { deckId })
+export const kickCampaign = (id: string, slot: number) => post<CampaignDetail>(`/marvel/campaigns/${id}/kick`, { slot })
+export const startCampaign = (id: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/start`)
+export const playCampaign = (id: string) => post<{ gameId: string }>(`/marvel/campaigns/${id}/play`)
+export const campaignChoice = (id: string, cardCode: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/choice`, { cardCode })
+export const buyMarket = (id: string, cardCode: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/market`, { cardCode })
+export const setCampaignHeal = (id: string, on: boolean) => post<CampaignDetail>(`/marvel/campaigns/${id}/heal`, { on })

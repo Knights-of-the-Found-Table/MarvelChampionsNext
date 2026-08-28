@@ -16,6 +16,7 @@ export default function App() {
           <ReportBugButton />
           <NavLink to="/">{t('nav.games')}</NavLink>
           <NavLink to="/new">{t('nav.new')}</NavLink>
+          <NavLink to="/campaigns">{t('nav.campaigns')}</NavLink>
           <NavLink to="/decks">{t('nav.decks')}</NavLink>
           <select
             aria-label="Language"

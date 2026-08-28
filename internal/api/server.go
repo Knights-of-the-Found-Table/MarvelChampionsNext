@@ -63,6 +63,17 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("POST /api/v1/marvel/games/{id}/chat", s.auth(s.handleChatSend))
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/stream", s.handleStream)
 
+	mux.HandleFunc("GET /api/v1/marvel/campaigns", s.auth(s.handleListCampaigns))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns", s.auth(s.handleCreateCampaign))
+	mux.HandleFunc("GET /api/v1/marvel/campaigns/{id}", s.auth(s.handleGetCampaign))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/join", s.auth(s.handleJoinCampaign))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/kick", s.auth(s.handleKickCampaign))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/start", s.auth(s.handleStartCampaign))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/play", s.auth(s.handlePlayCampaign))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/choice", s.auth(s.handleCampaignChoice))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/market", s.auth(s.handleCampaignMarket))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/heal", s.auth(s.handleCampaignHeal))
+
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})

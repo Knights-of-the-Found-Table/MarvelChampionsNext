@@ -543,6 +543,8 @@ func (s *Server) handleAnswer(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "view failed")
 		return
 	}
+	// Campaign chapters fold their result into the campaign log here.
+	s.reportCampaignResult(gameID, view.Over)
 	writeJSON(w, http.StatusOK, view)
 }
 
@@ -560,6 +562,8 @@ func (s *Server) handleUndo(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "view failed")
 		return
 	}
+	// Undoing the final answer rewinds the campaign chapter as well.
+	s.reportCampaignResult(gameID, view.Over)
 	writeJSON(w, http.StatusOK, view)
 }
 

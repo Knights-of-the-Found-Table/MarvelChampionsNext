@@ -9,6 +9,8 @@ import DeckDetail from './views/DeckDetail'
 import HeroPicker from './views/HeroPicker'
 import DeckBuilder from './views/DeckBuilder'
 import NewGame from './views/NewGame'
+import Campaigns from './views/Campaigns'
+import CampaignDetail from './views/CampaignDetail'
 import Games from './views/Games'
 import GamePage from './views/GamePage'
 import { getToken } from './api'
@@ -36,6 +38,8 @@ const router = createBrowserRouter([
       { path: 'decks/:id', element: <RequireAuth><DeckDetail /></RequireAuth> },
       { path: 'new', element: <RequireAuth><NewGame /></RequireAuth> },
       { path: 'games/:id', element: <RequireAuth><GamePage /></RequireAuth> },
+      { path: 'campaigns', element: <RequireAuth><Campaigns /></RequireAuth> },
+      { path: 'campaigns/:id', element: <RequireAuth><CampaignDetail /></RequireAuth> },
     ],
   },
 ])

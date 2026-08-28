@@ -201,6 +201,14 @@ func (g *Game) handle(msg Message) {
 			}
 			card := p.Deck[0]
 			p.Deck = p.Deck[1:]
+			// Obligations shuffled into a player's deck (campaign expert
+			// sets) enter play immediately instead of the hand; no
+			// replacement draw.
+			if def := card.Def(); def.Type == "obligation" {
+				g.tlogf("log.reveals", p.Name, def)
+				g.SpawnUpgrade(def.Code, p.ID)
+				continue
+			}
 			p.Hand = append(p.Hand, card)
 		}
 
@@ -313,6 +321,16 @@ func (g *Game) handle(msg Message) {
 
 	case AskOtherAction:
 		g.handleAskOtherAction(m)
+
+	case CampaignSideThreat:
+		// Campaign setup threat on a side scheme matched by base code.
+		for _, s := range g.SideSchemes {
+			if s != nil && data.BaseCode(s.Code) == m.Code {
+				s.Threat += m.N
+				g.TLogf("c.campaignPlacesThreatOnTheScheme", m.N, s)
+				break
+			}
+		}
 
 	case SchemeThreat:
 		// Hinder keyword: while side schemes with Hinder X are in play, X
@@ -1802,6 +1820,11 @@ func (g *Game) handleStartGame() {
 			g.Push(b.HeroSetup(g, p)...)
 		}
 	}
+	// Setup-keyword player cards ("begins the game in play") join their
+	// identity before the first round; the campaign layer then applies
+	// its setup instructions (campaign side schemes, threat, mills).
+	g.enterSetupCards()
+	g.Push(g.applyCampaignStart(g.campaign)...)
 	g.Push(BeginRound{})
 }
 

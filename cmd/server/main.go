@@ -27,6 +27,7 @@ import (
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/aos"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/blackpanther"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/blackwidow"
+	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/campaign"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/captainamerica"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/civilwar"
 	_ "github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine/cards/core"

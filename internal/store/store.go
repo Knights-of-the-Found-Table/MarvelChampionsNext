@@ -102,7 +102,10 @@ CREATE TABLE IF NOT EXISTS game_actions (
 	if err := s.ensureColumn("games", "player_count INTEGER NOT NULL DEFAULT 1"); err != nil {
 		return err
 	}
-	return s.ensureColumn("games", "host_user_id INTEGER NOT NULL DEFAULT 0")
+	if err := s.ensureColumn("games", "host_user_id INTEGER NOT NULL DEFAULT 0"); err != nil {
+		return err
+	}
+	return s.migrateCampaigns()
 }
 
 // columnExists reports whether a table has the named column.

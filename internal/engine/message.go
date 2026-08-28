@@ -148,6 +148,14 @@ type (
 		N      int
 		Source EntityID
 	}
+
+	// CampaignSideThreat places setup threat on a campaign side scheme
+	// matched by base card code (Pincer Maneuver scaling with evasion
+	// counters); queued after the scheme's reveal resolves.
+	CampaignSideThreat struct {
+		Code string
+		N    int
+	}
 	ThwartScheme struct {
 		Scheme EntityID
 		N      int
@@ -786,6 +794,7 @@ func (AskMinionOrder) msg()           {}
 func (AskAttack) msg()                {}
 func (OtherDefenders) msg()           {}
 func (AskOtherAction) msg()           {}
+func (CampaignSideThreat) msg()       {}
 func (SchemeThreat) msg()             {}
 func (ThwartScheme) msg()             {}
 func (DamageEntity) msg()             {}

@@ -95,6 +95,11 @@ type Game struct {
 	events []Evt
 	// Transient: scenario def hooks (rebuilt from ScenarioID).
 	scenario *ScenarioDef
+	// campaign holds the meta-campaign modifications for this game
+	// (campaign mode). Transient: it only matters during game start; on
+	// resume the setup already happened, and replays rebuild it from the
+	// recorded NewGameOptions.
+	campaign *CampaignSetup
 }
 
 // PendingQuestion blocks the game until answered.
@@ -1239,6 +1244,8 @@ type NewGameOptions struct {
 	// Players: identity hero base code (e.g. "01001") + deck card codes
 	// with counts.
 	Players []PlayerSpec
+	// Campaign carries meta-campaign modifications (campaign mode).
+	Campaign *CampaignSetup
 }
 
 type PlayerSpec struct {
@@ -1246,6 +1253,13 @@ type PlayerSpec struct {
 	UserID   string
 	HeroBase string // e.g. "01001"
 	Deck     map[string]int
+	// StartHP overrides the identity's starting max HP (expert campaign
+	// persistent damage); 0 keeps the printed value.
+	StartHP int
+	// DeckEncounters lists encounter-card codes shuffled into the
+	// player's deck (expert campaign obligations). When one is drawn it
+	// enters play instead of the hand.
+	DeckEncounters []string
 }
 
 // NewGame constructs a game at the moment before setup resolves.
@@ -1272,6 +1286,7 @@ func NewGame(opts NewGameOptions) (*Game, error) {
 		EventDamageBonus: map[PlayerID]int{},
 		EventThreatBonus: map[PlayerID]int{},
 		scenario:         scen,
+		campaign:         opts.Campaign,
 	}
 	if g.Difficulty == "" {
 		g.Difficulty = "standard"
@@ -1287,6 +1302,9 @@ func NewGame(opts NewGameOptions) (*Game, error) {
 	// First player is picked during StartGame (group decision modelled
 	// with the seeded RNG).
 	g.setupScenario(scen)
+	// Campaign encounter-deck additions shuffle in with the deck at game
+	// start (no extra RNG draws here: replays depend on the stream).
+	g.applyCampaignDeck(opts.Campaign)
 	g.Push(StartGame{})
 	g.Run()
 	return g, nil
@@ -1305,6 +1323,11 @@ func (g *Game) newPlayer(spec PlayerSpec, i int) (*Player, error) {
 		AlterEgoCode: data.AlterEgoSideCode(spec.HeroBase),
 		Side:         SideAlterEgo,
 		MaxHP:        deref(heroDef.HP, 10),
+	}
+	// Expert campaign persistent damage: the identity starts at the hit
+	// points recorded in the campaign log.
+	if spec.StartHP > 0 {
+		p.MaxHP = spec.StartHP
 	}
 	if p.Name == "" {
 		p.Name = heroDef.Name
@@ -1332,6 +1355,13 @@ func (g *Game) newPlayer(spec PlayerSpec, i int) (*Player, error) {
 			continue
 		}
 		for j := 0; j < qty; j++ {
+			p.Deck = append(p.Deck, Card{Code: code, Owner: p.ID})
+		}
+	}
+	// Expert campaign obligations shuffle into the deck itself (player
+	// card backs); drawn ones enter play instead of the hand.
+	for _, code := range spec.DeckEncounters {
+		if _, ok := DB.Lookup(code); ok {
 			p.Deck = append(p.Deck, Card{Code: code, Owner: p.ID})
 		}
 	}

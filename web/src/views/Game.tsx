@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { get, post, getToken, type ChatMessage, type Choice, type GameView, type Question } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
 import { useChoiceLabel, useEngineMsg } from '../i18n/labels'
@@ -17,6 +17,8 @@ import '../style/board.css'
 export default function Game() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const campaignId = searchParams.get('campaign')
   const gameId = id ?? ''
   const t = useT()
   const choiceLabel = useChoiceLabel()
@@ -470,6 +472,11 @@ export default function Game() {
             <p className={view.won ? 'victory' : 'defeat'}>
               {t('game.over')} — {t(view.won ? 'game.victory' : 'game.defeat')}: {em(view.reason)}
             </p>
+            {campaignId && (
+              <button className="primary" onClick={() => navigate(`/campaigns/${campaignId}`)}>
+                {t('campaigns.backToCampaign')}
+              </button>
+            )}
             <button className="primary" onClick={() => navigate('/')}>
               {t('game.backHome')}
             </button>

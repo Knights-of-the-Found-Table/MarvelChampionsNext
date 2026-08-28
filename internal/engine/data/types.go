@@ -70,6 +70,13 @@ type CardDef struct {
 	// icons (parsed at load, never re-matched on Text).
 	BoostEntersPlay bool `json:"boostEntersPlay,omitempty"`
 
+	// Victory is the printed "Victory X" point value (side schemes,
+	// minions); campaign scoring and the GMW unit economy read it.
+	Victory int `json:"victory,omitempty"`
+	// UnitCost is the printed "Unit Cost X" shop price of the GMW
+	// Market player cards; the campaign shop filters on it.
+	UnitCost int `json:"unitCost,omitempty"`
+
 	// ---- 身份卡上的组牌骑手，加载期从印刷文本解析一次成结构化字段，
 	// 牌组校验等逻辑只读字段，绝不再匹配 Text（参见上方 Keywords 的规约）。
 	// AspectMode 放宽单派系规则："" = 正常（至多一个派系）；
@@ -251,14 +258,19 @@ type rawCard struct {
 }
 
 var (
-	tagRE       = regexp.MustCompile(`</?[a-zA-Z][^>]*>`)
-	retalRE     = regexp.MustCompile(`^Retaliate (\d+)`)
-	hinderValRE = regexp.MustCompile(`Hinder (\d+)`)
-	boostSelfRE = regexp.MustCompile(`(?i)boost: put this (?:card|minion) into play`)
-	keywordSet  = []string{"Guard", "Toughness", "Quickstrike", "Surge", "Patrol", "Hazards", "ErrandOfMercy"}
-	romanRE     = regexp.MustCompile(`^(?i)([IVX]+)(?:([A-Z])|\d)?$`)
-	plainNumRE  = regexp.MustCompile(`^(\d+)(?:([A-Z])|\d)?$`)
-	letterRE    = regexp.MustCompile(`^([A-Z])(\d)?$`)
+	tagRE        = regexp.MustCompile(`</?[a-zA-Z][^>]*>`)
+	retalRE      = regexp.MustCompile(`^Retaliate (\d+)`)
+	hinderValRE  = regexp.MustCompile(`Hinder (\d+)`)
+	boostSelfRE  = regexp.MustCompile(`(?i)boost: put this (?:card|minion) into play`)
+	victoryValRE = regexp.MustCompile(`Victory (\d+)`)
+	unitCostRE   = regexp.MustCompile(`Unit Cost (\d+)`)
+	// "Setup" joins the set for the campaign cards: printed "Setup."
+	// player cards begin the game in play (Basic Condition / TECH
+	// upgrades, gear upgrades, Hope Summers).
+	keywordSet = []string{"Guard", "Toughness", "Quickstrike", "Surge", "Patrol", "Hazards", "ErrandOfMercy", "Setup", "Permanent"}
+	romanRE    = regexp.MustCompile(`^(?i)([IVX]+)(?:([A-Z])|\d)?$`)
+	plainNumRE = regexp.MustCompile(`^(\d+)(?:([A-Z])|\d)?$`)
+	letterRE   = regexp.MustCompile(`^([A-Z])(\d)?$`)
 
 	// 身份卡组牌骑手的印刷英文原文匹配。骑手措辞随印刷固定不变，每条
 	// 骑手对应一个结构化字段；匹配前先剥离标签（[[TRAIT]] 引用不带尖括
@@ -483,6 +495,17 @@ func normalize(def *CardDef, raw rawCard) {
 	// "Boost:</b> Put this card into play" — tags stripped before matching
 	// (the literal text carries a bold tag between "Boost:" and "Put").
 	def.BoostEntersPlay = boostSelfRE.MatchString(tagRE.ReplaceAllString(raw.Text, ""))
+	// "Victory X" is deliberately unanchored: it prints after Hinder and
+	// mode-gate riders on side schemes and minions. Campaign scoring and
+	// the GMW unit economy read the structured field, never the text.
+	if m := victoryValRE.FindStringSubmatch(tagRE.ReplaceAllString(raw.Text, "")); m != nil {
+		def.Victory, _ = strconv.Atoi(m[1])
+	}
+	// "Unit Cost X" (the GMW Market deckbuilding line), same parse-once
+	// rule: the campaign shop filters on the structured field.
+	if m := unitCostRE.FindStringSubmatch(tagRE.ReplaceAllString(raw.Text, "")); m != nil {
+		def.UnitCost, _ = strconv.Atoi(m[1])
+	}
 	parseDeckRiders(def, raw.Text)
 
 	// Preserve printed resource multiplicity. Basic resource cards such as

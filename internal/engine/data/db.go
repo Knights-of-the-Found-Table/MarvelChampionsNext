@@ -50,6 +50,24 @@ func add(db *Database, def *CardDef) {
 	}
 }
 
+// Register installs card definitions produced outside the embedded
+// snapshot (campaign back faces such as the Improved Condition upgrades,
+// which marvelcdb only ships as linked references). Existing codes are
+// never overridden. Call from package init only.
+func (db *Database) Register(defs ...*CardDef) {
+	for _, def := range defs {
+		if def == nil || def.Code == "" {
+			continue
+		}
+		if _, exists := db.Cards[def.Code]; exists {
+			continue
+		}
+		add(db, def)
+		db.sorted = append(db.sorted, def)
+		sort.Slice(db.sorted, func(i, j int) bool { return db.sorted[i].Code < db.sorted[j].Code })
+	}
+}
+
 // Load parses the embedded snapshot. It is safe to call multiple times but is
 // cheap enough to call once and share.
 func Load() (*Database, error) {
