@@ -1,5 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom'
 import { useLang, useSetLang, useT } from './i18n'
+import HotSeat from './components/HotSeat'
 import ReportBugButton from './components/ReportBugButton'
 import UserMenu from './components/UserMenu'
 
@@ -30,6 +31,7 @@ export default function App() {
       <main>
         <Outlet />
       </main>
+      <HotSeat />
     </div>
   )
 }

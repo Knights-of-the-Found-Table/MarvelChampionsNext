@@ -1281,3 +1281,129 @@ button.builder-add:not(:disabled) {
 .hero-pack {
   font-size: 0.75rem;
 }
+
+/* ── 热座换人（hot-seat）：左下角 👥 FAB + 名单面板 ── */
+.hotseat {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 900;
+}
+
+.hotseat-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #46586c;
+  background: rgba(16, 20, 27, 0.92);
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.hotseat-fab:hover {
+  border-color: #6f8db4;
+}
+
+.hotseat-panel {
+  position: absolute;
+  left: 0;
+  bottom: 54px;
+  width: min(300px, 86vw);
+  background: rgba(16, 20, 27, 0.97);
+  border: 1px solid #46586c;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.6);
+}
+
+.hotseat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hotseat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hotseat-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hotseat-name {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hotseat-name:hover:not(:disabled) {
+  border-color: #46586c;
+  background: rgba(70, 88, 108, 0.2);
+}
+
+.hotseat-name:disabled {
+  cursor: default;
+}
+
+.hotseat-list li.current .hotseat-name {
+  color: #9fd6a8;
+}
+
+.hotseat-here {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(120, 200, 140, 0.18);
+  border: 1px solid rgba(120, 200, 140, 0.5);
+}
+
+.hotseat-remove {
+  background: none;
+  border: none;
+  color: #8494a7;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.hotseat-remove:hover {
+  color: #ff9a92;
+  background: rgba(200, 90, 90, 0.15);
+}
+
+.hotseat-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.hotseat-note {
+  font-size: 11px;
+  margin: 10px 0 0;
+}
