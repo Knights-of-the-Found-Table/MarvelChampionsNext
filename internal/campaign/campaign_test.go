@@ -43,10 +43,10 @@ func TestRRSCampaignFlow(t *testing.T) {
 	if len(st.Experimental) != 1 || st.Experimental[0] != "04073" {
 		t.Fatalf("experimental = %v", st.Experimental)
 	}
-	if st.PendingChoices[0] != ChoiceTech {
+	if !st.PendingFor(0, ChoiceTech) {
 		t.Fatalf("pending = %v, want tech", st.PendingChoices)
 	}
-	if err := ApplyChoice(st, 0, "04156"); err != nil {
+	if err := ApplyChoice(st, 0, ChoiceTech, "04156"); err != nil {
 		t.Fatalf("tech choice: %v", err)
 	}
 	if st.Players[0].Deck["04156"] != 1 {
@@ -60,10 +60,10 @@ func TestRRSCampaignFlow(t *testing.T) {
 	if st.DelayCounters != 4 {
 		t.Fatalf("delay counters = %d", st.DelayCounters)
 	}
-	if st.PendingChoices[0] != ChoiceCondition {
+	if !st.PendingFor(0, ChoiceCondition) {
 		t.Fatalf("pending = %v, want condition", st.PendingChoices)
 	}
-	if err := ApplyChoice(st, 0, ""); err != nil {
+	if err := ApplyChoice(st, 0, ChoiceCondition, ""); err != nil {
 		t.Fatalf("skip condition: %v", err)
 	}
 
@@ -179,7 +179,7 @@ func TestExpertPersistence(t *testing.T) {
 	// Resolve the outstanding victory choice, then use the heal toggle:
 	// it adds a random obligation to the next deck and resets the
 	// recorded damage.
-	if err := ApplyChoice(st, 0, "04155"); err != nil {
+	if err := ApplyChoice(st, 0, ChoiceTech, "04155"); err != nil {
 		t.Fatalf("tech choice: %v", err)
 	}
 	if err := SetHeal(st, 0, true); err != nil {
@@ -213,7 +213,7 @@ func TestExpertPersistence(t *testing.T) {
 	dead := wonRRS(0, true, false)
 	dead.Experimental = []string{"04072"}
 	ApplyVictory(st2, dead)
-	if _, ok := st2.PendingFor(0); ok {
+	if st2.HasPending(0) {
 		t.Fatalf("eliminated player was offered a victory choice")
 	}
 	if st2.Players[0].HP != 0 {

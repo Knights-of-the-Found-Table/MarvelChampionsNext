@@ -71,7 +71,12 @@ export default function CampaignDetail() {
 
   const st = detail.state
   const mySlot = detail.yourSlot
-  const myPending = mySlot >= 0 && st.pendingChoices ? st.pendingChoices[String(mySlot)] : undefined
+  const myPendingKinds =
+    mySlot >= 0 && st.pendingChoices
+      ? Object.entries(st.pendingChoices)
+          .filter(([k]) => k.startsWith(mySlot + ':'))
+          .map(([, v]) => v)
+      : []
   const hasPending = st.pendingChoices && Object.keys(st.pendingChoices).length > 0
   const name = (code: string) => lname(zh, code, detail.names[code] ?? code)
   const latestGame = detail.games[0]
@@ -145,10 +150,66 @@ export default function CampaignDetail() {
       {detail.status === 'interlude' && (
         <div className="card">
           <h3>{t('campaigns.interlude')}</h3>
-          {myPending && detail.pools && (
-            <div>
+          {myPendingKinds.map((myPending) => (
+            <div key={myPending}>
               <p>{t('campaigns.choice.' + myPending)}</p>
-              {myPending === 'improve' ? (
+              {myPending === 'sm-tech' ? (
+                <div className="form inline">
+                  {(st.players.find((p) => p.slot === mySlot)?.smTechOffer ?? []).map((code) => (
+                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
+                      {name(code)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'sm-aspect' ? (
+                <SMCodePick
+                  placeholder={t('campaigns.aspectHint')}
+                  deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
+                  busy={busy}
+                  onPick={(code) => act(() => campaignChoice(id, code))}
+                />
+              ) : myPending === 'sm-plan' ? (
+                <div className="form inline">
+                  <select
+                    defaultValue=""
+                    onChange={(e) => {
+                      const code = e.target.value
+                      if (code) act(() => campaignChoice(id, code))
+                    }}
+                  >
+                    <option value="">{t('campaigns.pickCard')}</option>
+                    {Object.entries(st.players.find((p) => p.slot === mySlot)?.deck ?? {}).map(([code, n]) => (
+                      <option key={code} value={code}>
+                        {name(code)} ×{n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : myPending === 'mg-role' ? (
+                <div className="form inline">
+                  {detail.pools.roles.map((role) => (
+                    <button key={role} disabled={busy} onClick={() => act(() => campaignChoice(id, role))}>
+                      {t('campaigns.role.' + role)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'nx-scheme' ? (
+                <div className="form inline">
+                  {detail.pools.nx.map((code) => (
+                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
+                      {name(code)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'aos-accuse' ? (
+                <div className="form inline">
+                  {detail.pools.aosMembers.map((code) => (
+                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
+                      {name(code)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'improve' ? (
                 st.players
                   .filter((p) => p.slot === mySlot)
                   .map((p) => {
@@ -179,8 +240,9 @@ export default function CampaignDetail() {
                 </div>
               )}
             </div>
-          )}
-          {hasPending && !myPending && <p className="muted">{t('campaigns.waitingChoices')}</p>}
+          ))}
+
+          {hasPending && myPendingKinds.length === 0 && <p className="muted">{t('campaigns.waitingChoices')}</p>}
           {!hasPending && detail.host && (
             <button className="primary" disabled={busy} onClick={() => act(() => playCampaign(id))}>
               {t('campaigns.play')} — {detail.chapters[detail.index]?.name}
@@ -269,6 +331,11 @@ export default function CampaignDetail() {
                     </span>
                   )}
                   {p.engagedEnemy && <span>{t('campaigns.engaged')}</span>}
+                  {p.mgRole && (
+                    <span>
+                      {t('campaigns.role')}:{' '}{t('campaigns.role.' + p.mgRole)}{' '}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -322,6 +389,137 @@ export default function CampaignDetail() {
                 </td>
               </tr>
             )}
+            {st.box === 'mts' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.pool && st.pool.length > 0 && (
+                    <div>
+                      {t('campaigns.pool')}: {st.pool.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.flags?.towerDamaged && <div>{t('campaigns.towerDamaged')}</div>}
+                  {st.flags?.stones && <div>{t('campaigns.stonesCompleted')}</div>}
+                </td>
+              </tr>
+            )}
+            {st.box === 'sm' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  <div>
+                    {t('campaigns.reputation')}: {st.counters?.marked ?? 0}
+                  </div>
+                  {st.smOsborn && st.smOsborn.length > 0 && (
+                    <div>
+                      {t('campaigns.osborn')}: {st.smOsborn.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.smCommunity && st.smCommunity.length > 0 && (
+                    <div>
+                      {t('campaigns.community')}: {st.smCommunity.map(name).join(', ')}
+                    </div>
+                  )}
+                  {(st.smWaking ?? 0) > 0 && (
+                    <div>
+                      {t('campaigns.waking')}: {st.smWaking}
+                    </div>
+                  )}
+                  {st.smLastStanding && st.smLastStanding.length > 0 && (
+                    <div>
+                      {t('campaigns.lastStanding')}: {st.smLastStanding.map(name).join(', ')}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'mg' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.mgFuturePast && st.mgFuturePast.length > 0 && (
+                    <div>
+                      {t('campaigns.futurePast')}: {st.mgFuturePast.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.mgCaptives && st.mgCaptives.length > 0 && (
+                    <div>
+                      {t('campaigns.captives')}: {st.mgCaptives.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.mgRemovedAllies && st.mgRemovedAllies.length > 0 && (
+                    <div>
+                      {t('campaigns.removedAllies')}: {st.mgRemovedAllies.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.flags?.jubilee && <div>{t('campaigns.jubilee')}</div>}
+                </td>
+              </tr>
+            )}
+            {st.box === 'nx' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.nxEnvEarned && st.nxEnvEarned.length > 0 && (
+                    <div>
+                      {t('campaigns.nxEnvs')}: {st.nxEnvEarned.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.nxChosen && st.nxChosen.length > 0 && (
+                    <div>
+                      {t('campaigns.nxChosen')}: {st.nxChosen.map(name).join(', ')}
+                    </div>
+                  )}
+                  {(st.counters?.hopeDamage ?? 0) > 0 && (
+                    <div>
+                      {t('campaigns.hopeDamage')}: {st.counters?.hopeDamage}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'aoa' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.aoMissionLog && st.aoMissionLog.length > 0 && (
+                    <div>
+                      {t('campaigns.aoMissions')}: {st.aoMissionLog.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.aoOverseerLog && st.aoOverseerLog.length > 0 && (
+                    <div>
+                      {t('campaigns.aoOverseers')}: {st.aoOverseerLog.map(name).join(', ')}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'aos' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.aoEvidence && st.aoEvidence.length > 0 && (
+                    <div>
+                      {t('campaigns.aoEvidence')}: {st.aoEvidence.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.aoCounters && Object.keys(st.aoCounters).length > 0 && (
+                    <div>
+                      {t('campaigns.aoCounters')}:{' '}
+                      {Object.entries(st.aoCounters)
+                        .map(([code, n]) => `${name(code)} ${n}`)
+                        .join(', ')}
+                    </div>
+                  )}
+                  {st.flags?.accused && (
+                    <div>
+                      {t('campaigns.aoAccused')}: {st.flags.accusedCorrect ? t('campaigns.aoCorrect') : t('campaigns.aoWrong')}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -330,5 +528,24 @@ export default function CampaignDetail() {
         <Link to="/campaigns">← {t('campaigns.back')}</Link>
       </p>
     </section>
+  )
+}
+
+// SMCodePick is a free-text card picker (aspect advantage: any aspect card
+// by code). The server validates the choice.
+function SMCodePick(props: {
+  placeholder: string
+  deck: Record<string, number>
+  busy: boolean
+  onPick: (code: string) => void
+}) {
+  const [code, setCode] = useState('')
+  return (
+    <div className="form inline">
+      <input value={code} placeholder={props.placeholder} onChange={(e) => setCode(e.target.value.trim())} />
+      <button disabled={props.busy || !code} onClick={() => props.onPick(code)}>
+        OK
+      </button>
+    </div>
   )
 }

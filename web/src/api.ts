@@ -440,6 +440,13 @@ export interface CampaignPlayerLog {
   improved?: boolean
   allies?: string[]
   engagedEnemy?: boolean
+  smTech?: string
+  smTechOffer?: string[]
+  smAspect?: string
+  smPlanning?: string
+  smEnhanced?: boolean
+  setupHand?: string
+  mgRole?: string
 }
 
 export interface CampaignState {
@@ -458,6 +465,27 @@ export interface CampaignState {
   evasion?: number
   pendingChoices?: Record<string, string>
   lastResult?: 'won' | 'lost' | ''
+  pool?: string[]
+  flags?: Record<string, boolean>
+  counters?: Record<string, number>
+  smOsborn?: string[]
+  smCommunity?: string[]
+  smWaking?: number
+  smLastStanding?: string[]
+  mgFuturePast?: string[]
+  mgCaptives?: string[]
+  mgRemovedAllies?: string[]
+  nxEnvEarned?: string[]
+  nxChosen?: string[]
+  nxCurrent?: string
+  aoMission?: string
+  aoOverseer?: string
+  aoMissionLog?: string[]
+  aoOverseerLog?: string[]
+  aoShieldEnvelope?: string[]
+  aoEvidence?: string[]
+  aoCounters?: Record<string, number>
+  aoSurvivors?: string[]
 }
 
 export interface CampaignSeat {
@@ -505,7 +533,20 @@ export interface CampaignDetail {
   /** EN display names for every campaign card code in the log. */
   names: Record<string, string>
   /** Choice pools by pending-choice kind. */
-  pools: { tech: string[]; condition: string[] }
+  pools: {
+    tech: string[]
+    condition: string[]
+    roles: string[]
+    nx: string[]
+    aosMembers: string[]
+  }
+}
+
+export interface CampaignBoxInfo {
+  key: string
+  name: string
+  desc: string
+  scenarios: number
 }
 
 export interface CampaignSummary {
@@ -519,6 +560,7 @@ export interface CampaignSummary {
 }
 
 export const listCampaigns = () => get<CampaignSummary[]>('/marvel/campaigns')
+export const listCampaignBoxes = () => get<CampaignBoxInfo[]>('/marvel/campaigns/boxes')
 export const getCampaign = (id: string) => get<CampaignDetail>(`/marvel/campaigns/${id}`)
 export const createCampaign = (body: { box: string; difficulty: string; playerCount: number; deckId?: string }) =>
   post<CampaignDetail>('/marvel/campaigns', body)

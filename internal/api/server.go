@@ -63,6 +63,7 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("POST /api/v1/marvel/games/{id}/chat", s.auth(s.handleChatSend))
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/stream", s.handleStream)
 
+	mux.HandleFunc("GET /api/v1/marvel/campaigns/boxes", s.auth(s.handleCampaignBoxes))
 	mux.HandleFunc("GET /api/v1/marvel/campaigns", s.auth(s.handleListCampaigns))
 	mux.HandleFunc("POST /api/v1/marvel/campaigns", s.auth(s.handleCreateCampaign))
 	mux.HandleFunc("GET /api/v1/marvel/campaigns/{id}", s.auth(s.handleGetCampaign))

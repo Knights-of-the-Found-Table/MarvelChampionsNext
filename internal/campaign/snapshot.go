@@ -28,6 +28,20 @@ type Snapshot struct {
 	HydraPrisonInPlay bool
 	PrisonAllies      []string // codes of allies beneath Hydra Prison
 
+	// Generic reads shared by later campaigns.
+	MainStage           int            // stage the main scheme reached
+	VictoryDisplayCodes []string       // codes in the victory display
+	SideSchemeBaseCodes []string       // base codes of side schemes still in play
+	EnvironmentCodes    []string       // environment codes in play
+	MinionCodes         []string       // minion codes in play
+	VillainCodes        []string       // villain codes in play
+	CaptiveAllyCodes    []string       // captive-trait allies in play (MG)
+	AllyDamage          map[string]int // damage on allies in play, by code
+	EnvCountersByCode   map[string]int // counters on environments in play
+	PrisonStoredCodes   []string       // cards tucked beneath side schemes (MG)
+	Acceleration        int            // acceleration tokens on the main scheme
+	DeckIllusion        int            // Illusion-trait cards inside player decks
+
 	// GMW reads.
 	VictoryPoints         int  // summed Victory values in the victory display
 	NoMinions             bool // no minions in play at the end
@@ -65,6 +79,11 @@ func Observe(g *engine.Game) Snapshot {
 		}
 		snap.KOed[i] = p.KOed
 		snap.HeroForm[i] = p.IsHero()
+		for _, c := range p.Deck {
+			if def, ok := engine.DB.Lookup(c.Code); ok && def.HasTrait("illusion") {
+				snap.DeckIllusion++
+			}
+		}
 		for _, c := range p.Discard {
 			snap.Discard[i] = append(snap.Discard[i], c.Code)
 		}
@@ -114,6 +133,57 @@ func Observe(g *engine.Game) Snapshot {
 	if s := g.MainScheme; s != nil {
 		snap.DelayCounters = s.Counters
 		snap.MainThreat = s.Threat
+		snap.MainStage = s.Stage
+	}
+	for _, sc := range g.SideSchemes {
+		if sc != nil {
+			snap.SideSchemeBaseCodes = appendUnique(snap.SideSchemeBaseCodes, data.BaseCode(sc.Code))
+		}
+	}
+	for _, env := range g.Environments {
+		if env != nil {
+			snap.EnvironmentCodes = appendUnique(snap.EnvironmentCodes, data.BaseCode(env.Code))
+			if env.Counters > 0 {
+				if snap.EnvCountersByCode == nil {
+					snap.EnvCountersByCode = map[string]int{}
+				}
+				snap.EnvCountersByCode[data.BaseCode(env.Code)] = env.Counters
+			}
+		}
+	}
+	for _, mn := range g.Minions {
+		if mn != nil {
+			snap.MinionCodes = appendUnique(snap.MinionCodes, mn.Code)
+		}
+	}
+	for _, a := range g.Allies {
+		if a != nil {
+			if snap.AllyDamage == nil {
+				snap.AllyDamage = map[string]int{}
+			}
+			snap.AllyDamage[a.Code] = a.Damage
+			if def, ok := engine.DB.Lookup(a.Code); ok && def.HasTrait("captive") {
+				snap.CaptiveAllyCodes = appendUnique(snap.CaptiveAllyCodes, a.Code)
+			}
+		}
+	}
+	for _, sc := range g.SideSchemes {
+		if sc != nil {
+			for _, c := range sc.StoredCards {
+				snap.PrisonStoredCodes = appendUnique(snap.PrisonStoredCodes, data.BaseCode(c.Code))
+			}
+		}
+	}
+	for _, v := range g.Villains {
+		if v != nil {
+			snap.VillainCodes = appendUnique(snap.VillainCodes, data.BaseCode(v.Code))
+		}
+	}
+	if g.MainScheme != nil {
+		snap.Acceleration = g.MainScheme.AccelerationTokens
+	}
+	for _, c := range g.VictoryDisplay {
+		snap.VictoryDisplayCodes = appendUnique(snap.VictoryDisplayCodes, data.BaseCode(c.Code))
 	}
 	// Hydra Prison: still in play, with the recorded allies beneath it.
 	for _, s := range g.SideSchemes {

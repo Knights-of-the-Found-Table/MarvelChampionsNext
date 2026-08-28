@@ -83,6 +83,24 @@ func ApplyVictory(st *State, snap Snapshot) {
 				}
 			}
 		}
+	case "mts":
+		mtsVictory(st, snap)
+		return
+	case "sm":
+		smVictory(st, snap)
+		return
+	case "mg":
+		mgVictory(st, snap)
+		return
+	case "nx":
+		nxVictory(st, snap)
+		return
+	case "aoa":
+		aoaVictory(st, snap)
+		return
+	case "aos":
+		aosVictory(st, snap)
+		return
 	case "gmw":
 		gain := 0
 		for i := range st.Players {
@@ -151,7 +169,7 @@ func ApplyVictory(st *State, snap Snapshot) {
 // penalty — except the expert Ronan finale, where the campaign is lost.
 func ApplyDefeat(st *State) {
 	st.LastResult = "lost"
-	if st.Box == "gmw" && st.Index == 4 && st.IsExpert() {
+	if (st.Box == "gmw" || st.Box == "mts" || st.Box == "mg") && st.Index == 4 && st.IsExpert() {
 		st.Status = "lost"
 		return
 	}
@@ -189,9 +207,9 @@ func (st *State) recordExpertHP(snap Snapshot, living func(int) bool) {
 
 func (st *State) addPending(slot int, kind string) {
 	if st.PendingChoices == nil {
-		st.PendingChoices = map[int]string{}
+		st.PendingChoices = map[string]string{}
 	}
-	st.PendingChoices[slot] = kind
+	st.PendingChoices[PendingKey(slot, kind)] = kind
 }
 
 func without(list []string, s string) []string {
@@ -206,16 +224,23 @@ func without(list []string, s string) []string {
 
 // ApplyChoice resolves one interlude choice. cardCode "" declines an
 // optional choice (condition / improve).
-func ApplyChoice(st *State, slot int, cardCode string) error {
-	kind, ok := st.PendingFor(slot)
-	if !ok {
-		return fmt.Errorf("player %d has no pending choice", slot)
+func ApplyChoice(st *State, slot int, kind, cardCode string) error {
+	if !st.PendingFor(slot, kind) {
+		return fmt.Errorf("player %d has no pending %s choice", slot, kind)
 	}
 	pl := st.Slot(slot)
 	if pl == nil {
 		return fmt.Errorf("unknown slot %d", slot)
 	}
 	switch kind {
+	case ChoiceSMTech, ChoiceSMAspect, ChoiceSMPlan:
+		return ApplySMChoice(st, slot, kind, cardCode)
+	case ChoiceMGRole:
+		return ApplyMGRoleChoice(st, slot, cardCode)
+	case ChoiceNXScheme:
+		return ApplyNXScheme(st, slot, cardCode)
+	case ChoiceAOAccuse:
+		return ApplyAOAccuse(st, slot, cardCode)
 	case ChoiceTech:
 		if !contains(rrsTech, cardCode) {
 			return fmt.Errorf("not a TECH upgrade: %q", cardCode)
@@ -243,7 +268,7 @@ func ApplyChoice(st *State, slot int, cardCode string) error {
 	default:
 		return fmt.Errorf("unknown choice kind %q", kind)
 	}
-	delete(st.PendingChoices, slot)
+	st.ResolvePending(slot, kind)
 	return nil
 }
 
@@ -269,3 +294,30 @@ func TechUpgrades() []string { return rrsTech }
 // ConditionUpgrades lists the Basic Condition upgrade pool (RRS scenario
 // 2 victory choices).
 func ConditionUpgrades() []string { return rrsCond }
+
+// randInt is a deterministic pseudo-random draw: identical campaign
+// states re-report identical results (undo/replay safety).
+func randInt(n int) int {
+	if n <= 0 {
+		return 0
+	}
+	// FNV-1a over a marker string keeps this import-light and stable.
+	h := uint64(14695981039346656037)
+	for _, b := range []byte("campaign-rng") {
+		h ^= uint64(b)
+		h *= 1099511628211
+	}
+	return int((h >> 33) % uint64(n))
+}
+
+func withoutAll(list []string, exclude []string) []string {
+	out := make([]string, 0, len(list))
+	for _, x := range list {
+		if !contains(exclude, x) {
+			out = append(out, x)
+		}
+	}
+	return out
+}
+
+// ApplySMChoice routes the Sinister Motives picks from ApplyChoice.

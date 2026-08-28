@@ -1,17 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { createCampaign, Deck, get, listCampaigns, CampaignSummary } from '../api'
-import { useT } from '../i18n'
-
-const BOXES = [
-  { key: 'rrs', label: 'campaigns.box.rrs' },
-  { key: 'gmw', label: 'campaigns.box.gmw' },
-]
+import { createCampaign, Deck, get, listCampaignBoxes, listCampaigns, CampaignBoxInfo, CampaignSummary } from '../api'
+import { useT } from '../i18n' 
 
 export default function Campaigns() {
   const t = useT()
   const navigate = useNavigate()
   const [list, setList] = useState<CampaignSummary[]>([])
+  const [boxes, setBoxes] = useState<CampaignBoxInfo[]>([])
   const [decks, setDecks] = useState<Deck[]>([])
   const [box, setBox] = useState('rrs')
   const [difficulty, setDifficulty] = useState('standard')
@@ -22,6 +18,7 @@ export default function Campaigns() {
 
   useEffect(() => {
     listCampaigns().then(setList).catch(() => {})
+    listCampaignBoxes().then(setBoxes).catch(() => {})
     get<Deck[]>('/marvel/decks').then((d) => {
       setDecks(d)
       const first = d.find((x) => x.valid !== false) ?? d[0]
@@ -56,9 +53,9 @@ export default function Campaigns() {
         <label>
           {t('campaigns.box')}
           <select value={box} onChange={(e) => setBox(e.target.value)}>
-            {BOXES.map((b) => (
+            {boxes.map((b) => (
               <option key={b.key} value={b.key}>
-                {t(b.label)}
+                {b.name}
               </option>
             ))}
           </select>
@@ -93,6 +90,7 @@ export default function Campaigns() {
             </select>
           </label>
         )}
+        {boxes.find((b) => b.key === box)?.desc && <p className="muted">{boxes.find((b) => b.key === box)!.desc}</p>}
         <p className="muted">{t('campaigns.createHint')}</p>
         <button className="primary" disabled={busy || (playerCount === 1 && !deckId)}>
           {t('campaigns.create')}

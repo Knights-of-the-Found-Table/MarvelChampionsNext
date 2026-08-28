@@ -64,6 +64,74 @@ type CampaignSetup struct {
 	// appears and reveals it (Escape the Museum / Nebula expert
 	// techniques).
 	MillRevealAttachment bool
+	// PoolAllies lists ally codes put into play under the first player's
+	// control (MTS pool: Cosmo).
+	PoolAllies []string
+	// PoolMinions lists minion codes put into play engaged with the
+	// first player (MTS pool: Black Swan).
+	PoolMinions []string
+	// PoolUpgrades lists upgrade codes put into play under each player's
+	// control (MTS pool: Norn Stone on its Setup side).
+	PoolUpgrades []string
+	// DiscardTopHalf mills the top half of each player's deck during
+	// setup (MTS: The Infinity Stones 1B was completed).
+	DiscardTopHalf bool
+	// MainSchemeAcceleration places acceleration tokens on the main
+	// scheme during setup (MTS expert heal cost).
+	MainSchemeAcceleration int
+	// StartDamageEachPlayer deals each identity that much damage during
+	// setup (MTS: Avengers Tower had the Damaged trait).
+	StartDamageEachPlayer int
+	// StartEnvironment reveals this environment at setup (SM: Public
+	// Outcry).
+	StartEnvironment string
+	// StartEnvironments reveals these environments at setup (NX: earned
+	// campaign environments).
+	StartEnvironments []string
+	// EnvCounters places counters on campaign-referenced environments
+	// (SM: extra sand counters on City Streets).
+	EnvCounters map[string]int
+	// MinionEngageEachPlayer has every player search the encounter deck
+	// and discard pile for a minion and engage it; players who find none
+	// are dealt a facedown encounter card (SM reputation node).
+	MinionEngageEachPlayer bool
+	// RevealSideSchemeThreat has the first player search for a
+	// scenario-specific side scheme, reveal it and place one threat on
+	// it (SM reputation node).
+	RevealSideSchemeThreat bool
+	// DeckShuffleEncounter shuffles that many encounter cards into each
+	// player's deck (SM Mysterio expert).
+	DeckShuffleEncounter int
+	// PlayerSideScheme spawns this player side scheme under the first
+	// player's control (NeXt Evolution campaign).
+	PlayerSideScheme string
+	// MillRevealMinionOrPsionic mills the encounter deck until a minion
+	// or a psionic attachment appears and reveals it (Stryfe setup).
+	MillRevealMinionOrPsionic bool
+	// FacedownBoostEachPlayer places a facedown boost card on each
+	// identity (SM Venom expert). Player boost cards are not modeled
+	// engine-side; the field records the setup for the log.
+	FacedownBoostEachPlayer bool
+	// RoleUpgrades puts one campaign role upgrade into play per player
+	// (Mutant Genesis "use it or lose it" Skills).
+	RoleUpgrades map[int]string
+	// MissionScheme reveals this MISSION side scheme into the mission
+	// area (Age of Apocalypse).
+	MissionScheme string
+	// MissionOverseer puts this OVERSEER minion into the mission area.
+	MissionOverseer string
+	// MissionTeam gives the first player the Mission Team support.
+	MissionTeam bool
+	// ObligationFirstPlayer shuffles this obligation card into the first
+	// player's deck (AoA: Panicked Refugees).
+	ObligationFirstPlayer string
+	// BoardCounters spawns these environments into play with the given
+	// secret counters (AoS: the S.H.I.E.L.D. Executive Board).
+	BoardCounters map[string]int
+	// HandFetch searches each listed player's deck and discard pile for
+	// the recorded card and adds it to their opening hand (SM
+	// reputation node "Planning Ahead").
+	HandFetch map[int]string
 }
 
 // SpawnUpgrade puts an upgrade into play under owner without a payment
@@ -298,6 +366,204 @@ func (g *Game) applyCampaignStart(c *CampaignSetup) []Message {
 			card.ID = g.nextCardID()
 			g.Collection = append(g.Collection, card)
 			g.Logf("%s is placed into The Collection", card.Def().Name)
+		}
+	}
+	// Pool effects (MTS): allies under the first player, minions
+	// engaged with the first player, upgrades for everyone.
+	for _, code := range c.PoolAllies {
+		out = append(out, AllyEntersPlayFree{Player: firstPlayerID(g), Card: Card{Code: code}, FromOwner: firstPlayerID(g)})
+	}
+	for _, code := range c.PoolMinions {
+		out = append(out, RevealEncounterCard{Player: firstPlayerID(g), Card: Card{ID: g.nextCardID(), Code: code}})
+	}
+	for _, code := range c.PoolUpgrades {
+		for _, p := range g.Players {
+			g.SpawnUpgrade(code, p.ID)
+		}
+	}
+	for i, code := range c.RoleUpgrades {
+		if i < 0 || i >= len(g.Players) || code == "" {
+			continue
+		}
+		g.SpawnUpgrade(code, g.Players[i].ID)
+	}
+	if c.DiscardTopHalf {
+		for _, p := range g.Players {
+			if n := len(p.Deck) / 2; n > 0 {
+				out = append(out, MillPlayerDeck{Player: p.ID, N: n})
+			}
+		}
+	}
+	if c.MainSchemeAcceleration > 0 && g.MainScheme != nil {
+		g.MainScheme.AccelerationTokens += c.MainSchemeAcceleration
+	}
+	if c.StartDamageEachPlayer > 0 {
+		for _, p := range g.Players {
+			out = append(out, DamageEntity{Target: p.ID, Damage: c.StartDamageEachPlayer, Source: p.ID, Unpreventable: true})
+		}
+	}
+	for i, code := range c.HandFetch {
+		if i < 0 || i >= len(g.Players) || code == "" {
+			continue
+		}
+		p := g.Players[i]
+		fetched := false
+		for _, zone := range []*CardList{&p.Deck, &p.Discard} {
+			for j, card := range *zone {
+				matched := false
+				if code == "ally" {
+					matched = card.Def().Type == "ally"
+				} else {
+					matched = data.BaseCode(card.Code) == data.BaseCode(code)
+				}
+				if matched {
+					c2 := card
+					*zone = append((*zone)[:j:j], (*zone)[j+1:]...)
+					p.Hand = append(p.Hand, c2)
+					g.TLogf("c.findsRecordedCard", p, card.Def())
+					fetched = true
+					break
+				}
+			}
+			if fetched {
+				break
+			}
+		}
+		if fetched {
+			g.shuffle(&p.Deck)
+		}
+	}
+	for code, n := range c.BoardCounters {
+		if env := g.SpawnEnvironment(code); env != nil {
+			env.Counters = n
+		}
+	}
+	if c.MissionScheme != "" {
+		if def, ok := DB.Lookup(c.MissionScheme); ok {
+			s := &SideScheme{
+				ID:         g.nextEntityID(KindSideScheme),
+				Code:       def.Code,
+				Threat:     deref(def.BaseThreat, 3),
+				MaxThreat:  deref(def.BaseThreat, 3),
+				Hazard:     def.Hazards,
+				PlayerSide: true, // mission-area schemes cannot be player-thwarted
+			}
+			g.SideSchemes[s.ID] = s
+			g.tlogMajorf("log.sideSchemeEnters", def, s.Threat)
+			if b := behavior(def.Code); b != nil && b.OnPlay != nil {
+				g.Push(b.OnPlay(g, s)...)
+			}
+		}
+	}
+	if c.MissionOverseer != "" {
+		if def, ok := DB.Lookup(c.MissionOverseer); ok {
+			mn := &Minion{
+				ID:        g.nextEntityID(KindMinion),
+				Code:      def.Code,
+				MaxHP:     deref(def.HP, 4),
+				AttackVal: deref(def.Attack, 2),
+				SchemeVal: deref(def.Scheme, 2),
+				Tough:     def.HasKeyword("Toughness"),
+			}
+			g.Minions[mn.ID] = mn
+			g.tlogMajorf("log.minionEnters", def)
+			if b := behavior(def.Code); b != nil && b.OnPlay != nil {
+				g.Push(b.OnPlay(g, mn)...)
+			}
+		}
+	}
+	if c.MissionTeam {
+		g.SpawnSupport("45171a", firstPlayerID(g))
+	}
+	if c.PlayerSideScheme != "" {
+		if def, ok := DB.Lookup(c.PlayerSideScheme); ok {
+			s := &SideScheme{
+				ID:         g.nextEntityID(KindSideScheme),
+				Code:       def.Code,
+				Owner:      firstPlayerID(g),
+				PlayerSide: true,
+				Threat:     deref(def.BaseThreat, 2),
+				MaxThreat:  deref(def.BaseThreat, 2),
+			}
+			g.SideSchemes[s.ID] = s
+			g.tlogf("log.playsThreat", g.Player(firstPlayerID(g)), def, s.Threat)
+			if b := behavior(def.Code); b != nil && b.OnPlay != nil {
+				g.Push(b.OnPlay(g, s)...)
+			}
+		}
+	}
+	if c.MillRevealMinionOrPsionic {
+		for len(g.EncounterDeck) > 0 {
+			card := g.EncounterDeck[0]
+			g.EncounterDeck = g.EncounterDeck[1:]
+			def := card.Def()
+			if def.Type == "minion" || (def.Type == "attachment" && def.HasTrait("psionic")) {
+				out = append(out, RevealEncounterCard{Player: firstPlayerID(g), Card: card})
+				break
+			}
+			g.EncounterDiscard = append(g.EncounterDiscard, card)
+		}
+	}
+	if c.StartEnvironment != "" {
+		g.SpawnEnvironment(c.StartEnvironment)
+	}
+	for _, code := range c.StartEnvironments {
+		g.SpawnEnvironment(code)
+	}
+	if n := c.EnvCounters["27065"]; n > 0 {
+		if env := g.EnvironmentByCode("27065"); env != nil {
+			env.Counters += n
+		}
+	}
+	if c.MinionEngageEachPlayer {
+		for _, p := range g.Players {
+			done := false
+			for _, zone := range []*CardList{&g.EncounterDeck, &g.EncounterDiscard} {
+				for j, card := range *zone {
+					if card.Def().Type == "minion" {
+						c2 := card
+						*zone = append((*zone)[:j:j], (*zone)[j+1:]...)
+						out = append(out, RevealEncounterCard{Player: p.ID, Card: c2})
+						done = true
+						break
+					}
+				}
+				if done {
+					break
+				}
+			}
+			if !done {
+				if c2, ok := g.drawEncounter(); ok {
+					p.EncounterDown = append(p.EncounterDown, c2)
+					g.TLogf("log.dealsFacedown", p.Name)
+				}
+			}
+		}
+		g.ShuffleEncounterDeck()
+	}
+	if c.RevealSideSchemeThreat {
+		for j, card := range g.EncounterDeck {
+			if card.Def().Type == "side_scheme" {
+				c2 := card
+				g.EncounterDeck = append(g.EncounterDeck[:j:j], g.EncounterDeck[j+1:]...)
+				out = append(out, RevealEncounterCard{Player: firstPlayerID(g), Card: c2}, CampaignSideThreat{Code: data.BaseCode(c2.Code), N: 1})
+				break
+			}
+		}
+		g.ShuffleEncounterDeck()
+	}
+	if c.DeckShuffleEncounter > 0 {
+		for _, p := range g.Players {
+			for k := 0; k < c.DeckShuffleEncounter && len(g.EncounterDeck) > 0; k++ {
+				card := g.EncounterDeck[0]
+				g.EncounterDeck = g.EncounterDeck[1:]
+				card.Owner = p.ID
+				p.Deck = append(p.Deck, card)
+			}
+		}
+		g.ShuffleEncounterDeck()
+		for _, p := range g.Players {
+			out = append(out, ShufflePlayerDeck{Player: p.ID})
 		}
 	}
 	var out2 []Message

@@ -30,6 +30,18 @@ func BuildGame(st *State, seed int64) (engine.NewGameOptions, error) {
 	switch st.Box {
 	case "rrs":
 		buildRRS(st, ctx)
+	case "mts":
+		mtsSetup(st, ctx, &opts)
+	case "sm":
+		smSetup(st, ctx, &opts)
+	case "mg":
+		mgSetup(st, ctx, &opts)
+	case "nx":
+		nxSetup(st, ctx, &opts)
+	case "aoa":
+		aoaSetup(st, ctx, &opts)
+	case "aos":
+		aosSetup(st, ctx, &opts)
 	case "gmw":
 		if err := buildGMW(st, ctx); err != nil {
 			return opts, err
@@ -51,14 +63,17 @@ func BuildGame(st *State, seed int64) (engine.NewGameOptions, error) {
 			if pl.HealNext {
 				pl.HP = 0
 				pl.HealNext = false
-				if st.Box == "gmw" {
+				switch st.Box {
+				case "gmw":
 					if pl.Units < 1 {
 						return opts, fmt.Errorf("player %d cannot pay the healing unit", i)
 					}
 					pl.Units--
-				} else {
+				case "rrs":
 					spec.DeckEncounters = append(spec.DeckEncounters, rrsObligations[(st.Index+i)%len(rrsObligations)])
 				}
+				// mts: the cost is an acceleration token on the main
+				// scheme, applied via the campaign context below.
 			}
 			if pl.HP > 0 {
 				spec.StartHP = pl.HP
@@ -70,6 +85,15 @@ func BuildGame(st *State, seed int64) (engine.NewGameOptions, error) {
 		// deal themselves an encounter card.
 		if st.Box == "rrs" && st.Index == 4 && st.IsExpert() && pl.EngagedEnemy {
 			ctx.DealEncounter = append(ctx.DealEncounter, i)
+		}
+		if i == 0 && ctx.ObligationFirstPlayer != "" {
+			spec.DeckEncounters = append(spec.DeckEncounters, ctx.ObligationFirstPlayer)
+		}
+		if pl.SetupHand != "" {
+			if ctx.HandFetch == nil {
+				ctx.HandFetch = map[int]string{}
+			}
+			ctx.HandFetch[i] = pl.SetupHand
 		}
 		opts.Players = append(opts.Players, spec)
 	}

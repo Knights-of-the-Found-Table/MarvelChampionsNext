@@ -11810,5 +11810,145 @@
 	"campaigns.lastLost": {
 		"en": "last chapter lost (retry with no penalty)",
 		"zh": "上一章失败（可无惩罚重试）"
+	},
+	"c.findsRecordedCard": {
+		"en": "%s adds %s from their deck to their hand",
+		"zh": "%s 将卡组中的 %s 加入手牌"
+	},
+	"campaigns.pool": {
+		"en": "Campaign pool",
+		"zh": "战役池"
+	},
+	"campaigns.towerDamaged": {
+		"en": "Avengers Tower was damaged",
+		"zh": "复仇者大厦已受损"
+	},
+	"campaigns.stonesCompleted": {
+		"en": "The Infinity Stones 1B was completed",
+		"zh": "「无限宝石」1B 曾被完成"
+	},
+	"campaigns.reputation": {
+		"en": "Reputation",
+		"zh": "声望"
+	},
+	"campaigns.osborn": {
+		"en": "Osborn Tech",
+		"zh": "奥斯本科技"
+	},
+	"campaigns.community": {
+		"en": "Community Service resolved",
+		"zh": "已完成的社区服务"
+	},
+	"campaigns.waking": {
+		"en": "Waking Nightmare (Illusions in decks)",
+		"zh": "醒梦（牌组中的幻象）"
+	},
+	"campaigns.lastStanding": {
+		"en": "Last Ones Standing",
+		"zh": "最后的赢家"
+	},
+	"campaigns.futurePast": {
+		"en": "Future Past deck",
+		"zh": "未来往事牌库"
+	},
+	"campaigns.captives": {
+		"en": "Captive allies",
+		"zh": "被俘盟友"
+	},
+	"campaigns.jubilee": {
+		"en": "Jubilee is with the campaign",
+		"zh": "震波女随行"
+	},
+	"campaigns.nxEnvs": {
+		"en": "Earned environments",
+		"zh": "已赢得的环境"
+	},
+	"campaigns.nxChosen": {
+		"en": "Schemes chosen",
+		"zh": "已选过的玩家副计谋"
+	},
+	"campaigns.hopeDamage": {
+		"en": "Hope Summers's damage",
+		"zh": "霍普·萨默斯的伤害"
+	},
+	"campaigns.aoMissions": {
+		"en": "Missions struck",
+		"zh": "已结算的任务"
+	},
+	"campaigns.aoOverseers": {
+		"en": "Overseers struck",
+		"zh": "已击败的主管"
+	},
+	"campaigns.aoEvidence": {
+		"en": "Evidence gained",
+		"zh": "已获得的证据"
+	},
+	"campaigns.aoCounters": {
+		"en": "Secret counters remaining",
+		"zh": "剩余秘密指示物"
+	},
+	"campaigns.aoAccused": {
+		"en": "Accusation",
+		"zh": "指控结果"
+	},
+	"campaigns.aoCorrect": {
+		"en": "the mole was exposed!",
+		"zh": "内奸被揭穿！"
+	},
+	"campaigns.aoWrong": {
+		"en": "wrong suspect…",
+		"zh": "指认错误……"
+	},
+	"campaigns.role": {
+		"en": "Role",
+		"zh": "角色"
+	},
+	"campaigns.role.brawler": {
+		"en": "Brawler",
+		"zh": "斗士"
+	},
+	"campaigns.role.commander": {
+		"en": "Commander",
+		"zh": "指挥官"
+	},
+	"campaigns.role.defender": {
+		"en": "Defender",
+		"zh": "防卫者"
+	},
+	"campaigns.role.peacekeeper": {
+		"en": "Peacekeeper",
+		"zh": "和平卫士"
+	},
+	"campaigns.choice.sm-tech": {
+		"en": "Keep one of the dealt S.H.I.E.L.D. Tech upgrades:",
+		"zh": "从发到的神盾科技升级中保留一张："
+	},
+	"campaigns.choice.sm-aspect": {
+		"en": "Aspect advantage — name any aspect card to add at max copies:",
+		"zh": "派系优势——指定一张派系卡（加入最大数量）："
+	},
+	"campaigns.choice.sm-plan": {
+		"en": "Planning ahead — name a card from your deck:",
+		"zh": "提前规划——指定牌组中的一张卡："
+	},
+	"campaigns.choice.mg-role": {
+		"en": "Choose your campaign role:",
+		"zh": "选择你的战役角色："
+	},
+	"campaigns.choice.nx-scheme": {
+		"en": "Choose a campaign player side scheme for this chapter:",
+		"zh": "为本章选择一个战役玩家副计谋："
+	},
+	"campaigns.choice.aos-accuse": {
+		"en": "Accuse the mole on the Executive Board:",
+		"zh": "指认委员会中的内奸："
+	},
+	"campaigns.aspectHint": {
+		"en": "card code, e.g. 01031",
+		"zh": "卡牌代码，如 01031"
+	},
+	"campaigns.pickCard": {
+		"en": "Pick a card…",
+		"zh": "选择一张卡……"
 	}
 }

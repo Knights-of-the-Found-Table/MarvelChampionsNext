@@ -100,6 +100,18 @@ func (s *Server) deckForCampaign(w http.ResponseWriter, token string) (*store.De
 	return deck, true
 }
 
+func (s *Server) handleCampaignBoxes(w http.ResponseWriter, r *http.Request) {
+	boxes := []map[string]any{}
+	for _, key := range []string{"rrs", "gmw", "mts", "sm", "mg", "nx", "aoa", "aos"} {
+		b := campaign.Boxes[key]
+		if b == nil {
+			continue
+		}
+		boxes = append(boxes, map[string]any{"key": b.Key, "name": b.Name, "desc": b.Desc, "scenarios": len(b.Scenarios)})
+	}
+	writeJSON(w, http.StatusOK, boxes)
+}
+
 func (s *Server) handleListCampaigns(w http.ResponseWriter, r *http.Request) {
 	uid, ok := s.userIDInt(w, r)
 	if !ok {
@@ -274,6 +286,24 @@ func (s *Server) handleStartCampaign(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	st.Status = "interlude"
+	// Mutant Genesis: the Future Past deck starts complete, and every
+	// player owes a role pick before chapter 1.
+	if st.Box == "nx" {
+		campaign.QueueNXScheme(st)
+	}
+	if st.Box == "aos" {
+		campaign.PrepareAOSEvidence(st)
+	}
+	if st.Box == "mg" {
+		if len(st.MGFuturePast) == 0 {
+			st.MGFuturePast = append(st.MGFuturePast, campaign.FuturePastSeed()...)
+		}
+		for i := range st.Players {
+			if st.Players[i].MGRole == "" {
+				st.AddPending(i, campaign.ChoiceMGRole)
+			}
+		}
+	}
 	s.saveCampaignState(w, id, st)
 	s.writeCampaign(w, r, id, http.StatusOK)
 }
@@ -361,6 +391,7 @@ func (s *Server) handlePlayCampaign(w http.ResponseWriter, r *http.Request) {
 }
 
 type campaignChoiceRequest struct {
+	Kind     string `json:"kind"`
 	CardCode string `json:"cardCode"`
 }
 
@@ -382,7 +413,17 @@ func (s *Server) handleCampaignChoice(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "no choices are pending")
 		return
 	}
-	if err := campaign.ApplyChoice(st, slot, req.CardCode); err != nil {
+	kind := req.Kind
+	if kind == "" {
+		// Legacy clients omit the kind; accept when exactly one is owed.
+		if kinds := st.PendingKinds(slot); len(kinds) == 1 {
+			kind = kinds[0]
+		} else {
+			writeErr(w, http.StatusBadRequest, "choice kind required")
+			return
+		}
+	}
+	if err := campaign.ApplyChoice(st, slot, kind, req.CardCode); err != nil {
 		writeErr(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -685,6 +726,11 @@ func (s *Server) writeCampaign(w http.ResponseWriter, r *http.Request, id int64,
 	for _, mc := range campaign.MarketCards() {
 		note(mc.Code)
 	}
+	note(campaign.NXAllSchemes()...)
+	note(campaign.AOBoardMembers()...)
+	// The A.I.M. envelope stays server-side: players must deduce the
+	// mole, so the payload redacts it (state storage keeps it).
+	st.AOImEnvelope = campaign.AOSCombo{}
 	payload := map[string]any{
 		"id":          row.Token,
 		"box":         row.Box,
@@ -702,8 +748,11 @@ func (s *Server) writeCampaign(w http.ResponseWriter, r *http.Request, id int64,
 		"market":      campaign.MarketCards(),
 		"names":       names,
 		"pools": map[string][]string{
-			"tech":      campaign.TechUpgrades(),
-			"condition": campaign.ConditionUpgrades(),
+			"tech":       campaign.TechUpgrades(),
+			"condition":  campaign.ConditionUpgrades(),
+			"roles":      campaign.MGRoles(),
+			"nx":         st.NXAvailable(),
+			"aosMembers": campaign.AOBoardMembers(),
 		},
 	}
 	if box != nil {
