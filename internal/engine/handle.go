@@ -1334,6 +1334,7 @@ func (g *Game) handle(msg Message) {
 			} else {
 				p.SideDiscard = append(p.SideDiscard, card)
 				g.tlogf("log.resolves", p.Name, def)
+				g.recycleSideDeck(p)
 			}
 			if b := behavior(def.Code); b.OnPlay != nil {
 				ec := &EventCard{Code: def.Code, Owner: p.ID}
@@ -1347,6 +1348,7 @@ func (g *Game) handle(msg Message) {
 			p.SenseDeck = p.SenseDeck[1:]
 			p.SideDiscard = append(p.SideDiscard, card)
 			g.tlogf("log.discardsSideDeck", p.Name, card)
+			g.recycleSideDeck(p)
 		}
 
 	case UpgradeEnterPlay:

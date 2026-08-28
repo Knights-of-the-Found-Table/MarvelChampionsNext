@@ -58,6 +58,25 @@ func (g *Game) NextCardID() string { return g.nextCardID() }
 // ShuffleSideDeck shuffles a player's side deck (Invocation setup).
 func (g *Game) ShuffleSideDeck(p *Player) { g.shuffle(&p.SenseDeck) }
 
+// SideDeckFaceup reports whether the player's identity plays its side deck
+// with the top card faceup and a public discard pile (Doctor Strange's
+// Invocation deck; Hercules' Labor/Gift piles stay hidden).
+func SideDeckFaceup(p *Player) bool { return behavior(p.HeroCode).SideDeckFaceup }
+
+// recycleSideDeck refills a side deck that just ran out from its discard
+// pile, no penalty (the Invocation deck rule). Gated on the identity's
+// SideDeckRecycles flag: Daredevil's sense cards and Hercules' Gift pile
+// share the same fields but do not recycle.
+func (g *Game) recycleSideDeck(p *Player) {
+	if len(p.SenseDeck) > 0 || len(p.SideDiscard) == 0 || !behavior(p.HeroCode).SideDeckRecycles {
+		return
+	}
+	g.shuffle(&p.SideDiscard)
+	p.SenseDeck = append(p.SenseDeck, p.SideDiscard...)
+	p.SideDiscard = nil
+	g.tlogf("log.sideDeckRefills", p.Name, len(p.SenseDeck))
+}
+
 // AddEnvironment places an environment entity.
 func (g *Game) AddEnvironment(env *Environment) { g.Environments[env.ID] = env }
 

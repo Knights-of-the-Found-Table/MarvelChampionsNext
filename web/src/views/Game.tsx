@@ -238,10 +238,18 @@ export default function Game() {
         void openPile('', 'deck', t('pile.encounter'))
       } else if (card.id === 'pile-encounter-discard') {
         void openPile('', 'discard', t('pile.encounterDiscard'))
-      } else if (card.label === 'deck' || card.label === 'discard') {
-        const pid = card.id.replace(/^pile-(deck|discard)-/, '')
+      } else if (
+        card.label === 'deck' || card.label === 'discard' ||
+        card.label === 'sideDeck' || card.label === 'sideDiscard'
+      ) {
+        const pid = card.id.replace(/^pile-(?:side-)?(?:deck|discard)-/, '')
         const owner = view?.players.find((p) => p.id === pid)
-        void openPile(pid, card.label, `${owner?.name ?? ''} · ${t(card.label === 'deck' ? 'pile.deck' : 'pile.discard')}`)
+        const pileKey =
+          card.label === 'deck' ? 'pile.deck'
+          : card.label === 'discard' ? 'pile.discard'
+          : card.label === 'sideDeck' ? 'pile.sideDeck'
+          : 'pile.sideDiscard'
+        void openPile(pid, card.label, `${owner?.name ?? ''} · ${t(pileKey)}`)
       }
       return
     }

@@ -296,10 +296,13 @@ export function layoutBoard(view: GameView): PlacedCard[] {
     const w = CARD_W * scale
     const gap = 22 * scale
     const heroW = 164 * scale
+    // 副牌组 + 独立弃牌堆：有副牌组的英雄才显示（数量或弃牌非空）。
+    const side = (p.senseDeckCount ?? 0) + (p.sideDiscardCount ?? 0) > 0
     const enc = p.encounterDown > 0
       ? [{ id: `pile-enc-${p.id}`, w: w * 0.8 } as { id: string; w: number }]
       : []
-    const total = heroW + gap + w + gap + w + enc.length * (w * 0.8 + gap)
+    const total =
+      heroW + gap + w + gap + w + (side ? 2 * (w + gap) : 0) + enc.length * (w * 0.8 + gap)
     let x = cx - total / 2
     cards.push({ ...heroCard(p, x, y, pi, pi === activePlayer), scale })
     x += heroW + gap
@@ -314,6 +317,20 @@ export function layoutBoard(view: GameView): PlacedCard[] {
       count: p.discardCount ?? 0, pileScale: scale, label: 'discard',
     })
     x += w + gap
+    if (side) {
+      cards.push({
+        id: `pile-side-deck-${p.id}`, code: p.sideDeckTop?.code ?? '', kind: 'pile', x, y,
+        playerIndex: pi, faceDown: !p.sideDeckTop, title: p.name, z: 1,
+        count: p.senseDeckCount ?? 0, pileScale: scale, label: 'sideDeck',
+      })
+      x += w + gap
+      cards.push({
+        id: `pile-side-discard-${p.id}`, code: p.sideDiscardTop?.code ?? '', kind: 'pile', x, y,
+        playerIndex: pi, faceDown: !p.sideDiscardTop, title: p.name, z: 1,
+        count: p.sideDiscardCount ?? 0, pileScale: scale, label: 'sideDiscard',
+      })
+      x += w + gap
+    }
     if (enc.length > 0) {
       cards.push({
         id: `pile-enc-${p.id}`, code: '', kind: 'pile', x, y, playerIndex: pi,
@@ -341,8 +358,10 @@ export function layoutBoard(view: GameView): PlacedCard[] {
       const c = { ...entityCard('support', s, 0, y, pi), scale }
       fieldItems.push({ c, w: slotW(c.exhausted, scale) })
     }
+    const side = (p.senseDeckCount ?? 0) + (p.sideDiscardCount ?? 0) > 0
     const total =
       heroW + gap + w + gap + w + gap +
+      (side ? 2 * (w + gap) : 0) +
       (p.encounterDown > 0 ? w * 0.8 + gap : 0) +
       fieldItems.reduce((a, f) => a + f.w + 14, 0)
     let x = cx - total / 2
@@ -359,6 +378,20 @@ export function layoutBoard(view: GameView): PlacedCard[] {
       playerIndex: pi, faceDown: !p.discardTop, title: p.name, z: 1, count: p.discardCount ?? 0, pileScale: scale, label: 'discard',
     })
     x += w + gap
+    if (side) {
+      cards.push({
+        id: `pile-side-deck-${p.id}`, code: p.sideDeckTop?.code ?? '', kind: 'pile', x, y: pileY,
+        playerIndex: pi, faceDown: !p.sideDeckTop, title: p.name, z: 1,
+        count: p.senseDeckCount ?? 0, pileScale: scale, label: 'sideDeck',
+      })
+      x += w + gap
+      cards.push({
+        id: `pile-side-discard-${p.id}`, code: p.sideDiscardTop?.code ?? '', kind: 'pile', x, y: pileY,
+        playerIndex: pi, faceDown: !p.sideDiscardTop, title: p.name, z: 1,
+        count: p.sideDiscardCount ?? 0, pileScale: scale, label: 'sideDiscard',
+      })
+      x += w + gap
+    }
     if (p.encounterDown > 0) {
       cards.push({
         id: `pile-enc-${p.id}`, code: '', kind: 'pile', x, y: pileY, playerIndex: pi,

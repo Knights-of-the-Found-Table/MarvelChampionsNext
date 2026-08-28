@@ -212,6 +212,12 @@ export interface PlayerView {
   deckCount: number
   discardCount?: number
   discardTop?: CardRef
+  // 副牌组（如奇异博士的召唤牌组）：数量对所有副牌组英雄公开；顶牌与
+  // 弃牌堆顶只在明置副牌组（召唤牌组）暴露，海克力斯的 Labor/Gift 暗置。
+  senseDeckCount?: number
+  sideDeckTop?: CardRef
+  sideDiscardCount?: number
+  sideDiscardTop?: CardRef
   allies: AllyView[] | null
   supports: EntityLite[] | null
   upgrades: EntityLite[] | null

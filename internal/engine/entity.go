@@ -36,6 +36,15 @@ type Behavior struct {
 	HeroAbilities func(g *Game, p *Player) []Ability
 	// HeroSetup runs at game start after opening hands are drawn.
 	HeroSetup func(g *Game, p *Player) []Message
+	// SideDeckFaceup marks identity side decks played with the top card
+	// faceup and a public discard pile (Doctor Strange's Invocation deck);
+	// hidden side decks (Hercules' Labor/Gift piles reuse the same fields)
+	// leave it unset, and the view never exposes their card faces.
+	SideDeckFaceup bool
+	// SideDeckRecycles refills an empty side deck from its discard pile
+	// with no penalty (the Invocation deck rule). Gated per hero because
+	// Hercules' Gift pile is a second deck, not a discard.
+	SideDeckRecycles bool
 	// HandSizeBonus adds to the identity's hand size (e.g. Iron Man).
 	HandSizeBonus func(g *Game, p *Player) int
 	// VillainDamageable gates damage dynamically (e.g. Ultron III while

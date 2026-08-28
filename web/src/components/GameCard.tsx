@@ -343,11 +343,15 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
       ? t('pile.deckTitle', card.title)
       : card.label === 'discard'
         ? t('pile.discardTitle', card.title)
-        : card.label === 'encounter'
-          ? t('pile.encounter')
-          : card.label === 'encounter-discard'
-            ? t('pile.encounterDiscard')
-            : lname(zh, card.code, card.title)
+        : card.label === 'sideDeck'
+          ? t('pile.sideDeckTitle', card.title)
+          : card.label === 'sideDiscard'
+            ? t('pile.sideDiscardTitle', card.title)
+            : card.label === 'encounter'
+              ? t('pile.encounter')
+              : card.label === 'encounter-discard'
+                ? t('pile.encounterDiscard')
+                : lname(zh, card.code, card.title)
   return (
     <div
       className={`gcard pile pk-${Math.max(0, card.playerIndex)} k-pile-${card.label ?? 'deck'} ${className}`}

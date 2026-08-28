@@ -139,6 +139,12 @@ type PlayerView struct {
 	DiscardCount   int       `json:"discardCount"`
 	SenseDeckCount int       `json:"senseDeckCount,omitempty"`
 	DiscardTop     *CardRef  `json:"discardTop,omitempty"`
+	// Side deck (SenseDeck) display: the count is public for every hero
+	// with a side deck; the card faces only for faceup side decks (Doctor
+	// Strange's Invocation deck) — Hercules' Labor/Gift piles stay hidden.
+	SideDeckTop      *CardRef `json:"sideDeckTop,omitempty"`
+	SideDiscardCount int      `json:"sideDiscardCount,omitempty"`
+	SideDiscardTop   *CardRef `json:"sideDiscardTop,omitempty"`
 
 	Allies        []AllyView   `json:"allies"`
 	Supports      []EntityLite `json:"supports"`
@@ -246,8 +252,19 @@ func BuildView(token, name string, g *engine.Game, viewerUserID string, owners m
 			Exhausted: p.Exhausted, Stunned: p.Stunned, Confused: p.Confused, Tough: p.Tough > 0,
 			FirstPlayer: p.FirstPlayer, KOed: p.KOed, FormChanged: p.FormChanged,
 			HandSize: len(p.Hand), DeckCount: len(p.Deck), DiscardCount: len(p.Discard), EncounterDown: len(p.EncounterDown),
-			SenseDeckCount: len(p.SenseDeck),
-			UserID:         owners[string(p.ID)],
+			SenseDeckCount:   len(p.SenseDeck),
+			SideDiscardCount: len(p.SideDiscard),
+			UserID:           owners[string(p.ID)],
+		}
+		if engine.SideDeckFaceup(p) {
+			if len(p.SenseDeck) > 0 {
+				c := p.SenseDeck[0]
+				pv.SideDeckTop = &CardRef{ID: c.ID, Code: c.Code, Name: c.Def().Name}
+			}
+			if len(p.SideDiscard) > 0 {
+				c := p.SideDiscard[len(p.SideDiscard)-1]
+				pv.SideDiscardTop = &CardRef{ID: c.ID, Code: c.Code, Name: c.Def().Name}
+			}
 		}
 		if viewerUserID != "" && pv.UserID == viewerUserID {
 			for _, c := range p.Hand {

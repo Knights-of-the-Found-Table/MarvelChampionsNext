@@ -49,6 +49,18 @@ func (m *Manager) PileList(gameID int64, playerID, pile string) ([]PileCard, err
 			return nil, fmt.Errorf("unknown player %q", playerID)
 		}
 		list = p.Discard
+	case "sideDeck":
+		p := r.game.Player(engine.PlayerID(playerID))
+		if p == nil {
+			return nil, fmt.Errorf("unknown player %q", playerID)
+		}
+		list = p.SenseDeck
+	case "sideDiscard":
+		p := r.game.Player(engine.PlayerID(playerID))
+		if p == nil {
+			return nil, fmt.Errorf("unknown player %q", playerID)
+		}
+		list = p.SideDiscard
 	default:
 		return nil, fmt.Errorf("unknown pile %q", pile)
 	}
@@ -61,10 +73,10 @@ func (m *Manager) PileList(gameID int64, playerID, pile string) ([]PileCard, err
 		}
 		out[i] = PileCard{Code: c.Code, Name: name}
 	}
-	if pile == "deck" && len(out) > 1 {
+	if (pile == "deck" || pile == "sideDeck") && len(out) > 1 {
 		rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 		rng.Shuffle(len(out), func(i, j int) { out[i], out[j] = out[j], out[i] })
-	} else if pile == "discard" {
+	} else if pile == "discard" || pile == "sideDiscard" {
 		for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
 			out[i], out[j] = out[j], out[i]
 		}

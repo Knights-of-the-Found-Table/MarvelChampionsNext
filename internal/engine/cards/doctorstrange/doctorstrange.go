@@ -23,6 +23,9 @@ func init() {
 // registerDoctorStrange installs the identity (09001a/b).
 func registerDoctorStrange() {
 	engine.RegisterBehavior("09001", &engine.Behavior{
+		// 顶牌恒正面朝上（含公开弃牌堆）；副牌组耗尽时把弃牌堆洗回。
+		SideDeckFaceup:   true,
+		SideDeckRecycles: true,
 		// Stephen Strange begins the game with an Invocation deck.
 		HeroSetup: func(g *engine.Game, p *engine.Player) []engine.Message {
 			for _, code := range invocationCodes {
@@ -62,11 +65,7 @@ func registerDoctorStrange() {
 					if p == nil || len(p.SenseDeck) == 0 {
 						return nil
 					}
-					top := p.SenseDeck[0]
-					p.SenseDeck = p.SenseDeck[1:]
-					p.SideDiscard = append(p.SideDiscard, top)
-					g.TLogf("c.discardsFromTheInvocationDeck", p.Name, top)
-					return nil
+					return []engine.Message{engine.SideDeckDiscardTop{Player: p.ID}}
 				},
 			})
 			return abs
