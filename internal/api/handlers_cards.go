@@ -15,18 +15,23 @@ import (
 func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 	all := engine.DB.All()
 	type cardOut struct {
-		Code        string   `json:"code"`
-		Name        string   `json:"name"`
-		Subname     string   `json:"subname,omitempty"`
-		PackCode    string   `json:"packCode"`
-		PackName    string   `json:"packName,omitempty"`
-		Type        string   `json:"type"`
-		Category    string   `json:"category"`
-		Aspect      string   `json:"aspect,omitempty"`
-		CardSet     string   `json:"cardSet,omitempty"`
-		Cost        *int     `json:"cost,omitempty"`
-		Unique      bool     `json:"unique"`
-		Traits      []string `json:"traits,omitempty"`
+		Code     string   `json:"code"`
+		Name     string   `json:"name"`
+		Subname  string   `json:"subname,omitempty"`
+		PackCode string   `json:"packCode"`
+		PackName string   `json:"packName,omitempty"`
+		Type     string   `json:"type"`
+		Category string   `json:"category"`
+		Aspect   string   `json:"aspect,omitempty"`
+		CardSet  string   `json:"cardSet,omitempty"`
+		Cost     *int     `json:"cost,omitempty"`
+		Unique   bool     `json:"unique"`
+		Traits   []string `json:"traits,omitempty"`
+		// ETraits is the English print traits — locale-proof. Deckbuilding
+		// logic (aspect-exception matching) must key on these: with the
+		// server-wide zh overlay MC_ZH_DIR, Traits carries translated
+		// strings that can never equal the English rider traits.
+		ETraits     []string `json:"etraits,omitempty"`
 		Text        string   `json:"text,omitempty"`
 		Resources   []string `json:"resources,omitempty"`
 		Quantity    int      `json:"quantity,omitempty"`
@@ -53,7 +58,7 @@ func (s *Server) handleCards(w http.ResponseWriter, r *http.Request) {
 			Code: def.Code, Name: def.Name, Subname: def.Subname,
 			PackCode: def.PackCode, PackName: def.PackName, Type: def.Type, Category: def.Category,
 			Aspect: def.Aspect, CardSet: def.CardSet, Cost: def.Cost,
-			Unique: def.Unique, Traits: def.Traits, Text: def.Text, Resources: def.Resources,
+			Unique: def.Unique, Traits: def.Traits, ETraits: def.ETraits, Text: def.Text, Resources: def.Resources,
 			Quantity:    def.Quantity,
 			Implemented: engine.Implemented(def.Code),
 			HP:          def.HP, Attack: def.Attack, Thwart: def.Thwart,

@@ -308,6 +308,10 @@ export interface CardInfo {
   cost?: number | null
   unique: boolean
   traits?: string[]
+  // English print traits — deckbuilding logic (aspect-exception matching)
+  // must key on these: under the server-wide zh overlay (MC_ZH_DIR) the
+  // `traits` field carries translated strings.
+  etraits?: string[]
   resources?: string[]
   text?: string
   quantity?: number

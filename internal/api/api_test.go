@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -743,5 +744,36 @@ func TestCardsCatalogRiderFields(t *testing.T) {
 	}
 	if _, has := spidey["aspectException"]; has {
 		t.Fatal("plain alter ego should omit aspectException")
+	}
+
+	// Maria Hill's rider (exception trait with a trailing dot) must be
+	// served for the builder UI, which mirrors the engine's normTrait.
+	hill := byCode["50001b"]
+	if hill == nil {
+		t.Fatal("maria hill alter ego missing from catalog")
+	}
+	hx, ok := hill["aspectException"].(map[string]any)
+	if !ok || hx["trait"] != "s.h.i.e.l.d." || hx["cardType"] != "support" || hx["titles"].(float64) != 3 {
+		t.Fatalf("maria hill aspectException: %v", hill["aspectException"])
+	}
+
+	// etraits (English print traits) back the builder's locale-proof
+	// exception matching: always served alongside traits, equal to them in
+	// the default (English) catalog, and never carrying the trailing dot
+	// the raw print uses ("S.H.I.E.L.D." parses to "s.h.i.e.l.d").
+	for _, c := range cards {
+		traits, _ := c["traits"].([]any)
+		etraits, _ := c["etraits"].([]any)
+		if len(traits) != len(etraits) {
+			t.Fatalf("%v: traits %v != etraits %v", c["code"], traits, etraits)
+		}
+		for i := range etraits {
+			if traits[i] != etraits[i] {
+				t.Fatalf("%v: traits %v != etraits %v", c["code"], traits, etraits)
+			}
+			if s := etraits[i].(string); strings.HasSuffix(s, ".") {
+				t.Fatalf("%v: etrait %q keeps a trailing dot", c["code"], s)
+			}
+		}
 	}
 }

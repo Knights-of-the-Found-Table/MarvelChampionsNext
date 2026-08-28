@@ -301,6 +301,13 @@ export default function DeckBuilder() {
     return () => window.clearTimeout(id)
   }, [heroDef, heroCode, slots])
 
+  // 换英雄时清掉上一英雄的校验结果：序号只防响应乱序，不清会在新
+  // 英雄首次校验落地前短暂显示旧英雄的问题清单/绿板。
+  useEffect(() => {
+    setIssues([])
+    setValidated(false)
+  }, [heroCode])
+
   useEffect(() => {
     setPoolLimit(POOL_PAGE)
   }, [search, typeFilter])
