@@ -714,8 +714,8 @@ func (s *Server) handleChatSend(w http.ResponseWriter, r *http.Request) {
 }
 
 // handlePileList serves the contents of a deck or discard pile for the pile
-// viewer. Deck listings are shuffled server-side (see rooms.PileList), so
-// the draw order is never revealed.
+// viewer. Deck listings are sorted by card code server-side (see
+// rooms.PileList), so the draw order is never revealed.
 func (s *Server) handlePileList(w http.ResponseWriter, r *http.Request) {
 	gameID, ok := s.pathGame(w, r)
 	if !ok {

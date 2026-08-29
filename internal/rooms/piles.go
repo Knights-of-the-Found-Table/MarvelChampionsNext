@@ -2,8 +2,7 @@ package rooms
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
+	"sort"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
 )
@@ -15,8 +14,8 @@ type PileCard struct {
 }
 
 // PileList returns the contents of a pile for display. Deck listings are
-// shuffled with a wall-clock RNG (never the game's seeded PCG, which must
-// stay untouched for determinism), so the client cannot infer draw order.
+// sorted by card code: the sort scrambles the stored order, so the client
+// cannot infer draw order, and the listing stays stable across refreshes.
 // Discard listings are returned top-card first.
 func (m *Manager) PileList(gameID int64, playerID, pile string) ([]PileCard, error) {
 	r, err := m.Get(gameID)
@@ -73,9 +72,9 @@ func (m *Manager) PileList(gameID int64, playerID, pile string) ([]PileCard, err
 		}
 		out[i] = PileCard{Code: c.Code, Name: name}
 	}
-	if (pile == "deck" || pile == "sideDeck") && len(out) > 1 {
-		rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-		rng.Shuffle(len(out), func(i, j int) { out[i], out[j] = out[j], out[i] })
+	if pile == "deck" || pile == "sideDeck" {
+		// 字典序打乱存储顺序且不泄露抽牌次序，比洗牌更稳定可读。
+		sort.Slice(out, func(i, j int) bool { return out[i].Code < out[j].Code })
 	} else if pile == "discard" || pile == "sideDiscard" {
 		for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
 			out[i], out[j] = out[j], out[i]
