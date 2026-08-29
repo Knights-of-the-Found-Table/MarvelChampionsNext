@@ -14,6 +14,7 @@ import {
   swapCampaignDeck,
 } from '../api'
 import type { CampaignDetail as CampaignDetailData } from '../api'
+import { CardImage } from '../cards'
 import { lname, useT, useZhMap } from '../i18n'
 
 function statusKey(status: string) {
@@ -156,37 +157,27 @@ export default function CampaignDetail() {
             <div key={myPending}>
               <p>{t('campaigns.choice.' + myPending)}</p>
               {myPending === 'sm-tech' ? (
-                <div className="form inline">
-                  {(st.players.find((p) => p.slot === mySlot)?.smTechOffer ?? []).map((code) => (
-                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
-                      {name(code)}
-                    </button>
-                  ))}
-                </div>
+                <CardOptions
+                  busy={busy}
+                  name={name}
+                  onPick={(code) => act(() => campaignChoice(id, code))}
+                  options={(st.players.find((p) => p.slot === mySlot)?.smTechOffer ?? []).map((code) => ({ code }))}
+                />
               ) : myPending === 'sm-aspect' ? (
                 <SMCodePick
                   placeholder={t('campaigns.aspectHint')}
                   deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
                   busy={busy}
+                  name={name}
                   onPick={(code) => act(() => campaignChoice(id, code))}
                 />
               ) : myPending === 'sm-plan' ? (
-                <div className="form inline">
-                  <select
-                    defaultValue=""
-                    onChange={(e) => {
-                      const code = e.target.value
-                      if (code) act(() => campaignChoice(id, code))
-                    }}
-                  >
-                    <option value="">{t('campaigns.pickCard')}</option>
-                    {Object.entries(st.players.find((p) => p.slot === mySlot)?.deck ?? {}).map(([code, n]) => (
-                      <option key={code} value={code}>
-                        {name(code)} ×{n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <DeckPick
+                  busy={busy}
+                  deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
+                  name={name}
+                  onPick={(code) => act(() => campaignChoice(id, code))}
+                />
               ) : myPending === 'mg-role' ? (
                 <div className="form inline">
                   {detail.pools.roles.map((role) => (
@@ -196,21 +187,19 @@ export default function CampaignDetail() {
                   ))}
                 </div>
               ) : myPending === 'nx-scheme' ? (
-                <div className="form inline">
-                  {detail.pools.nx.map((code) => (
-                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
-                      {name(code)}
-                    </button>
-                  ))}
-                </div>
+                <CardOptions
+                  busy={busy}
+                  name={name}
+                  onPick={(code) => act(() => campaignChoice(id, code))}
+                  options={detail.pools.nx.map((code) => ({ code }))}
+                />
               ) : myPending === 'aos-accuse' ? (
-                <div className="form inline">
-                  {detail.pools.aosMembers.map((code) => (
-                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
-                      {name(code)}
-                    </button>
-                  ))}
-                </div>
+                <CardOptions
+                  busy={busy}
+                  name={name}
+                  onPick={(code) => act(() => campaignChoice(id, code))}
+                  options={detail.pools.aosMembers.map((code) => ({ code }))}
+                />
               ) : myPending === 'wi-trait' ? (
                 <div className="form inline">
                   {(detail.pools.traits ?? []).map((tr) => (
@@ -224,6 +213,7 @@ export default function CampaignDetail() {
                   placeholder="27010"
                   deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
                   busy={busy}
+                  name={name}
                   onPick={(code) => act(() => campaignChoice(id, code, 'wi-ally'))}
                 />
               ) : myPending === 'wi-card' ? (
@@ -231,6 +221,7 @@ export default function CampaignDetail() {
                   placeholder="27010"
                   deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
                   busy={busy}
+                  name={name}
                   onPick={(code) => act(() => campaignChoice(id, code, 'wi-card'))}
                 />
               ) : myPending === 'aw-ally' ? (
@@ -238,10 +229,11 @@ export default function CampaignDetail() {
                   placeholder="22001"
                   deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
                   busy={busy}
+                  name={name}
                   onPick={(code) => act(() => campaignChoice(id, code, 'aw-ally'))}
                 />
               ) : myPending === 'aw-identity' ? (
-                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, 'aw-identity'))} />
+                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} onPick={(code) => act(() => campaignChoice(id, code, 'aw-identity'))} />
               ) : myPending === 'mojo-role' ? (
                 <div className="form inline">
                   {Object.keys((detail.tables?.mojoRoles as Record<string, unknown>) ?? {}).map((role) => (
@@ -251,31 +243,31 @@ export default function CampaignDetail() {
                   ))}
                 </div>
               ) : myPending === 'mojo-training' || myPending === 'mojo-scheme' ? (
-                <div className="form inline">
-                  {(detail.pools.allNx ?? []).map((code) => (
-                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code, myPending))}>
-                      {name(code)}
-                    </button>
-                  ))}
-                </div>
+                <CardOptions
+                  busy={busy}
+                  name={name}
+                  onPick={(code) => act(() => campaignChoice(id, code, myPending))}
+                  options={(detail.pools.allNx ?? []).map((code) => ({ code }))}
+                />
               ) : myPending === 'mojo-event' ? (
-                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, 'mojo-event'))} />
+                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} onPick={(code) => act(() => campaignChoice(id, code, 'mojo-event'))} />
               ) : myPending === 'mojo-market' ? (
-                <div className="form inline">
-                  <button disabled={busy} onClick={() => act(() => campaignChoice(id, '21183', 'mojo-market'))}>
-                    {t('campaigns.shawarma')}
-                  </button>
-                  {(() => {
-                    const role = st.players.find((p) => p.slot === mySlot)?.mojoRole
-                    const table = (detail.tables?.mojoRoles as Record<string, { market?: string }> | undefined) ?? {}
-                    const market = role ? table[role]?.market : undefined
-                    return market ? (
-                      <button disabled={busy} onClick={() => act(() => campaignChoice(id, market, 'mojo-market'))}>
-                        {name(market)}
-                      </button>
-                    ) : null
-                  })()}
-                </div>
+                (() => {
+                  const role = st.players.find((p) => p.slot === mySlot)?.mojoRole
+                  const table = (detail.tables?.mojoRoles as Record<string, { market?: string }> | undefined) ?? {}
+                  const market = role ? table[role]?.market : undefined
+                  return (
+                    <CardOptions
+                      busy={busy}
+                      name={name}
+                      onPick={(code) => act(() => campaignChoice(id, code, 'mojo-market'))}
+                      options={[
+                        { code: '21183', label: t('campaigns.shawarma') },
+                        ...(market ? [{ code: market }] : []),
+                      ]}
+                    />
+                  )
+                })()
               ) : myPending === 'bord-path' ? (
                 <div className="form inline">
                   {((detail.tables?.paths as Array<{ key: string; label: string }> | undefined) ?? []).map((pth) => (
@@ -285,7 +277,7 @@ export default function CampaignDetail() {
                   ))}
                 </div>
               ) : myPending === 'bord-gear' ? (
-                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, 'bord-gear'))} />
+                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} onPick={(code) => act(() => campaignChoice(id, code, 'bord-gear'))} />
               ) : myPending === 'nt-meta' || myPending === 'nt-team' ? (
                 <div className="form inline">
                   <button disabled={busy} onClick={() => act(() => campaignChoice(id, 'yes', myPending))}>
@@ -297,7 +289,7 @@ export default function CampaignDetail() {
                 </div>
               ) : myPending === 'wa-sight' || myPending === 'wa-portal' || myPending === 'wa-intervened' ? (
                 <div className="form inline">
-                  <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, myPending))} />
+                  <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} onPick={(code) => act(() => campaignChoice(id, code, myPending))} />
                   <button disabled={busy} onClick={() => act(() => campaignChoice(id, '', myPending))}>
                     {t('campaigns.skip')}
                   </button>
@@ -329,22 +321,28 @@ export default function CampaignDetail() {
                     const imp = p.condition ? p.condition.slice(0, -1) + 'b' : ''
                     return (
                       <div key={p.slot} className="form inline">
-                        <button disabled={busy || !imp} onClick={() => act(() => campaignChoice(id, imp))}>
-                          {imp ? name(imp) : t('campaigns.noCondition')}
-                        </button>
-                        <button disabled={busy} onClick={() => act(() => campaignChoice(id, ''))}>
-                          {t('campaigns.skip')}
+                        {imp && (
+                          <CardOptions
+                            busy={busy}
+                            name={name}
+                            onPick={(code) => act(() => campaignChoice(id, code))}
+                            options={[{ code: imp }]}
+                          />
+                        )}
+                        <button disabled={busy || !imp} onClick={() => act(() => campaignChoice(id, ''))}>
+                          {imp ? t('campaigns.skip') : t('campaigns.noCondition')}
                         </button>
                       </div>
                     )
                   })
               ) : (
                 <div className="form inline">
-                  {(myPending === 'tech' ? detail.pools.tech : detail.pools.condition).map((code) => (
-                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code))}>
-                      {name(code)}
-                    </button>
-                  ))}
+                  <CardOptions
+                    busy={busy}
+                    name={name}
+                    onPick={(code) => act(() => campaignChoice(id, code))}
+                    options={(myPending === 'tech' ? detail.pools.tech : detail.pools.condition).map((code) => ({ code }))}
+                  />
                   {myPending === 'condition' && (
                     <button disabled={busy} onClick={() => act(() => campaignChoice(id, ''))}>
                       {t('campaigns.skip')}
@@ -899,48 +897,72 @@ export default function CampaignDetail() {
   )
 }
 
-// DeckPick is a dropdown over one player's deck (campaign picks that name
-// a card the player already owns).
+// CardOptions renders candidate cards as clickable thumbnails; CardImage
+// brings its own hover zoom (large art preview beside the pointer).
+function CardOptions(props: {
+  options: Array<{ code: string; label?: string; count?: number }>
+  busy: boolean
+  name: (code: string) => string
+  onPick: (code: string) => void
+}) {
+  return (
+    <div className="pick-cards">
+      {props.options.map(({ code, label, count }) => (
+        <button key={code} className="pick-card" disabled={props.busy} onClick={() => props.onPick(code)}>
+          <CardImage code={code} size="sm" />
+          <span className="pick-card-name">
+            {label ?? props.name(code)}
+            {count && count > 1 ? ` ×${count}` : ''}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// DeckPick shows one player's deck as clickable thumbnails (campaign picks
+// that name a card the player already owns); hover previews the full art.
 function DeckPick(props: {
   deck: Record<string, number>
   busy: boolean
   name: (code: string) => string
-  t: (key: string, ...args: Array<string | number>) => string
   onPick: (code: string) => void
 }) {
   return (
-    <select
-      defaultValue=""
-      onChange={(e) => {
-        const code = e.target.value
-        if (code) props.onPick(code)
-      }}
-    >
-      <option value="">{props.t('campaigns.pickCard')}</option>
-      {Object.entries(props.deck).map(([code, n]) => (
-        <option key={code} value={code}>
-          {props.name(code)} ×{n}
-        </option>
-      ))}
-    </select>
+    <CardOptions
+      busy={props.busy}
+      name={props.name}
+      onPick={props.onPick}
+      options={Object.entries(props.deck).map(([code, n]) => ({ code, count: n }))}
+    />
   )
 }
 
 // SMCodePick is a free-text card picker (aspect advantage: any aspect card
-// by code). The server validates the choice.
+// by code). The deck thumbnails below are quick picks — clicking one submits
+// it directly; the server validates the choice either way.
 function SMCodePick(props: {
   placeholder: string
   deck: Record<string, number>
   busy: boolean
+  name: (code: string) => string
   onPick: (code: string) => void
 }) {
   const [code, setCode] = useState('')
   return (
-    <div className="form inline">
-      <input value={code} placeholder={props.placeholder} onChange={(e) => setCode(e.target.value.trim())} />
-      <button disabled={props.busy || !code} onClick={() => props.onPick(code)}>
-        OK
-      </button>
+    <div className="pick-manual">
+      <div className="form inline">
+        <input value={code} placeholder={props.placeholder} onChange={(e) => setCode(e.target.value.trim())} />
+        <button disabled={props.busy || !code} onClick={() => props.onPick(code)}>
+          OK
+        </button>
+      </div>
+      <CardOptions
+        busy={props.busy}
+        name={props.name}
+        onPick={props.onPick}
+        options={Object.entries(props.deck).map(([c, n]) => ({ code: c, count: n }))}
+      />
     </div>
   )
 }

@@ -139,6 +139,45 @@ button.linklike {
   text-decoration: underline;
 }
 
+/* 战役章节之间：候选卡牌缩略图网格。悬浮大图由 CardImage 自带（card-zoom）。 */
+.pick-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.pick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  padding: 0.4rem;
+  max-width: 120px;
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.pick-card img {
+  display: block;
+  width: 100px;
+  height: auto;
+  border-radius: 5px;
+}
+
+.pick-card-name {
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+/* 自由输入码选择：输入行 + 牌库快选缩略图纵向排列 */
+.pick-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
 /* 顶栏报告 Bug：GitHub 图标 + 文字。 */
 button.bug-report-btn {
   display: inline-flex;
