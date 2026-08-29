@@ -327,6 +327,7 @@ export default function GameCard({ card, onClick, className = '', zoom = true, f
 
 // 牌堆：按数量堆叠的背面层（每约 3 张一层，封顶 7 层）+ 数量徽章。
 // 弃牌堆有顶牌时顶牌朝上盖在层堆上；空弃牌堆显示蓝色空框 + 数字 0。
+// 顶牌朝上时整堆支持悬浮放大预览（副牌组如奇异博士的祈唤牌组）。
 function Pile({ card, className = '', onClick }: { card: PlacedCard; className?: string; onClick?: () => void }) {
   const s = card.pileScale ?? 1
   const lang = useLang()
@@ -337,6 +338,9 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
   const safeCode = card.code && card.code !== 'undefined' && card.code !== 'null' ? card.code : ''
   const isDiscard = card.label === 'discard' || card.label === 'sideDiscard' || card.label === 'encounter-discard'
   const isEmptyDiscard = isDiscard && count === 0 && !safeCode
+  const pileRef = useRef<HTMLDivElement | null>(null)
+  const topUp = safeCode !== '' && !card.faceDown
+  const zoom = useCardZoom(topUp ? safeCode : '', pileRef)
   // 牌库/弃牌堆 title：{玩家名}的牌库 / {玩家名}的弃牌堆
   const displayTitle =
     card.label === 'deck'
@@ -354,6 +358,7 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
                 : lname(zh, card.code, card.title)
   return (
     <div
+      ref={pileRef}
       className={`gcard pile pk-${Math.max(0, card.playerIndex)} k-pile-${card.label ?? 'deck'} ${className}`}
       style={
         {
@@ -369,6 +374,8 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
       }
       title={displayTitle}
       onClick={onClick}
+      onMouseEnter={topUp ? zoom.onEnter : undefined}
+      onMouseLeave={topUp ? zoom.hide : undefined}
     >
       <div className="gcard-in">
         {isEmptyDiscard ? (
@@ -412,6 +419,7 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
         )}
         {(count > 0 || isDiscard) && <TaggedNumber className="pile-count" label={t('stat.pileCount')}>{count}</TaggedNumber>}
       </div>
+      {topUp ? zoom.overlay : null}
     </div>
   )
 }
