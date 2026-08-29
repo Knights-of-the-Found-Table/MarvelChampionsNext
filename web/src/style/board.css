@@ -235,12 +235,16 @@
 
 /* 牌堆可点击查看 */
 .gcard.k-pile-deck,
-.gcard.k-pile-discard {
+.gcard.k-pile-discard,
+.gcard.k-pile-sideDeck,
+.gcard.k-pile-sideDiscard {
   cursor: pointer;
 }
 
 .gcard.k-pile-deck:hover .gcard-in,
-.gcard.k-pile-discard:hover .gcard-in {
+.gcard.k-pile-discard:hover .gcard-in,
+.gcard.k-pile-sideDeck:hover .gcard-in,
+.gcard.k-pile-sideDiscard:hover .gcard-in {
   scale: 1.06;
 }
 

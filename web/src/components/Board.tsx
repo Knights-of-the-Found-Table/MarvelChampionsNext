@@ -66,28 +66,36 @@ export default function Board({
   const cards = layoutBoard(view)
   const t = useT()
 
-  // 场景快捷按钮：恢复（英雄牌左侧）、结束回合（弃牌堆右侧）。
-  // 位置从布局结果锚定，跟随身份行缩放。
+  // 场景快捷按钮：恢复（英雄牌左侧）、结束回合（身份行最右牌堆右侧）。
+  // 位置从布局结果锚定，跟随身份行缩放。有副牌组时身份行在主弃牌堆右侧
+  // 还有副牌组/副弃牌堆（以及 facedown 遭遇堆），按钮锚到最右的那个，
+  // 否则会叠在副牌组的牌上。
   const viewerPlayer = view.players[view.players.findIndex((p) => p.hand && p.hand.length > 0) >= 0 ? view.players.findIndex((p) => p.hand && p.hand.length > 0) : 0]
   const heroCard = cards.find((c) => c.id === viewerPlayer?.id)
-  const discardPile = cards.find((c) => c.id === `pile-discard-${viewerPlayer?.id ?? ''}`)
+  const viewerId = viewerPlayer?.id ?? ''
+  const actionPile =
+    cards.find((c) => c.id === `pile-enc-${viewerId}`) ??
+    cards.find((c) => c.id === `pile-side-discard-${viewerId}`) ??
+    cards.find((c) => c.id === `pile-discard-${viewerId}`)
   const btnScale = heroCard?.scale ?? 1
+  // 遭遇 facedown 堆按 0.8 倍缩放，锚定宽度随之收窄。
+  const actionPileW = actionPile?.id.startsWith('pile-enc-') ? 140 * btnScale * 0.8 : 140 * btnScale
   const endTurnBtn =
-    onEndTurn && discardPile
-      ? { x: discardPile.x + 140 * btnScale + 18, y: discardPile.y + CARD_H * btnScale - 50 }
+    onEndTurn && actionPile
+      ? { x: actionPile.x + actionPileW + 18, y: actionPile.y + CARD_H * btnScale - 50 }
       : null
   const recoverBtn =
     onRecover && heroCard
       ? { x: heroCard.x - 160 * btnScale - 14, y: heroCard.y + CARD_H * btnScale - 50 }
       : null
-  // 撤销锚在弃牌堆旁（无回合限制，任何阶段都可反悔）；与结束回合同时
+  // 撤销锚在同一牌堆旁（无回合限制，任何阶段都可反悔）；与结束回合同时
   // 出现时排在它的正上方，组成同一组桌游 token。间距是常数（44px 按钮
   // 高 + 8px 缝）：按钮高度不随牌面缩放，乘 btnScale 会叠回结束回合上。
   const undoBtn =
-    onUndo && discardPile
+    onUndo && actionPile
       ? {
-          x: discardPile.x + 140 * btnScale + 18,
-          y: endTurnBtn ? endTurnBtn.y - 52 : discardPile.y + CARD_H * btnScale - 50,
+          x: actionPile.x + actionPileW + 18,
+          y: endTurnBtn ? endTurnBtn.y - 52 : actionPile.y + CARD_H * btnScale - 50,
         }
       : null
   const posRef = useRef(new Map(cards.map((c) => [c.id, c])))

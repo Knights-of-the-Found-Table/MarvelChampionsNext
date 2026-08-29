@@ -335,7 +335,7 @@ function Pile({ card, className = '', onClick }: { card: PlacedCard; className?:
   const count = card.count ?? 0
   const layers = Math.max(1, Math.min(7, Math.ceil(count / 3)))
   const safeCode = card.code && card.code !== 'undefined' && card.code !== 'null' ? card.code : ''
-  const isDiscard = card.label === 'discard' || card.label === 'encounter-discard'
+  const isDiscard = card.label === 'discard' || card.label === 'sideDiscard' || card.label === 'encounter-discard'
   const isEmptyDiscard = isDiscard && count === 0 && !safeCode
   // 牌库/弃牌堆 title：{玩家名}的牌库 / {玩家名}的弃牌堆
   const displayTitle =
