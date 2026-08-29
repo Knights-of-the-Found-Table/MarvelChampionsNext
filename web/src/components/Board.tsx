@@ -81,14 +81,13 @@ export default function Board({
       ? { x: heroCard.x - 160 * btnScale - 14, y: heroCard.y + CARD_H * btnScale - 50 }
       : null
   // 撤销锚在弃牌堆旁（无回合限制，任何阶段都可反悔）；与结束回合同时
-  // 出现时叠在其正上方，组成同一组桌游 token。
+  // 出现时排在它的正上方，组成同一组桌游 token。间距是常数（44px 按钮
+  // 高 + 8px 缝）：按钮高度不随牌面缩放，乘 btnScale 会叠回结束回合上。
   const undoBtn =
     onUndo && discardPile
       ? {
           x: discardPile.x + 140 * btnScale + 18,
-          y: endTurnBtn
-            ? endTurnBtn.y - 46 * btnScale
-            : discardPile.y + CARD_H * btnScale - 50,
+          y: endTurnBtn ? endTurnBtn.y - 52 : discardPile.y + CARD_H * btnScale - 50,
         }
       : null
   const posRef = useRef(new Map(cards.map((c) => [c.id, c])))
