@@ -88,6 +88,14 @@ h2 {
   max-width: 480px;
 }
 
+/* 同一语义行的控件（如下拉选择 + 确认按钮）横排，不受 .form 列宽限制 */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+}
+
 label {
   display: flex;
   flex-direction: column;

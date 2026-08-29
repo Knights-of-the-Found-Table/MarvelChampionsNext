@@ -336,19 +336,17 @@ export default function CampaignDetail() {
                     )
                   })
               ) : (
-                <div className="form inline">
-                  <CardOptions
-                    busy={busy}
-                    name={name}
-                    onPick={(code) => act(() => campaignChoice(id, code))}
-                    options={(myPending === 'tech' ? detail.pools.tech : detail.pools.condition).map((code) => ({ code }))}
-                  />
-                  {myPending === 'condition' && (
-                    <button disabled={busy} onClick={() => act(() => campaignChoice(id, ''))}>
-                      {t('campaigns.skip')}
-                    </button>
-                  )}
-                </div>
+                <CardOptions
+                  busy={busy}
+                  name={name}
+                  onPick={(code) => act(() => campaignChoice(id, code))}
+                  options={(myPending === 'tech' ? detail.pools.tech : detail.pools.condition).map((code) => ({ code }))}
+                />
+              )}
+              {myPending === 'condition' && (
+                <button disabled={busy} onClick={() => act(() => campaignChoice(id, ''))}>
+                  {t('campaigns.skip')}
+                </button>
               )}
             </div>
           ))}
@@ -373,7 +371,7 @@ export default function CampaignDetail() {
             </p>
           )}
           {mySlot >= 0 && detail.status === 'interlude' && (
-            <div className="form inline">
+            <div className="form-row">
               <select value={deckId} onChange={(e) => setDeckId(e.target.value)}>
                 {decks.map((d) => (
                   <option key={d.id} value={d.id}>
