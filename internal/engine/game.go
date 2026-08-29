@@ -129,6 +129,9 @@ func (g *Game) nextCardID() string {
 func (g *Game) SpawnSupport(code string, owner PlayerID) *Support {
 	s := &Support{ID: g.nextEntityID(KindSupport), Code: code, Owner: owner}
 	g.Supports[s.ID] = s
+	if p := g.Player(owner); p != nil {
+		p.Supports = append(p.Supports, s.ID)
+	}
 	g.tlogMajorf("log.entersControl", s, g.Player(owner).Name)
 	return s
 }

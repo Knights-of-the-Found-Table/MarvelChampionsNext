@@ -101,6 +101,37 @@ func ApplyVictory(st *State, snap Snapshot) {
 	case "aos":
 		aosVictory(st, snap)
 		return
+	// Contest campaigns.
+	case "cowl":
+		cowlVictory(st, snap)
+		return
+	case "whatif":
+		wiVictory(st, snap)
+		return
+	case "awesome":
+		awVictory(st, snap)
+		return
+	case "alias":
+		aliasVictory(st, snap)
+		return
+	case "watchers":
+		watchersVictory(st, snap)
+		return
+	case "mojo":
+		mojoVictory(st, snap)
+		return
+	case "bord":
+		bordVictory(st, snap)
+		return
+	case "night":
+		nightVictory(st, snap)
+		return
+	case "viral":
+		viralVictory(st, snap)
+		return
+	case "entropy":
+		entVictory(st, snap)
+		return
 	case "gmw":
 		gain := 0
 		for i := range st.Players {
@@ -173,6 +204,25 @@ func ApplyDefeat(st *State) {
 		st.Status = "lost"
 		return
 	}
+	// Contest campaign defeat programs.
+	switch st.Box {
+	case "night":
+		nightDefeat(st)
+		return
+	case "viral":
+		viralDefeat(st)
+		return
+	case "entropy":
+		if st.Index == 4 && st.IsExpert() {
+			st.Status = "lost"
+			return
+		}
+	case "awesome":
+		if st.Index == 4 && st.IsExpert() {
+			st.Status = "lost"
+			return
+		}
+	}
 	st.Status = "interlude"
 }
 
@@ -241,6 +291,25 @@ func ApplyChoice(st *State, slot int, kind, cardCode string) error {
 		return ApplyNXScheme(st, slot, cardCode)
 	case ChoiceAOAccuse:
 		return ApplyAOAccuse(st, slot, cardCode)
+	// Contest campaign picks.
+	case ChoiceWITrait, ChoiceWIAlly, ChoiceWICard:
+		return ApplyWIChoice(st, slot, kind, cardCode)
+	case ChoiceAWAlly:
+		return ApplyAWAlly(st, slot, cardCode)
+	case ChoiceAWIdentity:
+		return ApplyAWIdentity(st, slot, cardCode)
+	case ChoiceMojoRole, ChoiceMojoTraining, ChoiceMojoEvent, ChoiceMojoMarket, ChoiceMojoScheme:
+		return ApplyMojoChoice(st, slot, kind, cardCode)
+	case ChoiceBordPath, ChoiceBordGear:
+		return ApplyBordChoice(st, slot, kind, cardCode)
+	case ChoiceNTMeta, ChoiceNTTeam:
+		return ApplyNTChoice(st, slot, kind, cardCode)
+	case ChoiceWASight, ChoiceWAPortal, ChoiceWAIntervened:
+		return ApplyWAChoice(st, slot, kind, cardCode)
+	case ChoiceViralNext:
+		return ApplyViralChoice(st, slot, kind, cardCode)
+	case ChoiceEnPath1, ChoiceEnPath2, ChoiceEnPath3:
+		return ApplyEnChoice(st, slot, kind, cardCode)
 	case ChoiceTech:
 		if !contains(rrsTech, cardCode) {
 			return fmt.Errorf("not a TECH upgrade: %q", cardCode)

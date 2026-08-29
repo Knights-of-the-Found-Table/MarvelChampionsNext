@@ -447,6 +447,19 @@ export interface CampaignPlayerLog {
   smEnhanced?: boolean
   setupHand?: string
   mgRole?: string
+  // Contest campaigns.
+  wiTrait?: string
+  wiAllies?: string[]
+  wiRewards?: string[]
+  influence?: number
+  awAlly?: string
+  awIdentity?: string
+  mojoRole?: string
+  mojoMarket?: string
+  mojoScheme?: string
+  mojoEvent?: string
+  bordObligations?: string[]
+  bordGear?: string[]
 }
 
 export interface CampaignState {
@@ -486,6 +499,10 @@ export interface CampaignState {
   aoEvidence?: string[]
   aoCounters?: Record<string, number>
   aoSurvivors?: string[]
+  // Contest campaigns.
+  selections?: Record<string, string>
+  victims?: string[]
+  cowlCaught?: string[]
 }
 
 export interface CampaignSeat {
@@ -499,6 +516,8 @@ export interface CampaignSeat {
 export interface CampaignChapter {
   id: string
   name: string
+  /** Identity this chapter requires (The Watcher's Team). */
+  requires?: string
 }
 
 export interface CampaignGameRef {
@@ -539,7 +558,15 @@ export interface CampaignDetail {
     roles: string[]
     nx: string[]
     aosMembers: string[]
+    smTech?: string[]
+    community?: string[]
+    traits?: string[]
+    soe?: string[]
+    viralNext?: string[]
+    allNx?: string[]
   }
+  /** Per-box choice tables (role cards, shop entries, path labels...). */
+  tables?: Record<string, unknown>
 }
 
 export interface CampaignBoxInfo {
@@ -568,6 +595,9 @@ export const joinCampaign = (id: string, deckId: string) => post<CampaignDetail>
 export const kickCampaign = (id: string, slot: number) => post<CampaignDetail>(`/marvel/campaigns/${id}/kick`, { slot })
 export const startCampaign = (id: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/start`)
 export const playCampaign = (id: string) => post<{ gameId: string }>(`/marvel/campaigns/${id}/play`)
-export const campaignChoice = (id: string, cardCode: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/choice`, { cardCode })
+export const campaignChoice = (id: string, cardCode: string, kind?: string) =>
+  post<CampaignDetail>(`/marvel/campaigns/${id}/choice`, kind ? { cardCode, kind } : { cardCode })
+export const swapCampaignDeck = (id: string, deckId: string) =>
+  post<CampaignDetail>(`/marvel/campaigns/${id}/deck`, { deckId })
 export const buyMarket = (id: string, cardCode: string) => post<CampaignDetail>(`/marvel/campaigns/${id}/market`, { cardCode })
 export const setCampaignHeal = (id: string, on: boolean) => post<CampaignDetail>(`/marvel/campaigns/${id}/heal`, { on })

@@ -110,9 +110,9 @@ func mgSetup(st *State, ctx *engine.CampaignSetup, opts *engine.NewGameOptions) 
 			set := mgRoles[role]
 			pick := set[randInt(len(set))]
 			if ctx.RoleUpgrades == nil {
-				ctx.RoleUpgrades = map[int]string{}
+				ctx.RoleUpgrades = map[int][]string{}
 			}
-			ctx.RoleUpgrades[i] = pick
+			ctx.RoleUpgrades[i] = []string{pick}
 		}
 		st.Flags["mgEarned"] = false
 	}

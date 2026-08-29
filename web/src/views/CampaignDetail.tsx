@@ -11,6 +11,7 @@ import {
   playCampaign,
   setCampaignHeal,
   startCampaign,
+  swapCampaignDeck,
 } from '../api'
 import type { CampaignDetail as CampaignDetailData } from '../api'
 import { lname, useT, useZhMap } from '../i18n'
@@ -97,6 +98,7 @@ export default function CampaignDetail() {
         {detail.chapters.map((ch, i) => (
           <li key={ch.id} className={i === detail.index ? 'current' : i < detail.index ? 'done' : ''}>
             {i + 1}. {ch.name}
+            {ch.requires && <span className="muted"> — {t('campaigns.flag.requires')} {ch.requires}</span>}
           </li>
         ))}
       </ol>
@@ -209,6 +211,117 @@ export default function CampaignDetail() {
                     </button>
                   ))}
                 </div>
+              ) : myPending === 'wi-trait' ? (
+                <div className="form inline">
+                  {(detail.pools.traits ?? []).map((tr) => (
+                    <button key={tr} disabled={busy} onClick={() => act(() => campaignChoice(id, tr, 'wi-trait'))}>
+                      {t('campaigns.wiTrait.' + tr)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'wi-ally' ? (
+                <SMCodePick
+                  placeholder="27010"
+                  deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
+                  busy={busy}
+                  onPick={(code) => act(() => campaignChoice(id, code, 'wi-ally'))}
+                />
+              ) : myPending === 'wi-card' ? (
+                <SMCodePick
+                  placeholder="27010"
+                  deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
+                  busy={busy}
+                  onPick={(code) => act(() => campaignChoice(id, code, 'wi-card'))}
+                />
+              ) : myPending === 'aw-ally' ? (
+                <SMCodePick
+                  placeholder="22001"
+                  deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}}
+                  busy={busy}
+                  onPick={(code) => act(() => campaignChoice(id, code, 'aw-ally'))}
+                />
+              ) : myPending === 'aw-identity' ? (
+                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, 'aw-identity'))} />
+              ) : myPending === 'mojo-role' ? (
+                <div className="form inline">
+                  {Object.keys((detail.tables?.mojoRoles as Record<string, unknown>) ?? {}).map((role) => (
+                    <button key={role} disabled={busy} onClick={() => act(() => campaignChoice(id, role, 'mojo-role'))}>
+                      {t('campaigns.role.' + role)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'mojo-training' || myPending === 'mojo-scheme' ? (
+                <div className="form inline">
+                  {(detail.pools.allNx ?? []).map((code) => (
+                    <button key={code} disabled={busy} onClick={() => act(() => campaignChoice(id, code, myPending))}>
+                      {name(code)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'mojo-event' ? (
+                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, 'mojo-event'))} />
+              ) : myPending === 'mojo-market' ? (
+                <div className="form inline">
+                  <button disabled={busy} onClick={() => act(() => campaignChoice(id, '21183', 'mojo-market'))}>
+                    {t('campaigns.shawarma')}
+                  </button>
+                  {(() => {
+                    const role = st.players.find((p) => p.slot === mySlot)?.mojoRole
+                    const table = (detail.tables?.mojoRoles as Record<string, { market?: string }> | undefined) ?? {}
+                    const market = role ? table[role]?.market : undefined
+                    return market ? (
+                      <button disabled={busy} onClick={() => act(() => campaignChoice(id, market, 'mojo-market'))}>
+                        {name(market)}
+                      </button>
+                    ) : null
+                  })()}
+                </div>
+              ) : myPending === 'bord-path' ? (
+                <div className="form inline">
+                  {((detail.tables?.paths as Array<{ key: string; label: string }> | undefined) ?? []).map((pth) => (
+                    <button key={pth.key} disabled={busy} onClick={() => act(() => campaignChoice(id, pth.key, 'bord-path'))}>
+                      {t('campaigns.path.' + pth.key)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'bord-gear' ? (
+                <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, 'bord-gear'))} />
+              ) : myPending === 'nt-meta' || myPending === 'nt-team' ? (
+                <div className="form inline">
+                  <button disabled={busy} onClick={() => act(() => campaignChoice(id, 'yes', myPending))}>
+                    {t('campaigns.yes')}
+                  </button>
+                  <button disabled={busy} onClick={() => act(() => campaignChoice(id, '', myPending))}>
+                    {t('campaigns.no')}
+                  </button>
+                </div>
+              ) : myPending === 'wa-sight' || myPending === 'wa-portal' || myPending === 'wa-intervened' ? (
+                <div className="form inline">
+                  <DeckPick busy={busy} deck={st.players.find((p) => p.slot === mySlot)?.deck ?? {}} name={name} t={t} onPick={(code) => act(() => campaignChoice(id, code, myPending))} />
+                  <button disabled={busy} onClick={() => act(() => campaignChoice(id, '', myPending))}>
+                    {t('campaigns.skip')}
+                  </button>
+                </div>
+              ) : myPending === 'viral-next' ? (
+                <div className="form inline">
+                  {(detail.pools.viralNext ?? []).map((idx) => (
+                    <button key={idx} disabled={busy} onClick={() => act(() => campaignChoice(id, idx, 'viral-next'))}>
+                      {t('campaigns.viralNext.' + idx)}
+                    </button>
+                  ))}
+                </div>
+              ) : myPending === 'en-path1' || myPending === 'en-path2' || myPending === 'en-path3' ? (
+                <div className="form inline">
+                  {(() => {
+                    const key = myPending.slice(-1)
+                    const opts = ((detail.tables?.enPaths as Record<string, string[]> | undefined) ?? {})[key] ?? []
+                    return opts.map((opt) => (
+                      <button key={opt} disabled={busy} onClick={() => act(() => campaignChoice(id, opt.endsWith('a') ? 'a' : 'b', myPending))}>
+                        {t('campaigns.choice.' + opt)}
+                      </button>
+                    ))
+                  })()}
+                </div>
               ) : myPending === 'improve' ? (
                 st.players
                   .filter((p) => p.slot === mySlot)
@@ -260,6 +373,20 @@ export default function CampaignDetail() {
                 {t('campaigns.heal')}
               </label>
             </p>
+          )}
+          {mySlot >= 0 && detail.status === 'interlude' && (
+            <div className="form inline">
+              <select value={deckId} onChange={(e) => setDeckId(e.target.value)}>
+                {decks.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+              <button disabled={busy || !deckId} onClick={() => act(() => swapCampaignDeck(id, deckId))}>
+                {t('campaigns.swapDeck')}
+              </button>
+            </div>
           )}
           {detail.box === 'gmw' && mySlot >= 0 && (
             <div>
@@ -334,6 +461,66 @@ export default function CampaignDetail() {
                   {p.mgRole && (
                     <span>
                       {t('campaigns.role')}:{' '}{t('campaigns.role.' + p.mgRole)}{' '}
+                    </span>
+                  )}
+                  {p.smTech && (
+                    <span>
+                      {t('campaigns.smTechLabel')}: {name(p.smTech)}{' '}
+                    </span>
+                  )}
+                  {p.wiTrait && (
+                    <span>
+                      {t('campaigns.wiTraitLabel')}: {t('campaigns.wiTrait.' + p.wiTrait)}{' '}
+                    </span>
+                  )}
+                  {p.wiAllies && p.wiAllies.length > 0 && (
+                    <span>
+                      {t('campaigns.wiAllies')}: {p.wiAllies.map(name).join(', ')}{' '}
+                    </span>
+                  )}
+                  {p.wiRewards && p.wiRewards.length > 0 && (
+                    <span>
+                      {t('campaigns.wiRewards')}: {p.wiRewards.map(name).join(', ')}{' '}
+                    </span>
+                  )}
+                  {detail.box === 'awesome' && (
+                    <span>
+                      {t('campaigns.influence')}: {p.influence ?? 0}{' '}
+                    </span>
+                  )}
+                  {p.awAlly && (
+                    <span>
+                      {t('campaigns.awAlly')}: {name(p.awAlly)}{' '}
+                    </span>
+                  )}
+                  {p.mojoRole && (
+                    <span>
+                      {t('campaigns.role')}:{' '}{t('campaigns.role.' + p.mojoRole)}{' '}
+                    </span>
+                  )}
+                  {p.mojoMarket && (
+                    <span>
+                      {t('campaigns.mojoMarketLabel')}: {name(p.mojoMarket)}{' '}
+                    </span>
+                  )}
+                  {p.mojoScheme && (
+                    <span>
+                      {t('campaigns.mojoScheme')}: {name(p.mojoScheme)}{' '}
+                    </span>
+                  )}
+                  {p.mojoEvent && (
+                    <span>
+                      {t('campaigns.mojoEvent')}: {name(p.mojoEvent)}{' '}
+                    </span>
+                  )}
+                  {p.bordObligations && p.bordObligations.length > 0 && (
+                    <span>
+                      {t('campaigns.bordObligations')}: {p.bordObligations.map(name).join(', ')}{' '}
+                    </span>
+                  )}
+                  {p.bordGear && p.bordGear.length > 0 && (
+                    <span>
+                      {t('campaigns.bordGear')}: {p.bordGear.map(name).join(', ')}
                     </span>
                   )}
                 </td>
@@ -520,6 +707,187 @@ export default function CampaignDetail() {
                 </td>
               </tr>
             )}
+            {(st.box === 'cowl' || st.box === 'night' || st.box === 'whatif' || st.box === 'mojo' || st.box === 'entropy') && st.smCommunity && st.smCommunity.length > 0 && (
+              <tr>
+                <th>{t('campaigns.community')}</th>
+                <td>{st.smCommunity.map(name).join(', ')}</td>
+              </tr>
+            )}
+            {st.box === 'cowl' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.cowlCaught && st.cowlCaught.length > 0 && (
+                    <div>
+                      {t('campaigns.flag.caught')}: {st.cowlCaught.map(name).join(', ')}
+                    </div>
+                  )}
+                  {st.pool && st.pool.length > 0 && (
+                    <div>
+                      {t('campaigns.flag.escaped')}: {st.pool.map(name).join(', ')}
+                    </div>
+                  )}
+                  <div>
+                    {t('campaigns.flag.intel')}: {(st.counters?.intel ?? 0)}
+                  </div>
+                </td>
+              </tr>
+            )}
+            {st.box === 'whatif' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.flags?.shawarma && <div>{t('campaigns.flag.shawarmaPool')}</div>}
+                  {st.flags?.towerDamaged && <div>{t('campaigns.towerDamaged')}</div>}
+                  {st.flags?.crime && <div>{t('campaigns.flag.crime')}</div>}
+                  {st.flags?.dinosaurs && <div>{t('campaigns.flag.dinosaurs')}</div>}
+                </td>
+              </tr>
+            )}
+            {st.box === 'awesome' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.flags?.modok && <div>{t('campaigns.flag.modok')}</div>}
+                  {st.flags?.sleeper && <div>{t('campaigns.flag.sleeper')}</div>}
+                  {(st.counters?.delay ?? 0) > 0 && (
+                    <div>
+                      {t('campaigns.flag.delay')}: {st.counters?.delay}
+                    </div>
+                  )}
+                  {st.selections?.lastVillain && (
+                    <div>
+                      {t('campaigns.flag.lastVillain')}: {name(st.selections.lastVillain)}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'alias' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.selections?.clue1 && (
+                    <div>
+                      {t('campaigns.flag.clue1')}: {name(st.selections.clue1)}
+                    </div>
+                  )}
+                  {st.selections?.clue2 && (
+                    <div>
+                      {t('campaigns.flag.clue2')}: {name(st.selections.clue2)}
+                    </div>
+                  )}
+                  {st.victims && st.victims.length > 0 && (
+                    <div>
+                      {t('campaigns.flag.victims')}: {st.victims.map(name).join(', ')}
+                    </div>
+                  )}
+                  <div>
+                    {t('campaigns.flag.wounds')}: {st.counters?.wounds ?? 0}
+                  </div>
+                  <div>
+                    {t('campaigns.flag.tally')}: {st.counters?.tally ?? 0}
+                  </div>
+                </td>
+              </tr>
+            )}
+            {st.box === 'mojo' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {(['training', 'hellfire', 'advanced1', 'advanced2', 'stronger', 'genosha'] as const).map((f) =>
+                    st.flags?.[f] ? <div key={f}>{t('campaigns.flag.' + f)}</div> : null,
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'bord' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {st.selections?.path && (
+                    <div>
+                      {t('campaigns.flag.path')}: {t('campaigns.path.' + st.selections.path)}
+                    </div>
+                  )}
+                  {(['blackDwarf', 'supergiant', 'corvus', 'proxima', 'blackSwan', 'shawarma', 'safehouse', 'breach', 'towerDamaged', 'ls2', 'ls3'] as const).map((f) =>
+                    st.flags?.[f] ? <div key={f}>{t('campaigns.flag.' + f)}</div> : null,
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'night' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  {(['gw1', 'gw2', 'gw3', 'gw4'] as const).map((k) =>
+                    st.selections?.[k] ? (
+                      <div key={k}>
+                        {t('campaigns.flag.' + k)}: {st.selections[k] === 'shehulk' ? 'She-Hulk' : 'Deadpool'}
+                      </div>
+                    ) : null,
+                  )}
+                  <div>
+                    {t('campaigns.flag.alliance')}: {st.counters?.alliance ?? 0}
+                  </div>
+                  <div>
+                    {t('campaigns.flag.rewinds')}: {st.counters?.rewinds ?? 0}
+                  </div>
+                  {st.pool && st.pool.length > 0 && (
+                    <div>
+                      'Pool: {st.pool.map(name).join(', ')}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'viral' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  <div>
+                    {t('campaigns.flag.pym')}: {st.counters?.pym ?? 0}
+                  </div>
+                  <div>
+                    {t('campaigns.flag.infection')}: {st.counters?.infection ?? 0}
+                  </div>
+                  {st.selections?.viralPlayed && (
+                    <div>
+                      {t('campaigns.flag.viralPlayed')}: {st.selections.viralPlayed.split(',').map((i) => t('campaigns.viralNext.' + i)).join(', ')}
+                    </div>
+                  )}
+                  {(['zolaStopped', 'zolaAlgorithm', 'sixStopped', 'sixUnited', 'nebulaStopped', 'nebulaAway', 'modokAway', 'scorpionAway'] as const).map((f) =>
+                    st.flags?.[f] ? <div key={f}>{t('campaigns.flag.' + f)}</div> : null,
+                  )}
+                </td>
+              </tr>
+            )}
+            {st.box === 'entropy' && (
+              <tr>
+                <th>{t('campaigns.campaignLog')}</th>
+                <td>
+                  <div>
+                    {t('campaigns.reputation')}: {st.counters?.marked ?? 0}
+                  </div>
+                  {([1, 2, 3, 4, 5, 6, 7] as const).map((i) => {
+                    const v = st.selections?.['cw' + i]
+                    return v ? (
+                      <div key={i}>
+                        {t('campaigns.flag.cw' + i)}: {v}
+                      </div>
+                    ) : null
+                  })}
+                  {([1, 2] as const).map((i) => {
+                    const v = st.selections?.['soe' + i]
+                    return v ? (
+                      <div key={i}>
+                        {t('campaigns.flag.soe' + i)}: {name(v)}
+                      </div>
+                    ) : null
+                  })}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -528,6 +896,33 @@ export default function CampaignDetail() {
         <Link to="/campaigns">← {t('campaigns.back')}</Link>
       </p>
     </section>
+  )
+}
+
+// DeckPick is a dropdown over one player's deck (campaign picks that name
+// a card the player already owns).
+function DeckPick(props: {
+  deck: Record<string, number>
+  busy: boolean
+  name: (code: string) => string
+  t: (key: string, ...args: Array<string | number>) => string
+  onPick: (code: string) => void
+}) {
+  return (
+    <select
+      defaultValue=""
+      onChange={(e) => {
+        const code = e.target.value
+        if (code) props.onPick(code)
+      }}
+    >
+      <option value="">{props.t('campaigns.pickCard')}</option>
+      {Object.entries(props.deck).map(([code, n]) => (
+        <option key={code} value={code}>
+          {props.name(code)} ×{n}
+        </option>
+      ))}
+    </select>
   )
 }
 

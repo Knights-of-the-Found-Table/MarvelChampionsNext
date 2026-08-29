@@ -202,6 +202,21 @@ func (s *Store) CampaignSlotByUser(campaignID, userID int64) (int, error) {
 	return slot, err
 }
 
+// UpdateCampaignDeck re-seats a player's deck between chapters (the
+// Watcher's Team rebuilds identities every chapter; several contest
+// campaigns allow deck customization in the interlude).
+func (s *Store) UpdateCampaignDeck(campaignID int64, slot int, deckID int64, heroBase string) error {
+	res, err := s.db.Exec(`UPDATE campaign_players SET deck_id = ?, hero_base = ? WHERE campaign_id = ? AND slot = ?`,
+		deckID, heroBase, campaignID, slot)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err == nil && n == 0 {
+		return errors.New("seat not found")
+	}
+	return nil
+}
+
 // SetGameCampaign links a game row to its campaign chapter.
 func (s *Store) SetGameCampaign(gameID, campaignID int64) error {
 	_, err := s.db.Exec(`UPDATE games SET campaign_id = ? WHERE id = ?`, campaignID, gameID)

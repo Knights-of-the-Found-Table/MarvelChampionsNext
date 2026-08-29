@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/campaign"
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/engine"
@@ -102,7 +103,8 @@ func (s *Server) deckForCampaign(w http.ResponseWriter, token string) (*store.De
 
 func (s *Server) handleCampaignBoxes(w http.ResponseWriter, r *http.Request) {
 	boxes := []map[string]any{}
-	for _, key := range []string{"rrs", "gmw", "mts", "sm", "mg", "nx", "aoa", "aos"} {
+	for _, key := range []string{"rrs", "gmw", "mts", "sm", "mg", "nx", "aoa", "aos",
+		"cowl", "whatif", "awesome", "alias", "watchers", "mojo", "bord", "night", "viral", "entropy"} {
 		b := campaign.Boxes[key]
 		if b == nil {
 			continue
@@ -304,6 +306,41 @@ func (s *Server) handleStartCampaign(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	// Contest campaign openings.
+	switch st.Box {
+	case "mojo":
+		for i := range st.Players {
+			if st.Players[i].MojoRole == "" {
+				st.AddPending(i, campaign.ChoiceMojoRole)
+			}
+		}
+		st.AddPending(0, campaign.ChoiceMojoTraining)
+	case "bord":
+		if st.Selections == nil {
+			st.Selections = map[string]string{}
+		}
+		if st.Selections["path"] == "" {
+			st.AddPending(0, campaign.ChoiceBordPath)
+		}
+	case "awesome":
+		for i := range st.Players {
+			if st.Players[i].AWAlly == "" {
+				st.AddPending(i, campaign.ChoiceAWAlly)
+			}
+			if st.Players[i].AWIdentity == "" {
+				st.AddPending(i, campaign.ChoiceAWIdentity)
+			}
+		}
+	case "entropy":
+		st.AddPending(0, campaign.ChoiceEnPath1)
+	case "viral":
+		// nothing owed before chapter 1; the branch pick lands after it
+	case "watchers":
+		if err := campaign.WatchersCheck(st); err != nil {
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
 	s.saveCampaignState(w, id, st)
 	s.writeCampaign(w, r, id, http.StatusOK)
 }
@@ -445,7 +482,7 @@ func (s *Server) handleCampaignMarket(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := campaign.BuyMarket(st, slot, req.CardCode); err != nil {
+	if err := campaign.SpendOrBuyMarket(st, slot, req.CardCode); err != nil {
 		writeErr(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -455,6 +492,50 @@ func (s *Server) handleCampaignMarket(w http.ResponseWriter, r *http.Request) {
 
 type campaignHealRequest struct {
 	On bool `json:"on"`
+}
+
+// handleCampaignDeck re-seats the caller with a new deck between chapters
+// (The Watcher's Team changes identities every chapter; several contest
+// campaigns allow deck customization in the interlude).
+func (s *Server) handleCampaignDeck(w http.ResponseWriter, r *http.Request) {
+	id, slot, ok := s.myCampaignSlot(w, r)
+	if !ok {
+		return
+	}
+	var req joinCampaignRequest
+	if err := jsonDecode(r, &req); err != nil || req.DeckID == "" {
+		writeErr(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+	row, err := s.Store.CampaignByID(id)
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "campaign not found")
+		return
+	}
+	if row.Status != "interlude" {
+		writeErr(w, http.StatusBadRequest, "decks can only change in the interlude")
+		return
+	}
+	deck, ok := s.deckForCampaign(w, req.DeckID)
+	if !ok {
+		return
+	}
+	heroBase := engine.BaseCodeOf(deck.InvestigatorCode)
+	if err := s.Store.UpdateCampaignDeck(id, slot, deck.ID, heroBase); err != nil {
+		writeErr(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	st, _, ok := s.campaignStateByID(w, id)
+	if !ok {
+		return
+	}
+	if pl := st.Slot(slot); pl != nil {
+		pl.HeroBase = heroBase
+		pl.Deck = copySlots(deck.Slots)
+		pl.SetupHand = ""
+	}
+	s.saveCampaignState(w, id, st)
+	s.writeCampaign(w, r, id, http.StatusOK)
 }
 
 func (s *Server) handleCampaignHeal(w http.ResponseWriter, r *http.Request) {
@@ -608,6 +689,9 @@ func decodeState(row *store.CampaignRow) (*campaign.State, bool) {
 	if st.Players == nil {
 		st.Players = []campaign.PlayerLog{}
 	}
+	// Maps omitted at save time (empty + omitempty) must come back as
+	// writable maps, or the first flag/counter write panics.
+	st.EnsureMaps()
 	return &st, true
 }
 
@@ -674,13 +758,14 @@ func (s *Server) writeCampaign(w http.ResponseWriter, r *http.Request, id int64,
 	}
 	box := st.BoxDef()
 	type chapter struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		Requires string `json:"requires,omitempty"`
 	}
 	chapters := []chapter{}
 	if box != nil {
 		for _, sc := range box.Scenarios {
-			chapters = append(chapters, chapter{ID: sc.ID, Name: sc.Name})
+			chapters = append(chapters, chapter{ID: sc.ID, Name: sc.Name, Requires: sc.Requires})
 		}
 	}
 	games, _ := s.Store.CampaignGames(id)
@@ -718,16 +803,33 @@ func (s *Server) writeCampaign(w http.ResponseWriter, r *http.Request, id int64,
 		note(pl.Tech, pl.Condition)
 		note(pl.Allies...)
 		note(pl.Market...)
+		note(pl.WIAllies...)
+		note(pl.WIRewards...)
+		note(pl.MojoEvent, pl.MojoMarket, pl.MojoScheme)
+		note(pl.BordObligations...)
+		note(pl.BordGear...)
+		note(pl.AWAlly, pl.AWIdentity)
 	}
 	note(st.Experimental...)
 	note(st.RemovedAllies...)
 	note(st.Collection...)
 	note(st.Artifacts...)
+	note(st.Victims...)
+	note(st.CowlCaught...)
+	note(campaign.AliasEvidence(st)...)
+	for _, code := range st.Pool {
+		note(strings.TrimPrefix(code, "evidence:"))
+	}
+	for _, sel := range st.Selections {
+		note(sel)
+	}
 	for _, mc := range campaign.MarketCards() {
 		note(mc.Code)
 	}
 	note(campaign.NXAllSchemes()...)
 	note(campaign.AOBoardMembers()...)
+	note(campaign.SMAllTech()...)
+	note(campaign.SMCommunitySchemes()...)
 	// The A.I.M. envelope stays server-side: players must deduce the
 	// mole, so the payload redacts it (state storage keeps it).
 	st.AOImEnvelope = campaign.AOSCombo{}
@@ -753,7 +855,14 @@ func (s *Server) writeCampaign(w http.ResponseWriter, r *http.Request, id int64,
 			"roles":      campaign.MGRoles(),
 			"nx":         st.NXAvailable(),
 			"aosMembers": campaign.AOBoardMembers(),
+			"smTech":     campaign.SMAllTech(),
+			"community":  campaign.SMCommunitySchemes(),
+			"traits":     campaign.WhatIfTraits(),
+			"soe":        campaign.EntSoeOptions(),
+			"viralNext":  campaign.ViralNextOptions(st),
+			"allNx":      campaign.NXAllSchemes(),
 		},
+		"tables": campaign.BoxTables(st),
 	}
 	if box != nil {
 		payload["name"] = box.Name

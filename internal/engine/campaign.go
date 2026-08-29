@@ -112,9 +112,9 @@ type CampaignSetup struct {
 	// identity (SM Venom expert). Player boost cards are not modeled
 	// engine-side; the field records the setup for the log.
 	FacedownBoostEachPlayer bool
-	// RoleUpgrades puts one campaign role upgrade into play per player
-	// (Mutant Genesis "use it or lose it" Skills).
-	RoleUpgrades map[int]string
+	// RoleUpgrades puts campaign role upgrades into play per player
+	// (Mutant Genesis "use it or lose it" Skills, contest roles).
+	RoleUpgrades map[int][]string
 	// MissionScheme reveals this MISSION side scheme into the mission
 	// area (Age of Apocalypse).
 	MissionScheme string
@@ -130,8 +130,24 @@ type CampaignSetup struct {
 	BoardCounters map[string]int
 	// HandFetch searches each listed player's deck and discard pile for
 	// the recorded card and adds it to their opening hand (SM
-	// reputation node "Planning Ahead").
+	// reputation node "Planning Ahead"). The pseudo-codes "ally" and
+	// "resource" match the card type instead of a specific printing.
 	HandFetch map[int]string
+	// SetupKeywordCards lists card codes that gain the setup keyword for
+	// this game only (Watchers' Team: Godslayer, Jarnbjorn and The
+	// Sorcerer Supreme "gain setup and permanent" via campaign cards).
+	// They leave the deck and enter play before the first round.
+	SetupKeywordCards []string
+	// PoolSupports puts each listed support into play under the first
+	// player's control (Black Order: Metro PD; Mojo: the X-Jet).
+	PoolSupports []string
+	// PlayerAllies puts each player's listed allies into play under that
+	// player's control (Awesome Campaign guardian allies, What If trait
+	// allies, Deadpool's Game Night Deadpool).
+	PlayerAllies map[int][]string
+	// StartSideSchemes reveals these additional campaign side schemes
+	// during setup (Deadpool's Game Night finale penalties).
+	StartSideSchemes []string
 }
 
 // SpawnUpgrade puts an upgrade into play under owner without a payment
@@ -155,17 +171,27 @@ func (g *Game) SpawnUpgrade(code string, owner PlayerID) *Upgrade {
 
 // setupKeywordCards finds player cards in the deck whose printed rules
 // begin with the setup keyword ("A card with the setup keyword begins the
-// game in play").
-func setupKeywordCards(p *Player) []Card {
+// game in play"), or whose code was granted the keyword by the campaign
+// (Watchers' Team: Godslayer and friends).
+func (g *Game) setupKeywordCards(p *Player) []Card {
+	granted := map[string]bool{}
+	if g.campaign != nil {
+		for _, code := range g.campaign.SetupKeywordCards {
+			granted[code] = true
+		}
+	}
 	var out []Card
 	kept := make(CardList, 0, len(p.Deck))
 	for _, c := range p.Deck {
 		def, ok := DB.Lookup(c.Code)
-		if ok && def.Category == data.CategoryPlayer && hasKeyword(def, "setup") {
-			out = append(out, c)
+		switch {
+		case ok && def.Category == data.CategoryPlayer && hasKeyword(def, "setup"):
+		case granted[data.BaseCode(c.Code)] || granted[c.Code]:
+		default:
+			kept = append(kept, c)
 			continue
 		}
-		kept = append(kept, c)
+		out = append(out, c)
 	}
 	p.Deck = kept
 	return out
@@ -184,14 +210,14 @@ func hasKeyword(def *data.CardDef, name string) bool {
 // Condition / Tech upgrades) join their identity before the first round.
 func (g *Game) enterSetupCards() {
 	for _, p := range g.Players {
-		for _, c := range setupKeywordCards(p) {
+		for _, c := range g.setupKeywordCards(p) {
 			switch def := DB.MustLookup(c.Code); def.Type {
 			case "upgrade":
 				g.SpawnUpgrade(c.Code, p.ID)
 			case "support":
 				g.SpawnSupport(c.Code, p.ID)
 			case "ally":
-				g.Push(AllyEntersPlayFree{Player: p.ID, Card: c, FromOwner: p.ID})
+				g.Push(AllyEntersPlayFree{Player: p.ID, Card: c, Spawn: true})
 			default:
 				// Only in-play types are legal setup cards; anything else
 				// returns to the deck.
@@ -371,7 +397,7 @@ func (g *Game) applyCampaignStart(c *CampaignSetup) []Message {
 	// Pool effects (MTS): allies under the first player, minions
 	// engaged with the first player, upgrades for everyone.
 	for _, code := range c.PoolAllies {
-		out = append(out, AllyEntersPlayFree{Player: firstPlayerID(g), Card: Card{Code: code}, FromOwner: firstPlayerID(g)})
+		out = append(out, AllyEntersPlayFree{Player: firstPlayerID(g), Card: Card{Code: code}, Spawn: true})
 	}
 	for _, code := range c.PoolMinions {
 		out = append(out, RevealEncounterCard{Player: firstPlayerID(g), Card: Card{ID: g.nextCardID(), Code: code}})
@@ -381,11 +407,35 @@ func (g *Game) applyCampaignStart(c *CampaignSetup) []Message {
 			g.SpawnUpgrade(code, p.ID)
 		}
 	}
-	for i, code := range c.RoleUpgrades {
-		if i < 0 || i >= len(g.Players) || code == "" {
+	for _, code := range c.PoolSupports {
+		g.SpawnSupport(code, firstPlayerID(g))
+	}
+	// Per-player allies (guardian allies, trait allies, Deadpool).
+	if c.PlayerAllies != nil {
+		idxs := make([]int, 0, len(c.PlayerAllies))
+		for i := range c.PlayerAllies {
+			idxs = append(idxs, i)
+		}
+		sort.Ints(idxs)
+		for _, i := range idxs {
+			if i < 0 || i >= len(g.Players) {
+				continue
+			}
+			for _, code := range c.PlayerAllies[i] {
+				out = append(out, AllyEntersPlayFree{Player: g.Players[i].ID, Card: Card{Code: code}, Spawn: true})
+			}
+		}
+	}
+	for i, codes := range c.RoleUpgrades {
+		if i < 0 || i >= len(g.Players) {
 			continue
 		}
-		g.SpawnUpgrade(code, g.Players[i].ID)
+		for _, code := range codes {
+			if code == "" {
+				continue
+			}
+			g.SpawnUpgrade(code, g.Players[i].ID)
+		}
 	}
 	if c.DiscardTopHalf {
 		for _, p := range g.Players {
@@ -411,9 +461,12 @@ func (g *Game) applyCampaignStart(c *CampaignSetup) []Message {
 		for _, zone := range []*CardList{&p.Deck, &p.Discard} {
 			for j, card := range *zone {
 				matched := false
-				if code == "ally" {
+				switch code {
+				case "ally":
 					matched = card.Def().Type == "ally"
-				} else {
+				case "resource":
+					matched = card.Def().Type == "resource"
+				default:
 					matched = data.BaseCode(card.Code) == data.BaseCode(code)
 				}
 				if matched {
@@ -574,6 +627,11 @@ func (g *Game) applyCampaignStart(c *CampaignSetup) []Message {
 			if n := c.SideSchemeThreat[code]; n > 0 {
 				out2 = append(out2, CampaignSideThreat{Code: code, N: n})
 			}
+		}
+	}
+	for _, code := range c.StartSideSchemes {
+		if def, ok := DB.Lookup(code); ok {
+			out2 = append(out2, RevealEncounterCard{Player: firstPlayerID(g), Card: Card{ID: g.nextCardID(), Code: def.Code}})
 		}
 	}
 	return append(out, out2...)

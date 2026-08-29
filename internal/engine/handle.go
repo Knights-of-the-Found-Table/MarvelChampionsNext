@@ -2629,7 +2629,11 @@ func (g *Game) handleAllyEntersPlayFree(m AllyEntersPlayFree) {
 	}
 	var card Card
 	var found bool
-	if m.FromOwner == "" {
+	if m.Spawn {
+		card = m.Card
+		card.ID = g.nextCardID()
+		found = true
+	} else if m.FromOwner == "" {
 		card, found = p.Hand.Find(m.Card.ID)
 		if found {
 			p.Hand.Remove(card.ID)

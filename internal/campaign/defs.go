@@ -12,12 +12,21 @@ type BoxDef struct {
 	Name      string        `json:"name"`
 	Desc      string        `json:"desc"`
 	Scenarios []ScenarioRef `json:"scenarios"`
+	// Meta carries display hints for the UI (log-flag labels, choice
+	// option tables). Purely descriptive; never consulted by rules.
+	Meta map[string]any `json:"meta,omitempty"`
+	// HeroOK optionally validates a joining player's hero (campaign
+	// deckbuilding restrictions).
+	HeroOK func(heroBase string) error `json:"-"`
 }
 
 // ScenarioRef names one chapter (engine scenario id + display name).
 type ScenarioRef struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+	// Requires names the identity this chapter is played with (The
+	// Watcher's Team). Display only; enforcement lives in the setup.
+	Requires string `json:"requires,omitempty"`
 }
 
 // Boxes lists the implemented campaigns. Scenario ids are the engine

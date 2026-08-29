@@ -396,6 +396,10 @@ type (
 		Player    PlayerID
 		Card      Card
 		FromOwner PlayerID `json:"fromOwner,omitempty"`
+		// Spawn builds the ally straight from Card.Code instead of
+		// pulling the card from the owner's hand or discard (campaign
+		// setup: guardian allies, trait allies, Cosmo).
+		Spawn bool `json:"spawn,omitempty"`
 	}
 
 	// MinionEntersPlay announces a minion entering play (Hawkeye's

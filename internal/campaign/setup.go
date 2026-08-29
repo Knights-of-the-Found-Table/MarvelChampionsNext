@@ -21,6 +21,14 @@ func BuildGame(st *State, seed int64) (engine.NewGameOptions, error) {
 	if len(st.PendingChoices) > 0 {
 		return engine.NewGameOptions{}, fmt.Errorf("interlude choices are still pending")
 	}
+	// Campaign deckbuilding restrictions (Avenger-only, no Guardians...).
+	if box.HeroOK != nil {
+		for i := range st.Players {
+			if err := box.HeroOK(st.Players[i].HeroBase); err != nil {
+				return engine.NewGameOptions{}, fmt.Errorf("player %d: %w", i+1, err)
+			}
+		}
+	}
 	opts := engine.NewGameOptions{
 		Seed:       seed,
 		ScenarioID: box.Scenarios[st.Index].ID,
@@ -46,6 +54,35 @@ func BuildGame(st *State, seed int64) (engine.NewGameOptions, error) {
 		if err := buildGMW(st, ctx); err != nil {
 			return opts, err
 		}
+	// Contest campaigns.
+	case "cowl":
+		cowlSetup(st, ctx)
+	case "whatif":
+		wiSetup(st, ctx)
+	case "awesome":
+		awSetup(st, ctx)
+	case "alias":
+		aliasSetup(st, ctx)
+	case "watchers":
+		if err := watchersValidate(st); err != nil {
+			return opts, err
+		}
+		watchersSetup(st, ctx)
+	case "mojo":
+		mojoSetup(st, ctx)
+	case "bord":
+		if err := bordSetup(st, ctx, &opts); err != nil {
+			return opts, err
+		}
+	case "night":
+		if err := nightValidate(st); err != nil {
+			return opts, err
+		}
+		nightSetup(st, ctx)
+	case "viral":
+		viralSetup(st, ctx)
+	case "entropy":
+		entSetup(st, ctx, &opts)
 	}
 	opts.Campaign = ctx
 	for i := range st.Players {
@@ -96,6 +133,11 @@ func BuildGame(st *State, seed int64) (engine.NewGameOptions, error) {
 			ctx.HandFetch[i] = pl.SetupHand
 		}
 		opts.Players = append(opts.Players, spec)
+	}
+	// Deadpool's Game Night: the reward pool is dealt into the copied
+	// decks (the log keeps the pool itself).
+	if st.Box == "night" {
+		nightDealPool(st, opts.Players)
 	}
 	return opts, nil
 }
@@ -227,6 +269,17 @@ type MarketCard struct {
 	Code string `json:"code"`
 	Name string `json:"name"`
 	Cost int    `json:"cost"`
+}
+
+// SpendOrBuyMarket routes the shared shop endpoint: units for the GMW
+// Market, Guardian Influence for the Awesome Campaign.
+func SpendOrBuyMarket(st *State, slot int, code string) error {
+	switch st.Box {
+	case "awesome":
+		return SpendInfluence(st, slot, code)
+	default:
+		return BuyMarket(st, slot, code)
+	}
 }
 
 // BuyMarket spends units on a Market card (one copy per campaign for the

@@ -152,15 +152,17 @@ func TestMGRolesAndFuturePast(t *testing.T) {
 	if len(opts.Campaign.RoleUpgrades) != 1 {
 		t.Fatalf("role upgrade missing: %v", opts.Campaign.RoleUpgrades)
 	}
-	for _, code := range opts.Campaign.RoleUpgrades {
-		found := false
-		for _, u := range mgRoles["brawler"] {
-			if u == code {
-				found = true
+	for _, codes := range opts.Campaign.RoleUpgrades {
+		for _, code := range codes {
+			found := false
+			for _, u := range mgRoles["brawler"] {
+				if u == code {
+					found = true
+				}
 			}
-		}
-		if !found {
-			t.Fatalf("upgrade %q not in the brawler set", code)
+			if !found {
+				t.Fatalf("upgrade %q not in the brawler set", code)
+			}
 		}
 	}
 	// Future Past cards defeated into the victory display leave the pool.

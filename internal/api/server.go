@@ -74,6 +74,7 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/choice", s.auth(s.handleCampaignChoice))
 	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/market", s.auth(s.handleCampaignMarket))
 	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/heal", s.auth(s.handleCampaignHeal))
+	mux.HandleFunc("POST /api/v1/marvel/campaigns/{id}/deck", s.auth(s.handleCampaignDeck))
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})

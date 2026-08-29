@@ -211,3 +211,102 @@ func TestCampaignSetupSurvivesMarshal(t *testing.T) {
 		t.Fatalf("campaign side scheme lost after marshal round trip")
 	}
 }
+
+// Campaign-granted setup-keyword cards (Watchers' Team: Godslayer and
+// friends) leave the deck and enter play before the first round.
+func TestCampaignSetupKeywordGranted(t *testing.T) {
+	g, err := engine.NewGame(engine.NewGameOptions{
+		Seed:       14,
+		ScenarioID: "01097",
+		Players: []engine.PlayerSpec{{
+			Name: "Tester", HeroBase: "01001", Deck: deckWith(map[string]int{"18018": 1}),
+		}},
+		Campaign: &engine.CampaignSetup{SetupKeywordCards: []string{"18018"}},
+	})
+	if err != nil {
+		t.Fatalf("NewGame: %v", err)
+	}
+	keepHands(t, g)
+	if deckCount(g, "18018") != 0 {
+		t.Fatalf("granted setup card stayed in the deck")
+	}
+	if findUpgrade(g, "18018") == nil {
+		t.Fatalf("Godslayer did not enter play at setup")
+	}
+}
+
+// Pool supports, per-player allies and additional start side schemes all
+// join the game at setup.
+func TestCampaignPoolSupportsAndAllies(t *testing.T) {
+	g, err := engine.NewGame(engine.NewGameOptions{
+		Seed:       15,
+		ScenarioID: "01097",
+		Players: []engine.PlayerSpec{
+			{Name: "One", HeroBase: "01001", Deck: spiderDeck()},
+			{Name: "Two", HeroBase: "01029", Deck: spiderDeck()},
+		},
+		Campaign: &engine.CampaignSetup{
+			PoolSupports:     []string{"01092"},
+			PlayerAllies:     map[int][]string{0: {"27010"}},
+			StartSideSchemes: []string{"16127"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("NewGame: %v", err)
+	}
+	keepHands(t, g)
+	if g.Environments == nil || len(g.SideSchemes) == 0 {
+		t.Fatalf("start side scheme missing")
+	}
+	helicarrier := false
+	for _, p := range g.Players {
+		for _, id := range p.Supports {
+			if s := g.Supports[id]; s != nil && s.Code == "01092" {
+				helicarrier = true
+			}
+		}
+	}
+	if !helicarrier {
+		t.Fatalf("pool support not in play")
+	}
+	silk := false
+	for _, id := range g.Players[0].Allies {
+		if a := g.Allies[id]; a != nil && a.Code == "27010" {
+			silk = true
+		}
+	}
+	for _, id := range g.Players[1].Allies {
+		if a := g.Allies[id]; a != nil && a.Code == "27010" {
+			t.Fatalf("player 2 must not receive player 0's ally")
+		}
+	}
+	if !silk {
+		t.Fatalf("player ally not in play")
+	}
+}
+
+// HandFetch's "resource" pseudo-code pulls any resource card to the
+// opening hand (Watcher's Cosmic Sight).
+func TestCampaignHandFetchResource(t *testing.T) {
+	g, err := engine.NewGame(engine.NewGameOptions{
+		Seed:       16,
+		ScenarioID: "01097",
+		Players: []engine.PlayerSpec{{
+			Name: "Tester", HeroBase: "01001", Deck: spiderDeck(),
+		}},
+		Campaign: &engine.CampaignSetup{HandFetch: map[int]string{0: "resource"}},
+	})
+	if err != nil {
+		t.Fatalf("NewGame: %v", err)
+	}
+	keepHands(t, g)
+	found := false
+	for _, c := range g.Players[0].Hand {
+		if c.Def().Type == "resource" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("no resource card fetched to the opening hand")
+	}
+}

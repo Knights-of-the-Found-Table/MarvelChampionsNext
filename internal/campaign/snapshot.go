@@ -37,6 +37,8 @@ type Snapshot struct {
 	VillainCodes        []string       // villain codes in play
 	CaptiveAllyCodes    []string       // captive-trait allies in play (MG)
 	AllyDamage          map[string]int // damage on allies in play, by code
+	AllySlots           map[string]int // ally code -> controlling slot
+	AttachmentCodes     []string       // attachment codes in play
 	EnvCountersByCode   map[string]int // counters on environments in play
 	PrisonStoredCodes   []string       // cards tucked beneath side schemes (MG)
 	Acceleration        int            // acceleration tokens on the main scheme
@@ -161,10 +163,19 @@ func Observe(g *engine.Game) Snapshot {
 			if snap.AllyDamage == nil {
 				snap.AllyDamage = map[string]int{}
 			}
+			if snap.AllySlots == nil {
+				snap.AllySlots = map[string]int{}
+			}
 			snap.AllyDamage[a.Code] = a.Damage
+			snap.AllySlots[a.Code] = slotOfPlayer(g, a.EOwner())
 			if def, ok := engine.DB.Lookup(a.Code); ok && def.HasTrait("captive") {
 				snap.CaptiveAllyCodes = appendUnique(snap.CaptiveAllyCodes, a.Code)
 			}
+		}
+	}
+	for _, at := range g.Attachments {
+		if at != nil {
+			snap.AttachmentCodes = appendUnique(snap.AttachmentCodes, at.Code)
 		}
 	}
 	for _, sc := range g.SideSchemes {
@@ -227,6 +238,16 @@ func mainSchemeCode(g *engine.Game) string {
 		return g.MainScheme.Code
 	}
 	return ""
+}
+
+// slotOfPlayer maps a player id to its slot index (-1 when unknown).
+func slotOfPlayer(g *engine.Game, id engine.PlayerID) int {
+	for i, p := range g.Players {
+		if p.ID == id {
+			return i
+		}
+	}
+	return -1
 }
 
 func contains(list []string, s string) bool {

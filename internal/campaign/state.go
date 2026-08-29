@@ -41,6 +41,29 @@ type PlayerLog struct {
 	SetupHand string `json:"setupHand,omitempty"`
 	// Mutant Genesis role (brawler|commander|defender|peacekeeper).
 	MGRole string `json:"mgRole,omitempty"`
+
+	// Contest campaigns (What If...?, Awesome, House of Mojo, Black
+	// Order, Deadpool's Game Night).
+	// What If...?: the trait recorded at scenario 1, the trait ally and
+	// the trait-card rewards added to the deck.
+	WITrait   string   `json:"wiTrait,omitempty"`
+	WIAllies  []string `json:"wiAllies,omitempty"`
+	WIRewards []string `json:"wiRewards,omitempty"`
+	// Awesome Campaign: Guardian Influence, the guardian ally in play and
+	// the identity-specific card fetched to the opening hand.
+	Influence  int    `json:"influence,omitempty"`
+	AWAlly     string `json:"awAlly,omitempty"`
+	AWIdentity string `json:"awIdentity,omitempty"`
+	// House of Mojo: role and its recorded cards.
+	MojoRole    string `json:"mojoRole,omitempty"`
+	MojoMarket  string `json:"mojoMarket,omitempty"`
+	MojoScheme  string `json:"mojoScheme,omitempty"`
+	MojoEvent   string `json:"mojoEvent,omitempty"`
+	MojoUpgrade string `json:"mojoUpgrade,omitempty"`
+	// Black Order: obligations carried in the deck and the Gear Up card
+	// recorded at the Direct Assault opener.
+	BordObligations []string `json:"bordObligations,omitempty"`
+	BordGear        []string `json:"bordGear,omitempty"`
 }
 
 // State serializes into the campaigns table's state column.
@@ -109,6 +132,16 @@ type State struct {
 	// Interlude bookkeeping: "slot:kind" -> kind; a player may owe
 	// several choices at once (e.g. SM tech + aspect + planning).
 	PendingChoices map[string]string `json:"pendingChoices,omitempty"`
+	// Named string records shared by the contest campaigns (branch
+	// paths, Crime Wave lines, the Alias clue trail, Deadpool's game
+	// results). Display names come from the per-box UI tables.
+	Selections map[string]string `json:"selections,omitempty"`
+	// Alias Investigations: rescued captive allies (victims) and Jessica
+	// Jones's wound count.
+	Victims []string `json:"victims,omitempty"`
+	// Crimson Cowl Conspiracy: Masters of Evil minions caught (victory
+	// display); escaped ones ride the shared Pool.
+	CowlCaught []string `json:"cowlCaught,omitempty"`
 	// LastResult reports the most recent scenario outcome for the UI.
 	LastResult string `json:"lastResult,omitempty"` // "won" | "lost"
 }
@@ -123,11 +156,29 @@ func New(box, difficulty string, players []PlayerLog) *State {
 		PowerStone: -1,
 		Flags:      map[string]bool{},
 		Counters:   map[string]int{},
+		Selections: map[string]string{},
 	}
 	if st.Difficulty == "" {
 		st.Difficulty = "standard"
 	}
 	return st
+}
+
+// EnsureMaps guarantees the named map fields are writable. Maps left out
+// of a saved JSON blob (empty + omitempty) deserialize as nil.
+func (st *State) EnsureMaps() {
+	if st.Flags == nil {
+		st.Flags = map[string]bool{}
+	}
+	if st.Counters == nil {
+		st.Counters = map[string]int{}
+	}
+	if st.Selections == nil {
+		st.Selections = map[string]string{}
+	}
+	if st.AOCounters == nil {
+		st.AOCounters = map[string]int{}
+	}
 }
 
 // Box returns the box definition (nil for unknown keys).
@@ -149,11 +200,60 @@ const (
 	ChoiceTech      = "tech"      // RRS scenario 1: pick one TECH upgrade
 	ChoiceCondition = "condition" // RRS scenario 2: optionally pick a Basic Condition upgrade
 	ChoiceImprove   = "improve"   // RRS scenario 4: optionally flip to the Improved side
-	// Sinister Motives reputation picks.
+	// Sinister Motives reputation picks (also reused by the contest
+	// campaigns whose designs build on the same cards).
 	ChoiceSMTech   = "sm-tech"   // keep one of three dealt S.H.I.E.L.D. Tech upgrades
 	ChoiceSMAspect = "sm-aspect" // aspect advantage: name any aspect card
 	ChoiceSMPlan   = "sm-plan"   // planning ahead: name a card from your deck
+	// What If...? (Amanda Shagoury).
+	ChoiceWITrait = "wi-trait" // record the group-hero trait
+	ChoiceWIAlly  = "wi-ally"  // add an ally with that trait to the deck
+	ChoiceWICard  = "wi-card"  // add any player card with that trait
+	// Awesome Campaign.
+	ChoiceAWAlly     = "aw-ally"     // basic GUARDIAN ally into play
+	ChoiceAWIdentity = "aw-identity" // identity-specific card to the hand
+	// House of Mojo.
+	ChoiceMojoRole     = "mojo-role"     // pick the campaign role (per player)
+	ChoiceMojoTraining = "mojo-training" // pick the training player side scheme (group)
+	ChoiceMojoEvent    = "mojo-event"    // add an aspect event to the deck
+	ChoiceMojoMarket   = "mojo-market"   // Shawarma or the role's market card
+	ChoiceMojoScheme   = "mojo-scheme"   // add a player side scheme to the deck
+	// Revenge of the Black Order.
+	ChoiceBordPath = "bord-path" // pick the narrative path (group)
+	ChoiceBordGear = "bord-gear" // record the Gear Up support/upgrade
+	// She-Hulk vs. Deadpool's Game Night self-reports.
+	ChoiceNTMeta = "nt-meta" // was the metagame challenge completed?
+	ChoiceNTTeam = "nt-team" // was the teamwork goal completed?
+	ChoiceNTPick = "nt-pick" // pick a reward-pool card offer
+	// The Watcher's Team: optional named-card rewards.
+	ChoiceWASight      = "wa-sight"      // resource card from deck to hand
+	ChoiceWAPortal     = "wa-portal"     // ally card from deck to hand
+	ChoiceWAIntervened = "wa-intervened" // identity-specific card to hand
+	// Going Viral / Entropic Ascension branching.
+	ChoiceViralNext = "viral-next" // which Scenario #2 to play next (group)
+	ChoiceEnPath1   = "en-path1"   // Investigative Journalism vs Blackout (group)
+	ChoiceEnPath2   = "en-path2"   // Police Transport vs Raft Transport / Strangers vs Friends (group)
+	ChoiceEnPath3   = "en-path3"   // Engineering vs Biology (group)
 )
+
+// SelfReportKinds lists the optional choice kinds where an empty answer
+// records "the players did not achieve it" instead of cancelling a
+// reward. Group self-reports resolve on the host's seat.
+var SelfReportKinds = map[string]bool{
+	ChoiceNTMeta: true,
+	ChoiceNTTeam: true,
+}
+
+// GroupChoiceKinds lists choice kinds owed by seat 0 on behalf of the
+// group.
+var GroupChoiceKinds = map[string]bool{
+	ChoiceBordPath:     true,
+	ChoiceViralNext:    true,
+	ChoiceEnPath1:      true,
+	ChoiceEnPath2:      true,
+	ChoiceEnPath3:      true,
+	ChoiceMojoTraining: true,
+}
 
 // PendingKey composes the pending-choice map key.
 func PendingKey(slot int, kind string) string { return fmt.Sprintf("%d:%s", slot, kind) }
