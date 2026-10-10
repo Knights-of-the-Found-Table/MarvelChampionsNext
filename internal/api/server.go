@@ -21,6 +21,8 @@ type Server struct {
 	Store  *store.Store
 	Rooms  *rooms.Manager
 	Secret []byte
+	// VoiceTest 是 /voice-test/ 静态页用的匿名语音信令测试厅。
+	VoiceTest *rooms.VoiceTestHub
 	// Images serves card images with on-demand marvelcdb fetching.
 	Images *imageCache
 	// ZhImages serves Chinese card faces seeded into cache/images/zh;
@@ -63,6 +65,7 @@ func (s *Server) Router() http.Handler {
 	mux.HandleFunc("POST /api/v1/marvel/games/{id}/chat", s.auth(s.handleChatSend))
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/stream", s.handleStream)
 	mux.HandleFunc("GET /api/v1/marvel/games/{id}/voice", s.auth(s.handleVoice))
+	mux.HandleFunc("GET /api/v1/voice-test/{room}", s.handleVoiceTest)
 
 	mux.HandleFunc("GET /api/v1/marvel/campaigns/boxes", s.auth(s.handleCampaignBoxes))
 	mux.HandleFunc("GET /api/v1/marvel/campaigns", s.auth(s.handleListCampaigns))

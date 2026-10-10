@@ -191,11 +191,12 @@ func main() {
 		}
 	}
 	server := &api.Server{
-		Store:    st,
-		Rooms:    rooms.NewManager(st),
-		Secret:   []byte(secret),
-		Images:   images,
-		ZhImages: zhImages,
+		Store:     st,
+		Rooms:     rooms.NewManager(st),
+		Secret:    []byte(secret),
+		VoiceTest: rooms.NewVoiceTestHub(),
+		Images:    images,
+		ZhImages:  zhImages,
 	}
 
 	mux := http.NewServeMux()

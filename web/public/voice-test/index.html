@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>语音聊天室测试 · Marvel LCG</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    background: #0b0e14; color: #dfe7f2;
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { width: min(520px, 94vw); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #8494a7; font-size: 13px; margin-bottom: 16px; }
+  .card {
+    background: rgba(16,20,27,.97); border: 1px solid #46586c;
+    border-radius: 12px; padding: 16px 18px;
+    box-shadow: 0 16px 44px rgba(0,0,0,.5);
+  }
+  .row { display: flex; gap: 8px; margin-bottom: 10px; }
+  input {
+    flex: 1; background: #0e131b; border: 1px solid #46586c; color: inherit;
+    border-radius: 8px; padding: 9px 12px; font-size: 14px; min-width: 0;
+  }
+  button {
+    background: #243448; border: 1px solid #46586c; color: inherit;
+    border-radius: 8px; padding: 9px 14px; font-size: 14px; cursor: pointer;
+    white-space: nowrap;
+  }
+  button:hover:not(:disabled) { border-color: #6f8db4; }
+  button.primary { background: #1f5fa8; border-color: #3a7cc4; }
+  button.danger { background: #5d2626; border-color: #8c4040; }
+  button:disabled { opacity: .5; cursor: default; }
+  .status { font-size: 13px; color: #8494a7; margin: 8px 0; min-height: 20px; }
+  .status.err { color: #ff9a92; }
+  .status.ok { color: #9fd6a8; }
+  ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  li {
+    display: flex; align-items: center; gap: 10px;
+    background: #101722; border: 1px solid #2b3b50; border-radius: 8px; padding: 8px 12px;
+  }
+  li .dot { width: 10px; height: 10px; border-radius: 50%; background: #46586c; flex: none; transition: background .15s, box-shadow .15s; }
+  li.speaking .dot { background: #7fd08a; box-shadow: 0 0 10px #7fd08a; }
+  li.muted .dot { background: #8c5b40; }
+  li .who { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  li .tag { font-size: 11px; color: #8494a7; }
+  li.me { border-color: #3a7cc4; }
+  .hint { font-size: 12px; color: #5f6f84; margin-top: 14px; }
+  code { background: #101722; padding: 1px 6px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎙️ 语音聊天室测试</h1>
+  <div class="sub">匿名测试 WebRTC 连通性。同一房间名的人在同一语音房。服务器只转发信令，音频点对点直连。</div>
+  <div class="card">
+    <div class="row">
+      <input id="room" placeholder="房间名，如 test123" maxlength="64" autocomplete="off">
+      <input id="name" placeholder="你的昵称" maxlength="32" autocomplete="off">
+    </div>
+    <div class="row">
+      <button id="join" class="primary">加入语音</button>
+      <button id="mute" disabled>静音</button>
+      <button id="leave" class="danger" disabled>离开</button>
+    </div>
+    <div id="status" class="status">未连接</div>
+    <ul id="peers"></ul>
+    <div class="hint">
+      用法：两台设备（或两个标签页）输入<strong>相同房间名</strong>各点「加入语音」，看到对方出现且绿点亮起即连通。<br>
+      本页同时也是对局语音功能的连通性自检：<code>/api/v1/voice-test/{room}</code> 与对局语音共用同一套信令协议。
+    </div>
+  </div>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id)
+  const roomEl = $('room'), nameEl = $('name')
+  const joinBtn = $('join'), muteBtn = $('mute'), leaveBtn = $('leave')
+  const statusEl = $('status'), peersEl = $('peers')
+
+  roomEl.value = localStorage.getItem('vt-room') || ''
+  nameEl.value = localStorage.getItem('vt-name') || ''
+
+  const STUN = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+  let ws = null, localStream = null, selfId = null, muted = false
+  const peers = new Map() // id -> {info, pc, audio, analyser, data, li, queue}
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text
+    statusEl.className = 'status' + (cls ? ' ' + cls : '')
+  }
+
+  function renderPeers() {
+    peersEl.innerHTML = ''
+    for (const [id, p] of peers) {
+      if (!p.li) {
+        const li = document.createElement('li')
+        li.innerHTML = '<span class="dot"></span><span class="who"></span><span class="tag"></span>'
+        p.li = li
+      }
+      p.li.querySelector('.who').textContent = p.info.name || 'anonymous'
+      p.li.querySelector('.tag').textContent = p.info.muted ? '已静音' : ''
+      p.li.classList.toggle('muted', !!p.info.muted)
+      p.li.classList.toggle('speaking', !!p.speaking)
+      peersEl.appendChild(p.li)
+    }
+  }
+
+  async function ensurePC(id, info) {
+    let p = peers.get(id)
+    if (p && p.pc) return p
+    p = p || { info, queue: [] }
+    p.info = info
+    peers.set(id, p)
+    const pc = new RTCPeerConnection(STUN)
+    p.pc = pc
+    for (const track of localStream.getTracks()) pc.addTrack(track, localStream)
+    pc.onicecandidate = (e) => {
+      if (e.candidate) send({ type: 'voice-signal', to: id, data: { candidate: e.candidate } })
+    }
+    pc.ontrack = (e) => {
+      if (!p.audio) {
+        p.audio = document.createElement('audio')
+        p.audio.autoplay = true
+        document.body.appendChild(p.audio)
+      }
+      p.audio.srcObject = e.streams[0]
+      watchSpeaking(p, e.streams[0])
+    }
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'failed' || pc.connectionState === 'closed') dropPeer(id)
+    }
+    return p
+  }
+
+  function watchSpeaking(p, stream) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext
+      const ctx = new AC()
+      const src = ctx.createMediaStreamSource(stream)
+      const an = ctx.createAnalyser()
+      an.fftSize = 512
+      src.connect(an)
+      const buf = new Uint8Array(an.frequencyBinCount)
+      p.meterTimer = setInterval(() => {
+        an.getByteFrequencyData(buf)
+        let sum = 0
+        for (const v of buf) sum += v
+        const speaking = sum / buf.length > 8
+        if (speaking !== p.speaking) { p.speaking = speaking; renderPeers() }
+      }, 400)
+    } catch { /* 音量指示是增强项，失败不影响通话 */ }
+  }
+
+  function dropPeer(id) {
+    const p = peers.get(id)
+    if (!p) return
+    if (p.meterTimer) clearInterval(p.meterTimer)
+    if (p.pc) p.pc.close()
+    if (p.audio) p.audio.remove()
+    peers.delete(id)
+    renderPeers()
+  }
+
+  function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)) }
+
+  async function onSignal(from, data) {
+    const p = await ensurePC(from, peers.get(from)?.info || { id: from })
+    if (data.sdp) {
+      await p.pc.setRemoteDescription(data.sdp)
+      for (const c of p.queue) await p.pc.addIceCandidate(c)
+      p.queue = []
+      if (data.sdp.type === 'offer') {
+        await p.pc.setLocalDescription()
+        send({ type: 'voice-signal', to: from, data: { sdp: p.pc.localDescription } })
+      }
+    } else if (data.candidate) {
+      if (p.pc.remoteDescription) await p.pc.addIceCandidate(data.candidate)
+      else p.queue.push(data.candidate)
+    }
+  }
+
+  async function join() {
+    const room = roomEl.value.trim(), name = nameEl.value.trim()
+    if (!room) { setStatus('先填房间名', 'err'); return }
+    localStorage.setItem('vt-room', room)
+    localStorage.setItem('vt-name', name)
+    setStatus('请求麦克风权限…')
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    } catch (e) {
+      setStatus('麦克风被拒：' + e.name + '。请检查浏览器权限（需要 HTTPS 或 localhost）。', 'err')
+      return
+    }
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws'
+    ws = new WebSocket(`${proto}://${location.host}/api/v1/voice-test/${encodeURIComponent(room)}?name=${encodeURIComponent(name)}`)
+    ws.onopen = () => setStatus('已连接信令，等待同伴…', 'ok')
+    ws.onclose = () => { cleanup(); setStatus('连接已断开', 'err') }
+    ws.onerror = () => setStatus('信令连接失败', 'err')
+    ws.onmessage = async (e) => {
+      const msg = JSON.parse(e.data)
+      switch (msg.type) {
+        case 'voice-welcome':
+          selfId = msg.self.id
+          setStatus(`已在房间「${room}」，等待同伴…`, 'ok')
+          for (const peer of msg.peers) {
+            const p = await ensurePC(peer.id, peer)
+            // id 字典序小者发 offer，双方一致，避免 glare
+            if (selfId < peer.id) {
+              await p.pc.setLocalDescription()
+              send({ type: 'voice-signal', to: peer.id, data: { sdp: p.pc.localDescription } })
+            }
+          }
+          renderPeers()
+          break
+        case 'voice-peer-joined':
+          await ensurePC(msg.peer.id, msg.peer)
+          if (selfId && selfId < msg.peer.id) {
+            const p = peers.get(msg.peer.id)
+            await p.pc.setLocalDescription()
+            send({ type: 'voice-signal', to: msg.peer.id, data: { sdp: p.pc.localDescription } })
+          }
+          renderPeers()
+          break
+        case 'voice-peer-left':
+          dropPeer(msg.id)
+          break
+        case 'voice-peer-muted': {
+          const p = peers.get(msg.id)
+          if (p) { p.info.muted = msg.muted; renderPeers() }
+          break
+        }
+        case 'voice-signal':
+          await onSignal(msg.from, msg.data)
+          break
+      }
+    }
+    joinBtn.disabled = true
+    muteBtn.disabled = false
+    leaveBtn.disabled = false
+  }
+
+  function cleanup() {
+    for (const id of [...peers.keys()]) dropPeer(id)
+    if (localStream) { localStream.getTracks().forEach((t) => t.stop()); localStream = null }
+    joinBtn.disabled = false
+    muteBtn.disabled = true
+    leaveBtn.disabled = true
+    muteBtn.textContent = '静音'
+    muted = false
+    selfId = null
+  }
+
+  joinBtn.onclick = join
+  leaveBtn.onclick = () => { if (ws) ws.close() }
+  muteBtn.onclick = () => {
+    if (!localStream) return
+    muted = !muted
+    localStream.getAudioTracks().forEach((t) => { t.enabled = !muted })
+    muteBtn.textContent = muted ? '取消静音' : '静音'
+    send({ type: 'voice-state', muted })
+  }
+  window.addEventListener('beforeunload', () => { if (ws) ws.close() })
+})()
+</script>
+</body>
+</html>
