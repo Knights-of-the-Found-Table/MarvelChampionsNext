@@ -1050,6 +1050,142 @@
   .chat-panel { width: min(330px, calc(100vw - 24px)); }
 }
 
+/* 语音挂件：与聊天气泡并排（左侧一格），面板风格同 chat-panel。 */
+.voice-widget {
+  position: absolute;
+  right: 78px;
+  bottom: 18px;
+  z-index: 330;
+  pointer-events: none;
+}
+
+.voice-fab,
+.voice-panel {
+  pointer-events: auto;
+}
+
+/* 加入后 FAB 泛绿光；有人在说话时呼吸一下，闭着面板也能感知。 */
+.voice-fab.on {
+  border-color: rgba(94, 197, 130, 0.75);
+  color: #7be3a6;
+}
+
+.voice-fab.on.talking {
+  animation: voice-glow 1.2s ease-in-out infinite;
+}
+
+@keyframes voice-glow {
+  0%, 100% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.48); }
+  50% { box-shadow: 0 0 18px rgba(94, 197, 130, 0.55); }
+}
+
+.voice-fab-muted {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 13px;
+}
+
+.voice-panel {
+  position: absolute;
+  right: 0;
+  bottom: 58px;
+  width: min(280px, calc(100vw - 36px));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(224, 162, 63, 0.38);
+  border-radius: 12px;
+  background: rgba(10, 18, 26, 0.88);
+  backdrop-filter: blur(16px) saturate(130%);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.voice-error {
+  margin: 0;
+  padding: 8px 12px;
+  color: #e0908d;
+  font-size: 12px;
+  line-height: 1.45;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.voice-join {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.voice-join .muted {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.voice-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.voice-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.voice-chip.speaking {
+  border-color: rgba(94, 197, 130, 0.85);
+  box-shadow: 0 0 0 2px rgba(94, 197, 130, 0.22), 0 0 12px rgba(94, 197, 130, 0.3);
+}
+
+.voice-chip.spectator .voice-badge {
+  opacity: 0.75;
+}
+
+.voice-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-muted-mark {
+  font-size: 12px;
+}
+
+.voice-controls {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.voice-controls button {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.voice-controls .voice-leave {
+  border-color: rgba(200, 90, 80, 0.55);
+  color: #e0908d;
+}
+
+@media (max-width: 1450px) {
+  .voice-widget { right: 70px; bottom: 12px; }
+  .voice-panel { width: min(260px, calc(100vw - 96px)); }
+}
+
 /* 日志面板：右侧抽屉 */
 .hud-log {
   position: absolute;

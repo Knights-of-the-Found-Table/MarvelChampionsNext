@@ -12,6 +12,7 @@ import ChatPanel from '../components/ChatPanel'
 import MsgText from '../components/MsgText'
 import QuestionPanel from '../components/QuestionPanel'
 import TutorialOverlay from '../components/TutorialOverlay'
+import VoicePanel from '../components/VoicePanel'
 import '../style/board.css'
 
 export default function Game() {
@@ -324,6 +325,7 @@ export default function Game() {
       />
       <div className="board-hud">
         <ChatPanel gameId={gameId} incoming={chatMessage} />
+        <VoicePanel gameId={gameId} />
         {/* 左侧操作条：返回主页（二次确认） */}
         <div className="hud-left">
           <button

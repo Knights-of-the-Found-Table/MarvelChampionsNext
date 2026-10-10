@@ -11579,6 +11579,58 @@
     "en": "Upgrades",
     "zh": "升级"
   },
+  "voice.connecting": {
+    "en": "Connecting…",
+    "zh": "连接中…"
+  },
+  "voice.disconnected": {
+    "en": "Voice connection dropped. Rejoin when you are ready.",
+    "zh": "语音连接中断了，需要时可以重新加入。"
+  },
+  "voice.empty": {
+    "en": "Nobody else is in voice yet.",
+    "zh": "还没有其他人加入语音。"
+  },
+  "voice.join": {
+    "en": "Join voice",
+    "zh": "加入语音"
+  },
+  "voice.joinHint": {
+    "en": "Talk with everyone at this table — players and spectators alike.",
+    "zh": "和同桌所有人语音交流，玩家与旁观者都可以加入。"
+  },
+  "voice.leave": {
+    "en": "Leave voice",
+    "zh": "离开语音"
+  },
+  "voice.micDenied": {
+    "en": "Microphone permission was denied. Allow mic access in your browser's site settings, then try again.",
+    "zh": "麦克风权限被拒绝了。请在浏览器的网站设置里允许麦克风访问，然后重试。"
+  },
+  "voice.micUnavailable": {
+    "en": "No microphone found or it is unavailable.",
+    "zh": "找不到可用的麦克风。"
+  },
+  "voice.mute": {
+    "en": "Mute",
+    "zh": "静音"
+  },
+  "voice.muted": {
+    "en": "Muted",
+    "zh": "已静音"
+  },
+  "voice.title": {
+    "en": "Voice",
+    "zh": "语音"
+  },
+  "voice.unmute": {
+    "en": "Unmute",
+    "zh": "取消静音"
+  },
+  "voice.you": {
+    "en": "you",
+    "zh": "你"
+  },
   "c.campaignPlacesThreatOnTheMainScheme": {
     "en": "The campaign places %d threat on the main scheme",
     "zh": "战役在主计谋上放置 %d 威胁"

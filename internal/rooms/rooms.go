@@ -22,6 +22,9 @@ type Room struct {
 	owners map[string]string
 	subs   map[chan []byte]string // channel -> viewer user id ("" = spectator)
 	chat   []ChatMessage
+	// voice is the table's voice-chat presence (connection id -> signaling
+	// sink). In-memory only; see voice.go.
+	voice map[string]*voiceConn
 }
 
 type Manager struct {
