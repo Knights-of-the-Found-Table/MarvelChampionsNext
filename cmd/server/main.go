@@ -244,10 +244,15 @@ func spaHandler(dir string, fs http.Handler) http.Handler {
 				fs.ServeHTTP(w, r)
 				return
 			}
-			// 目录里有自己的 index.html（如 /voice-test/）：补上结尾斜杠
-			// 重定向，让浏览器按目录页加载，而不是落到 SPA 兜底 404。
-			if _, err := os.Stat(filepath.Join(full, "index.html")); err == nil && !strings.HasSuffix(r.URL.Path, "/") {
-				http.Redirect(w, r, r.URL.Path+"/", http.StatusMovedPermanently)
+			// 目录里有自己的 index.html（如 /voice-test/）：无斜杠先 301
+			// 补斜杠，有斜杠交给 FileServer 伺服目录页，而不是落到 SPA
+			// 兜底把 React 的 404 页面端出来。
+			if _, err := os.Stat(filepath.Join(full, "index.html")); err == nil {
+				if !strings.HasSuffix(r.URL.Path, "/") {
+					http.Redirect(w, r, r.URL.Path+"/", http.StatusMovedPermanently)
+					return
+				}
+				fs.ServeHTTP(w, r)
 				return
 			}
 		}
