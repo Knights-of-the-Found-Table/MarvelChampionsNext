@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Knights-of-the-Found-Table/marvelchampionsnext/internal/api"
@@ -238,9 +239,17 @@ func spaHandler(dir string, fs http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := filepath.Clean(r.URL.Path)
 		full := filepath.Join(dir, path)
-		if st, err := os.Stat(full); err == nil && !st.IsDir() {
-			fs.ServeHTTP(w, r)
-			return
+		if st, err := os.Stat(full); err == nil {
+			if !st.IsDir() {
+				fs.ServeHTTP(w, r)
+				return
+			}
+			// 目录里有自己的 index.html（如 /voice-test/）：补上结尾斜杠
+			// 重定向，让浏览器按目录页加载，而不是落到 SPA 兜底 404。
+			if _, err := os.Stat(filepath.Join(full, "index.html")); err == nil && !strings.HasSuffix(r.URL.Path, "/") {
+				http.Redirect(w, r, r.URL.Path+"/", http.StatusMovedPermanently)
+				return
+			}
 		}
 		http.ServeFile(w, r, filepath.Join(dir, "index.html"))
 	})
