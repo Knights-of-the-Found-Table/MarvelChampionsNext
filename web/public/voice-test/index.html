@@ -47,7 +47,11 @@
   li.muted .dot { background: #8c5b40; }
   li .who { flex: 1; overflow: hidden; text-overflow: ellipsis; }
   li .tag { font-size: 11px; color: #8494a7; }
+  li .conn { font-size: 11px; font-family: monospace; color: #6f8db4; }
+  li .conn.bad { color: #ff9a92; }
+  li .conn.good { color: #9fd6a8; }
   li.me { border-color: #3a7cc4; }
+  li .playbtn { font-size: 12px; padding: 4px 10px; }
   .hint { font-size: 12px; color: #5f6f84; margin-top: 14px; }
   code { background: #101722; padding: 1px 6px; border-radius: 5px; }
 </style>
@@ -98,11 +102,25 @@
     for (const [id, p] of peers) {
       if (!p.li) {
         const li = document.createElement('li')
-        li.innerHTML = '<span class="dot"></span><span class="who"></span><span class="tag"></span>'
+        li.innerHTML = '<span class="dot"></span><span class="who"></span><span class="conn"></span><span class="tag"></span>'
         p.li = li
       }
       p.li.querySelector('.who').textContent = p.info.name || 'anonymous'
+      const connEl = p.li.querySelector('.conn')
+      connEl.textContent = p.connText || '…'
+      connEl.className = 'conn' + (p.connBad ? ' bad' : p.connGood ? ' good' : '')
       p.li.querySelector('.tag').textContent = p.info.muted ? '已静音' : ''
+      // 自动播放被浏览器拦下时给一个显式的播放按钮
+      let btn = p.li.querySelector('.playbtn')
+      if (p.needPlay) {
+        if (!btn) {
+          btn = document.createElement('button')
+          btn.className = 'playbtn'
+          btn.textContent = '▶ 点我出声'
+          btn.onclick = () => { p.audio?.play().then(() => { p.needPlay = false; renderPeers() }).catch(() => {}) }
+          p.li.appendChild(btn)
+        }
+      } else if (btn) btn.remove()
       p.li.classList.toggle('muted', !!p.info.muted)
       p.li.classList.toggle('speaking', !!p.speaking)
       peersEl.appendChild(p.li)
@@ -121,19 +139,55 @@
     pc.onicecandidate = (e) => {
       if (e.candidate) send({ type: 'voice-signal', to: id, data: { candidate: e.candidate } })
     }
+    // 连接状态实时上屏：区分「信令通了但 P2P 打不通」和「通了但没声」
+    const setConn = (text, good, bad) => { p.connText = text; p.connGood = good; p.connBad = bad; renderPeers() }
+    pc.oniceconnectionstatechange = () => {
+      const s = pc.iceConnectionState
+      if (s === 'connected' || s === 'completed') setConn('已连接', true, false)
+      else if (s === 'failed') setConn('连接失败(NAT?)', false, true)
+      else if (s === 'disconnected') setConn('断断续续', false, true)
+      else setConn('连接中 ' + s, false, false)
+    }
     pc.ontrack = (e) => {
       if (!p.audio) {
         p.audio = document.createElement('audio')
         p.audio.autoplay = true
+        p.audio.playsInline = true
         document.body.appendChild(p.audio)
       }
       p.audio.srcObject = e.streams[0]
+      // 自动播放策略：play() 被拒就亮出手动播放按钮
+      p.audio.play().catch(() => { p.needPlay = true; renderPeers() })
       watchSpeaking(p, e.streams[0])
+      watchBytes(p)
     }
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'closed') dropPeer(id)
     }
     return p
+  }
+
+  // 每秒看一次 inbound-rtp 的音频字节数：字节在涨 = 音频流真的到了，
+  // 听不到就是本地播放问题；字节不涨 = 对方没发（静音/权限/编码）。
+  function watchBytes(p) {
+    let last = -1
+    p.bytesTimer = setInterval(async () => {
+      if (!p.pc) return
+      try {
+        const stats = await p.pc.getStats()
+        for (const r of stats.values()) {
+          if (r.type === 'inbound-rtp' && r.kind === 'audio') {
+            if (last >= 0) {
+              const growing = r.bytesReceived > last
+              if (growing && !p.connGood) { p.connText = '已连接'; p.connGood = true; p.connBad = false }
+              if (!growing && p.connGood) { p.connText = '已连接·无音频流'; p.connBad = true }
+              renderPeers()
+            }
+            last = r.bytesReceived
+          }
+        }
+      } catch { /* stats 不可用时跳过本轮 */ }
+    }, 2000)
   }
 
   function watchSpeaking(p, stream) {
@@ -159,6 +213,7 @@
     const p = peers.get(id)
     if (!p) return
     if (p.meterTimer) clearInterval(p.meterTimer)
+    if (p.bytesTimer) clearInterval(p.bytesTimer)
     if (p.pc) p.pc.close()
     if (p.audio) p.audio.remove()
     peers.delete(id)
